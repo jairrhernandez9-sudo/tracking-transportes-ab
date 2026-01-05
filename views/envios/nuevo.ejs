@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .logo-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-text {
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    
+    .logo-tagline {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .back-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #64748b;
+    }
+    
+    .back-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      transform: translateX(-4px);
+    }
+    
+    .welcome h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+    
+    .welcome p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 280px;
+      padding: 12px 45px 12px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    
+    .notification-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .notification-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border-radius: 50%;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .user-profile:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .user-status-dot {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      background: #10b981;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+    
+    .user-info h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .user-info p {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    
+    .user-chevron {
+      width: 16px;
+      height: 16px;
+      color: #94a3b8;
+      transition: transform 0.3s ease;
+    }
+    
+    .user-profile.open .user-chevron {
+      transform: rotate(180deg);
+    }
+    
+    /* User Dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 280px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-dropdown-avatar {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .user-dropdown-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-dropdown-name {
+      color: white;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-email {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-dropdown-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 8px 0;
+    }
+    
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: #475569;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    
+    .user-dropdown-item i {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f8fafc;
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item:hover i {
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item.logout {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout i {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout:hover {
+      background: #fef2f2;
+    }
+    
+    /* FORM CONTAINER */
+    .form-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .form-card {
+      background: white;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      padding: 40px;
+      margin-bottom: 30px;
+    }
+    
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+    }
+    
+    .form-section {
+      margin-bottom: 30px;
+    }
+    
+    .form-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .form-label.required::after {
+      content: '*';
+      color: #ef4444;
+      margin-left: 4px;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .form-help {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 2px solid #f1f5f9;
+    }
+    
+    .btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #64748b;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    
+    .info-box {
+      background: #eff6ff;
+      border: 2px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .info-box i {
+      color: #3b82f6;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .info-text {
+      color: #1e40af;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    
+    /* Quick Date Buttons */
+    .quick-dates {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .quick-date-btn {
+      padding: 6px 12px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .quick-date-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+    
+    .quick-date-btn:active {
+      transform: scale(0.95);
+    }
+    
+    @media (max-width: 968px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .form-card {
+        padding: 24px;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="page-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i data-lucide="truck" style="width: 24px; height: 24px;"></i>
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">TransportAB</span>
+          <span class="logo-tagline">Sistema Tracking</span>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios" class="nav-link active">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/clientes" class="nav-link">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <% if (user && user.rol === 'admin') { %>
+        <div class="nav-section">
+          <div class="nav-section-title">SISTEMA</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="/usuarios" class="nav-link">
+                <i data-lucide="user-cog"></i>
+                <span>Usuarios</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/configuracion" class="nav-link">
+                <i data-lucide="settings"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="header">
+        <div class="header-left">
+          <a href="/envios" class="back-btn" title="Volver">
+            <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+          </a>
+          <div class="welcome">
+            <h1>➕ Crear Nuevo Envío</h1>
+            <p>Registra un nuevo envío en el sistema</p>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-box">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Buscar envío, cliente..."
+              autocomplete="off"
+            >
+            <i data-lucide="search" class="search-icon"></i>
+          </div>
+          
+          <a href="/envios-retrasados" class="notification-btn">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge">4</span>
+          </a>
+          
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+              <span class="user-status-dot"></span>
+            </div>
+            <div class="user-info">
+              <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
+              <p><%= user && user.email ? user.email : 'email@ejemplo.com' %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+            
+            <!-- Dropdown del perfil -->
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+                </div>
+                <div class="user-dropdown-info">
+                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'email@ejemplo.com' %></div>
+                  <span class="user-dropdown-badge">
+                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                  </span>
+                </div>
+              </div>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/mi-perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi perfil</span>
+              </a>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/auth/logout" class="user-dropdown-item logout">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <div class="form-container">
+        
+        <!-- Mensaje de error -->
+        <% if (error) { %>
+          <div class="alert alert-error">
+            <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
+            <%= error %>
+          </div>
+        <% } %>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+          <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+          <div class="info-text">
+            <strong>Importante:</strong> El número de tracking se generará automáticamente al crear el envío. Selecciona las ubicaciones de la lista o escríbelas manualmente.
+          </div>
+        </div>
+        
+        <!-- FORMULARIO -->
+        <form action="/envios/nuevo" method="POST">
+          <div class="form-card">
+            
+            <!-- Sección 1: Información del Cliente -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i data-lucide="user" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                Información del Cliente
+              </h2>
+              
+              <div class="form-group">
+                <label class="form-label required">Cliente</label>
+                <select name="cliente_id" class="form-select" required>
+                  <option value="">Selecciona un cliente...</option>
+                  <% clientes.forEach(cliente => { %>
+                    <option value="<%= cliente.id %>">
+                      <%= cliente.nombre_empresa %>
+                    </option>
+                  <% }); %>
+                </select>
+                <p class="form-help">Selecciona el cliente al que pertenece este envío</p>
+              </div>
+            </div>
+            
+            <!-- Sección 2: Detalles del Envío -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i data-lucide="package" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                Detalles del Envío
+              </h2>
+              
+              <div class="form-group">
+                <label class="form-label">Descripción del contenido</label>
+                <textarea 
+                  name="descripcion" 
+                  class="form-textarea"
+                  placeholder="Describe el contenido del envío..."
+                ></textarea>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Peso (kg)</label>
+                  <input 
+                    type="number" 
+                    name="peso" 
+                    class="form-input" 
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Fecha estimada de entrega</label>
+                  <input 
+                    type="date" 
+                    name="fecha_estimada_entrega" 
+                    id="fechaEntrega"
+                    class="form-input"
+                  >
+                  <div class="quick-dates">
+                    <button type="button" class="quick-date-btn" onclick="setQuickDate(1)">Mañana</button>
+                    <button type="button" class="quick-date-btn" onclick="setQuickDate(3)">3 días</button>
+                    <button type="button" class="quick-date-btn" onclick="setQuickDate(7)">1 semana</button>
+                    <button type="button" class="quick-date-btn" onclick="setQuickDate(14)">2 semanas</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Sección 3: Ubicaciones -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                Ubicaciones
+              </h2>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label required">Origen</label>
+                  <input 
+                    type="text" 
+                    name="origen" 
+                    class="form-input" 
+                    list="ubicaciones"
+                    placeholder="Escribe o selecciona una ciudad..."
+                    required
+                  >
+                  <p class="form-help">
+                    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+                    Escribe o selecciona de las ciudades disponibles
+                  </p>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label required">Destino</label>
+                  <input 
+                    type="text" 
+                    name="destino" 
+                    class="form-input" 
+                    list="ubicaciones"
+                    placeholder="Escribe o selecciona una ciudad..."
+                    required
+                  >
+                  <p class="form-help">
+                    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+                    Escribe o selecciona de las ciudades disponibles
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+          
+          <!-- Botones de acción -->
+          <div class="form-actions">
+            <a href="/envios" class="btn btn-secondary">
+              <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+              Crear Envío
+            </button>
+          </div>
+        </form>
+        
+      </div>
+    </main>
+    
+  </div>
+  
+  <!-- Lista de ubicaciones principales de México -->
+  <datalist id="ubicaciones">
+    <!-- Nuevo León -->
+    <option value="Monterrey, Nuevo León">
+    <option value="Guadalupe, Nuevo León">
+    <option value="San Pedro Garza García, Nuevo León">
+    <option value="Apodaca, Nuevo León">
+    <option value="Santa Catarina, Nuevo León">
+    <option value="San Nicolás de los Garza, Nuevo León">
+    <option value="García, Nuevo León">
+    <option value="Escobedo, Nuevo León">
+    
+    <!-- Coahuila -->
+    <option value="Saltillo, Coahuila">
+    <option value="Torreón, Coahuila">
+    <option value="Monclova, Coahuila">
+    <option value="Piedras Negras, Coahuila">
+    <option value="Acuña, Coahuila">
+    
+    <!-- Chihuahua -->
+    <option value="Chihuahua, Chihuahua">
+    <option value="Ciudad Juárez, Chihuahua">
+    <option value="Delicias, Chihuahua">
+    <option value="Cuauhtémoc, Chihuahua">
+    
+    <!-- Baja California -->
+    <option value="Tijuana, Baja California">
+    <option value="Mexicali, Baja California">
+    <option value="Ensenada, Baja California">
+    <option value="Tecate, Baja California">
+    <option value="Rosarito, Baja California">
+    
+    <!-- Sonora -->
+    <option value="Hermosillo, Sonora">
+    <option value="Ciudad Obregón, Sonora">
+    <option value="Nogales, Sonora">
+    <option value="San Luis Río Colorado, Sonora">
+    <option value="Navojoa, Sonora">
+    
+    <!-- Sinaloa -->
+    <option value="Culiacán, Sinaloa">
+    <option value="Mazatlán, Sinaloa">
+    <option value="Los Mochis, Sinaloa">
+    <option value="Guasave, Sinaloa">
+    
+    <!-- Durango -->
+    <option value="Durango, Durango">
+    <option value="Gómez Palacio, Durango">
+    
+    <!-- Guanajuato -->
+    <option value="León, Guanajuato">
+    <option value="Irapuato, Guanajuato">
+    <option value="Celaya, Guanajuato">
+    <option value="Salamanca, Guanajuato">
+    <option value="Guanajuato, Guanajuato">
+    <option value="San Miguel de Allende, Guanajuato">
+    <option value="Silao, Guanajuato">
+    
+    <!-- Querétaro -->
+    <option value="Querétaro, Querétaro">
+    <option value="San Juan del Río, Querétaro">
+    
+    <!-- San Luis Potosí -->
+    <option value="San Luis Potosí, San Luis Potosí">
+    <option value="Soledad de Graciano Sánchez, San Luis Potosí">
+    
+    <!-- Aguascalientes -->
+    <option value="Aguascalientes, Aguascalientes">
+    
+    <!-- Jalisco -->
+    <option value="Guadalajara, Jalisco">
+    <option value="Zapopan, Jalisco">
+    <option value="Tlaquepaque, Jalisco">
+    <option value="Tonalá, Jalisco">
+    <option value="Puerto Vallarta, Jalisco">
+    <option value="Lagos de Moreno, Jalisco">
+    <option value="Tlajomulco de Zúñiga, Jalisco">
+    
+    <!-- Michoacán -->
+    <option value="Morelia, Michoacán">
+    <option value="Uruapan, Michoacán">
+    <option value="Zamora, Michoacán">
+    <option value="Apatzingán, Michoacán">
+    
+    <!-- Colima -->
+    <option value="Colima, Colima">
+    <option value="Manzanillo, Colima">
+    
+    <!-- Nayarit -->
+    <option value="Tepic, Nayarit">
+    
+    <!-- Ciudad de México y Estado de México -->
+    <option value="Ciudad de México, CDMX">
+    <option value="Ecatepec, Estado de México">
+    <option value="Nezahualcóyotl, Estado de México">
+    <option value="Naucalpan, Estado de México">
+    <option value="Tlalnepantla, Estado de México">
+    <option value="Toluca, Estado de México">
+    <option value="Cuautitlán Izcalli, Estado de México">
+    <option value="Atizapán de Zaragoza, Estado de México">
+    
+    <!-- Puebla -->
+    <option value="Puebla, Puebla">
+    <option value="Tehuacán, Puebla">
+    
+    <!-- Hidalgo -->
+    <option value="Pachuca, Hidalgo">
+    <option value="Tulancingo, Hidalgo">
+    
+    <!-- Morelos -->
+    <option value="Cuernavaca, Morelos">
+    <option value="Jiutepec, Morelos">
+    
+    <!-- Tlaxcala -->
+    <option value="Tlaxcala, Tlaxcala">
+    
+    <!-- Veracruz -->
+    <option value="Veracruz, Veracruz">
+    <option value="Xalapa, Veracruz">
+    <option value="Coatzacoalcos, Veracruz">
+    <option value="Poza Rica, Veracruz">
+    <option value="Córdoba, Veracruz">
+    
+    <!-- Oaxaca -->
+    <option value="Oaxaca, Oaxaca">
+    
+    <!-- Chiapas -->
+    <option value="Tuxtla Gutiérrez, Chiapas">
+    <option value="Tapachula, Chiapas">
+    
+    <!-- Tabasco -->
+    <option value="Villahermosa, Tabasco">
+    
+    <!-- Guerrero -->
+    <option value="Acapulco, Guerrero">
+    <option value="Chilpancingo, Guerrero">
+    
+    <!-- Yucatán -->
+    <option value="Mérida, Yucatán">
+    
+    <!-- Quintana Roo -->
+    <option value="Cancún, Quintana Roo">
+    <option value="Playa del Carmen, Quintana Roo">
+    <option value="Chetumal, Quintana Roo">
+    <option value="Cozumel, Quintana Roo">
+    
+    <!-- Campeche -->
+    <option value="Campeche, Campeche">
+    
+    <!-- Tamaulipas -->
+    <option value="Reynosa, Tamaulipas">
+    <option value="Matamoros, Tamaulipas">
+    <option value="Nuevo Laredo, Tamaulipas">
+    <option value="Tampico, Tamaulipas">
+    <option value="Ciudad Victoria, Tamaulipas">
+    
+    <!-- Zacatecas -->
+    <option value="Zacatecas, Zacatecas">
+  </datalist>
+  
+  <script>
+    lucide.createIcons();
+    
+    // User Profile Dropdown
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileBtn.classList.toggle('open');
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    // Función para establecer fechas rápidas
+    function setQuickDate(days) {
+      const today = new Date();
+      today.setDate(today.getDate() + days);
+      
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      
+      const dateString = `${year}-${month}-${day}`;
+      document.getElementById('fechaEntrega').value = dateString;
+    }
+    
+    // Establecer fecha mínima (hoy)
+    document.addEventListener('DOMContentLoaded', function() {
+      const fechaInput = document.getElementById('fechaEntrega');
+      if (fechaInput) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        fechaInput.min = `${year}-${month}-${day}`;
+      }
+    });
+  </script>
+</body>
+</html>

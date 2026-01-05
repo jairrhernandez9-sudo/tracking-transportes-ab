@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .error-container {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+    }
+    
+    .error-icon {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      color: #dc2626;
+      font-size: 80px;
+      box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
+    }
+    
+    .error-code {
+      font-size: 6rem;
+      font-weight: 900;
+      color: #dc2626;
+      margin-bottom: 20px;
+      line-height: 1;
+    }
+    
+    .error-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 15px;
+    }
+    
+    .error-message {
+      font-size: 1.1rem;
+      color: #6b7280;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+    }
+    
+    .btn-back:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="error-container">
+    <div class="error-icon">
+      <i data-lucide="shield-alert"></i>
+    </div>
+    
+    <div class="error-code">403</div>
+    <h1 class="error-title">Acceso Denegado</h1>
+    <p class="error-message">
+      <%= mensaje || 'No tienes permisos suficientes para acceder a esta sección. Si crees que esto es un error, contacta al administrador del sistema.' %>
+    </p>
+    
+    <a href="/dashboard" class="btn-back">
+      <i data-lucide="arrow-left"></i>
+      Volver al Dashboard
+    </a>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

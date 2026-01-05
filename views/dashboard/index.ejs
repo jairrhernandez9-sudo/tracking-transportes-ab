@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .dashboard {
+      max-width: 100%;
+      margin: 0;
+      background: white;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* ========================================
+       SIDEBAR MEJORADO
+       ======================================== */
+    
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Logo mejorado */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    .logo-icon-image {
+  width: 42px;
+  height: 42px;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.logo-icon-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+    
+.logo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logo-text {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.logo-tagline {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+    
+    /* Secciones de navegación */
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link span {
+      flex: 1;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* Badge de notificaciones */
+    .nav-badge {
+      background: #ef4444;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    
+    /* Footer del sidebar */
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    
+    .sidebar-user-avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .status-indicator {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 10px;
+      height: 10px;
+      background: #10b981;
+      border: 2px solid #1e40af;
+      border-radius: 50%;
+    }
+    
+    .sidebar-user-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .sidebar-user-name {
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .sidebar-user-role {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    
+    .nav-link-logout {
+      width: 40px;
+      height: 40px;
+      background: rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fca5a5;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    
+    .nav-link-logout:hover {
+      background: #ef4444;
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      background: #f8fafc;
+      padding: 40px;
+      overflow-y: auto;
+      min-height: 100vh;
+    }
+    
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    
+    .welcome {
+      flex: 1;
+    }
+    
+    .welcome h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+    
+    .welcome p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 280px;
+      padding: 12px 45px 12px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    
+    /* Search Results Dropdown */
+    .search-results {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .search-results.show {
+      display: block;
+    }
+    
+    .search-result-item {
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-result-item:hover {
+      background: #f8fafc;
+    }
+    
+    .search-result-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    
+    .search-result-info {
+      flex: 1;
+    }
+    
+    .search-result-tracking {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    
+    .search-result-details {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    
+    .search-result-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .search-empty {
+      padding: 40px 20px;
+      text-align: center;
+      color: #94a3b8;
+    }
+    
+    .search-empty i {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+    
+    .search-loading {
+      padding: 20px;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .search-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .notification-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .notification-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border-radius: 50%;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* ========================================
+       USER PROFILE MEJORADO
+       ======================================== */
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .user-profile:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .user-status-dot {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      background: #10b981;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+    
+    .user-info h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .user-info p {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    
+    .user-chevron {
+      width: 16px;
+      height: 16px;
+      color: #94a3b8;
+      transition: transform 0.3s ease;
+    }
+    
+    .user-profile.open .user-chevron {
+      transform: rotate(180deg);
+    }
+    
+    /* User Dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 280px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-dropdown-avatar {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .user-dropdown-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-dropdown-name {
+      color: white;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-email {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-dropdown-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 8px 0;
+    }
+    
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: #475569;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    
+    .user-dropdown-item i {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f8fafc;
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item:hover i {
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item.logout {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout i {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout:hover {
+      background: #fef2f2;
+    }
+    
+    /* STATS CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+      border-radius: 0 20px 0 100%;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      border-color: #dbeafe;
+    }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .stat-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+    
+    .stat-icon-btn {
+      width: 32px;
+      height: 32px;
+      background: #f8fafc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-icon-btn:hover {
+      background: #dbeafe;
+      color: #3b82f6;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+    
+    .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    
+    .stat-change.positive {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .stat-change.negative {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .stat-change-text {
+      color: #94a3b8;
+      font-size: 0.8rem;
+      margin-left: 5px;
+    }
+    
+    /* CHARTS SECTION */
+    .charts-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .chart-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    
+    .chart-filters {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .filter-btn {
+      padding: 8px 16px;
+      background: #f8fafc;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .chart-container {
+      height: 300px;
+    }
+    
+    /* Custom Dropdown */
+    .custom-dropdown {
+      position: relative;
+    }
+    
+    .dropdown-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+      justify-content: space-between;
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      min-width: 180px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dropdown-item {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    
+    .dropdown-item:hover {
+      background: #f8fafc;
+      color: #3b82f6;
+      border-left-color: #3b82f6;
+    }
+    
+    .dropdown-item.active {
+      background: #eff6ff;
+      color: #3b82f6;
+      border-left-color: #3b82f6;
+      font-weight: 700;
+    }
+    
+    .dropdown-item i {
+      color: currentColor;
+    }
+    
+    /* BUDGET CARD */
+    .budget-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      text-align: center;
+    }
+    
+    .budget-donut {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 25px;
+    }
+    
+    .budget-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    
+    .budget-percentage {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+    
+    .budget-amount {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+    
+    .budget-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+    
+    .budget-legend {
+      text-align: left;
+    }
+    
+    .legend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 0.85rem;
+    }
+    
+    .legend-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    
+    /* TRANSACTIONS TABLE - NUEVO DISEÑO */
+    .transactions-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      margin-bottom: 30px;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    
+    .btn-link {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-link:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+    
+    /* Activity Header */
+    .activity-header {
+      display: grid;
+      grid-template-columns: 140px 200px 1fr 1fr 200px;
+      gap: 20px;
+      padding: 16px 20px;
+      background: #f8fafc;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .header-col {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    
+    /* Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .activity-item {
+      display: grid;
+      grid-template-columns: 140px 200px 1fr 1fr 200px;
+      gap: 20px;
+      align-items: center;
+      padding: 20px;
+      background: #fafbfc;
+      border-radius: 14px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .activity-item:hover {
+      background: white;
+      border-color: #e0e7ff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    /* Date */
+    .activity-date {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .date-day {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .date-time {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    
+    /* Tracking */
+    .activity-tracking {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .tracking-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .icon-pending {
+      background: #fef3c7;
+      color: #f59e0b;
+    }
+    
+    .icon-completed {
+      background: #d1fae5;
+      color: #10b981;
+    }
+    
+    .icon-in-transit {
+      background: #dbeafe;
+      color: #3b82f6;
+    }
+    
+    .tracking-number {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 0.95rem;
+    }
+    
+    .tracking-number a {
+      color: #0f172a;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .tracking-number a:hover {
+      color: #3b82f6;
+    }
+    
+    /* Client */
+    .activity-client {
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+    
+    /* Destination */
+    .activity-destination {
+      font-weight: 600;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    
+    /* Status Badge New */
+    .status-badge-new {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      text-align: center;
+    }
+    
+    /* Badge Colors - Sin estilos inline */
+    .badge-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .badge-in-transit {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .badge-preparation {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .badge-distribution {
+      background: #ede9fe;
+      color: #6b21a8;
+    }
+    
+    .badge-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* Empty State */
+    .empty-activity {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+    }
+    
+    .empty-activity i {
+      margin-bottom: 16px;
+    }
+    
+    .empty-activity p {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .charts-section {
+        grid-template-columns: 1fr;
+      }
+      
+      .activity-header {
+        display: none;
+      }
+      
+      .activity-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .activity-tracking,
+      .activity-date {
+        justify-content: flex-start;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="dashboard">
+    
+    <!-- SIDEBAR MEJORADO -->
+<aside class="sidebar">
+  <!-- Logo -->
+<div class="logo">
+  <div class="logo-icon-image">
+    <img src="/images/logo-transportes-ab.png" alt="Logo">
+  </div>
+  <div class="logo-info">
+    <span class="logo-text">TransportAB</span>
+    <span class="logo-tagline">Sistema Tracking</span>
+  </div>
+</div>
+  
+  <!-- Navegación Principal -->
+  <div class="nav-section">
+    <div class="nav-section-title">PRINCIPAL</div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="/dashboard" class="nav-link active">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/envios" class="nav-link">
+          <i data-lucide="package"></i>
+          <span>Envíos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/envios-retrasados" class="nav-link">
+          <i data-lucide="alert-triangle"></i>
+          <span>Envíos Retrasados</span>
+          <% if (stats.envios_retrasados && stats.envios_retrasados > 0) { %>
+            <span class="nav-badge"><%= stats.envios_retrasados %></span>
+          <% } %>
+        </a>
+      </li>
+    </ul>
+  </div>
+  
+  <!-- Navegación Gestión -->
+  <div class="nav-section">
+    <div class="nav-section-title">GESTIÓN</div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="/clientes" class="nav-link">
+          <i data-lucide="users"></i>
+          <span>Clientes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/reportes" class="nav-link">
+          <i data-lucide="bar-chart"></i>
+          <span>Reportes</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  
+  <!-- Navegación Sistema (solo admin) -->
+  <% if (user.rol === 'admin') { %>
+    <div class="nav-section">
+      <div class="nav-section-title">SISTEMA</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/usuarios" class="nav-link">
+            <i data-lucide="user-cog"></i>
+            <span>Usuarios</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/configuracion" class="nav-link">
+            <i data-lucide="settings"></i>
+            <span>Configuración</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  <% } %>
+</aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="header">
+        <div class="welcome">
+          <h1>Bienvenido, <%= user.nombre %>!</h1>
+          <p>Es el mejor momento para gestionar tus envíos</p>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-box">
+            <input 
+              type="text" 
+              class="search-input" 
+              id="searchInput"
+              placeholder="Buscar envío, cliente..."
+              autocomplete="off"
+            >
+            <i data-lucide="search" class="search-icon"></i>
+            
+            <!-- Dropdown de resultados -->
+            <div class="search-results" id="searchResults"></div>
+          </div>
+          
+          <a href="/envios-retrasados" class="notification-btn">
+            <i data-lucide="bell"></i>
+            <% if (stats.envios_retrasados && stats.envios_retrasados > 0) { %>
+              <span class="notification-badge"><%= stats.envios_retrasados %></span>
+            <% } %>
+          </a>
+          
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user.nombre.charAt(0).toUpperCase() %>
+              <span class="user-status-dot"></span>
+            </div>
+            <div class="user-info">
+              <h4><%= user.nombre %></h4>
+              <p><%= user.email %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+            
+            <!-- Dropdown del perfil -->
+<div class="user-dropdown" id="userDropdown">
+  <div class="user-dropdown-header">
+    <div class="user-dropdown-avatar">
+      <%= user.nombre.charAt(0).toUpperCase() %>
+    </div>
+    <div class="user-dropdown-info">
+      <div class="user-dropdown-name"><%= user.nombre %></div>
+      <div class="user-dropdown-email"><%= user.email %></div>
+      <span class="user-dropdown-badge">
+        <%= user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+      </span>
+    </div>
+  </div>
+  
+  <div class="user-dropdown-divider"></div>
+  
+  <a href="/mi-perfil" class="user-dropdown-item">
+    <i data-lucide="user"></i>
+    <span>Mi perfil</span>
+  </a>
+  
+  <div class="user-dropdown-divider"></div>
+  
+  <a href="/auth/logout" class="user-dropdown-item logout">
+    <i data-lucide="log-out"></i>
+    <span>Cerrar sesión</span>
+  </a>
+</div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- STATS CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Total envíos</span>
+            <div class="stat-icon-btn">
+              <i data-lucide="package" style="width: 16px; height: 16px;"></i>
+            </div>
+          </div>
+          <div class="stat-value"><%= stats.total_envios %></div>
+          <div>
+            <span class="stat-change <%= stats.cambio_envios >= 0 ? 'positive' : 'negative' %>">
+              <%= stats.cambio_envios >= 0 ? '↑' : '↓' %> <%= Math.abs(stats.cambio_envios) %>%
+            </span>
+            <span class="stat-change-text">vs último mes</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">En tránsito</span>
+            <div class="stat-icon-btn">
+              <i data-lucide="truck" style="width: 16px; height: 16px;"></i>
+            </div>
+          </div>
+          <div class="stat-value"><%= stats.en_transito %></div>
+          <div>
+            <span class="stat-change-text">Actualmente</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Entregados</span>
+            <div class="stat-icon-btn">
+              <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+            </div>
+          </div>
+          <div class="stat-value"><%= stats.entregados %></div>
+          <div>
+            <span class="stat-change-text">Este mes</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Tasa de éxito</span>
+            <div class="stat-icon-btn">
+              <i data-lucide="trending-up" style="width: 16px; height: 16px;"></i>
+            </div>
+          </div>
+          <div class="stat-value"><%= stats.tasa_entrega %>%</div>
+          <div>
+            <span class="stat-change positive">
+              ↑ Excelente
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CHARTS SECTION -->
+      <div class="charts-section">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Flujo de envíos</h3>
+            <div class="chart-filters">
+              <button class="filter-btn active" data-tipo="creados">
+                <i data-lucide="package" style="width: 14px; height: 14px;"></i>
+                Creados
+              </button>
+              <button class="filter-btn" data-tipo="entregados">
+                <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i>
+                Entregados
+              </button>
+              
+              <!-- Dropdown personalizado -->
+              <div class="custom-dropdown">
+                <button class="filter-btn dropdown-trigger" id="dropdownTrigger">
+                  <span id="dropdownSelected">Este año</span>
+                  <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                  <div class="dropdown-item" data-periodo="semana">
+                    <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+                    Esta semana
+                  </div>
+                  <div class="dropdown-item" data-periodo="mes">
+                    <i data-lucide="calendar-days" style="width: 16px; height: 16px;"></i>
+                    Este mes
+                  </div>
+                  <div class="dropdown-item active" data-periodo="año">
+                    <i data-lucide="calendar-range" style="width: 16px; height: 16px;"></i>
+                    Este año
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="flowChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="budget-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Estados</h3>
+          </div>
+          <div class="budget-donut">
+            <canvas id="budgetChart"></canvas>
+            <div class="budget-center">
+              <div class="budget-percentage"><%= stats.tasa_entrega %>%</div>
+              <div class="budget-amount"><%= stats.entregados %></div>
+              <div class="budget-label">entregados</div>
+            </div>
+          </div>
+          <div class="budget-legend">
+            <div class="legend-item">
+              <div class="legend-label">
+                <div class="legend-dot" style="background: #3b82f6;"></div>
+                <span>Entregados</span>
+              </div>
+              <strong><%= stats.entregados %></strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label">
+                <div class="legend-dot" style="background: #2563eb;"></div>
+                <span>En tránsito</span>
+              </div>
+              <strong><%= stats.en_transito %></strong>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label">
+                <div class="legend-dot" style="background: #93c5fd;"></div>
+                <span>Pendientes</span>
+              </div>
+              <strong><%= stats.pendientes || 0 %></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TRANSACTIONS TABLE -->
+      <div class="transactions-section">
+        <div class="section-header">
+          <h3 class="section-title">Actividad reciente</h3>
+          <a href="/envios" class="btn-link">Ver todos →</a>
+        </div>
+        
+        <!-- Header de columnas -->
+        <div class="activity-header">
+          <div class="header-col">FECHA</div>
+          <div class="header-col">TRACKING</div>
+          <div class="header-col">CLIENTE</div>
+          <div class="header-col">DESTINO</div>
+          <div class="header-col">ESTADO</div>
+        </div>
+        
+        <!-- Activity List -->
+        <div class="activity-list">
+          <% if (enviosRecientes && enviosRecientes.length > 0) { %>
+            <% enviosRecientes.forEach(envio => { 
+              let statusClass = 'status-pending';
+              let statusText = envio.estado_actual.replace(/_/g, ' ').toUpperCase();
+              let iconClass = 'icon-pending';
+              let iconEmoji = '📦';
+              let badgeClass = 'badge-pending';
+              
+              if (envio.estado_actual === 'entregado') {
+                statusClass = 'status-completed';
+                statusText = 'ENTREGADO';
+                iconClass = 'icon-completed';
+                iconEmoji = '✓';
+                badgeClass = 'badge-completed';
+              } else if (envio.estado_actual === 'en_transito') {
+                statusClass = 'status-in-transit';
+                statusText = 'EN TRÁNSITO';
+                iconClass = 'icon-in-transit';
+                iconEmoji = '🚚';
+                badgeClass = 'badge-in-transit';
+              } else if (envio.estado_actual === 'en_ruta_entrega') {
+                statusClass = 'status-in-transit';
+                statusText = 'EN RUTA DE ENTREGA';
+                iconClass = 'icon-in-transit';
+                iconEmoji = '🚚';
+                badgeClass = 'badge-in-transit';
+              } else if (envio.estado_actual === 'en_preparacion') {
+                statusText = 'EN PREPARACIÓN';
+                badgeClass = 'badge-preparation';
+              } else if (envio.estado_actual === 'en_centro_distribucion') {
+                statusText = 'EN CENTRO DISTRIBUCIÓN';
+                badgeClass = 'badge-distribution';
+              }
+            %>
+              <div class="activity-item">
+                <div class="activity-date">
+                  <div class="date-day">
+                    <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { 
+                      day: 'numeric', 
+                      month: 'short'
+                    }) %>
+                  </div>
+                  <div class="date-time">
+                    <%= new Date(envio.fecha_creacion).toLocaleTimeString('es-MX', { 
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    }) %>
+                  </div>
+                </div>
+                
+                <div class="activity-tracking">
+                  <div class="tracking-icon <%= iconClass %>">
+                    <%= iconEmoji %>
+                  </div>
+                  <div class="tracking-number">
+                    <a href="/envios/<%= envio.id %>"><%= envio.numero_tracking %></a>
+                  </div>
+                </div>
+                
+                <div class="activity-client">
+                  <%= envio.nombre_empresa || 'Cliente' %>
+                </div>
+                
+                <div class="activity-destination">
+                  <%= envio.destino %>
+                </div>
+                
+                <div class="activity-status">
+                  <span class="status-badge-new <%= badgeClass %>">
+                    <%= statusText %>
+                  </span>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="empty-activity">
+              <i data-lucide="inbox" style="width: 64px; height: 64px; opacity: 0.3;"></i>
+              <p>No hay actividad reciente</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      
+    </main>
+    
+  </div>
+
+  <!-- Datos JSON para gráficas -->
+  <script id="data-meses" type="application/json">
+  <%- enviosPorMes %>
+  </script>
+  
+  <script id="data-estados" type="application/json">
+  <%- enviosPorEstado %>
+  </script>
+
+  <script>
+    lucide.createIcons();
+    
+    // ========================================
+    // BÚSQUEDA EN TIEMPO REAL
+    // ========================================
+    
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    
+    // Función de búsqueda
+    async function buscarEnvios(query) {
+      if (query.trim().length < 2) {
+        searchResults.classList.remove('show');
+        return;
+      }
+      
+      // Mostrar loading
+      searchResults.innerHTML = `
+        <div class="search-loading">
+          <div class="search-spinner"></div>
+          <span>Buscando...</span>
+        </div>
+      `;
+      searchResults.classList.add('show');
+      
+      try {
+        const response = await fetch(`/dashboard/api/buscar?q=${encodeURIComponent(query)}`);
+        const resultados = await response.json();
+        
+        if (resultados.length === 0) {
+          searchResults.innerHTML = `
+            <div class="search-empty">
+              <i data-lucide="search-x"></i>
+              <p style="font-weight: 600; margin-top: 8px;">No se encontraron resultados</p>
+              <p style="font-size: 0.85rem; margin-top: 4px;">Intenta con otro término</p>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+        
+        // Renderizar resultados
+        searchResults.innerHTML = resultados.map(envio => {
+          let badgeClass = 'badge-pending';
+          let iconClass = 'icon-pending';
+          let iconEmoji = '📦';
+          let statusText = envio.estado_actual.replace(/_/g, ' ').toUpperCase();
+          
+          if (envio.estado_actual === 'entregado') {
+            badgeClass = 'badge-completed';
+            iconClass = 'icon-completed';
+            iconEmoji = '✓';
+            statusText = 'ENTREGADO';
+          } else if (envio.estado_actual === 'en_transito' || envio.estado_actual === 'en_ruta_entrega') {
+            badgeClass = 'badge-in-transit';
+            iconClass = 'icon-in-transit';
+            iconEmoji = '🚚';
+            statusText = 'EN TRÁNSITO';
+          } else if (envio.estado_actual === 'en_preparacion') {
+            badgeClass = 'badge-preparation';
+            statusText = 'EN PREPARACIÓN';
+          } else if (envio.estado_actual === 'en_centro_distribucion') {
+            badgeClass = 'badge-distribution';
+            statusText = 'EN CENTRO DISTRIBUCIÓN';
+          }
+          
+          return `
+            <a href="/envios/${envio.id}" class="search-result-item">
+              <div class="search-result-icon ${iconClass}">
+                ${iconEmoji}
+              </div>
+              <div class="search-result-info">
+                <div class="search-result-tracking">${envio.numero_tracking}</div>
+                <div class="search-result-details">
+                  ${envio.nombre_empresa || 'Cliente'} → ${envio.destino}
+                </div>
+              </div>
+              <span class="search-result-badge ${badgeClass}">
+                ${statusText}
+              </span>
+            </a>
+          `;
+        }).join('');
+        
+        lucide.createIcons();
+        
+      } catch (error) {
+        console.error('Error en búsqueda:', error);
+        searchResults.innerHTML = `
+          <div class="search-empty">
+            <p style="color: #ef4444; font-weight: 600;">Error al buscar</p>
+          </div>
+        `;
+      }
+    }
+    
+    // Event listener para el input
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          buscarEnvios(e.target.value);
+        }, 300); // Debounce de 300ms
+      });
+      
+      // Limpiar resultados al hacer focus
+      searchInput.addEventListener('focus', function() {
+        if (this.value.trim().length >= 2) {
+          buscarEnvios(this.value);
+        }
+      });
+    }
+    
+    // Cerrar resultados al hacer click fuera
+    document.addEventListener('click', function(e) {
+      if (searchInput && searchResults && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.classList.remove('show');
+      }
+    });
+    
+    // Cerrar resultados con ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && searchResults) {
+        searchResults.classList.remove('show');
+      }
+    });
+    
+    // ========================================
+    // USER PROFILE DROPDOWN
+    // ========================================
+    
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileBtn.classList.toggle('open');
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      
+      // Cerrar al hacer click fuera
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+      
+      // Cerrar con ESC
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    // ========================================
+    // GRÁFICAS
+    // ========================================
+    
+    // Variables globales
+    let flowChart = null;
+    let currentPeriodo = 'año';
+    let currentTipo = 'creados';
+    
+    // Inicializar gráfica
+    function initFlowChart(datos) {
+      const ctx = document.getElementById('flowChart');
+      
+      if (!ctx) return;
+      
+      // Destruir gráfica anterior si existe
+      if (flowChart) {
+        flowChart.destroy();
+      }
+      
+      // Si no hay datos, mostrar mensaje
+      if (!datos || datos.length === 0) {
+        const chartContainer = ctx.parentElement;
+        chartContainer.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: #64748b;">
+            <i data-lucide="bar-chart" style="width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3;"></i>
+            <p style="font-weight: 600; font-size: 1.1rem;">No hay datos para este período</p>
+            <p style="font-size: 0.9rem; margin-top: 8px;">Intenta seleccionar otro rango de fechas</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      
+      const labels = datos.map(item => item.periodo);
+      const values = datos.map(item => item.cantidad);
+      
+      flowChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: currentTipo === 'creados' ? 'Creados' : 'Entregados',
+            data: values,
+            backgroundColor: currentTipo === 'creados' ? '#93c5fd' : '#3b82f6',
+            borderRadius: 8,
+            barPercentage: 0.6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.y} envíos`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: '#f1f5f9',
+                drawBorder: false
+              },
+              border: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  weight: 600
+                },
+                stepSize: 1
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              border: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  weight: 600
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Cargar datos de la gráfica
+    async function loadFlowData(periodo, tipo) {
+      try {
+        console.log('Cargando datos:', { periodo, tipo });
+        
+        const response = await fetch(`/dashboard/api/grafica-flujo?periodo=${periodo}&tipo=${tipo}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const datos = await response.json();
+        
+        console.log('Datos recibidos:', datos);
+        
+        currentPeriodo = periodo;
+        currentTipo = tipo;
+        
+        // Restaurar canvas si fue reemplazado por mensaje de "sin datos"
+        const chartContainer = document.querySelector('.chart-container');
+        if (!document.getElementById('flowChart')) {
+          chartContainer.innerHTML = '<canvas id="flowChart"></canvas>';
+        }
+        
+        initFlowChart(datos);
+      } catch (error) {
+        console.error('Error al cargar datos de gráfica:', error);
+      }
+    }
+    
+    // Event listeners para botones de tipo
+    document.addEventListener('DOMContentLoaded', function() {
+      // Botones Creados/Entregados
+      const btnCreados = document.querySelector('[data-tipo="creados"]');
+      const btnEntregados = document.querySelector('[data-tipo="entregados"]');
+      
+      if (btnCreados) {
+        btnCreados.addEventListener('click', function() {
+          btnCreados.classList.add('active');
+          btnEntregados.classList.remove('active');
+          loadFlowData(currentPeriodo, 'creados');
+        });
+      }
+      
+      if (btnEntregados) {
+        btnEntregados.addEventListener('click', function() {
+          btnEntregados.classList.add('active');
+          btnCreados.classList.remove('active');
+          loadFlowData(currentPeriodo, 'entregados');
+        });
+      }
+      
+      // Dropdown personalizado
+      const dropdownTrigger = document.getElementById('dropdownTrigger');
+      const dropdownMenu = document.getElementById('dropdownMenu');
+      const dropdownSelected = document.getElementById('dropdownSelected');
+      const dropdownItems = document.querySelectorAll('.dropdown-item');
+      
+      // Toggle dropdown
+      if (dropdownTrigger) {
+        dropdownTrigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdownMenu.classList.toggle('show');
+          lucide.createIcons();
+        });
+      }
+      
+      // Select item
+      dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const periodo = this.getAttribute('data-periodo');
+          const texto = this.textContent.trim();
+          
+          // Actualizar UI
+          dropdownSelected.textContent = texto;
+          dropdownItems.forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          dropdownMenu.classList.remove('show');
+          
+          // Cargar datos
+          loadFlowData(periodo, currentTipo);
+        });
+      });
+      
+      // Cerrar dropdown al hacer click fuera
+      document.addEventListener('click', function() {
+        if (dropdownMenu) {
+          dropdownMenu.classList.remove('show');
+        }
+      });
+      
+      // Cargar datos iniciales
+      loadFlowData('año', 'creados');
+    });
+    
+    // Budget Donut Chart
+    const budgetCtx = document.getElementById('budgetChart');
+    if (budgetCtx) {
+      try {
+        const estadosScript = document.getElementById('data-estados');
+        let enviosPorEstadoData = [];
+        
+        if (estadosScript && estadosScript.textContent) {
+          enviosPorEstadoData = JSON.parse(estadosScript.textContent);
+        }
+        
+        if (enviosPorEstadoData.length > 0) {
+          const labels = enviosPorEstadoData.map(item => item.estado_actual);
+          const values = enviosPorEstadoData.map(item => item.cantidad);
+          const colors = ['#3b82f6', '#2563eb', '#93c5fd'];
+          
+          new Chart(budgetCtx, {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderWidth: 0,
+                cutout: '75%'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Error al cargar gráfica de estados:', e);
+      }
+    }
+  </script>
+
+</body>
+</html>

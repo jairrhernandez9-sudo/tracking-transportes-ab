@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .logo-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-text {
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    
+    .logo-tagline {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 30px 40px;
+      min-height: 100vh;
+      max-width: 1600px;
+    }
+    
+    /* HEADER */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .back-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #64748b;
+    }
+    
+    .back-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      transform: translateX(-4px);
+    }
+    
+    .page-title-section {
+      flex: 1;
+    }
+    
+    .title-icon {
+      font-size: 2rem;
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 320px;
+      padding: 10px 40px 10px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      pointer-events: none;
+    }
+    
+    .notification-btn {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .notification-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 18px;
+      height: 18px;
+      background: #ef4444;
+      border-radius: 9px;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .user-profile:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    
+    .user-info h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    
+    .user-info p {
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+    
+    .user-chevron {
+      width: 14px;
+      height: 14px;
+      color: #9ca3af;
+    }
+    
+    /* User Dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 260px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-header {
+      padding: 16px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-dropdown-avatar {
+      width: 42px;
+      height: 42px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    
+    .user-dropdown-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-dropdown-name {
+      color: white;
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-email {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-dropdown-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 6px 0;
+    }
+    
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      color: #4b5563;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    
+    .user-dropdown-item i {
+      width: 18px;
+      height: 18px;
+      color: #9ca3af;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f9fafb;
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item:hover i {
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item.logout {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout i {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout:hover {
+      background: #fef2f2;
+    }
+    
+    /* BREADCRUMB */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+    }
+    
+    .breadcrumb a {
+      color: #6b7280;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .breadcrumb a:hover {
+      color: #3b82f6;
+    }
+    
+    .breadcrumb-separator {
+      color: #d1d5db;
+    }
+    
+    .breadcrumb-current {
+      color: #1f2937;
+      font-weight: 600;
+    }
+    
+    /* ERROR MESSAGE */
+    .error-message {
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      color: #991b1b;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      animation: fadeIn 0.3s ease-out;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* FORM CONTAINER */
+    .form-container {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    .form-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .form-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .form-label i {
+      width: 16px;
+      height: 16px;
+      color: #3b82f6;
+    }
+    
+    .required {
+      color: #ef4444;
+      font-weight: 900;
+    }
+    
+    .form-input {
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-input:disabled {
+      background: #f9fafb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    textarea.form-input {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 2px solid #f1f5f9;
+    }
+    
+    .btn {
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: none;
+    }
+    
+    .btn i {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #4b5563;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    
+    @media (max-width: 968px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .page-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-container {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="page-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i data-lucide="truck" style="width: 24px; height: 24px;"></i>
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">TransportAB</span>
+          <span class="logo-tagline">Sistema Tracking</span>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios" class="nav-link">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/clientes" class="nav-link active">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <% if (user && user.rol === 'admin') { %>
+        <div class="nav-section">
+          <div class="nav-section-title">SISTEMA</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="/usuarios" class="nav-link">
+                <i data-lucide="user-cog"></i>
+                <span>Usuarios</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/configuracion" class="nav-link">
+                <i data-lucide="settings"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="page-header">
+        <div class="header-left">
+          <a href="/clientes" class="back-btn" title="Volver a clientes">
+            <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+          </a>
+          <div class="page-title-section">
+            <h1 class="page-title"><span class="title-icon">➕</span> Crear Nuevo Cliente</h1>
+            <p class="page-subtitle">Registra un nuevo cliente en el sistema</p>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-box">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Buscar en clientes..."
+              autocomplete="off"
+            >
+            <i data-lucide="search" class="search-icon"></i>
+          </div>
+          
+          <a href="/envios-retrasados" class="notification-btn">
+            <i data-lucide="bell"></i>
+            <% if (typeof enviosRetrasados !== 'undefined' && enviosRetrasados > 0) { %>
+              <span class="notification-badge"><%= enviosRetrasados %></span>
+            <% } %>
+          </a>
+          
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+            </div>
+            <div class="user-info">
+              <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
+              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+            
+            <!-- Dropdown del perfil -->
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+                </div>
+                <div class="user-dropdown-info">
+                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
+                  <span class="user-dropdown-badge">
+                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                  </span>
+                </div>
+              </div>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/mi-perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi perfil</span>
+              </a>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/auth/logout" class="user-dropdown-item logout">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- BREADCRUMB -->
+      <nav class="breadcrumb">
+        <a href="/dashboard">
+          <i data-lucide="home" style="width: 14px; height: 14px;"></i>
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/clientes">Clientes</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Nuevo</span>
+      </nav>
+      
+      <!-- ERROR MESSAGE -->
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-message">
+          <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
+          <%= error %>
+        </div>
+      <% } %>
+      
+      <!-- FORM -->
+      <div class="form-container">
+        <div class="form-header">
+          <h2 class="form-title">
+            <i data-lucide="building-2" style="width: 28px; height: 28px; color: #3b82f6;"></i>
+            Información del Cliente
+          </h2>
+          <p class="form-subtitle">Completa los datos del nuevo cliente. Los campos marcados con * son obligatorios.</p>
+        </div>
+        
+        <form action="/clientes/nuevo" method="POST">
+          <div class="form-grid">
+            
+            <!-- Nombre Empresa -->
+            <div class="form-group full-width">
+              <label class="form-label">
+                <i data-lucide="building"></i>
+                Nombre de la Empresa <span class="required">*</span>
+              </label>
+              <input 
+                type="text" 
+                name="nombre_empresa" 
+                class="form-input" 
+                placeholder="Ej: Empresa ABC S.A. de C.V."
+                required
+              >
+            </div>
+            
+            <!-- Contacto -->
+            <div class="form-group">
+              <label class="form-label">
+                <i data-lucide="user"></i>
+                Persona de Contacto
+              </label>
+              <input 
+                type="text" 
+                name="contacto" 
+                class="form-input" 
+                placeholder="Ej: Juan Pérez"
+              >
+            </div>
+            
+            <!-- RFC -->
+            <div class="form-group">
+              <label class="form-label">
+                <i data-lucide="file-text"></i>
+                RFC
+              </label>
+              <input 
+                type="text" 
+                name="rfc" 
+                class="form-input" 
+                placeholder="Ej: ABC123456XYZ"
+                maxlength="13"
+                style="text-transform: uppercase;"
+              >
+            </div>
+            
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label">
+                <i data-lucide="mail"></i>
+                Email
+              </label>
+              <input 
+                type="email" 
+                name="email" 
+                class="form-input" 
+                placeholder="contacto@empresa.com"
+              >
+            </div>
+            
+            <!-- Teléfono -->
+            <div class="form-group">
+              <label class="form-label">
+                <i data-lucide="phone"></i>
+                Teléfono
+              </label>
+              <input 
+                type="tel" 
+                name="telefono" 
+                class="form-input" 
+                placeholder="555-1234"
+              >
+            </div>
+            
+            <!-- Dirección -->
+            <div class="form-group full-width">
+              <label class="form-label">
+                <i data-lucide="map-pin"></i>
+                Dirección Completa
+              </label>
+              <textarea 
+                name="direccion" 
+                class="form-input" 
+                placeholder="Calle, Número, Colonia, Ciudad, Estado, CP"
+                rows="3"
+              ></textarea>
+            </div>
+            
+          </div>
+          
+          <div class="form-actions">
+            <a href="/clientes" class="btn btn-secondary">
+              <i data-lucide="x"></i>
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="check"></i>
+              Crear Cliente
+            </button>
+          </div>
+        </form>
+      </div>
+      
+    </main>
+    
+  </div>
+  
+  <script>
+    lucide.createIcons();
+    
+    // User Profile Dropdown
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileBtn.classList.toggle('open');
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    // Auto-uppercase RFC
+    const rfcInput = document.querySelector('input[name="rfc"]');
+    if (rfcInput) {
+      rfcInput.addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase();
+      });
+    }
+  </script>
+</body>
+</html>

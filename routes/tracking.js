@@ -1,0 +1,101 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../config/database');
+const QRCode = require('qrcode');
+
+// Página principal de tracking
+router.get('/', (req, res) => {
+  res.render('tracking-public', {
+    title: 'Rastrear Envío - Transportes AB'
+  });
+});
+
+// API para buscar envío por número de tracking
+router.get('/buscar/:numeroTracking', async (req, res) => {
+  try {
+    const { numeroTracking } = req.params;
+    
+    // Buscar envío
+    const [envios] = await db.query(
+      `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email 
+       FROM envios e 
+       LEFT JOIN clientes c ON e.cliente_id = c.id 
+       WHERE e.numero_tracking = ?`,
+      [numeroTracking]
+    );
+    
+    if (envios.length === 0) {
+      return res.json({ 
+        success: false, 
+        message: 'No se encontró ningún envío con ese número de tracking' 
+      });
+    }
+    
+    const envio = envios[0];
+    
+    // Buscar historial de estados
+    const [historial] = await db.query(
+      `SELECT * FROM historial_estados 
+       WHERE envio_id = ? 
+       ORDER BY fecha_hora ASC`,
+      [envio.id]
+    );
+    
+    // Buscar fotos para cada estado del historial
+    for (let estado of historial) {
+      const [fotos] = await db.query(
+        'SELECT * FROM fotos_evidencia WHERE historial_estado_id = ?',
+        [estado.id]
+      );
+      estado.fotos = fotos;
+    }
+    
+    res.json({
+      success: true,
+      envio,
+      historial
+    });
+    
+  } catch (error) {
+    console.error('Error buscando envío:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al buscar el envío' 
+    });
+  }
+});
+
+// Generar código QR para un tracking
+router.get('/qr/:numeroTracking', async (req, res) => {
+  try {
+    const { numeroTracking } = req.params;
+    
+    // URL completa del tracking
+    const trackingURL = `${req.protocol}://${req.get('host')}/tracking?numero=${numeroTracking}`;
+    
+    // Generar QR
+    const qrImage = await QRCode.toDataURL(trackingURL, {
+      width: 300,
+      margin: 2,
+      color: {
+        dark: '#1e3a8a',  // Azul de Transportes AB
+        light: '#ffffff'
+      }
+    });
+    
+    res.json({
+      success: true,
+      qrImage,
+      url: trackingURL
+    });
+    
+  } catch (error) {
+    console.error('Error generando QR:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al generar código QR' 
+    });
+  }
+});
+
+module.exports = router;

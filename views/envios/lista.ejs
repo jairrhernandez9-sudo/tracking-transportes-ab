@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .logo-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-text {
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    
+    .logo-tagline {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .welcome {
+      flex: 1;
+    }
+    
+    .welcome h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+    
+    .welcome p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 280px;
+      padding: 12px 45px 12px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    
+    .notification-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .notification-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border-radius: 50%;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .user-profile:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .user-status-dot {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      background: #10b981;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+    
+    .user-info h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .user-info p {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    
+    .user-chevron {
+      width: 16px;
+      height: 16px;
+      color: #94a3b8;
+      transition: transform 0.3s ease;
+    }
+    
+    .user-profile.open .user-chevron {
+      transform: rotate(180deg);
+    }
+    
+    /* User Dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 280px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-dropdown-avatar {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .user-dropdown-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-dropdown-name {
+      color: white;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-email {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-dropdown-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 8px 0;
+    }
+    
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: #475569;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    
+    .user-dropdown-item i {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f8fafc;
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item:hover i {
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item.logout {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout i {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout:hover {
+      background: #fef2f2;
+    }
+    
+    /* ENVIOS CONTAINER */
+    .envios-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    /* TOOLBAR */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+    
+.toolbar-left {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 4px 0;
+}
+    
+    .filter-btn {
+      padding: 12px 20px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #64748b;
+      white-space: nowrap;
+    }
+    
+    .filter-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      transform: translateY(-2px);
+    }
+    
+    .filter-btn.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+    }
+    
+    .filter-btn.active:hover {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* TABLE */
+    .table-container {
+      background: white;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      overflow: hidden;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .table thead {
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 800;
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    
+    .table tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+      transition: all 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+      background: #f8fafc;
+    }
+    
+    .table td {
+      padding: 18px 20px;
+      color: #0f172a;
+      font-size: 0.9rem;
+    }
+    
+    .tracking-number {
+      font-weight: 800;
+      color: #3b82f6;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge-creado {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge-pendiente {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .badge-en-transito {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge-entregado {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .badge-cancelado {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #64748b;
+    }
+    
+    .btn-icon:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .btn-icon.cancel:hover {
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    
+    .empty-state i {
+      width: 80px;
+      height: 80px;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+    
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      padding: 24px 30px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+    
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-close:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+    
+    .modal-body {
+      padding: 30px;
+    }
+    
+    .modal-footer {
+      padding: 20px 30px;
+      border-top: 2px solid #f1f5f9;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .form-label.required::after {
+      content: '*';
+      color: #ef4444;
+      margin-left: 4px;
+    }
+    
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      color: #0f172a;
+    }
+    
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-warning {
+      background: #fef3c7;
+      color: #92400e;
+      border: 2px solid #fbbf24;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: none;
+      white-space: nowrap;
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #64748b;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #d97706;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    
+    .modal-tracking {
+      font-weight: 800;
+      color: #3b82f6;
+      font-family: 'Courier New', monospace;
+    }
+    
+    @media (max-width: 968px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .toolbar-left {
+        overflow-x: auto;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="page-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i data-lucide="truck" style="width: 24px; height: 24px;"></i>
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">TransportAB</span>
+          <span class="logo-tagline">Sistema Tracking</span>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios" class="nav-link active">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/clientes" class="nav-link">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <% if (user && user.rol === 'admin') { %>
+        <div class="nav-section">
+          <div class="nav-section-title">SISTEMA</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="/usuarios" class="nav-link">
+                <i data-lucide="user-cog"></i>
+                <span>Usuarios</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/configuracion" class="nav-link">
+                <i data-lucide="settings"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="header">
+        <div class="welcome">
+          <h1>📦 Gestión de Envíos</h1>
+          <p>Administra todos los envíos de Transportes AB</p>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-box">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Buscar envío, cliente..."
+              autocomplete="off"
+            >
+            <i data-lucide="search" class="search-icon"></i>
+          </div>
+          
+          <a href="/envios-retrasados" class="notification-btn">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge">4</span>
+          </a>
+          
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+              <span class="user-status-dot"></span>
+            </div>
+            <div class="user-info">
+              <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
+              <p><%= user && user.email ? user.email : 'email@ejemplo.com' %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+            
+            <!-- Dropdown del perfil -->
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+                </div>
+                <div class="user-dropdown-info">
+                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'email@ejemplo.com' %></div>
+                  <span class="user-dropdown-badge">
+                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                  </span>
+                </div>
+              </div>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/mi-perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi perfil</span>
+              </a>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/auth/logout" class="user-dropdown-item logout">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <div class="envios-container">
+        
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <a href="/envios?estado=todos" class="filter-btn <%= (!filtros.estado || filtros.estado === 'todos') ? 'active' : '' %>">
+              <i data-lucide="package" style="width: 18px; height: 18px;"></i>
+              Todos
+            </a>
+            <a href="/envios?estado=creado" class="filter-btn <%= filtros.estado === 'creado' ? 'active' : '' %>">
+              <i data-lucide="file-plus" style="width: 18px; height: 18px;"></i>
+              Creados
+            </a>
+            <a href="/envios?estado=pendiente" class="filter-btn <%= filtros.estado === 'pendiente' ? 'active' : '' %>">
+              <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
+              Pendientes
+            </a>
+            <a href="/envios?estado=en-transito" class="filter-btn <%= filtros.estado === 'en-transito' ? 'active' : '' %>">
+              <i data-lucide="truck" style="width: 18px; height: 18px;"></i>
+              En tránsito
+            </a>
+            <a href="/envios?estado=entregado" class="filter-btn <%= filtros.estado === 'entregado' ? 'active' : '' %>">
+              <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+              Entregados
+            </a>
+            <a href="/envios?estado=cancelado" class="filter-btn <%= filtros.estado === 'cancelado' ? 'active' : '' %>">
+              <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i>
+              Cancelados
+            </a>
+          </div>
+          
+          <a href="/envios/nuevo/formulario" class="btn-primary">
+            <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+            Nuevo Envío
+          </a>
+        </div>
+        
+        <!-- TABLE -->
+        <div class="table-container">
+          <% if (envios && envios.length > 0) { %>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tracking</th>
+                  <th>Cliente</th>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% envios.forEach(envio => { %>
+                  <tr>
+                    <td>
+                      <span class="tracking-number"><%= envio.numero_tracking %></span>
+                    </td>
+                    <td>
+                      <strong><%= envio.nombre_empresa || 'Sin cliente' %></strong>
+                    </td>
+                    <td><%= envio.origen || '-' %></td>
+                    <td><%= envio.destino || '-' %></td>
+                    <td>
+                      <span class="badge badge-<%= envio.estado_actual %>">
+                        <%= envio.estado_actual.replace('-', ' ').toUpperCase() %>
+                      </span>
+                    </td>
+                    <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX') %></td>
+                    <td>
+                      <div class="table-actions">
+                        <!-- Ver Detalles -->
+                        <a href="/envios/<%= envio.id %>" class="btn-icon" title="Ver detalles completos">
+                          <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+                        </a>
+                        
+                        <!-- Editar -->
+                        <a href="/envios/<%= envio.id %>/editar" class="btn-icon" title="Editar información">
+                          <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                        </a>
+                        
+                        <!-- Cancelar (Solo Admin) -->
+                        <% if (user && user.rol === 'admin' && envio.estado_actual !== 'cancelado' && envio.estado_actual !== 'entregado') { %>
+                          <button class="btn-icon cancel" data-id="<%= envio.id %>" data-tracking="<%= envio.numero_tracking %>" title="Cancelar envío">
+                            <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i>
+                          </button>
+                        <% } %>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } else { %>
+<div class="empty-state">
+  <div class="empty-state-icon">
+    <i data-lucide="package-x"></i>
+  </div>
+  <h3>No hay envíos registrados</h3>
+  <p>Aqui apareceran los envios que filtres</p>
+
+</div>
+          <% } %>
+        </div>
+        
+      </div>
+    </main>
+    
+  </div>
+  
+  <!-- Modal Cancelar Envío -->
+  <div id="modalCancelar" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>
+          <i data-lucide="x-circle" style="width: 24px; height: 24px; color: #f59e0b;"></i>
+          Cancelar Envío
+        </h2>
+        <button class="modal-close" onclick="cerrarModalCancelar()">
+          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <p style="color: #64748b; margin-bottom: 20px; font-size: 0.95rem;">
+          Estás a punto de cancelar el envío <span class="modal-tracking" id="trackingCancelar"></span>
+        </p>
+        
+        <div class="form-group">
+          <label class="form-label required">Motivo de cancelación</label>
+          <select id="motivoCancelacion" class="form-select" required>
+            <option value="">Selecciona un motivo...</option>
+            <option value="solicitud_cliente">Solicitud del cliente</option>
+            <option value="direccion_incorrecta">Dirección incorrecta</option>
+            <option value="pago_rechazado">Pago rechazado</option>
+            <option value="producto_no_disponible">Producto no disponible</option>
+            <option value="duplicado">Envío duplicado</option>
+            <option value="otro">Otro motivo</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Comentarios adicionales</label>
+          <textarea id="comentariosCancelacion" class="form-textarea" placeholder="Describe los detalles de la cancelación..."></textarea>
+        </div>
+        
+        <div class="alert alert-warning">
+          <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+          Esta acción quedará registrada en el historial del envío
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="cerrarModalCancelar()">
+          <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+          Volver
+        </button>
+        <button class="btn btn-warning" onclick="confirmarCancelacion()">
+          <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i>
+          Cancelar Envío
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    lucide.createIcons();
+    
+    // User Profile Dropdown
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileBtn.classList.toggle('open');
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    // Variables globales para cancelación
+    let envioIdCancelar = null;
+    
+    // Delegación de eventos para botones de cancelar
+    document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('click', function(e) {
+        const cancelBtn = e.target.closest('.btn-icon.cancel');
+        if (cancelBtn) {
+          const id = cancelBtn.getAttribute('data-id');
+          const tracking = cancelBtn.getAttribute('data-tracking');
+          abrirModalCancelar(id, tracking);
+        }
+      });
+    });
+    
+    // Abrir modal de cancelación
+    function abrirModalCancelar(id, tracking) {
+      envioIdCancelar = id;
+      document.getElementById('trackingCancelar').textContent = tracking;
+      document.getElementById('modalCancelar').classList.add('show');
+      document.getElementById('motivoCancelacion').value = '';
+      document.getElementById('comentariosCancelacion').value = '';
+      lucide.createIcons();
+    }
+    
+    // Cerrar modal de cancelación
+    function cerrarModalCancelar() {
+      document.getElementById('modalCancelar').classList.remove('show');
+      envioIdCancelar = null;
+    }
+    
+    // Confirmar cancelación
+    async function confirmarCancelacion() {
+      const motivo = document.getElementById('motivoCancelacion').value;
+      const comentarios = document.getElementById('comentariosCancelacion').value;
+      
+      if (!motivo) {
+        alert('Por favor selecciona un motivo de cancelación');
+        return;
+      }
+      
+      try {
+        // Crear texto del comentario
+        const motivosTexto = {
+          'solicitud_cliente': 'Solicitud del cliente',
+          'direccion_incorrecta': 'Dirección incorrecta',
+          'pago_rechazado': 'Pago rechazado',
+          'producto_no_disponible': 'Producto no disponible',
+          'duplicado': 'Envío duplicado',
+          'otro': 'Otro motivo'
+        };
+        
+        let comentarioFinal = `Cancelado: ${motivosTexto[motivo]}`;
+        if (comentarios) {
+          comentarioFinal += `. ${comentarios}`;
+        }
+        
+        const response = await fetch(`/envios/${envioIdCancelar}/cancelar`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            motivo: motivo,
+            comentarios: comentarioFinal
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          cerrarModalCancelar();
+          alert('Envío cancelado correctamente');
+          window.location.reload();
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cancelar el envío');
+      }
+    }
+    
+    // Cerrar modal con tecla ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        cerrarModalCancelar();
+      }
+    });
+    
+    // Cerrar modal al hacer click fuera
+    document.getElementById('modalCancelar')?.addEventListener('click', function(e) {
+      if (e.target === this) {
+        cerrarModalCancelar();
+      }
+    });
+  </script>
+</body>
+</html>

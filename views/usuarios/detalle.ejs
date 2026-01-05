@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .logo-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-text {
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    
+    .logo-tagline {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 30px 40px;
+      min-height: 100vh;
+      max-width: 1600px;
+    }
+    
+    /* HEADER */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .back-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #64748b;
+    }
+    
+    .back-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      transform: translateX(-4px);
+    }
+    
+    .page-title-section {
+      flex: 1;
+    }
+    
+    .title-icon {
+      font-size: 2rem;
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .btn-primary {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-primary i {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .notification-btn {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .notification-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 18px;
+      height: 18px;
+      background: #ef4444;
+      border-radius: 9px;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .user-profile:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    
+    .user-info h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    
+    .user-info p {
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+    
+    .user-chevron {
+      width: 14px;
+      height: 14px;
+      color: #9ca3af;
+    }
+    
+    /* User Dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 260px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-header {
+      padding: 16px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-dropdown-avatar {
+      width: 42px;
+      height: 42px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    
+    .user-dropdown-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-dropdown-name {
+      color: white;
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-email {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-dropdown-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 6px 0;
+    }
+    
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      color: #4b5563;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    
+    .user-dropdown-item i {
+      width: 18px;
+      height: 18px;
+      color: #9ca3af;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f9fafb;
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item:hover i {
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item.logout {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout i {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout:hover {
+      background: #fef2f2;
+    }
+    
+    /* BREADCRUMB */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+    }
+    
+    .breadcrumb a {
+      color: #6b7280;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .breadcrumb a:hover {
+      color: #3b82f6;
+    }
+    
+    .breadcrumb-separator {
+      color: #d1d5db;
+    }
+    
+    .breadcrumb-current {
+      color: #1f2937;
+      font-weight: 600;
+    }
+    
+    /* USER PROFILE CARD */
+    .profile-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 40px;
+      margin-bottom: 30px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .profile-header {
+      display: flex;
+      align-items: start;
+      gap: 30px;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .profile-avatar-large {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 3rem;
+      flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    }
+    
+    .profile-main-info {
+      flex: 1;
+    }
+    
+    .profile-name {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+    
+    .profile-email {
+      font-size: 1.1rem;
+      color: #6b7280;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    
+    .profile-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .profile-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .profile-badge i {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .badge-admin {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge-operador {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+    
+    .badge-activo {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .badge-inactivo {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* INFO GRID */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .info-item {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .info-label i {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .info-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    
+    /* STATS */
+    .stats-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #f1f5f9;
+    }
+    
+    .stats-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    
+    .stat-box {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      padding: 24px;
+      border-radius: 12px;
+      color: white;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+    }
+    
+    /* ACTIONS */
+    .actions-section {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #f1f5f9;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: none;
+    }
+    
+    .btn i {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .btn-edit {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-edit:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-delete {
+      background: white;
+      color: #ef4444;
+      border: 2px solid #ef4444;
+    }
+    
+    .btn-delete:hover {
+      background: #ef4444;
+      color: white;
+    }
+    
+    @media (max-width: 968px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .page-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      
+      .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .actions-section {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="page-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i data-lucide="truck" style="width: 24px; height: 24px;"></i>
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">TransportAB</span>
+          <span class="logo-tagline">Sistema Tracking</span>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios" class="nav-link">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/clientes" class="nav-link">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">SISTEMA</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/usuarios" class="nav-link active">
+              <i data-lucide="user-cog"></i>
+              <span>Usuarios</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/configuracion" class="nav-link">
+              <i data-lucide="settings"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="page-header">
+        <div class="header-left">
+          <a href="/usuarios" class="back-btn" title="Volver a usuarios">
+            <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+          </a>
+          <div class="page-title-section">
+            <h1 class="page-title"><span class="title-icon">👤</span> Detalle de Usuario</h1>
+            <p class="page-subtitle">Información completa del usuario</p>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <a href="/usuarios/<%= usuario.id %>/editar" class="btn-primary">
+            <i data-lucide="edit"></i>
+            Editar Usuario
+          </a>
+          
+          <a href="/envios-retrasados" class="notification-btn">
+            <i data-lucide="bell"></i>
+            <% if (typeof enviosRetrasados !== 'undefined' && enviosRetrasados > 0) { %>
+              <span class="notification-badge"><%= enviosRetrasados %></span>
+            <% } %>
+          </a>
+          
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+            </div>
+            <div class="user-info">
+              <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
+              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+            
+            <!-- Dropdown del perfil -->
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+                </div>
+                <div class="user-dropdown-info">
+                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
+                  <span class="user-dropdown-badge">
+                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                  </span>
+                </div>
+              </div>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/mi-perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi perfil</span>
+              </a>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/auth/logout" class="user-dropdown-item logout">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- BREADCRUMB -->
+      <nav class="breadcrumb">
+        <a href="/dashboard">
+          <i data-lucide="home" style="width: 14px; height: 14px;"></i>
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/usuarios">Usuarios</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current"><%= usuario.nombre %></span>
+      </nav>
+      
+      <!-- PROFILE CARD -->
+      <div class="profile-card">
+        <!-- Header -->
+        <div class="profile-header">
+          <div class="profile-avatar-large">
+            <%= usuario.nombre.charAt(0).toUpperCase() %>
+          </div>
+          <div class="profile-main-info">
+            <h2 class="profile-name"><%= usuario.nombre %></h2>
+            <p class="profile-email"><%= usuario.email %></p>
+            <div class="profile-badges">
+              <span class="profile-badge <%= usuario.rol === 'admin' ? 'badge-admin' : 'badge-operador' %>">
+                <i data-lucide="<%= usuario.rol === 'admin' ? 'shield' : 'user' %>"></i>
+                <%= usuario.rol === 'admin' ? 'Administrador' : 'Operador' %>
+              </span>
+              <span class="profile-badge <%= usuario.activo ? 'badge-activo' : 'badge-inactivo' %>">
+                <i data-lucide="<%= usuario.activo ? 'check-circle' : 'x-circle' %>"></i>
+                <%= usuario.activo ? 'Activo' : 'Inactivo' %>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Info Grid -->
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">
+              <i data-lucide="calendar"></i>
+              Fecha de Registro
+            </div>
+            <div class="info-value">
+              <%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric' 
+              }) %>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">
+              <i data-lucide="hash"></i>
+              ID de Usuario
+            </div>
+            <div class="info-value">#<%= usuario.id %></div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">
+              <i data-lucide="mail"></i>
+              Correo Electrónico
+            </div>
+            <div class="info-value" style="font-size: 0.95rem; word-break: break-all;">
+              <%= usuario.email %>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">
+              <i data-lucide="shield-check"></i>
+              Nivel de Acceso
+            </div>
+            <div class="info-value">
+              <%= usuario.rol === 'admin' ? 'Administrador Total' : 'Operador Limitado' %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="stats-section">
+          <h3 class="stats-title">
+            <i data-lucide="bar-chart-2" style="width: 20px; height: 20px;"></i>
+            Estadísticas
+          </h3>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Envíos Creados</div>
+              <div class="stat-value"><%= totalEnvios || 0 %></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="actions-section">
+          <a href="/usuarios/<%= usuario.id %>/editar" class="btn btn-edit">
+            <i data-lucide="edit"></i>
+            Editar Usuario
+          </a>
+          
+          <% if (usuario.id !== user.id) { %>
+            <button 
+              class="btn btn-delete" 
+              data-user-id="<%= usuario.id %>" 
+              data-user-name="<%= usuario.nombre %>" 
+              onclick="confirmarEliminar(this)"
+            >
+              <i data-lucide="trash-2"></i>
+              Eliminar Usuario
+            </button>
+          <% } %>
+        </div>
+      </div>
+      
+    </main>
+    
+  </div>
+  
+  <script>
+    lucide.createIcons();
+    
+    // User Profile Dropdown
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileBtn.classList.toggle('open');
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    // Delete confirmation
+    function confirmarEliminar(button) {
+      const id = button.getAttribute('data-user-id');
+      const nombre = button.getAttribute('data-user-name');
+      
+      if (confirm(`¿Estás seguro de eliminar al usuario "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+        // Crear formulario y enviar
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/usuarios/${id}/eliminar`;
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
+</body>
+</html>

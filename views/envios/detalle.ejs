@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .logo-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-text {
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    
+    .logo-tagline {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+    
+    .back-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #64748b;
+    }
+    
+    .back-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      transform: translateX(-4px);
+    }
+    
+    .welcome {
+      flex: 1;
+    }
+    
+    .welcome h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+    
+    .welcome p {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 280px;
+      padding: 12px 45px 12px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    
+    .notification-btn {
+      width: 45px;
+      height: 45px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .notification-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border-radius: 50%;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .user-profile:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .user-status-dot {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      background: #10b981;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+    
+    .user-info h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .user-info p {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    
+    .user-chevron {
+      width: 16px;
+      height: 16px;
+      color: #94a3b8;
+      transition: transform 0.3s ease;
+    }
+    
+    .user-profile.open .user-chevron {
+      transform: rotate(180deg);
+    }
+    
+    /* User Dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 280px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 2000;
+      overflow: hidden;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-dropdown-avatar {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    
+    .user-dropdown-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-dropdown-name {
+      color: white;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-email {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-dropdown-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-dropdown-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 8px 0;
+    }
+    
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: #475569;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    
+    .user-dropdown-item i {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f8fafc;
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item:hover i {
+      color: #3b82f6;
+    }
+    
+    .user-dropdown-item.logout {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout i {
+      color: #ef4444;
+    }
+    
+    .user-dropdown-item.logout:hover {
+      background: #fef2f2;
+    }
+    
+    /* DETALLE CONTAINER */
+    .detalle-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 2px solid #10b981;
+    }
+    
+    .alert-warning {
+      padding: 16px;
+      border-radius: 12px;
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      color: #92400e;
+      display: flex;
+      gap: 12px;
+      font-weight: 600;
+    }
+    
+    .alert-warning i {
+      color: #f59e0b;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .alert-info {
+      padding: 16px;
+      border-radius: 12px;
+      background: #dbeafe;
+      border: 2px solid #60a5fa;
+      color: #1e40af;
+      display: flex;
+      gap: 12px;
+      font-weight: 600;
+    }
+    
+    .alert-info i {
+      color: #3b82f6;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    /* LAYOUT GRID */
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 30px;
+    }
+    
+    /* INFO CARD */
+    .info-card {
+      background: white;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .tracking-number {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #3b82f6;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 20px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge-creado { background: #dbeafe; color: #1e40af; }
+    .badge-pendiente { background: #fef3c7; color: #92400e; }
+    .badge-en-transito { background: #dbeafe; color: #1e40af; }
+    .badge-entregado { background: #d1fae5; color: #065f46; }
+    .badge-cancelado { background: #fee2e2; color: #991b1b; }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .info-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    
+    /* TIMELINE MODERNA */
+    .timeline {
+      position: relative;
+      padding-left: 0;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 60px;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #3b82f6 0%, #e2e8f0 100%);
+      border-radius: 2px;
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 24px;
+      padding-left: 80px;
+      min-height: 60px;
+    }
+    
+    .timeline-item:last-child .timeline::before {
+      display: none;
+    }
+    
+    .timeline-marker {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 56px;
+      height: 56px;
+      background: white;
+      border: 4px solid #e2e8f0;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: all 0.3s ease;
+    }
+    
+    .timeline-item.completed .timeline-marker {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .timeline-item.completed .timeline-marker i {
+      color: white;
+      width: 28px;
+      height: 28px;
+    }
+    
+    .timeline-marker i {
+      width: 24px;
+      height: 24px;
+      color: #64748b;
+      transition: all 0.3s ease;
+    }
+    
+    /* Estados específicos */
+    .timeline-item[data-estado="entregado"] .timeline-marker {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+    }
+    
+    .timeline-item[data-estado="entregado"] .timeline-marker i {
+      color: white;
+    }
+    
+    .timeline-item[data-estado="en-transito"] .timeline-marker {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-color: #3b82f6;
+    }
+    
+    .timeline-item[data-estado="en-transito"] .timeline-marker i {
+      color: white;
+    }
+    
+    .timeline-item[data-estado="pendiente"] .timeline-marker {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border-color: #f59e0b;
+    }
+    
+    .timeline-item[data-estado="pendiente"] .timeline-marker i {
+      color: white;
+    }
+    
+    .timeline-item[data-estado="creado"] .timeline-marker {
+      background: white;
+      border-color: #cbd5e1;
+    }
+    
+    .timeline-item[data-estado="cancelado"] .timeline-marker {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-color: #ef4444;
+    }
+    
+    .timeline-item[data-estado="cancelado"] .timeline-marker i {
+      color: white;
+    }
+    
+    .timeline-content {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      border: 2px solid #f1f5f9;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .timeline-content:hover {
+      border-color: #e2e8f0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .timeline-estado {
+      font-weight: 900;
+      color: #0f172a;
+      font-size: 1.15rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .timeline-fecha {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 700;
+      background: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    
+    .timeline-ubicacion {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .timeline-ubicacion i {
+      color: #3b82f6;
+      width: 16px;
+      height: 16px;
+    }
+    
+    .timeline-comentario {
+      color: #475569;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border-left: 3px solid #3b82f6;
+    }
+    
+    .timeline-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .timeline-user i {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .timeline-photos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #f1f5f9;
+    }
+    
+    .photo-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+    
+    .photo-item:hover::before {
+      opacity: 1;
+    }
+    
+    .photo-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-color: #3b82f6;
+    }
+    
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .photo-item:hover img {
+      transform: scale(1.1);
+    }
+    
+    .photo-zoom-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 2;
+    }
+    
+    .photo-item:hover .photo-zoom-icon {
+      opacity: 1;
+    }
+    
+    .photo-zoom-icon i {
+      width: 20px;
+      height: 20px;
+      color: #3b82f6;
+    }
+    
+    .no-history {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+    }
+    
+    .no-history i {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      color: #cbd5e1;
+    }
+    
+    .no-history p {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    /* SIDEBAR ACCIONES */
+    .action-card {
+      background: white;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    
+    .action-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .form-help {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #475569;
+      border: 2px solid #e2e8f0;
+      margin-bottom: 10px;
+    }
+    
+    .btn-secondary:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    
+    .file-upload {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    
+    .file-upload input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 30px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-upload-label:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    
+    .preview-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .preview-item.pdf {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+    }
+    
+    .preview-item.pdf i {
+      width: 40px;
+      height: 40px;
+      color: #ef4444;
+      margin-bottom: 8px;
+    }
+    
+    .preview-item.pdf span {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    
+    .preview-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      background: #ef4444;
+      border: 2px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .preview-remove:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+    
+    .preview-remove i {
+      width: 14px;
+      height: 14px;
+      color: white;
+    }
+    
+    .upload-status {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .upload-status.loading {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .upload-status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .upload-status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .quick-actions {
+      display: grid;
+      gap: 10px;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 1200px) {
+      .detalle-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 968px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .timeline-item {
+        padding-left: 70px;
+      }
+      
+      .timeline-marker {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="page-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i data-lucide="truck" style="width: 24px; height: 24px;"></i>
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">TransportAB</span>
+          <span class="logo-tagline">Sistema Tracking</span>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios" class="nav-link active">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/clientes" class="nav-link">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <% if (user && user.rol === 'admin') { %>
+        <div class="nav-section">
+          <div class="nav-section-title">SISTEMA</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="/usuarios" class="nav-link">
+                <i data-lucide="user-cog"></i>
+                <span>Usuarios</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/configuracion" class="nav-link">
+                <i data-lucide="settings"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="header">
+        <div class="header-left">
+          <a href="/envios" class="back-btn" title="Volver a envíos">
+            <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+          </a>
+          <div class="welcome">
+            <h1>📦 Detalle del Envío</h1>
+            <p>Información completa y seguimiento</p>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-box">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Buscar envío, cliente..."
+              autocomplete="off"
+            >
+            <i data-lucide="search" class="search-icon"></i>
+          </div>
+          
+          <a href="/envios-retrasados" class="notification-btn">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge">4</span>
+          </a>
+          
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+              <span class="user-status-dot"></span>
+            </div>
+            <div class="user-info">
+              <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
+              <p><%= user && user.email ? user.email : 'email@ejemplo.com' %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+            
+            <!-- Dropdown del perfil -->
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+                </div>
+                <div class="user-dropdown-info">
+                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'email@ejemplo.com' %></div>
+                  <span class="user-dropdown-badge">
+                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                  </span>
+                </div>
+              </div>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/mi-perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi perfil</span>
+              </a>
+              
+              <div class="user-dropdown-divider"></div>
+              
+              <a href="/auth/logout" class="user-dropdown-item logout">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <div class="detalle-container">
+        
+        <!-- Mensaje de éxito -->
+        <% if (typeof success !== 'undefined' && success === 'updated') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Envío actualizado correctamente
+          </div>
+        <% } %>
+        
+        <% if (typeof success !== 'undefined' && success === 'created') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Envío creado correctamente
+          </div>
+        <% } %>
+        
+        <!-- GRID PRINCIPAL -->
+        <div class="detalle-grid">
+          
+          <!-- COLUMNA IZQUIERDA -->
+          <div>
+            <!-- INFO GENERAL -->
+            <div class="info-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="package" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Información General
+                </h2>
+                <a href="/envios/<%= envio.id %>/editar" class="btn-secondary" style="padding: 8px 16px; width: auto; font-size: 0.85rem;">
+                  <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+                  Editar
+                </a>
+              </div>
+              
+              <div class="tracking-number"><%= envio.numero_tracking %></div>
+              
+              <span class="badge badge-<%= envio.estado_actual %>">
+                <%= envio.estado_actual.replace('-', ' ').toUpperCase() %>
+              </span>
+              
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Cliente</span>
+                  <span class="info-value"><%= envio.nombre_empresa || 'Sin cliente' %></span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Contacto</span>
+                  <span class="info-value"><%= envio.contacto || '-' %></span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Teléfono</span>
+                  <span class="info-value"><%= envio.telefono || '-' %></span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Email</span>
+                  <span class="info-value"><%= envio.cliente_email || '-' %></span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Origen</span>
+                  <span class="info-value">
+                    <i data-lucide="map-pin" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+                    <%= envio.origen || '-' %>
+                  </span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Destino</span>
+                  <span class="info-value">
+                    <i data-lucide="flag" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+                    <%= envio.destino || '-' %>
+                  </span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Peso</span>
+                  <span class="info-value"><%= envio.peso ? envio.peso + ' kg' : '-' %></span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Fecha Creación</span>
+                  <span class="info-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX') %></span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Fecha Estimada</span>
+                  <span class="info-value">
+                    <%= envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : '-' %>
+                  </span>
+                </div>
+                
+                <div class="info-item">
+                  <span class="info-label">Creado Por</span>
+                  <span class="info-value"><%= envio.creador_nombre || '-' %></span>
+                </div>
+              </div>
+              
+              <% if (envio.descripcion) { %>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
+                  <span class="info-label">Descripción</span>
+                  <p style="margin-top: 8px; color: #475569; line-height: 1.6;"><%= envio.descripcion %></p>
+                </div>
+              <% } %>
+            </div>
+            
+            <!-- HISTORIAL -->
+            <div class="info-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="clock" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Historial de Estados
+                </h2>
+              </div>
+              
+              <div class="timeline">
+                <% if (historial && historial.length > 0) { %>
+                  <% historial.forEach((item, index) => { 
+                    // Determinar icono según estado
+                    let iconoEstado = 'circle';
+                    if (item.estado === 'entregado') iconoEstado = 'check-circle';
+                    else if (item.estado === 'en-transito') iconoEstado = 'truck';
+                    else if (item.estado === 'pendiente') iconoEstado = 'clock';
+                    else if (item.estado === 'cancelado') iconoEstado = 'x-circle';
+                    else if (item.estado === 'creado') iconoEstado = 'package';
+                  %>
+                    <div class="timeline-item <%= item.estado === 'entregado' ? 'completed' : '' %>" data-estado="<%= item.estado %>">
+                      <div class="timeline-marker">
+                        <i data-lucide="<%= iconoEstado %>"></i>
+                      </div>
+                      <div class="timeline-content">
+                        <div class="timeline-header">
+                          <span class="timeline-estado"><%= item.estado.replace('-', ' ') %></span>
+                          <span class="timeline-fecha">
+                            <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { 
+                              day: '2-digit', 
+                              month: 'short', 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            }) %>
+                          </span>
+                        </div>
+                        
+                        <div class="timeline-ubicacion">
+                          <i data-lucide="map-pin"></i>
+                          <%= item.ubicacion || 'Sin ubicación especificada' %>
+                        </div>
+                        
+                        <% if (item.comentarios) { %>
+                          <div class="timeline-comentario">
+                            <i data-lucide="message-square" style="width: 14px; height: 14px; display: inline; vertical-align: middle; margin-right: 6px;"></i>
+                            <%= item.comentarios %>
+                          </div>
+                        <% } %>
+                        
+                        <div class="timeline-user">
+                          <i data-lucide="user"></i>
+                          <%= item.usuario_nombre || 'Sistema' %>
+                        </div>
+                        
+                        <% if (item.fotos && item.fotos.length > 0) { %>
+                          <div class="timeline-photos">
+                            <% item.fotos.forEach(foto => { %>
+                              <div class="photo-item" onclick="openPhotoModal('<%= foto.url_foto %>')">
+                                <img src="<%= foto.url_foto %>" alt="Evidencia">
+                                <div class="photo-zoom-icon">
+                                  <i data-lucide="zoom-in"></i>
+                                </div>
+                              </div>
+                            <% }); %>
+                          </div>
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="no-history">
+                    <i data-lucide="inbox"></i>
+                    <p>No hay historial de estados disponible</p>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- COLUMNA DERECHA -->
+          <div>
+            <!-- ACTUALIZAR ESTADO -->
+            <div class="action-card">
+              <h3 class="action-title">
+                <i data-lucide="refresh-cw" style="width: 20px; height: 20px; color: #3b82f6;"></i>
+                Actualizar Estado
+              </h3>
+              
+              <% if (envio.estado_actual === 'cancelado') { %>
+                <!-- BLOQUEADO POR CANCELACIÓN -->
+                <div class="alert-warning">
+                  <i data-lucide="x-circle" style="width: 20px; height: 20px;"></i>
+                  <div>
+                    <strong>Envío cancelado</strong>
+                    <p style="margin-top: 4px; font-size: 0.85rem; font-weight: 500;">No se pueden realizar más actualizaciones en envíos cancelados.</p>
+                  </div>
+                </div>
+              <% } else if (envio.estado_actual === 'entregado') { %>
+                <!-- BLOQUEADO POR ENTREGA -->
+                <div class="alert-info">
+                  <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+                  <div>
+                    <strong>Envío entregado</strong>
+                    <p style="margin-top: 4px; font-size: 0.85rem; font-weight: 500;">El envío ya fue entregado exitosamente.</p>
+                  </div>
+                </div>
+              <% } else { %>
+                <!-- FORMULARIO ACTIVO -->
+                <form id="formActualizarEstado">
+                  <div class="form-group">
+                    <label class="form-label">Nuevo Estado</label>
+                    <select name="nuevo_estado" class="form-select" required>
+                      <option value="">Seleccionar...</option>
+                      <option value="creado">Creado</option>
+                      <option value="pendiente">Pendiente</option>
+                      <option value="en-transito">En Tránsito</option>
+                      <option value="entregado">Entregado</option>
+                      <option value="cancelado">Cancelado</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Ubicación</label>
+                    <input type="text" name="ubicacion" class="form-input" placeholder="Ciudad, Estado" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Comentarios</label>
+                    <textarea name="comentarios" class="form-textarea" placeholder="Información adicional..."></textarea>
+                  </div>
+                  
+                  <button type="submit" class="btn btn-primary">
+                    <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+                    Actualizar
+                  </button>
+                </form>
+              <% } %>
+            </div>
+            
+            <!-- SUBIR EVIDENCIA -->
+            <div class="action-card">
+              <h3 class="action-title">
+                <i data-lucide="camera" style="width: 20px; height: 20px; color: #3b82f6;"></i>
+                Subir Evidencia
+              </h3>
+              
+              <% if (historial && historial.length > 0) { %>
+                <form id="formSubirFoto" enctype="multipart/form-data">
+                  
+                  <!-- SELECTOR DE ESTADO -->
+                  <div class="form-group">
+                    <label class="form-label">Estado al que pertenece la evidencia</label>
+                    <select name="historial_estado_id" id="historialEstadoSelect" class="form-select" required>
+                      <option value="">Selecciona el estado...</option>
+                      <% historial.forEach((item, index) => { %>
+                        <option value="<%= item.id %>" <%= index === 0 ? 'selected' : '' %>>
+                          <%= item.estado.replace('-', ' ').toUpperCase() %> 
+                          - <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) %>
+                          <% if (item.ubicacion) { %> (<%= item.ubicacion %>)<% } %>
+                        </option>
+                      <% }); %>
+                    </select>
+                    <p class="form-help">
+                      <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+                      Selecciona a qué actualización pertenecen las fotos
+                    </p>
+                  </div>
+                  
+                  <!-- UPLOAD DE ARCHIVOS -->
+                  <div class="file-upload">
+                    <input 
+                      type="file" 
+                      name="fotos" 
+                      id="fotoInput" 
+                      accept="image/*,application/pdf"
+                      multiple
+                    >
+                    <label for="fotoInput" class="file-upload-label">
+                      <i data-lucide="upload" style="width: 24px; height: 24px; color: #64748b;"></i>
+                      <div>
+                        <span style="color: #64748b; font-weight: 600; display: block;">Seleccionar archivos</span>
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Máximo 5 archivos (JPG, PNG, PDF)</span>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div id="previewContainer" class="preview-container" style="display: none;"></div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Comentario general (opcional)</label>
+                    <textarea name="comentario" class="form-textarea" placeholder="Comentario sobre las evidencias..." rows="3"></textarea>
+                  </div>
+                  
+                  <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+                  
+                  <button type="submit" class="btn btn-primary" id="btnSubirFoto" disabled>
+                    <i data-lucide="upload" style="width: 18px; height: 18px;"></i>
+                    <span id="btnSubirTexto">Subir Evidencias</span>
+                  </button>
+                </form>
+              <% } else { %>
+                <div class="alert-info">
+                  <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                  <div>
+                    <strong>Sin actualizaciones</strong>
+                    <p style="margin-top: 4px; font-size: 0.85rem; font-weight: 500;">Primero debes actualizar el estado del envío para poder subir evidencias.</p>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+            
+            <!-- ACCIONES RÁPIDAS -->
+            <div class="action-card">
+              <h3 class="action-title">
+                <i data-lucide="zap" style="width: 20px; height: 20px; color: #3b82f6;"></i>
+                Acciones Rápidas
+              </h3>
+              
+              <div class="quick-actions">
+                <a href="/envios/<%= envio.id %>/etiqueta" target="_blank" class="btn btn-secondary">
+                  <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
+                  Imprimir Etiqueta
+                </a>
+                
+                <a href="/tracking/<%= envio.numero_tracking %>" target="_blank" class="btn btn-secondary">
+                  <i data-lucide="external-link" style="width: 18px; height: 18px;"></i>
+                  Ver Tracking Público
+                </a>
+                
+                <button onclick="copiarTracking()" class="btn btn-secondary">
+                  <i data-lucide="copy" style="width: 18px; height: 18px;"></i>
+                  Copiar Tracking
+                </button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </main>
+    
+  </div>
+  
+  <script>
+    lucide.createIcons();
+    
+    // User Profile Dropdown
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userProfileBtn.classList.toggle('open');
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          userProfileBtn.classList.remove('open');
+          userDropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    // Actualizar Estado
+    document.getElementById('formActualizarEstado')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const response = await fetch('/envios/<%= envio.id %>/actualizar-estado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Estado actualizado correctamente');
+          window.location.reload();
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al actualizar el estado');
+      }
+    });
+    
+    // Preview de múltiples fotos
+    const fotoInput = document.getElementById('fotoInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const btnSubirFoto = document.getElementById('btnSubirFoto');
+    let selectedFiles = [];
+    
+    if (fotoInput) {
+      fotoInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        // Validar máximo 5 archivos
+        if (selectedFiles.length + files.length > 5) {
+          alert('Máximo 5 archivos permitidos');
+          return;
+        }
+        
+        // Validar tamaño (5MB por archivo)
+        for (const file of files) {
+          if (file.size > 5 * 1024 * 1024) {
+            alert(`El archivo ${file.name} excede el tamaño máximo de 5MB`);
+            return;
+          }
+        }
+        
+        // Agregar archivos a la lista
+        selectedFiles.push(...files);
+        updatePreview();
+        
+        // Habilitar botón
+        btnSubirFoto.disabled = selectedFiles.length === 0;
+      });
+    }
+    
+    function updatePreview() {
+      previewContainer.innerHTML = '';
+      
+      if (selectedFiles.length === 0) {
+        previewContainer.style.display = 'none';
+        return;
+      }
+      
+      previewContainer.style.display = 'grid';
+      
+      selectedFiles.forEach((file, index) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        
+        if (file.type.startsWith('image/')) {
+          // Preview de imagen
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewItem.innerHTML = `
+              <img src="${e.target.result}" alt="Preview">
+              <button type="button" class="preview-remove" onclick="removeFile(${index})">
+                <i data-lucide="x"></i>
+              </button>
+            `;
+            lucide.createIcons();
+          };
+          reader.readAsDataURL(file);
+        } else if (file.type === 'application/pdf') {
+          // Preview de PDF
+          previewItem.classList.add('pdf');
+          previewItem.innerHTML = `
+            <i data-lucide="file-text"></i>
+            <span>${file.name}</span>
+            <button type="button" class="preview-remove" onclick="removeFile(${index})">
+              <i data-lucide="x"></i>
+            </button>
+          `;
+          lucide.createIcons();
+        }
+        
+        previewContainer.appendChild(previewItem);
+      });
+      
+      lucide.createIcons();
+    }
+    
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      updatePreview();
+      
+      // Actualizar input file
+      const dt = new DataTransfer();
+      selectedFiles.forEach(file => dt.items.add(file));
+      fotoInput.files = dt.files;
+      
+      // Deshabilitar botón si no hay archivos
+      btnSubirFoto.disabled = selectedFiles.length === 0;
+    }
+    
+    // Subir múltiples fotos
+    document.getElementById('formSubirFoto')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const historialId = document.getElementById('historialEstadoSelect')?.value;
+      if (!historialId) {
+        alert('Selecciona el estado al que pertenecen las evidencias');
+        return;
+      }
+      
+      if (selectedFiles.length === 0) {
+        alert('Selecciona al menos un archivo');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('historial_estado_id', historialId);
+      formData.append('comentario', document.querySelector('[name="comentario"]').value);
+      
+      // Agregar todos los archivos
+      selectedFiles.forEach(file => {
+        formData.append('fotos', file);
+      });
+      
+      // Mostrar estado de carga
+      const uploadStatus = document.getElementById('uploadStatus');
+      uploadStatus.style.display = 'flex';
+      uploadStatus.className = 'upload-status loading';
+      uploadStatus.innerHTML = `
+        <i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i>
+        Subiendo ${selectedFiles.length} archivo(s)...
+      `;
+      lucide.createIcons();
+      
+      // Deshabilitar botón
+      btnSubirFoto.disabled = true;
+      document.getElementById('btnSubirTexto').textContent = 'Subiendo...';
+      
+      try {
+        const response = await fetch('/envios/<%= envio.id %>/subir-fotos', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          uploadStatus.className = 'upload-status success';
+          uploadStatus.innerHTML = `
+            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+            ${result.uploaded} archivo(s) subido(s) correctamente
+          `;
+          lucide.createIcons();
+          
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          uploadStatus.className = 'upload-status error';
+          uploadStatus.innerHTML = `
+            <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+            Error: ${result.message}
+          `;
+          lucide.createIcons();
+          btnSubirFoto.disabled = false;
+          document.getElementById('btnSubirTexto').textContent = 'Subir Evidencias';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        uploadStatus.className = 'upload-status error';
+        uploadStatus.innerHTML = `
+          <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+          Error al subir los archivos
+        `;
+        lucide.createIcons();
+        btnSubirFoto.disabled = false;
+        document.getElementById('btnSubirTexto').textContent = 'Subir Evidencias';
+      }
+    });
+    
+    // Copiar tracking
+    function copiarTracking() {
+      const tracking = '<%= envio.numero_tracking %>';
+      navigator.clipboard.writeText(tracking).then(() => {
+        alert('Número de tracking copiado: ' + tracking);
+      });
+    }
+    
+    // Modal de fotos
+    function openPhotoModal(url) {
+      window.open(url, '_blank');
+    }
+  </script>
+</body>
+</html>

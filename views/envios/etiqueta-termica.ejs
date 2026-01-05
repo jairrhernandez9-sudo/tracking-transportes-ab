@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Etiqueta - <%= envio.numero_tracking %></title>
+  
+  <!-- JsBarcode -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  
+  <style>
+    /* ============================================
+       RESET Y CONFIGURACIÓN BASE
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    /* Configuración para impresión térmica 4x6" (10.16cm x 15.24cm) */
+    @page {
+      size: 4in 6in;
+      margin: 0;
+    }
+    
+    @media print {
+      body {
+        width: 4in;
+        height: 6in;
+        background: white !important;
+        padding: 0 !important;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+      
+      .page-break {
+        page-break-after: always;
+      }
+      
+      .etiqueta {
+        margin: 0 !important;
+        box-shadow: none !important;
+      }
+    }
+    
+    /* ============================================
+       PÁGINA DE VISTA PREVIA - VERSIÓN PREMIUM
+       ============================================ */
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+    }
+    
+    /* Header de la página */
+    .preview-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      padding: 30px 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      margin-bottom: 40px;
+    }
+    
+    .preview-header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    
+    .preview-logo-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .preview-logo-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    
+    .preview-title-group h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+    }
+    
+    .preview-title-group p {
+      margin: 5px 0 0 0;
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    /* Controles mejorados */
+    .controls {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+    }
+    
+    .controls-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    
+    .controls-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #1e40af;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px;
+      font-size: 40px;
+      box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+    }
+    
+    .controls-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #1e3a8a;
+      margin-bottom: 15px;
+    }
+    
+    .controls-info {
+      font-size: 16px;
+      color: #6b7280;
+      margin-bottom: 35px;
+      line-height: 1.6;
+    }
+    
+    .controls-info strong {
+      color: #1e3a8a;
+      font-weight: 800;
+    }
+    
+    .controls-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 16px 40px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-icon {
+      font-size: 22px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(30, 58, 138, 0.4);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #1e3a8a;
+      border: 2px solid #1e3a8a;
+    }
+    
+    .btn-secondary:hover {
+      background: #f0f4ff;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(30, 58, 138, 0.2);
+    }
+    
+    /* Contenedor de etiquetas */
+    .etiquetas-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    
+    /* Info adicional */
+    .preview-info {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      margin: 0 auto 30px;
+      max-width: 800px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .preview-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    
+    .preview-info-item {
+      text-align: center;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .preview-info-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .preview-info-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+    
+    /* Footer de la página */
+    .preview-footer {
+      background: #1f2937;
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+      margin-top: 60px;
+    }
+    
+    .preview-footer p {
+      margin: 0;
+      opacity: 0.8;
+      font-size: 14px;
+    }
+    
+    /* ============================================
+       ESTILOS DE LA ETIQUETA TÉRMICA
+       ============================================ */
+    
+    /* Contenedor de etiqueta */
+    .etiqueta {
+      width: 4in;
+      height: 6in;
+      background: white;
+      padding: 0.25in;
+      margin: 0 auto 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: relative;
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Header con logo */
+    .etiqueta-header {
+      text-align: center;
+      border-bottom: 3px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .company-name {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+    
+    .company-slogan {
+      font-size: 10px;
+      color: #666;
+      font-weight: 600;
+    }
+    
+    /* Número de tracking */
+    .tracking-section {
+      text-align: center;
+      margin: 12px 0;
+      padding: 8px;
+      background: #f8f8f8;
+      border: 2px solid #000;
+      border-radius: 4px;
+    }
+    
+    .tracking-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .tracking-number {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #000;
+    }
+    
+    /* Código de barras */
+    .barcode-section {
+      text-align: center;
+      margin: 12px 0;
+      padding: 8px 0;
+      background: white;
+    }
+    
+    .barcode-section svg {
+      max-width: 100%;
+    }
+    
+    /* Sección de rutas */
+    .route-section {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin: 12px 0;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+    
+    .route-point {
+      text-align: center;
+    }
+    
+    .route-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    
+    .route-location {
+      font-size: 13px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.2;
+    }
+    
+    .route-arrow {
+      font-size: 24px;
+      font-weight: 900;
+      color: #000;
+    }
+    
+    /* Información del destinatario */
+    .recipient-section {
+      border: 2px solid #000;
+      padding: 12px;
+      margin: 12px 0;
+      min-height: 90px;
+      background: #fafafa;
+    }
+    
+    .section-title {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      border-bottom: 2px solid #000;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .recipient-name {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 4px;
+      color: #000;
+    }
+    
+    .recipient-address {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .recipient-contact {
+      font-size: 10px;
+      color: #666;
+      font-weight: 600;
+    }
+    
+    /* Información del paquete */
+    .package-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 15px 0 20px 0;
+    }
+    
+    .info-box {
+      border: 2px solid #000;
+      padding: 10px 6px;
+      text-align: center;
+      background: #f9f9f9;
+    }
+    
+    .info-label {
+      font-size: 8px;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    
+    .info-value {
+      font-size: 14px;
+      font-weight: 900;
+      color: #000;
+    }
+    
+    /* QR Code - integrado en el grid */
+    .qr-section {
+      text-align: center;
+    }
+    
+    .qr-code {
+      width: 70px;
+      height: 70px;
+      border: 2px solid #000;
+      padding: 3px;
+      background: white;
+      display: block;
+      margin: 0 auto;
+    }
+    
+    .qr-label {
+      font-size: 7px;
+      font-weight: 700;
+      margin-top: 3px;
+      color: #000;
+    }
+    
+    /* Footer */
+    .etiqueta-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 2px solid #000;
+      font-size: 10px;
+      color: #333;
+      line-height: 1.5;
+      text-align: left;
+    }
+    
+    .footer-line {
+      margin-bottom: 3px;
+    }
+    
+    .footer-strong {
+      font-weight: 900;
+      color: #000;
+    }
+    
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    
+    @media (max-width: 768px) {
+      .preview-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+      
+      .controls-card {
+        padding: 30px 20px;
+      }
+      
+      .controls-title {
+        font-size: 22px;
+      }
+      
+      .controls-actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .preview-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- ============================================
+       PÁGINA DE VISTA PREVIA (NO SE IMPRIME)
+       ============================================ -->
+  
+  <div class="no-print">
+    
+    <!-- Header -->
+    <div class="preview-header">
+      <div class="preview-header-content">
+        <div class="preview-logo-section">
+          <div class="preview-logo-icon">🏷️</div>
+          <div class="preview-title-group">
+            <h1>Generador de Etiquetas</h1>
+            <p>Sistema de Tracking - Transportes AB</p>
+          </div>
+        </div>
+        <div>
+          <button onclick="window.close()" class="btn btn-secondary" style="background: rgba(255,255,255,0.2); border: 2px solid white; color: white;">
+            <span class="btn-icon">✕</span>
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tarjeta de controles -->
+    <div class="controls">
+      <div class="controls-card">
+        <div class="controls-icon">🖨️</div>
+        <h2 class="controls-title">Etiquetas Térmicas Listas</h2>
+        <p class="controls-info">
+          Se han generado <strong><%= cantidad %></strong> etiqueta(s) de tamaño <strong>4x6 pulgadas</strong><br>
+          para el envío <strong><%= envio.numero_tracking %></strong>
+        </p>
+        
+        <div class="controls-actions">
+          <button onclick="window.print()" class="btn btn-primary">
+            <span class="btn-icon">🖨️</span>
+            Imprimir Etiquetas
+          </button>
+          <button onclick="descargarTodasPDF()" class="btn btn-secondary">
+            <span class="btn-icon">📥</span>
+            Descargar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Información adicional -->
+    <div class="preview-info">
+      <div class="preview-info-grid">
+        <div class="preview-info-item">
+          <div class="preview-info-label">Envío</div>
+          <div class="preview-info-value"><%= envio.numero_tracking %></div>
+        </div>
+        <div class="preview-info-item">
+          <div class="preview-info-label">Destino</div>
+          <div class="preview-info-value"><%= envio.destino.split(',')[0] %></div>
+        </div>
+        <div class="preview-info-item">
+          <div class="preview-info-label">Etiquetas</div>
+          <div class="preview-info-value"><%= cantidad %></div>
+        </div>
+        <div class="preview-info-item">
+          <div class="preview-info-label">Formato</div>
+          <div class="preview-info-value">4x6"</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- ============================================
+       ETIQUETAS TÉRMICAS (SE IMPRIMEN)
+       ============================================ -->
+  
+  <div class="etiquetas-container">
+    
+    <!-- Generar múltiples etiquetas según la cantidad -->
+    <% for (let i = 1; i <= cantidad; i++) { %>
+    
+    <div class="etiqueta">
+      
+      <!-- Header -->
+      <div class="etiqueta-header">
+        <div class="company-name">TRANSPORTES AB</div>
+        <div class="company-slogan">Entrega Segura y Confiable</div>
+      </div>
+      
+      <!-- Número de Tracking -->
+      <div class="tracking-section">
+        <div class="tracking-label">N° DE RASTREO</div>
+        <div class="tracking-number"><%= envio.numero_tracking %></div>
+      </div>
+      
+      <!-- Código de Barras -->
+      <div class="barcode-section">
+        <svg id="barcode-<%= i %>"></svg>
+      </div>
+      
+      <!-- Ruta: Origen → Destino -->
+      <div class="route-section">
+        <div class="route-point">
+          <div class="route-label">Origen</div>
+          <div class="route-location"><%= envio.origen.split(',')[0] %></div>
+        </div>
+        <div class="route-arrow">→</div>
+        <div class="route-point">
+          <div class="route-label">Destino</div>
+          <div class="route-location"><%= envio.destino.split(',')[0] %></div>
+        </div>
+      </div>
+      
+      <!-- Destinatario -->
+      <div class="recipient-section">
+        <div class="section-title">📦 ENTREGAR A:</div>
+        <div class="recipient-name"><%= envio.nombre_empresa || 'Cliente Final' %></div>
+        <div class="recipient-address"><%= envio.destino %></div>
+        <% if (envio.contacto) { %>
+          <div class="recipient-contact">Contacto: <%= envio.contacto %></div>
+        <% } %>
+        <% if (envio.telefono) { %>
+          <div class="recipient-contact">Tel: <%= envio.telefono %></div>
+        <% } %>
+      </div>
+      
+      <!-- Información del Paquete con QR -->
+      <div class="package-info">
+        <div class="info-box">
+          <div class="info-label">Peso</div>
+          <div class="info-value"><%= envio.peso %> kg</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">Fecha</div>
+          <div class="info-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' }) %></div>
+        </div>
+        <div class="info-box">
+          <div class="qr-section">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=<%= baseUrl %>/tracking?numero=<%= envio.numero_tracking %>" 
+                 alt="QR" class="qr-code">
+            <div class="qr-label">Escanear</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="etiqueta-footer">
+        <div class="footer-line">
+          <span class="footer-strong">Etiqueta <%= i %> de <%= cantidad %></span>
+        </div>
+        <div class="footer-line">
+          <% if (envio.descripcion) { %>
+            <%= envio.descripcion.substring(0, 60) %>...
+          <% } else { %>
+            Envío estándar - Manéjese con cuidado
+          <% } %>
+        </div>
+      </div>
+      
+    </div>
+    
+    <% } %>
+    
+  </div>
+  
+  <!-- Footer de la página -->
+  <div class="preview-footer no-print">
+    <p>&copy; 2024 Transportes AB. Todos los derechos reservados.</p>
+    <p>Sistema de Tracking Profesional</p>
+  </div>
+  
+  <!-- ============================================
+       SCRIPTS
+       ============================================ -->
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Variables desde el servidor
+      var trackingNumber = '<%= envio.numero_tracking %>';
+      var totalEtiquetas = parseInt('<%= cantidad %>');
+      
+      // Generar código de barras para cada etiqueta
+      for (var i = 1; i <= totalEtiquetas; i++) {
+        JsBarcode("#barcode-" + i, trackingNumber, {
+          format: "CODE128",
+          width: 2,
+          height: 60,
+          displayValue: false,
+          margin: 0
+        });
+      }
+    });
+    
+    function descargarTodasPDF() {
+      // Simular descarga (por ahora solo imprime)
+      alert('💡 Para guardar como PDF:\n\n1. Haz clic en "Imprimir Etiquetas"\n2. Selecciona "Guardar como PDF"\n3. Guarda el archivo');
+    }
+  </script>
+
+</body>
+</html>

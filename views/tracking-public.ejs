@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  
+  <!-- Estilos -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Iconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Librerías para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+ 
+  </style>
+</head>
+<body>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-container">
+          <img src="/images/logo-transportes-ab.png" alt="Transportes AB" class="logo">
+          <h1 class="company-name">Transportes AB</h1>
+        </div>
+        <div class="header-actions">
+          <a href="/login" class="header-btn">Iniciar Sesión</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Rastrea tu Envío en Tiempo Real</h1>
+        <p>Ingresa tu número de tracking para conocer el estado de tu paquete</p>
+        
+        <div class="search-box">
+          <form id="searchForm" class="search-input-group">
+            <input 
+              type="text" 
+              id="trackingInput" 
+              class="search-input" 
+              placeholder="Ej: TRK-2024-001"
+              required
+              autocomplete="off"
+            >
+            <button type="submit" class="search-btn">
+              <i data-lucide="search"></i>
+              Rastrear
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Secciones informativas (se muestran antes de buscar) -->
+  <section id="info-sections" class="info-sections">
+    
+    <!-- Características -->
+    <div class="features-section">
+      <div class="container">
+        <h2 class="section-title">¿Por qué elegir Transportes AB?</h2>
+        <div class="features-grid">
+          
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af;">
+              <i data-lucide="truck" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h3>Rastreo en Tiempo Real</h3>
+            <p>Conoce la ubicación exacta de tu envío en todo momento con actualizaciones constantes.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46;">
+              <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h3>100% Seguro</h3>
+            <p>Tus envíos están protegidos con el más alto estándar de seguridad y cuidado.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+              <i data-lucide="zap" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h3>Entrega Rápida</h3>
+            <p>Optimizamos nuestras rutas para garantizar entregas en el menor tiempo posible.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); color: #5b21b6;">
+              <i data-lucide="headphones" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h3>Soporte 24/7</h3>
+            <p>Nuestro equipo está disponible en todo momento para resolver tus dudas.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-section">
+      <div class="container">
+        <div class="stats-grid">
+          
+          <div class="stat-item">
+            <div class="stat-number">50,000+</div>
+            <div class="stat-label">Envíos Entregados</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Satisfacción del Cliente</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">24hrs</div>
+            <div class="stat-label">Tiempo Promedio</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">15+</div>
+            <div class="stat-label">Años de Experiencia</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Cómo Funciona -->
+    <div class="how-it-works-section">
+      <div class="container">
+        <h2 class="section-title">¿Cómo funciona el rastreo?</h2>
+        <div class="steps-grid">
+          
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-icon">
+              <i data-lucide="package" style="width: 40px; height: 40px;"></i>
+            </div>
+            <h3>Ingresa tu Número</h3>
+            <p>Escribe o escanea el número de tracking que recibiste al crear tu envío.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-icon">
+              <i data-lucide="search" style="width: 40px; height: 40px;"></i>
+            </div>
+            <h3>Consulta el Estado</h3>
+            <p>Visualiza en tiempo real el estado actual y el historial completo de tu paquete.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-icon">
+              <i data-lucide="bell" style="width: 40px; height: 40px;"></i>
+            </div>
+            <h3>Recibe Notificaciones</h3>
+            <p>Mantente informado con actualizaciones automáticas por email o SMS.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA de Contacto -->
+    <div class="cta-section">
+      <div class="container">
+        <div class="cta-content">
+          <h2>¿Necesitas ayuda con tu envío?</h2>
+          <p>Nuestro equipo está listo para asistirte en todo momento</p>
+          <div class="cta-buttons">
+            <a href="tel:+528181234567" class="cta-btn cta-btn-primary">
+              <i data-lucide="phone"></i>
+              (81) 8123-4567
+            </a>
+            <a href="https://wa.me/528181234567" target="_blank" class="cta-btn cta-btn-secondary">
+              <i data-lucide="message-circle"></i>
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Loading -->
+<div id="loading" class="loading">
+  <div class="loading-container">
+    <div class="truck-animation">
+      <div class="road"></div>
+      <div class="truck-wrapper">
+        <i data-lucide="truck" class="truck-icon"></i>
+      </div>
+      <div class="road-lines">
+        <div class="road-line"></div>
+        <div class="road-line"></div>
+        <div class="road-line"></div>
+      </div>
+    </div>
+    <div class="loading-text">
+      <h3>Buscando tu envío...</h3>
+      <p>Estamos consultando la información</p>
+    </div>
+  </div>
+</div>
+
+      <!-- No encontrado -->
+      <div id="notFound" class="not-found">
+        <div class="not-found-icon">📦</div>
+        <h3>No se encontró el envío</h3>
+        <p>Verifica que el número de tracking sea correcto e intenta nuevamente.</p>
+        <button onclick="volverABuscar()" class="btn btn-primary">
+          Intentar de nuevo
+        </button>
+      </div>
+
+      <!-- Resultado -->
+      <div id="resultado">
+        <!-- El contenido se llenará dinámicamente -->
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 Transportes AB. Todos los derechos reservados.</p>
+      <p style="margin-top: 10px; opacity: 0.6;">Sistema de Tracking</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Inicializar iconos de Lucide
+    lucide.createIcons();
+
+    // Manejo del formulario de búsqueda
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const trackingNumber = document.getElementById('trackingInput').value.trim();
+      
+      if (!trackingNumber) {
+        alert('Por favor ingresa un número de tracking');
+        return;
+      }
+      
+      // Mostrar loading
+      document.getElementById('loading').classList.add('show');
+      document.getElementById('resultado').classList.remove('show');
+      document.getElementById('notFound').classList.remove('show');
+      
+      try {
+        const response = await fetch(`/tracking/buscar/${encodeURIComponent(trackingNumber)}`);
+        const data = await response.json();
+        
+        // Ocultar loading
+        document.getElementById('loading').classList.remove('show');
+        
+        if (data.success) {
+          mostrarResultado(data.envio, data.historial);
+        } else {
+          document.getElementById('notFound').classList.add('show');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('loading').classList.remove('show');
+        alert('Error al buscar el envío. Por favor intenta de nuevo.');
+      }
+    });
+
+    // Definir los pasos del progreso
+const pasosProgreso = [
+  { estado: 'creado', icono: 'file-check', label: 'Creado' },
+  { estado: 'en_preparacion', icono: 'package', label: 'En Preparación' },
+  { estado: 'despachado', icono: 'truck', label: 'Despachado' },
+  { estado: 'en_transito', icono: 'navigation', label: 'En Tránsito' },
+  { estado: 'en_centro_distribucion', icono: 'building-2', label: 'En Centro' },
+  { estado: 'en_ruta_entrega', icono: 'map-pin', label: 'En Ruta' },
+  { estado: 'entregado', icono: 'check-circle', label: 'Entregado' }
+];
+
+// Calcular el progreso visual (0-100%)
+function calcularProgresoVisual(estadoActual) {
+  const indiceActual = pasosProgreso.findIndex(paso => paso.estado === estadoActual);
+  if (indiceActual === -1) return 0;
+  return (indiceActual / (pasosProgreso.length - 1)) * 100;
+}
+
+// Generar HTML de los pasos
+function generarPasosProgreso(estadoActual) {
+  const indiceActual = pasosProgreso.findIndex(paso => paso.estado === estadoActual);
+  
+  return pasosProgreso.map((paso, index) => {
+    let claseEstado = 'pending';
+    if (index < indiceActual) {
+      claseEstado = 'completed';
+    } else if (index === indiceActual) {
+      claseEstado = 'current';
+    }
+    
+    return `
+      <div class="progress-step ${claseEstado}">
+        <div class="step-circle">
+          <i data-lucide="${paso.icono}"></i>
+        </div>
+        <div class="step-label">${paso.label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+ async function mostrarResultado(envio, historial) {
+  // Ocultar secciones informativas
+  document.getElementById('info-sections').style.display = 'none';
+  const estadosTexto = {
+    'creado': 'Creado',
+    'en_preparacion': 'En Preparación',
+    'despachado': 'Despachado',
+    'en_transito': 'En Tránsito',
+    'en_centro_distribucion': 'En Centro de Distribución',
+    'en_ruta_entrega': 'En Ruta de Entrega',
+    'entregado': 'Entregado'
+  };
+
+  const progreso = {
+    'creado': 15,
+    'en_preparacion': 30,
+    'despachado': 45,
+    'en_transito': 60,
+    'en_centro_distribucion': 75,
+    'en_ruta_entrega': 90,
+    'entregado': 100
+  };
+
+  let historialHTML = '';
+  historial.forEach((item, index) => {
+    const fecha = new Date(item.fecha_hora);
+    const fechaFormateada = fecha.toLocaleString('es-MX', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    historialHTML += `
+      <div class="timeline-item">
+        <div class="timeline-dot ${index < historial.length - 1 ? 'completed' : ''}"></div>
+        <div class="timeline-content">
+          <div class="timeline-date">${fechaFormateada}</div>
+          <div class="timeline-status">${estadosTexto[item.estado] || item.estado}</div>
+          <div class="timeline-location">
+            <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
+            ${item.ubicacion}
+          </div>
+          ${item.comentarios ? `<div class="timeline-comment">${item.comentarios}</div>` : ''}
+          ${item.fotos && item.fotos.length > 0 ? `
+            <div class="fotos-evidencia" style="margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+              ${item.fotos.map(foto => `
+                <div class="foto-item" style="position: relative; cursor: pointer;" onclick="verFotoGrande('${foto.url_foto}', '${foto.descripcion || ''}')">
+                  <img src="${foto.url_foto}" alt="${foto.descripcion || 'Evidencia'}" 
+                       style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                       onerror="this.src='https://placehold.co/400x300/e5e7eb/6b7280?text=Sin+Imagen'">
+                  ${foto.descripcion ? `<div style="font-size: 0.75rem; color: #6b7280; margin-top: 5px;">${foto.descripcion}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  const fechaCreacion = new Date(envio.fecha_creacion).toLocaleDateString('es-MX');
+  const fechaEstimada = envio.fecha_estimada_entrega ? 
+    new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : 'Por definir';
+
+  // Generar código QR
+  let qrCodeHTML = '';
+  try {
+    const qrResponse = await fetch(`/tracking/qr/${envio.numero_tracking}`);
+    const qrData = await qrResponse.json();
+    if (qrData.success) {
+      qrCodeHTML = `
+  <div class="qr-section" style="padding: 50px 30px; text-align: center; background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%); border-top: 1px solid var(--gray-200);">
+    <h3 style="margin-bottom: 15px; color: var(--gray-900); font-size: 1.75rem; display: flex; align-items: center; justify-content: center; gap: 12px;">
+      <i data-lucide="qr-code" style="width: 24px; height: 24px; display: inline; vertical-align: middle;"></i>
+      Código QR
+    </h3>
+    <p style="color: var(--gray-600); margin-bottom: 30px; font-size: 1.05rem;">Escanea este código para acceder rápidamente al tracking</p>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      <img src="${qrData.qrImage}" alt="Código QR" style="max-width: 280px; border-radius: 16px; box-shadow: var(--shadow-xl); transition: var(--transition); background: white; padding: 20px;">
+      <button onclick="descargarQR('${qrData.qrImage}', '${envio.numero_tracking}')" class="action-btn action-btn-secondary" style="width: auto;">
+        <i data-lucide="download"></i>
+        Descargar QR
+      </button>
+    </div>
+  </div>
+`;
+    }
+  } catch (error) {
+    console.error('Error cargando QR:', error);
+  }
+
+  const html = `
+    <div class="tracking-card fade-in">
+      <div class="tracking-header">
+        <div class="tracking-number">${envio.numero_tracking}</div>
+        <div class="tracking-subtitle">Estado actual de tu envío</div>
+      </div>
+
+      <div class="current-status">
+        <div class="status-icon status-${envio.estado_actual}">
+          <i data-lucide="package"></i>
+        </div>
+        <div class="status-text">${estadosTexto[envio.estado_actual] || envio.estado_actual}</div>
+        <div class="status-description">Tu paquete se encuentra actualmente en este estado</div>
+      </div>
+
+<div class="progress-tracker">
+  <div class="progress-line">
+    <div class="progress-line-fill" style="width: ${calcularProgresoVisual(envio.estado_actual)}%"></div>
+  </div>
+  <div class="progress-steps">
+    ${generarPasosProgreso(envio.estado_actual)}
+  </div>
+</div>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">Origen</div>
+          <div class="detail-value">${envio.origen}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Destino</div>
+          <div class="detail-value">${envio.destino}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Peso</div>
+          <div class="detail-value">${envio.peso} kg</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Fecha de Envío</div>
+          <div class="detail-value">${fechaCreacion}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Entrega Estimada</div>
+          <div class="detail-value">${fechaEstimada}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Cliente</div>
+          <div class="detail-value">${envio.nombre_empresa || 'N/A'}</div>
+        </div>
+      </div>
+
+      <div class="timeline-container">
+        <h3 class="timeline-title">
+          <i data-lucide="clock" style="width: 24px; height: 24px; display: inline; vertical-align: middle;"></i>
+          Historial de Movimientos
+        </h3>
+        <div class="timeline">
+          ${historialHTML}
+        </div>
+      </div>
+
+      ${qrCodeHTML}
+
+      <div class="actions-container">
+        <button class="action-btn action-btn-primary" onclick="exportarPDF('${envio.numero_tracking}')">
+          <i data-lucide="download"></i>
+          Exportar PDF
+        </button>
+        <button class="action-btn action-btn-secondary" onclick="compartirWhatsApp('${envio.numero_tracking}')">
+          <i data-lucide="share-2"></i>
+          Compartir
+        </button>
+        <button class="action-btn action-btn-secondary" onclick="copiarEnlace('${envio.numero_tracking}')">
+          <i data-lucide="link"></i>
+          Copiar Enlace
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('resultado').innerHTML = html;
+  document.getElementById('resultado').classList.add('show');
+  
+  // Reinicializar iconos de Lucide
+  lucide.createIcons();
+  
+  // Scroll suave al resultado
+  document.getElementById('resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+    async function exportarPDF(trackingNumber) {
+  try {
+    // Mostrar mensaje de carga
+    const btn = event.target.closest('.action-btn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="loader"></i> Generando PDF...';
+    btn.disabled = true;
+    lucide.createIcons();
+
+    // Obtener datos del envío
+    const response = await fetch(`/tracking/buscar/${trackingNumber}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      alert('Error al generar PDF');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const envio = data.envio;
+    const historial = data.historial;
+    
+    // Colores de Transportes AB
+    const colorPrimary = [30, 58, 138]; // #1e3a8a
+    const colorSecondary = [37, 99, 235]; // #2563eb
+    const colorGray = [107, 114, 128]; // #6b7280
+    
+    let yPosition = 20;
+    
+    // HEADER CON COLORES DE MARCA
+    doc.setFillColor(...colorPrimary);
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    // Logo (placeholder - si tienes logo en base64, úsalo)
+    doc.setFontSize(24);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont(undefined, 'bold');
+    doc.text('TRANSPORTES AB', 20, 25);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text('Sistema de Rastreo de Envíos', 20, 32);
+    
+    yPosition = 50;
+    
+    // TÍTULO DEL DOCUMENTO
+    doc.setTextColor(...colorPrimary);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('COMPROBANTE DE RASTREO', 20, yPosition);
+    yPosition += 10;
+    
+    // NÚMERO DE TRACKING (destacado)
+    doc.setFillColor(240, 240, 255);
+    doc.roundedRect(20, yPosition, 170, 15, 3, 3, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(...colorSecondary);
+    doc.text(`Número de Tracking: ${envio.numero_tracking}`, 25, yPosition + 10);
+    yPosition += 25;
+    
+    // ESTADO ACTUAL
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colorPrimary);
+    doc.text('Estado Actual:', 20, yPosition);
+    yPosition += 7;
+    
+    const estadosTexto = {
+      'creado': 'Creado',
+      'en_preparacion': 'En Preparación',
+      'despachado': 'Despachado',
+      'en_transito': 'En Tránsito',
+      'en_centro_distribucion': 'En Centro de Distribución',
+      'en_ruta_entrega': 'En Ruta de Entrega',
+      'entregado': 'Entregado'
+    };
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(estadosTexto[envio.estado_actual] || envio.estado_actual, 25, yPosition);
+    yPosition += 10;
+    
+    // DETALLES DEL ENVÍO
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colorPrimary);
+    doc.text('Detalles del Envío:', 20, yPosition);
+    yPosition += 7;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    
+    const detalles = [
+      ['Origen:', envio.origen],
+      ['Destino:', envio.destino],
+      ['Peso:', `${envio.peso} kg`],
+      ['Fecha de Envío:', new Date(envio.fecha_creacion).toLocaleDateString('es-MX')],
+      ['Entrega Estimada:', envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : 'Por definir'],
+      ['Cliente:', envio.nombre_empresa || 'N/A'],
+      ['Descripción:', envio.descripcion || 'N/A']
+    ];
+    
+    detalles.forEach(([label, value]) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(label, 25, yPosition);
+      doc.setFont(undefined, 'normal');
+      const lines = doc.splitTextToSize(value, 120);
+      doc.text(lines, 70, yPosition);
+      yPosition += 6 * lines.length;
+    });
+    
+    yPosition += 5;
+    
+    // HISTORIAL DE MOVIMIENTOS
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colorPrimary);
+    doc.text('Historial de Movimientos:', 20, yPosition);
+    yPosition += 5;
+    
+    // Tabla de historial
+    const tableData = historial.map(item => {
+      const fecha = new Date(item.fecha_hora).toLocaleString('es-MX', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return [
+        fecha,
+        estadosTexto[item.estado] || item.estado,
+        item.ubicacion,
+        item.comentarios || '-'
+      ];
+    });
+    
+    doc.autoTable({
+      startY: yPosition,
+      head: [['Fecha/Hora', 'Estado', 'Ubicación', 'Comentarios']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: colorPrimary,
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 3
+      },
+      columnStyles: {
+        0: { cellWidth: 35 },
+        1: { cellWidth: 35 },
+        2: { cellWidth: 45 },
+        3: { cellWidth: 65 }
+      },
+      margin: { left: 20, right: 20 }
+    });
+    
+    yPosition = doc.lastAutoTable.finalY + 15;
+    
+    // CÓDIGO QR
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    // Obtener QR
+    const qrResponse = await fetch(`/tracking/qr/${trackingNumber}`);
+    const qrData = await qrResponse.json();
+    
+    if (qrData.success) {
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colorPrimary);
+      doc.text('Código QR para Rastreo Rápido:', 20, yPosition);
+      yPosition += 5;
+      
+      // Agregar QR al PDF
+      doc.addImage(qrData.qrImage, 'PNG', 70, yPosition, 50, 50);
+      yPosition += 55;
+      
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colorGray);
+      doc.text('Escanea este código para acceder al tracking desde tu móvil', 105, yPosition, { align: 'center' });
+    }
+    
+    // FOOTER
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(...colorGray);
+      doc.text(
+        `Transportes AB - Sistema de Tracking | Página ${i} de ${pageCount}`,
+        105,
+        285,
+        { align: 'center' }
+      );
+      doc.text(
+        `Generado el ${new Date().toLocaleString('es-MX')}`,
+        105,
+        290,
+        { align: 'center' }
+      );
+    }
+    
+    // Guardar PDF
+    doc.save(`Tracking-${trackingNumber}.pdf`);
+    
+    // Restaurar botón
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+    lucide.createIcons();
+    
+  } catch (error) {
+    console.error('Error generando PDF:', error);
+    alert('Error al generar el PDF. Por favor intenta de nuevo.');
+    
+    // Restaurar botón en caso de error
+    const btn = event.target.closest('.action-btn');
+    if (btn) {
+      btn.innerHTML = '<i data-lucide="download"></i> Exportar PDF';
+      btn.disabled = false;
+      lucide.createIcons();
+    }
+  }
+}
+
+    function compartirWhatsApp(trackingNumber) {
+      const url = window.location.origin + '/tracking?numero=' + trackingNumber;
+      const texto = `Rastrea tu envío de Transportes AB: ${url}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+    function verFotoGrande(url, descripcion) {
+  document.getElementById('fotoModalImg').src = url;
+  document.getElementById('fotoModalDesc').textContent = descripcion;
+  document.getElementById('fotoModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarFotoModal() {
+  document.getElementById('fotoModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+function descargarQR(qrDataURL, trackingNumber) {
+  const link = document.createElement('a');
+  link.download = `QR-${trackingNumber}.png`;
+  link.href = qrDataURL;
+  link.click();
+}
+
+function copiarEnlace(trackingNumber) {
+  const url = `${window.location.origin}/tracking?numero=${trackingNumber}`;
+  navigator.clipboard.writeText(url).then(() => {
+    // Mostrar mensaje de copiado
+    const btn = event.target.closest('.action-btn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="check"></i> ¡Copiado!';
+    btn.style.background = '#10b981';
+    btn.style.color = 'white';
+    lucide.createIcons();
+    
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+      btn.style.background = '';
+      btn.style.color = '';
+      lucide.createIcons();
+    }, 2000);
+  }).catch(err => {
+    alert('Error al copiar el enlace');
+  });
+}
+
+function volverABuscar() {
+  document.getElementById('info-sections').style.display = 'block';
+  document.getElementById('resultado').classList.remove('show');
+  document.getElementById('notFound').classList.remove('show');
+  document.getElementById('trackingInput').value = '';
+  document.getElementById('trackingInput').focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+  </script>
+
+<!-- Modal para ver fotos en grande -->
+<div id="fotoModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; padding: 20px;" onclick="cerrarFotoModal()">
+  <div style="max-width: 1200px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <button onclick="cerrarFotoModal()" style="position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">✕</button>
+    <img id="fotoModalImg" src="" alt="" style="max-width: 100%; max-height: 80vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+    <p id="fotoModalDesc" style="color: white; margin-top: 20px; font-size: 1.1rem; text-align: center;"></p>
+  </div>
+</div>
+
+</body>
+</html>

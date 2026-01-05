@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+    }
+    
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* SIDEBAR - Copiado del dashboard */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    }
+    
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .logo-icon-image {
+  width: 42px;
+  height: 42px;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.logo-icon-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+    
+.logo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logo-text {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.logo-tagline {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 14px;
+      margin-bottom: 8px;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .nav-link i {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .nav-badge {
+      background: #ef4444;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    .perfil-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .perfil-header {
+      margin-bottom: 40px;
+    }
+    
+    .perfil-header h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    
+    .perfil-header p {
+      color: #64748b;
+      font-size: 1rem;
+    }
+    
+    .perfil-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+    }
+    
+    .perfil-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .perfil-avatar-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+      text-align: center;
+    }
+    
+    .perfil-avatar-large {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 3rem;
+      margin: 0 auto 20px;
+    }
+    
+    .perfil-nombre {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+    
+    .perfil-email {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+    
+    .perfil-rol-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: #eff6ff;
+      color: #1e40af;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .perfil-stats {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+    
+    .stat-label {
+      color: #64748b;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .stat-value {
+      color: #0f172a;
+      font-weight: 800;
+    }
+    
+    .perfil-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .perfil-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid #f1f5f9;
+    }
+    
+    .card-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-description {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-help {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 2px solid #10b981;
+    }
+    
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+    }
+    
+    @media (max-width: 968px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .perfil-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="page-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+<!-- Logo -->
+<div class="logo">
+  <div class="logo-icon-image">
+    <img src="/images/logo-transportes-ab.png" alt="Logo">
+  </div>
+  <div class="logo-info">
+    <span class="logo-text">TransportAB</span>
+    <span class="logo-tagline">Sistema Tracking</span>
+  </div>
+</div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios" class="nav-link">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/clientes" class="nav-link">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <% if (user.rol === 'admin') { %>
+        <div class="nav-section">
+          <div class="nav-section-title">SISTEMA</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="/usuarios" class="nav-link">
+                <i data-lucide="user-cog"></i>
+                <span>Usuarios</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/configuracion" class="nav-link">
+                <i data-lucide="settings"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="perfil-container">
+        
+        <!-- Header -->
+        <div class="perfil-header">
+          <h1>Mi Perfil</h1>
+          <p>Gestiona tu información personal y preferencias</p>
+        </div>
+        
+        <!-- Mensajes -->
+        <% if (success === 'datos_actualizados') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Tus datos se actualizaron correctamente
+          </div>
+        <% } %>
+        
+        <% if (success === 'password_actualizada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Tu contraseña se cambió correctamente
+          </div>
+        <% } %>
+        
+        <% if (error === 'email_existe') { %>
+          <div class="alert alert-error">
+            <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
+            El email ya está en uso por otro usuario
+          </div>
+        <% } %>
+        
+        <% if (error === 'passwords_no_coinciden') { %>
+          <div class="alert alert-error">
+            <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
+            Las contraseñas no coinciden
+          </div>
+        <% } %>
+        
+        <% if (error === 'password_incorrecta') { %>
+          <div class="alert alert-error">
+            <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
+            La contraseña actual es incorrecta
+          </div>
+        <% } %>
+        
+        <% if (error === 'password_corta') { %>
+          <div class="alert alert-error">
+            <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
+            La contraseña debe tener al menos 6 caracteres
+          </div>
+        <% } %>
+        
+        <!-- Grid -->
+        <div class="perfil-grid">
+          
+          <!-- Sidebar -->
+          <div class="perfil-sidebar">
+            <!-- Avatar Card -->
+            <div class="perfil-avatar-card">
+              <div class="perfil-avatar-large">
+                <%= user.nombre.charAt(0).toUpperCase() %>
+              </div>
+              <div class="perfil-nombre"><%= user.nombre %></div>
+              <div class="perfil-email"><%= user.email %></div>
+              <span class="perfil-rol-badge">
+                <%= user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+              </span>
+            </div>
+            
+            <!-- Stats -->
+            <div class="perfil-stats">
+              <div class="stat-item">
+                <span class="stat-label">Estado</span>
+                <span class="stat-value" style="color: #10b981;">● Activo</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content -->
+          <div class="perfil-content">
+            
+            <!-- Datos Personales -->
+            <div class="perfil-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="user" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Datos Personales
+                </h2>
+                <p class="card-description">Actualiza tu nombre y correo electrónico</p>
+              </div>
+              
+              <form action="/mi-perfil/actualizar-datos" method="POST">
+                <div class="form-group">
+                  <label class="form-label">Nombre completo</label>
+                  <input 
+                    type="text" 
+                    name="nombre" 
+                    class="form-input" 
+                    value="<%= user.nombre %>"
+                    required
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Correo electrónico</label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    class="form-input" 
+                    value="<%= user.email %>"
+                    required
+                  >
+                  <p class="form-help">Este email se usa para iniciar sesión</p>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                  <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+                  Guardar cambios
+                </button>
+              </form>
+            </div>
+            
+            <!-- Cambiar Contraseña -->
+            <div class="perfil-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="lock" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Cambiar Contraseña
+                </h2>
+                <p class="card-description">Actualiza tu contraseña de acceso</p>
+              </div>
+              
+              <form action="/mi-perfil/cambiar-password" method="POST">
+                <div class="form-group">
+                  <label class="form-label">Contraseña actual</label>
+                  <input 
+                    type="password" 
+                    name="password_actual" 
+                    class="form-input" 
+                    required
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Nueva contraseña</label>
+                  <input 
+                    type="password" 
+                    name="password_nueva" 
+                    class="form-input" 
+                    minlength="6"
+                    required
+                  >
+                  <p class="form-help">Mínimo 6 caracteres</p>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Confirmar nueva contraseña</label>
+                  <input 
+                    type="password" 
+                    name="password_confirmar" 
+                    class="form-input" 
+                    minlength="6"
+                    required
+                  >
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                  <i data-lucide="key" style="width: 18px; height: 18px;"></i>
+                  Cambiar contraseña
+                </button>
+              </form>
+            </div>
+            
+          </div>
+        </div>
+        
+      </div>
+    </main>
+    
+  </div>
+  
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
