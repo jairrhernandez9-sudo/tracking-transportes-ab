@@ -155,7 +155,7 @@
     <div class="container">
       <div class="hero-content">
         <h1>Rastrea tu Envío en Tiempo Real</h1>
-        <p>Ingresa tu número de tracking para conocer el estado de tu paquete</p>
+        <p>Ingresa tu número de tracking o referencia del cliente para conocer el estado de tu paquete</p>
         
         <div class="search-box">
           <form id="searchForm" class="search-input-group">
@@ -163,7 +163,7 @@
               type="text" 
               id="trackingInput" 
               class="search-input" 
-              placeholder="Ej: TRK-2024-001"
+              placeholder="Ej: TRK-2024-001 o REF-12345"
               required
               autocomplete="off"
             >
@@ -263,7 +263,7 @@
               <i data-lucide="package" style="width: 40px; height: 40px;"></i>
             </div>
             <h3>Ingresa tu Número</h3>
-            <p>Escribe o escanea el número de tracking que recibiste al crear tu envío.</p>
+            <p>Escribe o escanea el número de tracking o tu referencia de cliente que recibiste al crear tu envío.</p>
           </div>
 
           <div class="step-card">
@@ -339,7 +339,7 @@
       <div id="notFound" class="not-found">
         <div class="not-found-icon">📦</div>
         <h3>No se encontró el envío</h3>
-        <p>Verifica que el número de tracking sea correcto e intenta nuevamente.</p>
+        <p>Verifica que el número de tracking o referencia del cliente sea correcto e intenta nuevamente.</p>
         <button onclick="volverABuscar()" class="btn btn-primary">
           Intentar de nuevo
         </button>
@@ -596,6 +596,10 @@ function generarPasosProgreso(estadoActual) {
           <div class="detail-label">Cliente</div>
           <div class="detail-value">${envio.nombre_empresa || 'N/A'}</div>
         </div>
+        <div class="detail-item">
+          <div class="detail-label">Referencia del Cliente</div>
+          <div class="detail-value">${envio.referencia_cliente || 'Sin referencia'}</div>
+        </div>
       </div>
 
       <div class="timeline-container">
@@ -740,6 +744,7 @@ function generarPasosProgreso(estadoActual) {
       ['Fecha de Envío:', new Date(envio.fecha_creacion).toLocaleDateString('es-MX')],
       ['Entrega Estimada:', envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : 'Por definir'],
       ['Cliente:', envio.nombre_empresa || 'N/A'],
+      ['Referencia del Cliente:', envio.referencia_cliente || 'Sin referencia'],
       ['Descripción:', envio.descripcion || 'N/A']
     ];
     

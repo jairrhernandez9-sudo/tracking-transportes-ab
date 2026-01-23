@@ -10,24 +10,24 @@ router.get('/', (req, res) => {
   });
 });
 
-// API para buscar envío por número de tracking
+// API para buscar envío por número de tracking O referencia del cliente
 router.get('/buscar/:numeroTracking', async (req, res) => {
   try {
     const { numeroTracking } = req.params;
     
-    // Buscar envío
+    // Buscar envío por número de tracking O por referencia del cliente
     const [envios] = await db.query(
       `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email 
        FROM envios e 
        LEFT JOIN clientes c ON e.cliente_id = c.id 
-       WHERE e.numero_tracking = ?`,
-      [numeroTracking]
+       WHERE e.numero_tracking = ? OR e.referencia_cliente = ?`,
+      [numeroTracking, numeroTracking]
     );
     
     if (envios.length === 0) {
       return res.json({ 
         success: false, 
-        message: 'No se encontró ningún envío con ese número de tracking' 
+        message: 'No se encontró ningún envío con ese número de tracking o referencia' 
       });
     }
     
