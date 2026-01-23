@@ -177,14 +177,45 @@ router.post('/alertas', async (req, res) => {
   }
 });
 
-// Actualizar tracking
+// Actualizar tracking ⬅️ ACTUALIZADO CON TODAS LAS OPCIONES
 router.post('/tracking', async (req, res) => {
   try {
-    const { tracking_publico_activo, mostrar_fotos_tracking } = req.body;
+    const {
+      tracking_publico_activo,
+      mostrar_fotos_tracking,
+      mostrar_pdfs_tracking,
+      mostrar_comentarios_tracking,
+      mostrar_ubicaciones_tracking,
+      mostrar_info_cliente_tracking,
+      mostrar_datos_envio_tracking,
+      mostrar_historial_completo_tracking,
+      mostrar_qr_tracking,
+      mostrar_boton_pdf_tracking,
+      mostrar_boton_whatsapp_tracking,
+      mostrar_boton_copiar_tracking,
+      mostrar_seccion_features,
+      mostrar_seccion_stats,
+      mostrar_seccion_como_funciona,
+      mostrar_seccion_cta
+    } = req.body;
     
     const updates = [
       ['tracking_publico_activo', tracking_publico_activo ? 'true' : 'false'],
-      ['mostrar_fotos_tracking', mostrar_fotos_tracking ? 'true' : 'false']
+      ['mostrar_fotos_tracking', mostrar_fotos_tracking ? 'true' : 'false'],
+      ['mostrar_pdfs_tracking', mostrar_pdfs_tracking ? 'true' : 'false'],
+      ['mostrar_comentarios_tracking', mostrar_comentarios_tracking ? 'true' : 'false'],
+      ['mostrar_ubicaciones_tracking', mostrar_ubicaciones_tracking ? 'true' : 'false'],
+      ['mostrar_info_cliente_tracking', mostrar_info_cliente_tracking ? 'true' : 'false'],
+      ['mostrar_datos_envio_tracking', mostrar_datos_envio_tracking ? 'true' : 'false'],
+      ['mostrar_historial_completo_tracking', mostrar_historial_completo_tracking ? 'true' : 'false'],
+      ['mostrar_qr_tracking', mostrar_qr_tracking ? 'true' : 'false'],
+      ['mostrar_boton_pdf_tracking', mostrar_boton_pdf_tracking ? 'true' : 'false'],
+      ['mostrar_boton_whatsapp_tracking', mostrar_boton_whatsapp_tracking ? 'true' : 'false'],
+      ['mostrar_boton_copiar_tracking', mostrar_boton_copiar_tracking ? 'true' : 'false'],
+      ['mostrar_seccion_features', mostrar_seccion_features ? 'true' : 'false'],
+      ['mostrar_seccion_stats', mostrar_seccion_stats ? 'true' : 'false'],
+      ['mostrar_seccion_como_funciona', mostrar_seccion_como_funciona ? 'true' : 'false'],
+      ['mostrar_seccion_cta', mostrar_seccion_cta ? 'true' : 'false']
     ];
     
     for (const [clave, valor] of updates) {
@@ -194,6 +225,7 @@ router.post('/tracking', async (req, res) => {
       );
     }
     
+    console.log('✅ Configuración de tracking actualizada');
     res.redirect('/configuracion?success=tracking_actualizado');
   } catch (error) {
     console.error('Error al actualizar tracking:', error);

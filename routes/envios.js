@@ -1,3 +1,6 @@
+
+Copiar
+
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
@@ -446,13 +449,6 @@ router.post('/:id/actualizar-estado', isAuthenticated, async (req, res) => {
       });
     }
     
-    // BLOQUEAR SI ESTÁ ENTREGADO
-    if (estadoActual === 'entregado') {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'No se puede actualizar un envío que ya fue entregado' 
-      });
-    }
     
     // Actualizar estado actual del envío
     await db.query(

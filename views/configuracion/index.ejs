@@ -1270,53 +1270,233 @@
         </div>
         
         <!-- TAB: TRACKING -->
-        <div id="tracking" class="tab-content">
-          <form action="/configuracion/tracking" method="POST">
-            <div class="config-card" style="max-width: 800px;">
-              <div class="card-header">
-                <h2 class="card-title">
-                  <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
-                  Configuración de Tracking
-                </h2>
-                <p class="card-description">Ajusta las opciones del sistema de rastreo público</p>
-              </div>
-              
-              <div class="switch-group">
-                <div class="switch-label">
-                  <div class="switch-title">Tracking Público Activo</div>
-                  <div class="switch-description">Permitir que clientes rastreen sus envíos sin iniciar sesión</div>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" name="tracking_publico_activo" <%= config.tracking.tracking_publico_activo ? 'checked' : '' %>>
-                  <span class="slider"></span>
-                </label>
-              </div>
-              
-              <div class="switch-group">
-                <div class="switch-label">
-                  <div class="switch-title">Mostrar Fotos en Tracking</div>
-                  <div class="switch-description">Mostrar fotos de evidencia en el tracking público</div>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" name="mostrar_fotos_tracking" <%= config.tracking.mostrar_fotos_tracking ? 'checked' : '' %>>
-                  <span class="slider"></span>
-                </label>
-              </div>
-              
-              <div class="info-box">
-                <i data-lucide="shield" style="width: 20px; height: 20px;"></i>
-                <div class="info-text">
-                  <strong>Privacidad:</strong> Al desactivar el tracking público, solo usuarios autenticados podrán ver el estado de los envíos. Las fotos solo se mostrarán si esta opción está activada.
-                </div>
-              </div>
-            </div>
-            
-            <button type="submit" class="btn-primary">
-              <i data-lucide="save" style="width: 18px; height: 18px;"></i>
-              Guardar configuración
-            </button>
-          </form>
+<div id="tracking" class="tab-content">
+  <form action="/configuracion/tracking" method="POST">
+    <div class="config-card" style="max-width: 800px;">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+          Configuración de Tracking Público
+        </h2>
+        <p class="card-description">Controla qué información es visible para tus clientes en el tracking público</p>
+      </div>
+      
+      <!-- TRACKING PÚBLICO -->
+      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px;">
+        <strong style="color: #1e40af; display: block; margin-bottom: 8px;">⚙️ General</strong>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Tracking Público Activo</div>
+          <div class="switch-description">Permitir que clientes rastreen sus envíos sin iniciar sesión</div>
         </div>
+        <label class="switch">
+          <input type="checkbox" name="tracking_publico_activo" <%= config.tracking.tracking_publico_activo ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <!-- EVIDENCIAS -->
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <strong style="color: #92400e; display: block; margin-bottom: 8px;">📸 Evidencias</strong>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Fotos en Tracking</div>
+          <div class="switch-description">Mostrar fotos de evidencia en el tracking público</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_fotos_tracking" <%= config.tracking.mostrar_fotos_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar PDFs Adjuntos</div>
+          <div class="switch-description">Mostrar documentos PDF de evidencia</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_pdfs_tracking" <%= config.tracking.mostrar_pdfs_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <!-- INFORMACIÓN DEL ENVÍO -->
+      <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <strong style="color: #1e40af; display: block; margin-bottom: 8px;">ℹ️ Información del Envío</strong>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Comentarios</div>
+          <div class="switch-description">Mostrar comentarios de los operadores</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_comentarios_tracking" <%= config.tracking.mostrar_comentarios_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Ubicaciones Detalladas</div>
+          <div class="switch-description">Mostrar ubicación en cada cambio de estado</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_ubicaciones_tracking" <%= config.tracking.mostrar_ubicaciones_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Información del Cliente</div>
+          <div class="switch-description">Mostrar nombre de la empresa cliente</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_info_cliente_tracking" <%= config.tracking.mostrar_info_cliente_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Datos del Envío</div>
+          <div class="switch-description">Mostrar peso y descripción del paquete</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_datos_envio_tracking" <%= config.tracking.mostrar_datos_envio_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Historial Completo</div>
+          <div class="switch-description">Mostrar todos los estados por los que pasó el envío</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_historial_completo_tracking" <%= config.tracking.mostrar_historial_completo_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <!-- FUNCIONALIDADES -->
+      <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <strong style="color: #065f46; display: block; margin-bottom: 8px;">⚡ Funcionalidades</strong>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Mostrar Código QR</div>
+          <div class="switch-description">Mostrar código QR para compartir el tracking</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_qr_tracking" <%= config.tracking.mostrar_qr_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Botón Exportar PDF</div>
+          <div class="switch-description">Permitir descargar reporte en PDF</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_boton_pdf_tracking" <%= config.tracking.mostrar_boton_pdf_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Botón Compartir WhatsApp</div>
+          <div class="switch-description">Permitir compartir el tracking por WhatsApp</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_boton_whatsapp_tracking" <%= config.tracking.mostrar_boton_whatsapp_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Botón Copiar Enlace</div>
+          <div class="switch-description">Permitir copiar el enlace de tracking</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_boton_copiar_tracking" <%= config.tracking.mostrar_boton_copiar_tracking ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <!-- SECCIONES INFORMATIVAS -->
+      <div style="background: #fce7f3; border-left: 4px solid #ec4899; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <strong style="color: #9f1239; display: block; margin-bottom: 8px;">📄 Secciones Informativas</strong>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Sección "¿Por qué elegirnos?"</div>
+          <div class="switch-description">Mostrar características y beneficios</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_seccion_features" <%= config.tracking.mostrar_seccion_features ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Sección de Estadísticas</div>
+          <div class="switch-description">Mostrar números y logros de la empresa</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_seccion_stats" <%= config.tracking.mostrar_seccion_stats ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Sección "¿Cómo funciona?"</div>
+          <div class="switch-description">Mostrar pasos del proceso de tracking</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_seccion_como_funciona" <%= config.tracking.mostrar_seccion_como_funciona ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="switch-group">
+        <div class="switch-label">
+          <div class="switch-title">Sección de Contacto/CTA</div>
+          <div class="switch-description">Mostrar llamada a la acción y datos de contacto</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="mostrar_seccion_cta" <%= config.tracking.mostrar_seccion_cta ? 'checked' : '' %>>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <!-- INFO BOX -->
+      <div class="info-box" style="margin-top: 24px;">
+        <i data-lucide="shield" style="width: 20px; height: 20px;"></i>
+        <div class="info-text">
+          <strong>Privacidad y Control:</strong> Estas opciones te permiten controlar exactamente qué información ven tus clientes en el tracking público. Desactiva las opciones que contengan información sensible o que prefieras mantener privada.
+        </div>
+      </div>
+    </div>
+    
+    <button type="submit" class="btn-primary">
+      <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+      Guardar configuración de tracking
+    </button>
+  </form>
+</div>
         
       </div>
     </main>
