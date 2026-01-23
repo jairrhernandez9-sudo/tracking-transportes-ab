@@ -177,9 +177,11 @@
     </div>
   </section>
 
-  <!-- Secciones informativas (se muestran antes de buscar) -->
+<!-- Secciones informativas (se muestran antes de buscar) -->
+  <% if (config.mostrar_seccion_features !== false || config.mostrar_seccion_stats !== false || config.mostrar_seccion_como_funciona !== false || config.mostrar_seccion_cta !== false) { %>
   <section id="info-sections" class="info-sections">
     
+    <% if (config.mostrar_seccion_features !== false) { %>
     <!-- Características -->
     <div class="features-section">
       <div class="container">
@@ -221,7 +223,9 @@
         </div>
       </div>
     </div>
+    <% } %>
 
+    <% if (config.mostrar_seccion_stats !== false) { %>
     <!-- Estadísticas -->
     <div class="stats-section">
       <div class="container">
@@ -250,7 +254,9 @@
         </div>
       </div>
     </div>
+    <% } %>
 
+    <% if (config.mostrar_seccion_como_funciona !== false) { %>
     <!-- Cómo Funciona -->
     <div class="how-it-works-section">
       <div class="container">
@@ -286,8 +292,10 @@
 
         </div>
       </div>
-    </div>
+</div>
+    <% } %>
 
+    <% if (config.mostrar_seccion_cta !== false) { %>
     <!-- CTA de Contacto -->
     <div class="cta-section">
       <div class="container">
@@ -307,8 +315,10 @@
         </div>
       </div>
     </div>
+    <% } %>
 
   </section>
+  <% } %>
 
   <!-- Main Content -->
   <main class="main-content">
@@ -363,6 +373,8 @@
 
   <!-- Scripts -->
   <script>
+    // Configuración cargada desde el servidor
+const config = JSON.parse('<%- JSON.stringify(config || {}) %>');    
     // Inicializar iconos de Lucide
     lucide.createIcons();
 
@@ -482,15 +494,21 @@ function generarPasosProgreso(estadoActual) {
         <div class="timeline-content">
           <div class="timeline-date">${fechaFormateada}</div>
           <div class="timeline-status">${estadosTexto[item.estado] || item.estado}</div>
-          <div class="timeline-location">
-            <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
-            ${item.ubicacion}
-          </div>
-          ${item.comentarios ? `<div class="timeline-comment">${item.comentarios}</div>` : ''}
-          ${item.fotos && item.fotos.length > 0 ? `
+          ${config.mostrar_ubicaciones_tracking !== false ? `
+            <div class="timeline-location">
+              <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
+              ${item.ubicacion}
+            </div>
+          ` : ''}
+${(config.mostrar_comentarios_tracking !== false && item.comentarios) ? `<div class="timeline-comment">${item.comentarios}</div>` : ''}${item.fotos && item.fotos.length > 0 ? `
             <div class="fotos-evidencia" style="margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
               ${item.fotos.map(foto => {
                 const esPDF = foto.url_foto && foto.url_foto.toLowerCase().endsWith('.pdf');
+                
+                // Verificar configuración
+                if (esPDF && config.mostrar_pdfs_tracking === false) return '';
+                if (!esPDF && config.mostrar_fotos_tracking === false) return '';
+                
                 if (esPDF) {
                   return `
                     <a href="${foto.url_foto}" target="_blank" class="foto-item pdf" style="text-decoration: none;">
@@ -522,6 +540,7 @@ function generarPasosProgreso(estadoActual) {
 
   // Generar código QR
   let qrCodeHTML = '';
+  if (config.mostrar_qr_tracking !== false) {
   try {
     const qrResponse = await fetch(`/tracking/qr/${envio.numero_tracking}`);
     const qrData = await qrResponse.json();
@@ -546,6 +565,7 @@ function generarPasosProgreso(estadoActual) {
   } catch (error) {
     console.error('Error cargando QR:', error);
   }
+   }
 
   const html = `
     <div class="tracking-card fade-in">
@@ -580,10 +600,12 @@ function generarPasosProgreso(estadoActual) {
           <div class="detail-label">Destino</div>
           <div class="detail-value">${envio.destino}</div>
         </div>
-        <div class="detail-item">
-          <div class="detail-label">Peso</div>
-          <div class="detail-value">${envio.peso} kg</div>
-        </div>
+        ${config.mostrar_datos_envio_tracking !== false ? `
+          <div class="detail-item">
+            <div class="detail-label">Peso</div>
+            <div class="detail-value">${envio.peso} kg</div>
+          </div>
+        ` : ''}
         <div class="detail-item">
           <div class="detail-label">Fecha de Envío</div>
           <div class="detail-value">${fechaCreacion}</div>
@@ -592,10 +614,12 @@ function generarPasosProgreso(estadoActual) {
           <div class="detail-label">Entrega Estimada</div>
           <div class="detail-value">${fechaEstimada}</div>
         </div>
-        <div class="detail-item">
-          <div class="detail-label">Cliente</div>
-          <div class="detail-value">${envio.nombre_empresa || 'N/A'}</div>
-        </div>
+        ${config.mostrar_info_cliente_tracking !== false ? `
+          <div class="detail-item">
+            <div class="detail-label">Cliente</div>
+            <div class="detail-value">${envio.nombre_empresa || 'N/A'}</div>
+          </div>
+        ` : ''}
         <div class="detail-item">
           <div class="detail-label">Referencia del Cliente</div>
           <div class="detail-value">${envio.referencia_cliente || 'Sin referencia'}</div>
@@ -614,19 +638,25 @@ function generarPasosProgreso(estadoActual) {
 
       ${qrCodeHTML}
 
-      <div class="actions-container">
-        <button class="action-btn action-btn-primary" onclick="exportarPDF('${envio.numero_tracking}')">
-          <i data-lucide="download"></i>
-          Exportar PDF
-        </button>
-        <button class="action-btn action-btn-secondary" onclick="compartirWhatsApp('${envio.numero_tracking}')">
-          <i data-lucide="share-2"></i>
-          Compartir
-        </button>
-        <button class="action-btn action-btn-secondary" onclick="copiarEnlace('${envio.numero_tracking}')">
-          <i data-lucide="link"></i>
-          Copiar Enlace
-        </button>
+<div class="actions-container">
+        ${config.mostrar_boton_pdf_tracking !== false ? `
+          <button class="action-btn action-btn-primary" onclick="exportarPDF('${envio.numero_tracking}')">
+            <i data-lucide="download"></i>
+            Exportar PDF
+          </button>
+        ` : ''}
+        ${config.mostrar_boton_whatsapp_tracking !== false ? `
+          <button class="action-btn action-btn-secondary" onclick="compartirWhatsApp('${envio.numero_tracking}')">
+            <i data-lucide="share-2"></i>
+            Compartir
+          </button>
+        ` : ''}
+        ${config.mostrar_boton_copiar_tracking !== false ? `
+          <button class="action-btn action-btn-secondary" onclick="copiarEnlace('${envio.numero_tracking}')">
+            <i data-lucide="link"></i>
+            Copiar Enlace
+          </button>
+        ` : ''}
       </div>
     </div>
   `;
