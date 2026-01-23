@@ -897,6 +897,22 @@
                 </select>
                 <p class="form-help">Selecciona el cliente al que pertenece este envío</p>
               </div>
+              
+              <!-- ⬇️ NUEVO CAMPO: REFERENCIA DEL CLIENTE -->
+              <div class="form-group">
+                <label class="form-label">Referencia del Cliente</label>
+                <input 
+                  type="text" 
+                  name="referencia_cliente" 
+                  class="form-input" 
+                  placeholder="Ej: PO-2024-001, ORD-12345, REF-ABC"
+                  maxlength="100"
+                >
+                <p class="form-help">
+                  <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+                  Número de orden o referencia interna del cliente (opcional)
+                </p>
+              </div>
             </div>
             
             <!-- Sección 2: Detalles del Envío -->

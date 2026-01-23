@@ -69,12 +69,13 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (buscar) {
       query += ` AND (
         e.numero_tracking LIKE ? OR 
+        e.referencia_cliente LIKE ? OR
         c.nombre_empresa LIKE ? OR 
         e.origen LIKE ? OR 
         e.destino LIKE ?
       )`;
       const searchTerm = `%${buscar}%`;
-      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
     
     // Filtro de estado
@@ -199,7 +200,15 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
 // Crear nuevo envío (POST)
 router.post('/nuevo', isAuthenticated, async (req, res) => {
   try {
-    const { cliente_id, descripcion, peso, fecha_estimada_entrega, origen, destino } = req.body;
+    const { 
+      cliente_id, 
+      referencia_cliente,  // ⬅️ NUEVO CAMPO
+      descripcion, 
+      peso, 
+      fecha_estimada_entrega, 
+      origen, 
+      destino 
+    } = req.body;
     
     if (!cliente_id || !origen || !destino) {
       // ✅ SOLO CLIENTES ACTIVOS
@@ -236,11 +245,30 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
     
     const numeroTracking = `TRK-${year}-${String(nextNumber).padStart(3, '0')}`;
     
-    // Insertar envío
+    // Insertar envío con referencia_cliente
     const [result] = await db.query(
-      `INSERT INTO envios (numero_tracking, cliente_id, descripcion, peso, fecha_estimada_entrega, origen, destino, usuario_creador_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [numeroTracking, cliente_id, descripcion, peso || null, fecha_estimada_entrega || null, origen, destino, req.session.userId]
+      `INSERT INTO envios (
+        numero_tracking, 
+        cliente_id, 
+        referencia_cliente,  
+        descripcion, 
+        peso, 
+        fecha_estimada_entrega, 
+        origen, 
+        destino, 
+        usuario_creador_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        numeroTracking, 
+        cliente_id, 
+        referencia_cliente || null,  // ⬅️ NUEVO CAMPO
+        descripcion, 
+        peso || null, 
+        fecha_estimada_entrega || null, 
+        origen, 
+        destino, 
+        req.session.userId
+      ]
     );
     
     // Crear estado inicial en historial
@@ -311,7 +339,15 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
 router.post('/:id/editar', isAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
-    const { cliente_id, descripcion, peso, fecha_estimada_entrega, origen, destino } = req.body;
+    const { 
+      cliente_id, 
+      referencia_cliente,  // ⬅️ NUEVO CAMPO
+      descripcion, 
+      peso, 
+      fecha_estimada_entrega, 
+      origen, 
+      destino 
+    } = req.body;
     
     if (!cliente_id || !origen || !destino) {
       const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
@@ -336,9 +372,25 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     
     await db.query(
       `UPDATE envios 
-       SET cliente_id = ?, descripcion = ?, peso = ?, fecha_estimada_entrega = ?, origen = ?, destino = ?
+       SET 
+         cliente_id = ?, 
+         referencia_cliente = ?,  
+         descripcion = ?, 
+         peso = ?, 
+         fecha_estimada_entrega = ?, 
+         origen = ?, 
+         destino = ?
        WHERE id = ?`,
-      [cliente_id, descripcion, peso || null, fecha_estimada_entrega || null, origen, destino, id]
+      [
+        cliente_id, 
+        referencia_cliente || null,  // ⬅️ NUEVO CAMPO
+        descripcion, 
+        peso || null, 
+        fecha_estimada_entrega || null, 
+        origen, 
+        destino, 
+        id
+      ]
     );
     
     console.log('✅ Envío actualizado:', id);
