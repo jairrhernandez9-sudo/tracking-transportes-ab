@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const { generarSiguienteTracking } = require('../utils/tracking-utils'); // ⬅️ CAMBIO 1: IMPORTAR FUNCIÓN
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -175,10 +176,18 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 // Formulario crear nuevo envío
 router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
   try {
-    // ✅ SOLO CLIENTES ACTIVOS
-    const [clientes] = await db.query(
-      'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
-    );
+    // ⬅️ CAMBIO 2: OBTENER CLIENTES CON SU PRÓXIMO TRACKING
+    const [clientes] = await db.query(`
+      SELECT 
+        id,
+        nombre_empresa,
+        prefijo_tracking,
+        ultimo_numero_tracking,
+        CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+      FROM clientes 
+      WHERE activo = 1 
+      ORDER BY nombre_empresa
+    `);
     
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
@@ -202,7 +211,7 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
   try {
     const { 
       cliente_id, 
-      referencia_cliente,  // ⬅️ NUEVO CAMPO
+      referencia_cliente,
       descripcion, 
       peso, 
       fecha_estimada_entrega, 
@@ -211,10 +220,17 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
     } = req.body;
     
     if (!cliente_id || !origen || !destino) {
-      // ✅ SOLO CLIENTES ACTIVOS
-      const [clientes] = await db.query(
-        'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
-      );
+      const [clientes] = await db.query(`
+        SELECT 
+          id,
+          nombre_empresa,
+          prefijo_tracking,
+          ultimo_numero_tracking,
+          CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+        FROM clientes 
+        WHERE activo = 1 
+        ORDER BY nombre_empresa
+      `);
       return res.render('envios/nuevo', {
         title: 'Crear Nuevo Envío',
         user: {
@@ -228,22 +244,8 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
       });
     }
     
-    // Generar número de tracking automático
-    const year = new Date().getFullYear();
-    const [lastTracking] = await db.query(
-      `SELECT numero_tracking FROM envios 
-       WHERE numero_tracking LIKE ? 
-       ORDER BY id DESC LIMIT 1`,
-      [`TRK-${year}-%`]
-    );
-    
-    let nextNumber = 1;
-    if (lastTracking.length > 0) {
-      const lastNumber = parseInt(lastTracking[0].numero_tracking.split('-')[2]);
-      nextNumber = lastNumber + 1;
-    }
-    
-    const numeroTracking = `TRK-${year}-${String(nextNumber).padStart(3, '0')}`;
+    // ⬅️ CAMBIO 3: GENERAR TRACKING PERSONALIZADO POR CLIENTE
+    const numeroTracking = await generarSiguienteTracking(cliente_id);
     
     // Insertar envío con referencia_cliente
     const [result] = await db.query(
@@ -261,32 +263,41 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
       [
         numeroTracking, 
         cliente_id, 
-        referencia_cliente || null,  // ⬅️ NUEVO CAMPO
+        referencia_cliente,
         descripcion, 
-        peso || null, 
-        fecha_estimada_entrega || null, 
+        peso, 
+        fecha_estimada_entrega, 
         origen, 
         destino, 
         req.session.userId
       ]
     );
     
-    // Crear estado inicial en historial
+    const envioId = result.insertId;
+    
+    // Crear primer registro en historial
     await db.query(
       `INSERT INTO historial_estados (envio_id, estado, ubicacion, comentarios, usuario_id)
-       VALUES (?, 'creado', ?, 'Envío creado en el sistema', ?)`,
-      [result.insertId, origen, req.session.userId]
+       VALUES (?, 'creado', ?, 'Envío creado', ?)`,
+      [envioId, origen, req.session.userId]
     );
     
     console.log('✅ Envío creado:', numeroTracking);
-    res.redirect(`/envios/${result.insertId}?success=created`);
+    res.redirect(`/envios/${envioId}?success=creado`);
     
   } catch (error) {
     console.error('Error al crear envío:', error);
-    // ✅ SOLO CLIENTES ACTIVOS
-    const [clientes] = await db.query(
-      'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
-    );
+    const [clientes] = await db.query(`
+      SELECT 
+        id,
+        nombre_empresa,
+        prefijo_tracking,
+        ultimo_numero_tracking,
+        CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+      FROM clientes 
+      WHERE activo = 1 
+      ORDER BY nombre_empresa
+    `);
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
       user: {
@@ -307,15 +318,13 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
     const { id } = req.params;
     
     const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
+    const [clientes] = await db.query(
+      'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
+    );
     
     if (envios.length === 0) {
       return res.status(404).send('Envío no encontrado');
     }
-    
-    // ✅ SOLO CLIENTES ACTIVOS
-    const [clientes] = await db.query(
-      'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
-    );
     
     res.render('envios/editar', {
       title: 'Editar Envío',
@@ -330,8 +339,8 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       error: null
     });
   } catch (error) {
-    console.error('Error al cargar formulario de edición:', error);
-    res.status(500).send('Error al cargar el formulario');
+    console.error('Error al cargar envío para editar:', error);
+    res.status(500).send('Error al cargar el envío');
   }
 });
 
@@ -341,7 +350,7 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     const { id } = req.params;
     const { 
       cliente_id, 
-      referencia_cliente,  // ⬅️ NUEVO CAMPO
+      referencia_cliente,
       descripcion, 
       peso, 
       fecha_estimada_entrega, 
@@ -351,7 +360,6 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     
     if (!cliente_id || !origen || !destino) {
       const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
-      // ✅ SOLO CLIENTES ACTIVOS
       const [clientes] = await db.query(
         'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
       );
@@ -371,35 +379,24 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     }
     
     await db.query(
-      `UPDATE envios 
-       SET 
-         cliente_id = ?, 
-         referencia_cliente = ?,  
-         descripcion = ?, 
-         peso = ?, 
-         fecha_estimada_entrega = ?, 
-         origen = ?, 
-         destino = ?
+      `UPDATE envios SET 
+        cliente_id = ?, 
+        referencia_cliente = ?,
+        descripcion = ?, 
+        peso = ?, 
+        fecha_estimada_entrega = ?, 
+        origen = ?, 
+        destino = ?
        WHERE id = ?`,
-      [
-        cliente_id, 
-        referencia_cliente || null,  // ⬅️ NUEVO CAMPO
-        descripcion, 
-        peso || null, 
-        fecha_estimada_entrega || null, 
-        origen, 
-        destino, 
-        id
-      ]
+      [cliente_id, referencia_cliente, descripcion, peso, fecha_estimada_entrega, origen, destino, id]
     );
     
     console.log('✅ Envío actualizado:', id);
-    res.redirect(`/envios/${id}?success=updated`);
+    res.redirect(`/envios/${id}?success=actualizado`);
     
   } catch (error) {
     console.error('Error al actualizar envío:', error);
     const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [req.params.id]);
-    // ✅ SOLO CLIENTES ACTIVOS
     const [clientes] = await db.query(
       'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
     );
