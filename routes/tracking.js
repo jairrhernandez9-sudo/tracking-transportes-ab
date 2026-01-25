@@ -1,13 +1,48 @@
+S
+Copiar
+
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const QRCode = require('qrcode');
 
-// Página principal de tracking
-router.get('/', (req, res) => {
-  res.render('tracking-public', {
-    title: 'Rastrear Envío - Transportes AB'
+// ✅ FUNCIÓN PARA OBTENER CONFIGURACIÓN
+async function obtenerConfiguracion() {
+  const [configs] = await db.query('SELECT * FROM configuracion_sistema WHERE categoria = "tracking"');
+  
+  const configuracion = {};
+  
+  configs.forEach(config => {
+    let valor = config.valor;
+    
+    // Convertir según tipo
+    if (config.tipo === 'boolean') {
+      valor = valor === 'true';
+    }
+    
+    configuracion[config.clave] = valor;
   });
+  
+  return configuracion;
+}
+
+// ✅ Página principal de tracking - AHORA CON CONFIG
+router.get('/', async (req, res) => {
+  try {
+    const config = await obtenerConfiguracion();
+    
+    res.render('tracking-public', {
+      title: 'Rastrear Envío - Transportes AB',
+      config: config  // ✅ AHORA SÍ PASA LA CONFIGURACIÓN
+    });
+  } catch (error) {
+    console.error('Error al cargar configuración:', error);
+    // Si falla, renderiza con config vacío para que use valores por defecto
+    res.render('tracking-public', {
+      title: 'Rastrear Envío - Transportes AB',
+      config: {}
+    });
+  }
 });
 
 // API para buscar envío por número de tracking O referencia del cliente
