@@ -965,6 +965,52 @@
             
           </div>
           
+          <!-- ⬅️ NUEVO: Prefijo de Tracking -->
+            <div class="form-group full-width" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 24px; border-radius: 16px; border: 2px solid #3b82f6;">
+              <label class="form-label" style="color: #1e40af; font-weight: 700; font-size: 1.05rem;">
+                <i data-lucide="hash" style="width: 20px; height: 20px;"></i>
+                Prefijo de Tracking
+              </label>
+              <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                Este prefijo identificará los envíos del cliente. Se generará automáticamente o puedes personalizarlo.
+              </p>
+              
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <input 
+                    type="text" 
+                    id="prefijo_tracking_input"
+                    name="prefijo_tracking_manual" 
+                    class="form-input" 
+                    placeholder="Ej: ITP, JAB, TDN"
+                    maxlength="10"
+                    style="text-transform: uppercase; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;"
+                  >
+                  <div id="prefijo_status" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"></div>
+                </div>
+                
+                <button 
+                  type="button" 
+                  id="btn_sugerir_prefijo"
+                  style="padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);"
+                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.4)'"
+                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'"
+                >
+                  <i data-lucide="wand-2" style="width: 18px; height: 18px; margin-right: 8px;"></i>
+                  Sugerir Automático
+                </button>
+              </div>
+              
+              <div id="preview_tracking" style="margin-top: 16px; padding: 16px; background: white; border-radius: 12px; border: 2px dashed #cbd5e1; display: none;">
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
+                  VISTA PREVIA DEL TRACKING
+                </div>
+                <div style="font-size: 1.3rem; font-weight: 900; color: #1e40af; font-family: 'Courier New', monospace; letter-spacing: 2px;">
+                  <span id="preview_text">---</span>-00001
+                </div>
+              </div>
+            </div>
+
           <div class="form-actions">
             <a href="/clientes" class="btn btn-secondary">
               <i data-lucide="x"></i>
@@ -1019,6 +1065,124 @@
         this.value = this.value.toUpperCase();
       });
     }
+
+    // ============================================
+    // SISTEMA DE PREFIJOS DE TRACKING
+    // ============================================
+    
+    const nombreEmpresaInput = document.querySelector('input[name="nombre_empresa"]');
+    const prefijoInput = document.getElementById('prefijo_tracking_input');
+    const btnSugerir = document.getElementById('btn_sugerir_prefijo');
+    const prefijoStatus = document.getElementById('prefijo_status');
+    const previewTracking = document.getElementById('preview_tracking');
+    const previewText = document.getElementById('preview_text');
+    
+    let verificacionTimeout = null;
+    
+    // Sugerir prefijo automáticamente
+    if (btnSugerir) {
+      btnSugerir.addEventListener('click', async function() {
+        const nombreEmpresa = nombreEmpresaInput.value.trim();
+        
+        if (!nombreEmpresa) {
+          alert('Por favor, ingresa primero el nombre de la empresa');
+          nombreEmpresaInput.focus();
+          return;
+        }
+        
+        btnSugerir.disabled = true;
+        btnSugerir.innerHTML = '<i data-lucide="loader-2" style="width: 18px; height: 18px; margin-right: 8px; animation: spin 1s linear infinite;"></i> Generando...';
+        
+        try {
+          const response = await fetch(`/clientes/api/sugerir-prefijo?nombre=${encodeURIComponent(nombreEmpresa)}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            prefijoInput.value = data.prefijo;
+            actualizarPreview(data.prefijo);
+            verificarPrefijo(data.prefijo);
+          } else {
+            prefijoStatus.innerHTML = '<span style="color: #ef4444;">✗ ' + (data.error || 'Error al generar prefijo') + '</span>';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          prefijoStatus.innerHTML = '<span style="color: #ef4444;">✗ Error al generar prefijo</span>';
+        } finally {
+          btnSugerir.disabled = false;
+          btnSugerir.innerHTML = '<i data-lucide="wand-2" style="width: 18px; height: 18px; margin-right: 8px;"></i> Sugerir Automático';
+          lucide.createIcons();
+        }
+      });
+    }
+    
+    // Verificar prefijo en tiempo real
+    if (prefijoInput) {
+      prefijoInput.addEventListener('input', function() {
+        const prefijo = this.value.toUpperCase();
+        this.value = prefijo;
+        
+        actualizarPreview(prefijo);
+        
+        clearTimeout(verificacionTimeout);
+        
+        if (prefijo.length >= 2) {
+          prefijoStatus.innerHTML = '<span style="color: #64748b;">⏳ Verificando...</span>';
+          
+          verificacionTimeout = setTimeout(() => {
+            verificarPrefijo(prefijo);
+          }, 500);
+        } else {
+          prefijoStatus.innerHTML = '';
+          previewTracking.style.display = 'none';
+        }
+      });
+    }
+    
+    // Función para verificar disponibilidad
+    async function verificarPrefijo(prefijo) {
+      if (!prefijo || prefijo.length < 2) {
+        prefijoStatus.innerHTML = '';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/clientes/api/verificar-prefijo?prefijo=${encodeURIComponent(prefijo)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          if (data.disponible) {
+            prefijoStatus.innerHTML = '<span style="color: #10b981; font-weight: 700;">✓ Prefijo disponible</span>';
+          } else {
+            prefijoStatus.innerHTML = '<span style="color: #ef4444; font-weight: 700;">✗ Este prefijo ya está en uso</span>';
+          }
+        } else {
+          prefijoStatus.innerHTML = '<span style="color: #ef4444;">✗ ' + (data.error || 'Error al verificar') + '</span>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        prefijoStatus.innerHTML = '<span style="color: #ef4444;">✗ Error al verificar prefijo</span>';
+      }
+    }
+    
+    // Actualizar vista previa
+    function actualizarPreview(prefijo) {
+      if (prefijo && prefijo.length >= 2) {
+        previewText.textContent = prefijo;
+        previewTracking.style.display = 'block';
+      } else {
+        previewTracking.style.display = 'none';
+      }
+    }
+    
+    // Agregar animación de spin para el loader
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>

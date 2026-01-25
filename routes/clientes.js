@@ -3,6 +3,105 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { isAuthenticated } = require('../middleware/auth');
+// ⬅️ NUEVO: Importar funciones de tracking
+const {
+  generarPrefijoUnico,
+  prefijoDisponible,
+  validarFormatoPrefijo
+} = require('../utils/tracking-utils');
+
+// ============================================
+// APIs PARA PREFIJOS (NUEVO)
+// ============================================
+
+/**
+ * API: Sugerir prefijo automático basado en nombre de empresa
+ * GET /clientes/api/sugerir-prefijo?nombre=IT+Piezas
+ */
+router.get('/api/sugerir-prefijo', isAuthenticated, async (req, res) => {
+  try {
+    const { nombre } = req.query;
+    
+    if (!nombre) {
+      return res.json({ 
+        success: false, 
+        error: 'El nombre de la empresa es requerido' 
+      });
+    }
+    
+    const prefijoSugerido = await generarPrefijoUnico(nombre);
+    
+    res.json({
+      success: true,
+      prefijo: prefijoSugerido,
+      disponible: true
+    });
+    
+  } catch (error) {
+    console.error('Error sugiriendo prefijo:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al generar sugerencia de prefijo' 
+    });
+  }
+});
+
+/**
+ * API: Verificar disponibilidad de un prefijo
+ * GET /clientes/api/verificar-prefijo?prefijo=ITP&clienteId=5
+ */
+router.get('/api/verificar-prefijo', isAuthenticated, async (req, res) => {
+  try {
+    const { prefijo, clienteId } = req.query;
+    
+    if (!prefijo) {
+      return res.json({ 
+        success: false, 
+        error: 'El prefijo es requerido' 
+      });
+    }
+    
+    // Validar formato
+    const validacion = validarFormatoPrefijo(prefijo);
+    if (!validacion.valido) {
+      return res.json({
+        success: false,
+        disponible: false,
+        error: validacion.error
+      });
+    }
+    
+    const prefijoUpper = prefijo.toUpperCase();
+    
+    // Verificar si está disponible (excluyendo el cliente actual si es edición)
+    let query = 'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ?';
+    const params = [prefijoUpper];
+    
+    if (clienteId) {
+      query += ' AND id != ?';
+      params.push(clienteId);
+    }
+    
+    const [result] = await db.query(query, params);
+    const disponible = result[0].count === 0;
+    
+    res.json({
+      success: true,
+      disponible: disponible,
+      prefijo: prefijoUpper,
+      mensaje: disponible 
+        ? '✓ Prefijo disponible' 
+        : '✗ Este prefijo ya está en uso'
+    });
+    
+  } catch (error) {
+    console.error('Error verificando prefijo:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error al verificar disponibilidad del prefijo' 
+    });
+  }
+});
 
 // ============================================
 // LISTADO DE CLIENTES
@@ -69,11 +168,18 @@ router.get('/nuevo', isAuthenticated, (req, res) => {
 });
 
 // ============================================
-// CREAR CLIENTE (POST)
+// CREAR CLIENTE (POST) - MODIFICADO
 // ============================================
 router.post('/nuevo', isAuthenticated, async (req, res) => {
   try {
-    const { nombre_empresa, contacto, telefono, email, direccion } = req.body;
+    const { 
+      nombre_empresa, 
+      contacto, 
+      telefono, 
+      email, 
+      direccion,
+      prefijo_tracking_manual  // ⬅️ NUEVO CAMPO
+    } = req.body;
     
     // Validar campos requeridos
     if (!nombre_empresa || !email) {
@@ -106,17 +212,71 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
       });
     }
     
-    // Insertar cliente
+    // ⬅️ NUEVO: Determinar el prefijo a usar
+    let prefijoFinal;
+    
+    if (prefijo_tracking_manual && prefijo_tracking_manual.trim() !== '') {
+      // El usuario proporcionó un prefijo manualmente
+      const validacion = validarFormatoPrefijo(prefijo_tracking_manual);
+      
+      if (!validacion.valido) {
+        return res.render('clientes/nuevo', {
+          title: 'Nuevo Cliente',
+          user: {
+            nombre: req.session.userName,
+            email: req.session.userEmail,
+            rol: req.session.userRole
+          },
+          error: validacion.error
+        });
+      }
+      
+      prefijoFinal = prefijo_tracking_manual.toUpperCase();
+      
+      // Verificar disponibilidad
+      const disponible = await prefijoDisponible(prefijoFinal);
+      if (!disponible) {
+        return res.render('clientes/nuevo', {
+          title: 'Nuevo Cliente',
+          user: {
+            nombre: req.session.userName,
+            email: req.session.userEmail,
+            rol: req.session.userRole
+          },
+          error: 'El prefijo ya está en uso'
+        });
+      }
+    } else {
+      // Generar prefijo automáticamente
+      prefijoFinal = await generarPrefijoUnico(nombre_empresa);
+    }
+    
+    // ⬅️ MODIFICADO: Insertar cliente con prefijo
     await db.query(
-      `INSERT INTO clientes (nombre_empresa, contacto, telefono, email, direccion)
-       VALUES (?, ?, ?, ?, ?)`,
-      [nombre_empresa, contacto, telefono, email, direccion]
+      `INSERT INTO clientes 
+      (nombre_empresa, contacto, telefono, email, direccion, prefijo_tracking, ultimo_numero_tracking)
+       VALUES (?, ?, ?, ?, ?, ?, 0)`,
+      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal]
     );
     
     res.redirect('/clientes?success=created');
     
   } catch (error) {
     console.error('Error al crear cliente:', error);
+    
+    // Si es error de prefijo duplicado (por race condition)
+    if (error.code === 'ER_DUP_ENTRY' && error.message.includes('prefijo_tracking')) {
+      return res.render('clientes/nuevo', {
+        title: 'Nuevo Cliente',
+        user: {
+          nombre: req.session.userName,
+          email: req.session.userEmail,
+          rol: req.session.userRole
+        },
+        error: 'El prefijo ya está en uso. Por favor elige otro.'
+      });
+    }
+    
     res.render('clientes/nuevo', {
       title: 'Nuevo Cliente',
       user: {
@@ -214,12 +374,19 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
 });
 
 // ============================================
-// EDITAR CLIENTE (POST)
+// EDITAR CLIENTE (POST) - MODIFICADO
 // ============================================
 router.post('/:id/editar', isAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre_empresa, contacto, telefono, email, direccion } = req.body;
+    const { 
+      nombre_empresa, 
+      contacto, 
+      telefono, 
+      email, 
+      direccion,
+      prefijo_tracking_manual  // ⬅️ NUEVO CAMPO
+    } = req.body;
     
     // Validar campos requeridos
     if (!nombre_empresa || !email) {
@@ -256,18 +423,91 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
       });
     }
     
-    // Actualizar cliente
+    // ⬅️ NUEVO: Obtener cliente actual para verificar prefijo
+    const [clienteActual] = await db.query(
+      'SELECT prefijo_tracking, ultimo_numero_tracking FROM clientes WHERE id = ?',
+      [id]
+    );
+    
+    if (clienteActual.length === 0) {
+      return res.redirect('/clientes?error=cliente_no_encontrado');
+    }
+    
+    let prefijoFinal = clienteActual[0].prefijo_tracking;
+    
+    // Si se proporcionó un nuevo prefijo
+    if (prefijo_tracking_manual && prefijo_tracking_manual.trim() !== '') {
+      const nuevoPrefijoUpper = prefijo_tracking_manual.toUpperCase();
+      
+      // Solo validar si cambió
+      if (nuevoPrefijoUpper !== clienteActual[0].prefijo_tracking) {
+        const validacion = validarFormatoPrefijo(nuevoPrefijoUpper);
+        
+        if (!validacion.valido) {
+          const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
+          return res.render('clientes/editar', {
+            title: 'Editar Cliente',
+            user: {
+              nombre: req.session.userName,
+              email: req.session.userEmail,
+              rol: req.session.userRole
+            },
+            cliente: clientes[0],
+            error: validacion.error
+          });
+        }
+        
+        // Verificar disponibilidad (excluyendo el cliente actual)
+        const [result] = await db.query(
+          'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ? AND id != ?',
+          [nuevoPrefijoUpper, id]
+        );
+        
+        if (result[0].count > 0) {
+          const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
+          return res.render('clientes/editar', {
+            title: 'Editar Cliente',
+            user: {
+              nombre: req.session.userName,
+              email: req.session.userEmail,
+              rol: req.session.userRole
+            },
+            cliente: clientes[0],
+            error: 'El prefijo ya está en uso'
+          });
+        }
+        
+        prefijoFinal = nuevoPrefijoUpper;
+      }
+    }
+    
+    // ⬅️ MODIFICADO: Actualizar cliente con prefijo
     await db.query(
       `UPDATE clientes 
-       SET nombre_empresa = ?, contacto = ?, telefono = ?, email = ?, direccion = ?
+       SET nombre_empresa = ?, contacto = ?, telefono = ?, email = ?, direccion = ?, prefijo_tracking = ?
        WHERE id = ?`,
-      [nombre_empresa, contacto, telefono, email, direccion, id]
+      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, id]
     );
     
     res.redirect(`/clientes/${id}?success=updated`);
     
   } catch (error) {
     console.error('Error al actualizar cliente:', error);
+    
+    if (error.code === 'ER_DUP_ENTRY' && error.message.includes('prefijo_tracking')) {
+      const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [req.params.id]);
+      return res.render('clientes/editar', {
+        title: 'Editar Cliente',
+        user: {
+          nombre: req.session.userName,
+          email: req.session.userEmail,
+          rol: req.session.userRole
+        },
+        cliente: clientes[0],
+        error: 'El prefijo ya está en uso'
+      });
+    }
+    
     const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [req.params.id]);
     res.render('clientes/editar', {
       title: 'Editar Cliente',
@@ -285,7 +525,8 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
 // ============================================
 // ELIMINAR CLIENTE
 // ============================================
-router.post('/:id/eliminar', isAuthenticated, requireAdmin, async (req, res) => {  try {
+router.post('/:id/eliminar', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
     const { id } = req.params;
     
     // Verificar si tiene envíos asociados

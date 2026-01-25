@@ -971,7 +971,64 @@
             </div>
             
           </div>
-          
+          <!-- ⬅️ NUEVO: Prefijo de Tracking -->
+            <div class="form-group full-width" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 16px; border: 2px solid #f59e0b;">
+              <label class="form-label" style="color: #92400e; font-weight: 700; font-size: 1.05rem;">
+                <i data-lucide="hash" style="width: 20px; height: 20px;"></i>
+                Prefijo de Tracking
+              </label>
+              
+              <div style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #f59e0b;">
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+                  PREFIJO ACTUAL
+                </div>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #92400e; font-family: 'Courier New', monospace; letter-spacing: 2px;">
+                  <%= cliente.prefijo_tracking %>
+                </div>
+              </div>
+              
+              <% if (cliente.ultimo_numero_tracking > 0) { %>
+                <div style="background: #fef2f2; padding: 12px; border-radius: 10px; margin-bottom: 16px; border-left: 4px solid #ef4444;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #991b1b; font-weight: 600;">
+                    <i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i>
+                    <span>Este cliente ya tiene <%= cliente.ultimo_numero_tracking %> envío(s) creado(s)</span>
+                  </div>
+                  <div style="font-size: 0.75rem; color: #b91c1c; margin-top: 4px; margin-left: 24px;">
+                    Cambiar el prefijo NO afectará los envíos ya creados
+                  </div>
+                </div>
+              <% } %>
+              
+              <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                Puedes modificar el prefijo si es necesario. Los envíos futuros usarán el nuevo prefijo.
+              </p>
+              
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <input 
+                    type="text" 
+                    id="prefijo_tracking_input"
+                    name="prefijo_tracking_manual" 
+                    class="form-input" 
+                    value="<%= cliente.prefijo_tracking %>"
+                    placeholder="Ej: ITP, JAB, TDN"
+                    maxlength="10"
+                    style="text-transform: uppercase; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;"
+                  >
+                  <div id="prefijo_status" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"></div>
+                </div>
+              </div>
+              
+              <div id="preview_tracking" style="margin-top: 16px; padding: 16px; background: white; border-radius: 12px; border: 2px dashed #cbd5e1;">
+                <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
+                  PRÓXIMO TRACKING CON EL NUEVO PREFIJO
+                </div>
+                <div style="font-size: 1.3rem; font-weight: 900; color: #92400e; font-family: 'Courier New', monospace; letter-spacing: 2px;">
+                  <span id="preview_text"><%= cliente.prefijo_tracking %></span>-<%= String(cliente.ultimo_numero_tracking + 1).padStart(5, '0') %>
+                </div>
+              </div>
+            </div>
+
           <div class="form-actions">
             <a href="/clientes/<%= cliente.id %>" class="btn btn-secondary">
               <i data-lucide="x"></i>
@@ -1025,6 +1082,81 @@
       rfcInput.addEventListener('input', function(e) {
         this.value = this.value.toUpperCase();
       });
+    }
+
+    // ============================================
+    // SISTEMA DE PREFIJOS DE TRACKING - EDICIÓN
+    // ============================================
+    
+    const prefijoInput = document.getElementById('prefijo_tracking_input');
+    const prefijoStatus = document.getElementById('prefijo_status');
+    const previewText = document.getElementById('preview_text');
+    const clienteId = '<%= cliente.id %>';
+    const prefijoOriginal = '<%= cliente.prefijo_tracking %>';
+    
+    let verificacionTimeout = null;
+    
+    // Verificar prefijo en tiempo real
+    if (prefijoInput) {
+      prefijoInput.addEventListener('input', function() {
+        const prefijo = this.value.toUpperCase();
+        this.value = prefijo;
+        
+        actualizarPreview(prefijo);
+        
+        clearTimeout(verificacionTimeout);
+        
+        if (prefijo.length >= 2) {
+          // Si es el mismo prefijo original, no verificar
+          if (prefijo === prefijoOriginal) {
+            prefijoStatus.innerHTML = '<span style="color: #64748b;">ℹ️ Prefijo actual (sin cambios)</span>';
+            return;
+          }
+          
+          prefijoStatus.innerHTML = '<span style="color: #64748b;">⏳ Verificando...</span>';
+          
+          verificacionTimeout = setTimeout(() => {
+            verificarPrefijo(prefijo);
+          }, 500);
+        } else {
+          prefijoStatus.innerHTML = '';
+        }
+      });
+    }
+    
+    // Función para verificar disponibilidad
+    async function verificarPrefijo(prefijo) {
+      if (!prefijo || prefijo.length < 2) {
+        prefijoStatus.innerHTML = '';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/clientes/api/verificar-prefijo?prefijo=${encodeURIComponent(prefijo)}&clienteId=${clienteId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          if (data.disponible) {
+            prefijoStatus.innerHTML = '<span style="color: #10b981; font-weight: 700;">✓ Prefijo disponible</span>';
+          } else {
+            prefijoStatus.innerHTML = '<span style="color: #ef4444; font-weight: 700;">✗ Este prefijo ya está en uso</span>';
+          }
+        } else {
+          prefijoStatus.innerHTML = '<span style="color: #ef4444;">✗ ' + (data.error || 'Error al verificar') + '</span>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        prefijoStatus.innerHTML = '<span style="color: #ef4444;">✗ Error al verificar prefijo</span>';
+      }
+    }
+    
+    // Actualizar vista previa
+    function actualizarPreview(prefijo) {
+      if (prefijo && prefijo.length >= 2) {
+        previewText.textContent = prefijo;
+      } else {
+        previewText.textContent = '---';
+      }
     }
   </script>
 </body>
