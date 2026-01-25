@@ -6,6 +6,28 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// ============================================
+// FUNCIÓN HELPER: Construir dirección completa
+// ============================================
+function construirDireccionCompleta(calle, colonia, ciudad, estado, cp, referencia = '') {
+  const partes = [];
+  
+  if (calle && calle.trim()) partes.push(calle.trim());
+  if (colonia && colonia.trim()) partes.push(colonia.trim());
+  if (ciudad && ciudad.trim()) partes.push(ciudad.trim());
+  if (estado && estado.trim()) partes.push(estado.trim());
+  if (cp && cp.trim()) partes.push(cp.trim());
+  
+  let direccion = partes.join(', ');
+  
+  // Agregar referencia si existe
+  if (referencia && referencia.trim()) {
+    direccion += ` (${referencia.trim()})`;
+  }
+  
+  return direccion;
+}
+
 // Middleware de autenticación
 function isAuthenticated(req, res, next) {
   if (req.session && req.session.userId) {
@@ -214,13 +236,44 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
       referencia_cliente,
       descripcion, 
       peso, 
-      fecha_estimada_entrega, 
-      origen, 
-      destino 
+      fecha_estimada_entrega,
+      // ⬅️ NUEVOS CAMPOS DE ORIGEN
+      origen_calle,
+      origen_colonia,
+      origen_ciudad,
+      origen_estado,
+      origen_cp,
+      origen_referencia,
+      // ⬅️ NUEVOS CAMPOS DE DESTINO
+      destino_calle,
+      destino_colonia,
+      destino_ciudad,
+      destino_estado,
+      destino_cp,
+      destino_referencia
     } = req.body;
     
-    if (!cliente_id || !origen || !destino) {
-      const [clientes] = await db.query(`
+    // ⬅️ CONSTRUIR DIRECCIONES COMPLETAS
+    const origen = construirDireccionCompleta(
+      origen_calle, 
+      origen_colonia, 
+      origen_ciudad, 
+      origen_estado, 
+      origen_cp, 
+      origen_referencia
+    );
+    
+    const destino = construirDireccionCompleta(
+      destino_calle, 
+      destino_colonia, 
+      destino_ciudad, 
+      destino_estado, 
+      destino_cp, 
+      destino_referencia
+    );
+    
+if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
+        const [clientes] = await db.query(`
         SELECT 
           id,
           nombre_empresa,
@@ -240,7 +293,7 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
           rol: req.session.userRole
         },
         clientes,
-        error: 'Cliente, origen y destino son obligatorios'
+error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
     
@@ -248,6 +301,7 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
     const numeroTracking = await generarSiguienteTracking(cliente_id);
     
     // Insertar envío con referencia_cliente
+// ⬅️ INSERTAR CON CAMPOS DETALLADOS
     const [result] = await db.query(
       `INSERT INTO envios (
         numero_tracking, 
@@ -257,9 +311,21 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
         peso, 
         fecha_estimada_entrega, 
         origen, 
-        destino, 
+        destino,
+        origen_calle,
+        origen_colonia,
+        origen_ciudad,
+        origen_estado,
+        origen_cp,
+        origen_referencia,
+        destino_calle,
+        destino_colonia,
+        destino_ciudad,
+        destino_estado,
+        destino_cp,
+        destino_referencia,
         usuario_creador_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         numeroTracking, 
         cliente_id, 
@@ -268,7 +334,19 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
         peso, 
         fecha_estimada_entrega, 
         origen, 
-        destino, 
+        destino,
+        origen_calle,
+        origen_colonia,
+        origen_ciudad,
+        origen_estado,
+        origen_cp,
+        origen_referencia || null,
+        destino_calle,
+        destino_colonia,
+        destino_ciudad,
+        destino_estado,
+        destino_cp,
+        destino_referencia || null,
         req.session.userId
       ]
     );
@@ -358,8 +436,8 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
       destino 
     } = req.body;
     
-    if (!cliente_id || !origen || !destino) {
-      const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
+if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
+        const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
       const [clientes] = await db.query(
         'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
       );
