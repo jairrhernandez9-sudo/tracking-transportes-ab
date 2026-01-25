@@ -1093,6 +1093,24 @@
                       </select>
                     </div>
                     
+                    <!-- Referencias/Detalles adicionales -->
+                    <div style="grid-column: 1 / -1;">
+                      <label class="form-label">
+                        <i data-lucide="info" style="width: 14px; height: 14px;"></i>
+                        Referencias / Detalles Adicionales
+                      </label>
+                      <input 
+                        type="text" 
+                        name="origen_referencia" 
+                        class="form-input" 
+                        placeholder="Ej: Sucursal 30, Local 300, Entre calles X y Y, Edificio azul, etc."
+                      >
+                      <p class="form-help" style="margin-top: 6px; font-size: 0.75rem; color: #64748b;">
+                        <i data-lucide="lightbulb" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+                        Opcional: Información adicional para facilitar la ubicación
+                      </p>
+                    </div>
+                    
                   </div>
                 </div>
                 
@@ -1219,6 +1237,24 @@
                       </select>
                     </div>
                     
+                    <!-- Referencias/Detalles adicionales -->
+                    <div style="grid-column: 1 / -1;">
+                      <label class="form-label">
+                        <i data-lucide="info" style="width: 14px; height: 14px;"></i>
+                        Referencias / Detalles Adicionales
+                      </label>
+                      <input 
+                        type="text" 
+                        name="destino_referencia" 
+                        class="form-input" 
+                        placeholder="Ej: Bodega 5, Muelle B, Atención: Juan Pérez, Torre Norte, etc."
+                      >
+                      <p class="form-help" style="margin-top: 6px; font-size: 0.75rem; color: #64748b;">
+                        <i data-lucide="lightbulb" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+                        Opcional: Información adicional para facilitar la entrega
+                      </p>
+                    </div>
+                    
                   </div>
                 </div>
               </div>
@@ -1246,162 +1282,238 @@
   
   <!-- Lista de ubicaciones principales de México -->
   <datalist id="ciudades">
-    <!-- Nuevo León -->
-    <option value="Monterrey, Nuevo León">
-    <option value="Guadalupe, Nuevo León">
-    <option value="San Pedro Garza García, Nuevo León">
-    <option value="Apodaca, Nuevo León">
-    <option value="Santa Catarina, Nuevo León">
-    <option value="San Nicolás de los Garza, Nuevo León">
-    <option value="García, Nuevo León">
-    <option value="Escobedo, Nuevo León">
+   <datalist id="ciudades">
+    <!-- NUEVO LEÓN (Área Metropolitana de Monterrey) -->
+    <option value="Monterrey">
+    <option value="San Pedro Garza García">
+    <option value="San Nicolás de los Garza">
+    <option value="Guadalupe">
+    <option value="Apodaca">
+    <option value="Santa Catarina">
+    <option value="Escobedo">
+    <option value="García">
+    <option value="Juárez">
+    <option value="Cadereyta Jiménez">
+    <option value="Santiago">
+    <option value="Montemorelos">
+    <option value="Linares">
+    <option value="Sabinas Hidalgo">
     
-    <!-- Coahuila -->
-    <option value="Saltillo, Coahuila">
-    <option value="Torreón, Coahuila">
-    <option value="Monclova, Coahuila">
-    <option value="Piedras Negras, Coahuila">
-    <option value="Acuña, Coahuila">
+    <!-- CIUDAD DE MÉXICO (Alcaldías principales) -->
+    <option value="Ciudad de México">
+    <option value="Cuauhtémoc">
+    <option value="Miguel Hidalgo">
+    <option value="Benito Juárez">
+    <option value="Coyoacán">
+    <option value="Álvaro Obregón">
+    <option value="Tlalpan">
+    <option value="Iztapalapa">
+    <option value="Gustavo A. Madero">
+    <option value="Azcapotzalco">
+    <option value="Venustiano Carranza">
     
-    <!-- Chihuahua -->
-    <option value="Chihuahua, Chihuahua">
-    <option value="Ciudad Juárez, Chihuahua">
-    <option value="Delicias, Chihuahua">
-    <option value="Cuauhtémoc, Chihuahua">
+    <!-- JALISCO -->
+    <option value="Guadalajara">
+    <option value="Zapopan">
+    <option value="Tlaquepaque">
+    <option value="Tonalá">
+    <option value="Tlajomulco de Zúñiga">
+    <option value="Puerto Vallarta">
+    <option value="Lagos de Moreno">
+    <option value="Tepatitlán">
     
-    <!-- Baja California -->
-    <option value="Tijuana, Baja California">
-    <option value="Mexicali, Baja California">
-    <option value="Ensenada, Baja California">
-    <option value="Tecate, Baja California">
-    <option value="Rosarito, Baja California">
+    <!-- COAHUILA -->
+    <option value="Saltillo">
+    <option value="Torreón">
+    <option value="Monclova">
+    <option value="Piedras Negras">
+    <option value="Ciudad Acuña">
+    <option value="Ramos Arizpe">
+    <option value="Frontera">
+    <option value="Sabinas">
     
-    <!-- Sonora -->
-    <option value="Hermosillo, Sonora">
-    <option value="Ciudad Obregón, Sonora">
-    <option value="Nogales, Sonora">
-    <option value="San Luis Río Colorado, Sonora">
-    <option value="Navojoa, Sonora">
+    <!-- CHIHUAHUA -->
+    <option value="Chihuahua">
+    <option value="Ciudad Juárez">
+    <option value="Delicias">
+    <option value="Cuauhtémoc">
+    <option value="Parral">
+    <option value="Nuevo Casas Grandes">
     
-    <!-- Sinaloa -->
-    <option value="Culiacán, Sinaloa">
-    <option value="Mazatlán, Sinaloa">
-    <option value="Los Mochis, Sinaloa">
-    <option value="Guasave, Sinaloa">
+    <!-- GUANAJUATO -->
+    <option value="León">
+    <option value="Irapuato">
+    <option value="Celaya">
+    <option value="Salamanca">
+    <option value="Guanajuato">
+    <option value="San Miguel de Allende">
+    <option value="Silao">
+    <option value="Pénjamo">
     
-    <!-- Durango -->
-    <option value="Durango, Durango">
-    <option value="Gómez Palacio, Durango">
+    <!-- PUEBLA -->
+    <option value="Puebla">
+    <option value="Tehuacán">
+    <option value="San Martín Texmelucan">
+    <option value="Atlixco">
+    <option value="San Pedro Cholula">
     
-    <!-- Guanajuato -->
-    <option value="León, Guanajuato">
-    <option value="Irapuato, Guanajuato">
-    <option value="Celaya, Guanajuato">
-    <option value="Salamanca, Guanajuato">
-    <option value="Guanajuato, Guanajuato">
-    <option value="San Miguel de Allende, Guanajuato">
-    <option value="Silao, Guanajuato">
+    <!-- QUERÉTARO -->
+    <option value="Querétaro">
+    <option value="San Juan del Río">
+    <option value="Corregidora">
+    <option value="El Marqués">
     
-    <!-- Querétaro -->
-    <option value="Querétaro, Querétaro">
-    <option value="San Juan del Río, Querétaro">
+    <!-- ESTADO DE MÉXICO -->
+    <option value="Ecatepec">
+    <option value="Nezahualcóyotl">
+    <option value="Naucalpan">
+    <option value="Tlalnepantla">
+    <option value="Toluca">
+    <option value="Atizapán de Zaragoza">
+    <option value="Cuautitlán Izcalli">
+    <option value="Chimalhuacán">
+    <option value="Metepec">
+    <option value="Texcoco">
     
-    <!-- San Luis Potosí -->
-    <option value="San Luis Potosí, San Luis Potosí">
-    <option value="Soledad de Graciano Sánchez, San Luis Potosí">
+    <!-- VERACRUZ -->
+    <option value="Veracruz">
+    <option value="Xalapa">
+    <option value="Coatzacoalcos">
+    <option value="Poza Rica">
+    <option value="Córdoba">
+    <option value="Boca del Río">
+    <option value="Minatitlán">
+    <option value="Orizaba">
     
-    <!-- Aguascalientes -->
-    <option value="Aguascalientes, Aguascalientes">
+    <!-- BAJA CALIFORNIA -->
+    <option value="Tijuana">
+    <option value="Mexicali">
+    <option value="Ensenada">
+    <option value="Tecate">
+    <option value="Rosarito">
     
-    <!-- Jalisco -->
-    <option value="Guadalajara, Jalisco">
-    <option value="Zapopan, Jalisco">
-    <option value="Tlaquepaque, Jalisco">
-    <option value="Tonalá, Jalisco">
-    <option value="Puerto Vallarta, Jalisco">
-    <option value="Lagos de Moreno, Jalisco">
-    <option value="Tlajomulco de Zúñiga, Jalisco">
+    <!-- SONORA -->
+    <option value="Hermosillo">
+    <option value="Ciudad Obregón">
+    <option value="Nogales">
+    <option value="San Luis Río Colorado">
+    <option value="Navojoa">
+    <option value="Guaymas">
+    <option value="Agua Prieta">
     
-    <!-- Michoacán -->
-    <option value="Morelia, Michoacán">
-    <option value="Uruapan, Michoacán">
-    <option value="Zamora, Michoacán">
-    <option value="Apatzingán, Michoacán">
+    <!-- SINALOA -->
+    <option value="Culiacán">
+    <option value="Mazatlán">
+    <option value="Los Mochis">
+    <option value="Guasave">
+    <option value="Guamúchil">
     
-    <!-- Colima -->
-    <option value="Colima, Colima">
-    <option value="Manzanillo, Colima">
+    <!-- TAMAULIPAS -->
+    <option value="Reynosa">
+    <option value="Matamoros">
+    <option value="Nuevo Laredo">
+    <option value="Tampico">
+    <option value="Victoria">
+    <option value="Ciudad Madero">
     
-    <!-- Nayarit -->
-    <option value="Tepic, Nayarit">
+    <!-- YUCATÁN -->
+    <option value="Mérida">
+    <option value="Valladolid">
+    <option value="Tizimín">
+    <option value="Progreso">
     
-    <!-- Ciudad de México y Estado de México -->
-    <option value="Ciudad de México, CDMX">
-    <option value="Ecatepec, Estado de México">
-    <option value="Nezahualcóyotl, Estado de México">
-    <option value="Naucalpan, Estado de México">
-    <option value="Tlalnepantla, Estado de México">
-    <option value="Toluca, Estado de México">
-    <option value="Cuautitlán Izcalli, Estado de México">
-    <option value="Atizapán de Zaragoza, Estado de México">
+    <!-- QUINTANA ROO -->
+    <option value="Cancún">
+    <option value="Playa del Carmen">
+    <option value="Chetumal">
+    <option value="Cozumel">
+    <option value="Tulum">
     
-    <!-- Puebla -->
-    <option value="Puebla, Puebla">
-    <option value="Tehuacán, Puebla">
+    <!-- DURANGO -->
+    <option value="Durango">
+    <option value="Gómez Palacio">
+    <option value="Lerdo">
     
-    <!-- Hidalgo -->
-    <option value="Pachuca, Hidalgo">
-    <option value="Tulancingo, Hidalgo">
+    <!-- AGUASCALIENTES -->
+    <option value="Aguascalientes">
+    <option value="Calvillo">
+    <option value="Jesús María">
     
-    <!-- Morelos -->
-    <option value="Cuernavaca, Morelos">
-    <option value="Jiutepec, Morelos">
+    <!-- SAN LUIS POTOSÍ -->
+    <option value="San Luis Potosí">
+    <option value="Soledad de Graciano Sánchez">
+    <option value="Ciudad Valles">
+    <option value="Matehuala">
     
-    <!-- Tlaxcala -->
-    <option value="Tlaxcala, Tlaxcala">
+    <!-- MICHOACÁN -->
+    <option value="Morelia">
+    <option value="Uruapan">
+    <option value="Zamora">
+    <option value="Lázaro Cárdenas">
+    <option value="Apatzingán">
     
-    <!-- Veracruz -->
-    <option value="Veracruz, Veracruz">
-    <option value="Xalapa, Veracruz">
-    <option value="Coatzacoalcos, Veracruz">
-    <option value="Poza Rica, Veracruz">
-    <option value="Córdoba, Veracruz">
+    <!-- MORELOS -->
+    <option value="Cuernavaca">
+    <option value="Jiutepec">
+    <option value="Cuautla">
+    <option value="Temixco">
     
-    <!-- Oaxaca -->
-    <option value="Oaxaca, Oaxaca">
+    <!-- OAXACA -->
+    <option value="Oaxaca de Juárez">
+    <option value="Salina Cruz">
+    <option value="Tuxtepec">
+    <option value="Juchitán">
     
-    <!-- Chiapas -->
-    <option value="Tuxtla Gutiérrez, Chiapas">
-    <option value="Tapachula, Chiapas">
+    <!-- HIDALGO -->
+    <option value="Pachuca">
+    <option value="Tulancingo">
+    <option value="Tula">
     
-    <!-- Tabasco -->
-    <option value="Villahermosa, Tabasco">
+    <!-- ZACATECAS -->
+    <option value="Zacatecas">
+    <option value="Fresnillo">
+    <option value="Guadalupe">
     
-    <!-- Guerrero -->
-    <option value="Acapulco, Guerrero">
-    <option value="Chilpancingo, Guerrero">
+    <!-- GUERRERO -->
+    <option value="Acapulco">
+    <option value="Chilpancingo">
+    <option value="Iguala">
+    <option value="Zihuatanejo">
     
-    <!-- Yucatán -->
-    <option value="Mérida, Yucatán">
+    <!-- COLIMA -->
+    <option value="Colima">
+    <option value="Manzanillo">
+    <option value="Tecomán">
     
-    <!-- Quintana Roo -->
-    <option value="Cancún, Quintana Roo">
-    <option value="Playa del Carmen, Quintana Roo">
-    <option value="Chetumal, Quintana Roo">
-    <option value="Cozumel, Quintana Roo">
+    <!-- NAYARIT -->
+    <option value="Tepic">
+    <option value="Bahía de Banderas">
+    <option value="Santiago Ixcuintla">
     
-    <!-- Campeche -->
-    <option value="Campeche, Campeche">
+    <!-- TABASCO -->
+    <option value="Villahermosa">
+    <option value="Cárdenas">
+    <option value="Comalcalco">
     
-    <!-- Tamaulipas -->
-    <option value="Reynosa, Tamaulipas">
-    <option value="Matamoros, Tamaulipas">
-    <option value="Nuevo Laredo, Tamaulipas">
-    <option value="Tampico, Tamaulipas">
-    <option value="Ciudad Victoria, Tamaulipas">
+    <!-- CAMPECHE -->
+    <option value="Campeche">
+    <option value="Ciudad del Carmen">
     
-    <!-- Zacatecas -->
-    <option value="Zacatecas, Zacatecas">
+    <!-- CHIAPAS -->
+    <option value="Tuxtla Gutiérrez">
+    <option value="Tapachula">
+    <option value="San Cristóbal de las Casas">
+    <option value="Comitán">
+    
+    <!-- TLAXCALA -->
+    <option value="Tlaxcala">
+    <option value="Apizaco">
+    
+    <!-- BAJA CALIFORNIA SUR -->
+    <option value="La Paz">
+    <option value="Los Cabos">
+    <option value="San José del Cabo">
+    <option value="Cabo San Lucas">
   </datalist>
   
   <script>
