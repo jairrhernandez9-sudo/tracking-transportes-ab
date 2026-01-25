@@ -1005,16 +1005,18 @@
               
               <div style="display: flex; gap: 12px; align-items: flex-start;">
                 <div style="flex: 1;">
-                  <input 
-                    type="text" 
-                    id="prefijo_tracking_input"
-                    name="prefijo_tracking_manual" 
-                    class="form-input" 
-                    value="<%= cliente.prefijo_tracking %>"
-                    placeholder="Ej: ITP, JAB, TDN"
-                    maxlength="10"
-                    style="text-transform: uppercase; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;"
-                  >
+<input 
+  type="text" 
+  id="prefijo_tracking_input"
+  name="prefijo_tracking_manual" 
+  class="form-input" 
+  value="<%= cliente.prefijo_tracking %>"
+  placeholder="Ej: ITP, JAB, TDN"
+  minlength="2"
+  maxlength="10"
+  required
+  style="text-transform: uppercase; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;"
+>
                   <div id="prefijo_status" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"></div>
                 </div>
               </div>
@@ -1124,10 +1126,21 @@
       });
     }
     
-    // Función para verificar disponibilidad
+// Función para verificar disponibilidad
     async function verificarPrefijo(prefijo) {
-      if (!prefijo || prefijo.length < 2) {
+      // ⬅️ NUEVO: Validar longitud mínima
+      if (!prefijo) {
         prefijoStatus.innerHTML = '';
+        return;
+      }
+      
+      if (prefijo.length < 2) {
+        prefijoStatus.innerHTML = '<span style="color: #ef4444; font-weight: 700;">✗ El prefijo debe tener al menos 2 caracteres</span>';
+        return;
+      }
+      
+      if (prefijo.length > 10) {
+        prefijoStatus.innerHTML = '<span style="color: #ef4444; font-weight: 700;">✗ El prefijo no puede tener más de 10 caracteres</span>';
         return;
       }
       

@@ -161,12 +161,14 @@ async function generarSiguienteTracking(clienteId) {
  * @returns {object} { valido: boolean, error: string }
  */
 function validarFormatoPrefijo(prefijo) {
-  if (!prefijo || typeof prefijo !== 'string') {
-    return { valido: false, error: 'El prefijo es obligatorio' };
+  // Validar que no esté vacío
+  if (!prefijo || prefijo.trim() === '') {
+    return { valido: false, error: 'El prefijo no puede estar vacío' };
   }
   
   const prefijoLimpio = prefijo.trim().toUpperCase();
   
+  // ⬅️ VALIDAR LONGITUD: mínimo 2, máximo 10
   if (prefijoLimpio.length < 2) {
     return { valido: false, error: 'El prefijo debe tener al menos 2 caracteres' };
   }
@@ -175,13 +177,12 @@ function validarFormatoPrefijo(prefijo) {
     return { valido: false, error: 'El prefijo no puede tener más de 10 caracteres' };
   }
   
-  // Solo letras mayúsculas y números
-  const regex = /^[A-Z0-9]+$/;
-  if (!regex.test(prefijoLimpio)) {
-    return { valido: false, error: 'El prefijo solo puede contener letras mayúsculas y números' };
+  // Validar que solo contenga letras y números
+  if (!/^[A-Z0-9]+$/.test(prefijoLimpio)) {
+    return { valido: false, error: 'El prefijo solo puede contener letras y números (sin espacios ni caracteres especiales)' };
   }
   
-  return { valido: true, error: null };
+  return { valido: true };
 }
 
 // =====================================================
