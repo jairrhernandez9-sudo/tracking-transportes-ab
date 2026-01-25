@@ -969,37 +969,257 @@
                 Ubicaciones
               </h2>
               
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label required">Origen</label>
-                  <input 
-                    type="text" 
-                    name="origen" 
-                    class="form-input" 
-                    list="ubicaciones"
-                    placeholder="Escribe o selecciona una ciudad..."
-                    required
-                  >
-                  <p class="form-help">
-                    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-                    Escribe o selecciona de las ciudades disponibles
-                  </p>
+<div class="form-row">
+                <!-- ============================================ -->
+                <!-- ORIGEN - CAMPOS DETALLADOS -->
+                <!-- ============================================ -->
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e40af; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
+                    Dirección de Origen
+                  </h3>
+                  
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #f0f9ff; padding: 20px; border-radius: 12px; border: 2px solid #3b82f6;">
+                    
+                    <!-- Calle y Número -->
+                    <div style="grid-column: 1 / -1;">
+                      <label class="form-label required">
+                        <i data-lucide="home" style="width: 14px; height: 14px;"></i>
+                        Calle y Número
+                      </label>
+                      <input 
+                        type="text" 
+                        name="origen_calle" 
+                        class="form-input" 
+                        placeholder="Ej: Av. Constitución 123"
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Colonia -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="map" style="width: 14px; height: 14px;"></i>
+                        Colonia
+                      </label>
+                      <input 
+                        type="text" 
+                        name="origen_colonia" 
+                        class="form-input" 
+                        placeholder="Ej: Centro"
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Código Postal -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="hash" style="width: 14px; height: 14px;"></i>
+                        Código Postal
+                      </label>
+                      <input 
+                        type="text" 
+                        name="origen_cp" 
+                        class="form-input" 
+                        placeholder="Ej: 64000"
+                        maxlength="5"
+                        pattern="[0-9]{5}"
+                        title="Debe ser un código postal de 5 dígitos"
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Ciudad -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="building-2" style="width: 14px; height: 14px;"></i>
+                        Ciudad
+                      </label>
+                      <input 
+                        type="text" 
+                        name="origen_ciudad" 
+                        class="form-input" 
+                        list="ciudades"
+                        placeholder="Escribe o selecciona..."
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="map-pinned" style="width: 14px; height: 14px;"></i>
+                        Estado
+                      </label>
+                      <select 
+                        name="origen_estado" 
+                        class="form-input" 
+                        required
+                        style="cursor: pointer;"
+                      >
+                        <option value="">Selecciona un estado...</option>
+                        <option value="Aguascalientes">Aguascalientes</option>
+                        <option value="Baja California">Baja California</option>
+                        <option value="Baja California Sur">Baja California Sur</option>
+                        <option value="Campeche">Campeche</option>
+                        <option value="Chiapas">Chiapas</option>
+                        <option value="Chihuahua">Chihuahua</option>
+                        <option value="Ciudad de México">Ciudad de México</option>
+                        <option value="Coahuila">Coahuila</option>
+                        <option value="Colima">Colima</option>
+                        <option value="Durango">Durango</option>
+                        <option value="Guanajuato">Guanajuato</option>
+                        <option value="Guerrero">Guerrero</option>
+                        <option value="Hidalgo">Hidalgo</option>
+                        <option value="Jalisco">Jalisco</option>
+                        <option value="México">México</option>
+                        <option value="Michoacán">Michoacán</option>
+                        <option value="Morelos">Morelos</option>
+                        <option value="Nayarit">Nayarit</option>
+                        <option value="Nuevo León">Nuevo León</option>
+                        <option value="Oaxaca">Oaxaca</option>
+                        <option value="Puebla">Puebla</option>
+                        <option value="Querétaro">Querétaro</option>
+                        <option value="Quintana Roo">Quintana Roo</option>
+                        <option value="San Luis Potosí">San Luis Potosí</option>
+                        <option value="Sinaloa">Sinaloa</option>
+                        <option value="Sonora">Sonora</option>
+                        <option value="Tabasco">Tabasco</option>
+                        <option value="Tamaulipas">Tamaulipas</option>
+                        <option value="Tlaxcala">Tlaxcala</option>
+                        <option value="Veracruz">Veracruz</option>
+                        <option value="Yucatán">Yucatán</option>
+                        <option value="Zacatecas">Zacatecas</option>
+                      </select>
+                    </div>
+                    
+                  </div>
                 </div>
                 
-                <div class="form-group">
-                  <label class="form-label required">Destino</label>
-                  <input 
-                    type="text" 
-                    name="destino" 
-                    class="form-input" 
-                    list="ubicaciones"
-                    placeholder="Escribe o selecciona una ciudad..."
-                    required
-                  >
-                  <p class="form-help">
-                    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-                    Escribe o selecciona de las ciudades disponibles
-                  </p>
+                <!-- ============================================ -->
+                <!-- DESTINO - CAMPOS DETALLADOS -->
+                <!-- ============================================ -->
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <h3 style="font-size: 1.1rem; font-weight: 700; color: #dc2626; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
+                    Dirección de Destino
+                  </h3>
+                  
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #fef2f2; padding: 20px; border-radius: 12px; border: 2px solid #ef4444;">
+                    
+                    <!-- Calle y Número -->
+                    <div style="grid-column: 1 / -1;">
+                      <label class="form-label required">
+                        <i data-lucide="home" style="width: 14px; height: 14px;"></i>
+                        Calle y Número
+                      </label>
+                      <input 
+                        type="text" 
+                        name="destino_calle" 
+                        class="form-input" 
+                        placeholder="Ej: Calle Morelos 456"
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Colonia -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="map" style="width: 14px; height: 14px;"></i>
+                        Colonia
+                      </label>
+                      <input 
+                        type="text" 
+                        name="destino_colonia" 
+                        class="form-input" 
+                        placeholder="Ej: San Jerónimo"
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Código Postal -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="hash" style="width: 14px; height: 14px;"></i>
+                        Código Postal
+                      </label>
+                      <input 
+                        type="text" 
+                        name="destino_cp" 
+                        class="form-input" 
+                        placeholder="Ej: 01000"
+                        maxlength="5"
+                        pattern="[0-9]{5}"
+                        title="Debe ser un código postal de 5 dígitos"
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Ciudad -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="building-2" style="width: 14px; height: 14px;"></i>
+                        Ciudad
+                      </label>
+                      <input 
+                        type="text" 
+                        name="destino_ciudad" 
+                        class="form-input" 
+                        list="ciudades"
+                        placeholder="Escribe o selecciona..."
+                        required
+                      >
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div>
+                      <label class="form-label required">
+                        <i data-lucide="map-pinned" style="width: 14px; height: 14px;"></i>
+                        Estado
+                      </label>
+                      <select 
+                        name="destino_estado" 
+                        class="form-input" 
+                        required
+                        style="cursor: pointer;"
+                      >
+                        <option value="">Selecciona un estado...</option>
+                        <option value="Aguascalientes">Aguascalientes</option>
+                        <option value="Baja California">Baja California</option>
+                        <option value="Baja California Sur">Baja California Sur</option>
+                        <option value="Campeche">Campeche</option>
+                        <option value="Chiapas">Chiapas</option>
+                        <option value="Chihuahua">Chihuahua</option>
+                        <option value="Ciudad de México">Ciudad de México</option>
+                        <option value="Coahuila">Coahuila</option>
+                        <option value="Colima">Colima</option>
+                        <option value="Durango">Durango</option>
+                        <option value="Guanajuato">Guanajuato</option>
+                        <option value="Guerrero">Guerrero</option>
+                        <option value="Hidalgo">Hidalgo</option>
+                        <option value="Jalisco">Jalisco</option>
+                        <option value="México">México</option>
+                        <option value="Michoacán">Michoacán</option>
+                        <option value="Morelos">Morelos</option>
+                        <option value="Nayarit">Nayarit</option>
+                        <option value="Nuevo León">Nuevo León</option>
+                        <option value="Oaxaca">Oaxaca</option>
+                        <option value="Puebla">Puebla</option>
+                        <option value="Querétaro">Querétaro</option>
+                        <option value="Quintana Roo">Quintana Roo</option>
+                        <option value="San Luis Potosí">San Luis Potosí</option>
+                        <option value="Sinaloa">Sinaloa</option>
+                        <option value="Sonora">Sonora</option>
+                        <option value="Tabasco">Tabasco</option>
+                        <option value="Tamaulipas">Tamaulipas</option>
+                        <option value="Tlaxcala">Tlaxcala</option>
+                        <option value="Veracruz">Veracruz</option>
+                        <option value="Yucatán">Yucatán</option>
+                        <option value="Zacatecas">Zacatecas</option>
+                      </select>
+                    </div>
+                    
+                  </div>
                 </div>
               </div>
             </div>
@@ -1025,7 +1245,7 @@
   </div>
   
   <!-- Lista de ubicaciones principales de México -->
-  <datalist id="ubicaciones">
+  <datalist id="ciudades">
     <!-- Nuevo León -->
     <option value="Monterrey, Nuevo León">
     <option value="Guadalupe, Nuevo León">
