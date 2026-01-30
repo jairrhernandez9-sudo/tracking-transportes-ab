@@ -1048,6 +1048,139 @@
               Guardar cambios
             </button>
           </form>
+          <!-- ============================================ -->
+          <!-- SECCIÓN: DIRECCIONES DE ORIGEN -->
+          <!-- ============================================ -->
+          <div style="margin-top: 48px; padding-top: 32px; border-top: 2px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+              <div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                  <i data-lucide="map-pin" style="width: 28px; height: 28px; color: #3b82f6;"></i>
+                  Direcciones de Origen
+                </h2>
+                <p style="color: #6b7280; font-size: 0.95rem;">
+                  Ubicaciones desde donde tu empresa envía paquetes
+                </p>
+              </div>
+              <button 
+                onclick="modalNuevaDireccion()"
+                style="padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: all 0.3s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'"
+              >
+                <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                Nueva Dirección
+              </button>
+            </div>
+
+            <% if (direccionesEmpresa && direccionesEmpresa.length > 0) { %>
+              <div style="display: grid; gap: 16px;">
+                <% direccionesEmpresa.forEach(function(dir) { %>
+                  <div style="background: white; padding: 24px; border-radius: 12px; border: 2px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); transition: all 0.3s;" 
+                       onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 16px rgba(59, 130, 246, 0.1)'"
+                       onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                      <!-- Info de la dirección -->
+                      <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                          <h3 style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin: 0;">
+                            <%= dir.alias %>
+                          </h3>
+                          <% if (dir.es_predeterminada) { %>
+                            <span style="padding: 4px 12px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border-radius: 6px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                              <i data-lucide="star" style="width: 12px; height: 12px;"></i>
+                              PREDETERMINADA
+                            </span>
+                          <% } %>
+                        </div>
+                        
+                        <div style="color: #4b5563; line-height: 1.6;">
+                          <p style="margin: 0 0 4px 0; font-weight: 500;">
+                            📍 <%= dir.calle %>, <%= dir.colonia %>
+                          </p>
+                          <p style="margin: 0 0 4px 0;">
+                            🏙️ <%= dir.ciudad %>, <%= dir.estado %>, <%= dir.cp %>
+                          </p>
+                          <% if (dir.referencia) { %>
+                            <p style="margin: 8px 0 0 0; padding: 8px 12px; background: #f9fafb; border-radius: 6px; font-size: 0.875rem;">
+                              ℹ️ <strong>Ref:</strong> <%= dir.referencia %>
+                            </p>
+                          <% } %>
+                        </div>
+                      </div>
+                      
+                      <!-- Botones de acción -->
+                      <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                        <% if (!dir.es_predeterminada) { %>
+                          <form action="/configuracion/direcciones/<%= dir.id %>/predeterminada" method="POST" style="margin: 0;">
+                            <button 
+                              type="submit"
+                              title="Marcar como predeterminada"
+                              style="padding: 8px 12px; background: #fbbf24; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.875rem;"
+                              onmouseover="this.style.background='#f59e0b'"
+                              onmouseout="this.style.background='#fbbf24'"
+                            >
+                              <i data-lucide="star" style="width: 16px; height: 16px;"></i>
+                              Predeterminada
+                            </button>
+                          </form>
+                        <% } %>
+                        
+<button 
+                          class="btn-editar-direccion"
+                          data-id="<%= dir.id %>"
+                          data-alias="<%= dir.alias %>"
+                          data-calle="<%= dir.calle %>"
+                          data-colonia="<%= dir.colonia %>"
+                          data-ciudad="<%= dir.ciudad %>"
+                          data-estado="<%= dir.estado %>"
+                          data-cp="<%= dir.cp %>"
+                          data-referencia="<%= dir.referencia || '' %>"
+                          data-predeterminada="<%= dir.es_predeterminada ? 'true' : 'false' %>"
+                          style="padding: 8px 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.875rem;"
+                          onmouseover="this.style.background='#2563eb'"
+                          onmouseout="this.style.background='#3b82f6'"
+                        >
+                          <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
+                          Editar
+                        </button>
+                        
+                        <form action="/configuracion/direcciones/<%= dir.id %>/eliminar" method="POST" style="margin: 0;" onsubmit="return confirm('¿Eliminar esta dirección?')">
+                          <button 
+                            type="submit"
+                            style="padding: 8px 12px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.875rem;"
+                            onmouseover="this.style.background='#dc2626'"
+                            onmouseout="this.style.background='#ef4444'"
+                          >
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                            Eliminar
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <div style="background: #f9fafb; padding: 48px; border-radius: 12px; text-align: center; border: 2px dashed #d1d5db;">
+                <i data-lucide="map-pin" style="width: 64px; height: 64px; color: #9ca3af; margin: 0 auto 16px; display: block;"></i>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #4b5563; margin-bottom: 8px;">
+                  No hay direcciones registradas
+                </h3>
+                <p style="color: #6b7280; margin-bottom: 24px;">
+                  Agrega las ubicaciones desde donde tu empresa envía paquetes
+                </p>
+                <button 
+                  onclick="modalNuevaDireccion()"
+                  style="padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;"
+                >
+                  <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                  Agregar Primera Dirección
+                </button>
+              </div>
+            <% } %>
+          </div>
         </div>
         
         <!-- TAB: TARIFAS -->
@@ -1546,6 +1679,302 @@
       
       lucide.createIcons();
     }
+  </script>
+
+  <!-- ============================================ -->
+  <!-- MODALES PARA DIRECCIONES -->
+  <!-- ============================================ -->
+  
+  <!-- Modal: Nueva Dirección -->
+  <div id="modalNuevaDireccion" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; padding: 32px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 12px;">
+          <i data-lucide="map-pin" style="width: 28px; height: 28px; color: #3b82f6;"></i>
+          Nueva Dirección de Origen
+        </h2>
+        <button onclick="cerrarModalNuevaDireccion()" style="background: none; border: none; cursor: pointer; padding: 8px; border-radius: 8px;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+          <i data-lucide="x" style="width: 24px; height: 24px; color: #6b7280;"></i>
+        </button>
+      </div>
+      
+      <form action="/configuracion/direcciones/nueva" method="POST">
+        <div style="display: grid; gap: 16px;">
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">
+              🏷️ Alias (Nombre descriptivo) *
+            </label>
+            <input type="text" name="alias" required placeholder="Ej: Bodega Central, Almacén Norte" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            <p style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;">Nombre para identificar esta dirección</p>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Calle y Número *</label>
+            <input type="text" name="calle" required placeholder="Ej: Av. Constitución 123" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🏘️ Colonia *</label>
+              <input type="text" name="colonia" required placeholder="Ej: Centro" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🔢 Código Postal *</label>
+              <input type="text" name="cp" required placeholder="Ej: 64000" maxlength="5" pattern="[0-9]{5}" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🏙️ Ciudad *</label>
+              <input type="text" name="ciudad" required placeholder="Ej: Monterrey" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Estado *</label>
+              <select name="estado" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; cursor: pointer;">
+                <option value="">Seleccionar...</option>
+                <option value="Aguascalientes">Aguascalientes</option>
+                <option value="Baja California">Baja California</option>
+                <option value="Baja California Sur">Baja California Sur</option>
+                <option value="Campeche">Campeche</option>
+                <option value="Chiapas">Chiapas</option>
+                <option value="Chihuahua">Chihuahua</option>
+                <option value="Ciudad de México">Ciudad de México</option>
+                <option value="Coahuila">Coahuila</option>
+                <option value="Colima">Colima</option>
+                <option value="Durango">Durango</option>
+                <option value="Guanajuato">Guanajuato</option>
+                <option value="Guerrero">Guerrero</option>
+                <option value="Hidalgo">Hidalgo</option>
+                <option value="Jalisco">Jalisco</option>
+                <option value="México">México</option>
+                <option value="Michoacán">Michoacán</option>
+                <option value="Morelos">Morelos</option>
+                <option value="Nayarit">Nayarit</option>
+                <option value="Nuevo León">Nuevo León</option>
+                <option value="Oaxaca">Oaxaca</option>
+                <option value="Puebla">Puebla</option>
+                <option value="Querétaro">Querétaro</option>
+                <option value="Quintana Roo">Quintana Roo</option>
+                <option value="San Luis Potosí">San Luis Potosí</option>
+                <option value="Sinaloa">Sinaloa</option>
+                <option value="Sonora">Sonora</option>
+                <option value="Tabasco">Tabasco</option>
+                <option value="Tamaulipas">Tamaulipas</option>
+                <option value="Tlaxcala">Tlaxcala</option>
+                <option value="Veracruz">Veracruz</option>
+                <option value="Yucatán">Yucatán</option>
+                <option value="Zacatecas">Zacatecas</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">ℹ️ Referencias (Opcional)</label>
+            <input type="text" name="referencia" placeholder="Ej: Andén 5, Portón azul, Muelle B" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+          </div>
+          
+          <div style="background: #fef3c7; padding: 16px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="es_predeterminada" style="width: 18px; height: 18px; cursor: pointer;">
+              <span style="font-weight: 600; color: #92400e;">
+                ⭐ Marcar como dirección predeterminada
+              </span>
+            </label>
+            <p style="font-size: 0.75rem; color: #78350f; margin-top: 4px; margin-left: 26px;">
+              Esta dirección se seleccionará automáticamente al crear nuevos envíos
+            </p>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+          <button type="button" onclick="cerrarModalNuevaDireccion()" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; border-radius: 10px; font-weight: 600; cursor: pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="padding: 12px 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
+            <i data-lucide="save" style="width: 18px; height: 18px; display: inline; vertical-align: middle; margin-right: 8px;"></i>
+            Guardar Dirección
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Modal: Editar Dirección -->
+  <div id="modalEditarDireccion" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; padding: 32px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 12px;">
+          <i data-lucide="edit-2" style="width: 28px; height: 28px; color: #3b82f6;"></i>
+          Editar Dirección
+        </h2>
+        <button onclick="cerrarModalEditarDireccion()" style="background: none; border: none; cursor: pointer; padding: 8px; border-radius: 8px;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+          <i data-lucide="x" style="width: 24px; height: 24px; color: #6b7280;"></i>
+        </button>
+      </div>
+      
+      <form id="formEditarDireccion" method="POST">
+        <div style="display: grid; gap: 16px;">
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🏷️ Alias *</label>
+            <input type="text" id="edit_alias" name="alias" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Calle y Número *</label>
+            <input type="text" id="edit_calle" name="calle" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🏘️ Colonia *</label>
+              <input type="text" id="edit_colonia" name="colonia" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🔢 Código Postal *</label>
+              <input type="text" id="edit_cp" name="cp" required maxlength="5" pattern="[0-9]{5}" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🏙️ Ciudad *</label>
+              <input type="text" id="edit_ciudad" name="ciudad" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Estado *</label>
+              <select id="edit_estado" name="estado" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; cursor: pointer;">
+                <option value="">Seleccionar...</option>
+                <option value="Aguascalientes">Aguascalientes</option>
+                <option value="Baja California">Baja California</option>
+                <option value="Baja California Sur">Baja California Sur</option>
+                <option value="Campeche">Campeche</option>
+                <option value="Chiapas">Chiapas</option>
+                <option value="Chihuahua">Chihuahua</option>
+                <option value="Ciudad de México">Ciudad de México</option>
+                <option value="Coahuila">Coahuila</option>
+                <option value="Colima">Colima</option>
+                <option value="Durango">Durango</option>
+                <option value="Guanajuato">Guanajuato</option>
+                <option value="Guerrero">Guerrero</option>
+                <option value="Hidalgo">Hidalgo</option>
+                <option value="Jalisco">Jalisco</option>
+                <option value="México">México</option>
+                <option value="Michoacán">Michoacán</option>
+                <option value="Morelos">Morelos</option>
+                <option value="Nayarit">Nayarit</option>
+                <option value="Nuevo León">Nuevo León</option>
+                <option value="Oaxaca">Oaxaca</option>
+                <option value="Puebla">Puebla</option>
+                <option value="Querétaro">Querétaro</option>
+                <option value="Quintana Roo">Quintana Roo</option>
+                <option value="San Luis Potosí">San Luis Potosí</option>
+                <option value="Sinaloa">Sinaloa</option>
+                <option value="Sonora">Sonora</option>
+                <option value="Tabasco">Tabasco</option>
+                <option value="Tamaulipas">Tamaulipas</option>
+                <option value="Tlaxcala">Tlaxcala</option>
+                <option value="Veracruz">Veracruz</option>
+                <option value="Yucatán">Yucatán</option>
+                <option value="Zacatecas">Zacatecas</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">ℹ️ Referencias</label>
+            <input type="text" id="edit_referencia" name="referencia" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+          </div>
+          
+          <div style="background: #fef3c7; padding: 16px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="edit_predeterminada" name="es_predeterminada" style="width: 18px; height: 18px; cursor: pointer;">
+              <span style="font-weight: 600; color: #92400e;">⭐ Marcar como predeterminada</span>
+            </label>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+          <button type="button" onclick="cerrarModalEditarDireccion()" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; border-radius: 10px; font-weight: 600; cursor: pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="padding: 12px 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
+            <i data-lucide="save" style="width: 18px; height: 18px; display: inline; vertical-align: middle; margin-right: 8px;"></i>
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Funciones para modal nueva dirección
+    function modalNuevaDireccion() {
+      document.getElementById('modalNuevaDireccion').style.display = 'flex';
+      lucide.createIcons();
+    }
+    
+    function cerrarModalNuevaDireccion() {
+      document.getElementById('modalNuevaDireccion').style.display = 'none';
+    }
+    
+    // Funciones para modal editar dirección
+    function modalEditarDireccion(id, alias, calle, colonia, ciudad, estado, cp, referencia, predeterminada) {
+      document.getElementById('formEditarDireccion').action = '/configuracion/direcciones/' + id + '/editar';
+      document.getElementById('edit_alias').value = alias;
+      document.getElementById('edit_calle').value = calle;
+      document.getElementById('edit_colonia').value = colonia;
+      document.getElementById('edit_ciudad').value = ciudad;
+      document.getElementById('edit_estado').value = estado;
+      document.getElementById('edit_cp').value = cp;
+      document.getElementById('edit_referencia').value = referencia;
+      document.getElementById('edit_predeterminada').checked = predeterminada === 'true' || predeterminada === true;
+      
+      document.getElementById('modalEditarDireccion').style.display = 'flex';
+      lucide.createIcons();
+    }
+
+        // Event listener para botones de editar
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.btn-editar-direccion').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          modalEditarDireccion(
+            this.dataset.id,
+            this.dataset.alias,
+            this.dataset.calle,
+            this.dataset.colonia,
+            this.dataset.ciudad,
+            this.dataset.estado,
+            this.dataset.cp,
+            this.dataset.referencia,
+            this.dataset.predeterminada
+          );
+        });
+      });
+    });
+    
+    function cerrarModalEditarDireccion() {
+      document.getElementById('modalEditarDireccion').style.display = 'none';
+    }
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        cerrarModalNuevaDireccion();
+        cerrarModalEditarDireccion();
+      }
+    });
+    
+    // Cerrar haciendo clic fuera
+    document.getElementById('modalNuevaDireccion').addEventListener('click', function(e) {
+      if (e.target === this) cerrarModalNuevaDireccion();
+    });
+    
+    document.getElementById('modalEditarDireccion').addEventListener('click', function(e) {
+      if (e.target === this) cerrarModalEditarDireccion();
+    });
   </script>
 </body>
 </html>
