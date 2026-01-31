@@ -325,6 +325,13 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       [id]
     );
     
+    // Obtener direcciones del cliente
+    const [direcciones] = await db.query(`
+      SELECT * FROM direcciones_cliente 
+      WHERE cliente_id = ? AND activa = 1 
+      ORDER BY es_predeterminada DESC, alias ASC
+    `, [id]);
+    
     res.render('clientes/detalle', {
       title: cliente.nombre_empresa,
       user: {
@@ -334,7 +341,10 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       },
       cliente,
       envios,
-      stats: stats[0]
+      stats: stats[0],
+       direcciones, 
+      success: req.query.success, 
+      error: req.query.error 
     });
     
   } catch (error) {
