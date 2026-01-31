@@ -394,14 +394,23 @@ router.post('/direcciones/:id/predeterminada', async (req, res) => {
   }
 });
 
-// API: Obtener direcciones de empresa (para formularios de envío)
-router.get('/api/direcciones', async (req, res) => {
+
+
+// ============================================
+// API: OBTENER DIRECCIONES DE EMPRESA (JSON)
+// ============================================
+router.get('/api/direcciones', isAuthenticated, async (req, res) => {
   try {
-    const direcciones = await obtenerDireccionesEmpresa();
-    res.json(direcciones);
+    const [direcciones] = await db.query(`
+      SELECT * FROM direcciones_empresa 
+      WHERE activa = 1 
+      ORDER BY es_predeterminada DESC, alias ASC
+    `);
+    
+    res.json({ success: true, direcciones });
   } catch (error) {
-    console.error('Error al obtener direcciones:', error);
-    res.status(500).json({ error: 'Error al obtener direcciones' });
+    console.error('Error al obtener direcciones empresa:', error);
+    res.status(500).json({ success: false, message: 'Error al cargar direcciones' });
   }
 });
 

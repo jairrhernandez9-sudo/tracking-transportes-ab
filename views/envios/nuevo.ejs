@@ -970,6 +970,27 @@
               </h2>
               
 <div class="form-row">
+  <!-- ============================================ -->
+<!-- DROPDOWN: DIRECCIÓN DE ORIGEN -->
+<!-- ============================================ -->
+<div class="form-group" style="grid-column: 1 / -1;">
+  <label class="form-label">
+    <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i>
+    Dirección de Origen Guardada
+  </label>
+  <select 
+    id="direccionOrigenSelect" 
+    class="form-select" 
+    style="cursor: pointer; font-weight: 600;"
+  >
+    <option value="">📝 Ingresar manualmente...</option>
+    <!-- Se llenan vía JavaScript -->
+  </select>
+  <p class="form-help" style="margin-top: 6px;">
+    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+    Selecciona una dirección guardada o ingresa manualmente
+  </p>
+</div>
                 <!-- ============================================ -->
                 <!-- ORIGEN - CAMPOS DETALLADOS -->
                 <!-- ============================================ -->
@@ -1114,6 +1135,27 @@
                   </div>
                 </div>
                 
+                <!-- ============================================ -->
+<!-- DROPDOWN: DIRECCIÓN DE DESTINO -->
+<!-- ============================================ -->
+<div class="form-group" style="grid-column: 1 / -1;">
+  <label class="form-label">
+    <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i>
+    Dirección de Destino Guardada
+  </label>
+  <select 
+    id="direccionDestinoSelect" 
+    class="form-select" 
+    style="cursor: pointer; font-weight: 600;"
+    disabled
+  >
+    <option value="">Primero selecciona un cliente...</option>
+  </select>
+  <p class="form-help" style="margin-top: 6px;">
+    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
+    Las direcciones del cliente aparecerán aquí
+  </p>
+</div>
                 <!-- ============================================ -->
                 <!-- DESTINO - CAMPOS DETALLADOS -->
                 <!-- ============================================ -->
@@ -1570,6 +1612,160 @@
         fechaInput.min = `${year}-${month}-${day}`;
       }
     });
+
+    // ============================================
+// CARGAR DIRECCIONES DE EMPRESA (ORIGEN)
+// ============================================
+async function cargarDireccionesOrigen() {
+  try {
+    const response = await fetch('/configuracion/api/direcciones');
+    const data = await response.json();
+    
+    if (data.success && data.direcciones) {
+      const select = document.getElementById('direccionOrigenSelect');
+      
+      // Limpiar opciones existentes (excepto la primera)
+      select.innerHTML = '<option value="">📝 Ingresar manualmente...</option>';
+      
+      // Agregar direcciones
+      data.direcciones.forEach(dir => {
+        const option = document.createElement('option');
+        option.value = dir.id;
+        option.textContent = `${dir.es_predeterminada ? '⭐ ' : ''}${dir.alias} - ${dir.ciudad}, ${dir.estado}`;
+        option.dataset.calle = dir.calle;
+        option.dataset.colonia = dir.colonia;
+        option.dataset.cp = dir.cp;
+        option.dataset.ciudad = dir.ciudad;
+        option.dataset.estado = dir.estado;
+        option.dataset.referencia = dir.referencia || '';
+        select.appendChild(option);
+      });
+      
+      lucide.createIcons();
+    }
+  } catch (error) {
+    console.error('Error al cargar direcciones de origen:', error);
+  }
+}
+
+// ============================================
+// CARGAR DIRECCIONES DEL CLIENTE (DESTINO)
+// ============================================
+async function cargarDireccionesDestino(clienteId) {
+  const select = document.getElementById('direccionDestinoSelect');
+  
+  if (!clienteId) {
+    select.disabled = true;
+    select.innerHTML = '<option value="">Primero selecciona un cliente...</option>';
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/direcciones/cliente/${clienteId}`);
+    const data = await response.json();
+    
+    select.innerHTML = '<option value="">📝 Ingresar manualmente...</option>';
+    
+    if (data.success && data.direcciones && data.direcciones.length > 0) {
+      data.direcciones.forEach(dir => {
+        const option = document.createElement('option');
+        option.value = dir.id;
+        option.textContent = `${dir.es_predeterminada ? '⭐ ' : ''}${dir.alias} - ${dir.ciudad}, ${dir.estado}`;
+        option.dataset.calle = dir.calle;
+        option.dataset.colonia = dir.colonia;
+        option.dataset.cp = dir.cp;
+        option.dataset.ciudad = dir.ciudad;
+        option.dataset.estado = dir.estado;
+        option.dataset.referencia = dir.referencia || '';
+        select.appendChild(option);
+      });
+      select.disabled = false;
+    } else {
+      select.innerHTML = '<option value="">Este cliente no tiene direcciones guardadas</option>';
+      select.disabled = true;
+    }
+    
+    lucide.createIcons();
+  } catch (error) {
+    console.error('Error al cargar direcciones del cliente:', error);
+    select.innerHTML = '<option value="">Error al cargar direcciones</option>';
+    select.disabled = true;
+  }
+}
+
+// ============================================
+// AUTO-LLENAR CAMPOS AL SELECCIONAR ORIGEN
+// ============================================
+document.getElementById('direccionOrigenSelect')?.addEventListener('change', function() {
+  const selectedOption = this.options[this.selectedIndex];
+  
+  if (this.value === '') {
+    // Limpiar campos si selecciona "Ingresar manualmente"
+    document.querySelector('[name="origen_calle"]').value = '';
+    document.querySelector('[name="origen_colonia"]').value = '';
+    document.querySelector('[name="origen_cp"]').value = '';
+    document.querySelector('[name="origen_ciudad"]').value = '';
+    document.querySelector('[name="origen_estado"]').value = '';
+    document.querySelector('[name="origen_referencia"]').value = '';
+    return;
+  }
+  
+  // Auto-llenar con datos de la dirección seleccionada
+  document.querySelector('[name="origen_calle"]').value = selectedOption.dataset.calle || '';
+  document.querySelector('[name="origen_colonia"]').value = selectedOption.dataset.colonia || '';
+  document.querySelector('[name="origen_cp"]').value = selectedOption.dataset.cp || '';
+  document.querySelector('[name="origen_ciudad"]').value = selectedOption.dataset.ciudad || '';
+  document.querySelector('[name="origen_estado"]').value = selectedOption.dataset.estado || '';
+  document.querySelector('[name="origen_referencia"]').value = selectedOption.dataset.referencia || '';
+});
+
+// ============================================
+// AUTO-LLENAR CAMPOS AL SELECCIONAR DESTINO
+// ============================================
+document.getElementById('direccionDestinoSelect')?.addEventListener('change', function() {
+  const selectedOption = this.options[this.selectedIndex];
+  
+  if (this.value === '') {
+    // Limpiar campos si selecciona "Ingresar manualmente"
+    document.querySelector('[name="destino_calle"]').value = '';
+    document.querySelector('[name="destino_colonia"]').value = '';
+    document.querySelector('[name="destino_cp"]').value = '';
+    document.querySelector('[name="destino_ciudad"]').value = '';
+    document.querySelector('[name="destino_estado"]').value = '';
+    document.querySelector('[name="destino_referencia"]').value = '';
+    return;
+  }
+  
+  // Auto-llenar con datos de la dirección seleccionada
+  document.querySelector('[name="destino_calle"]').value = selectedOption.dataset.calle || '';
+  document.querySelector('[name="destino_colonia"]').value = selectedOption.dataset.colonia || '';
+  document.querySelector('[name="destino_cp"]').value = selectedOption.dataset.cp || '';
+  document.querySelector('[name="destino_ciudad"]').value = selectedOption.dataset.ciudad || '';
+  document.querySelector('[name="destino_estado"]').value = selectedOption.dataset.estado || '';
+  document.querySelector('[name="destino_referencia"]').value = selectedOption.dataset.referencia || '';
+});
+
+// ============================================
+// DETECTAR CAMBIO DE CLIENTE
+// ============================================
+document.querySelector('[name="cliente_id"]')?.addEventListener('change', function() {
+  const clienteId = this.value;
+  cargarDireccionesDestino(clienteId);
+});
+
+// ============================================
+// INICIALIZAR AL CARGAR LA PÁGINA
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Cargar direcciones de origen (empresa)
+  cargarDireccionesOrigen();
+  
+  // Si ya hay un cliente seleccionado (por ejemplo, en edición), cargar sus direcciones
+  const clienteSelect = document.querySelector('[name="cliente_id"]');
+  if (clienteSelect && clienteSelect.value) {
+    cargarDireccionesDestino(clienteSelect.value);
+  }
+});
   </script>
 </body>
 </html>
