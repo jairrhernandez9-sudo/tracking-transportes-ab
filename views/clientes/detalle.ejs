@@ -1325,122 +1325,6 @@
           </div>
         </div>
           
-          <!-- ============================================ -->
-          <!-- DIRECCIONES DEL CLIENTE -->
-          <!-- ============================================ -->
-          <div class="info-card" style="margin-top: 24px;">
-            <div class="card-header">
-              <h2 class="card-title">
-                <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
-                Direcciones de Destino
-              </h2>
-              <button 
-                onclick="modalNuevaDireccionCliente()"
-                style="padding: 8px 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.3s;"
-                onmouseover="this.style.transform='translateY(-2px)'"
-                onmouseout="this.style.transform='translateY(0)'"
-              >
-                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                Nueva Dirección
-              </button>
-            </div>
-            
-            <% if (direcciones && direcciones.length > 0) { %>
-              <div style="display: grid; gap: 12px; margin-top: 16px;">
-                <% direcciones.forEach(function(dir) { %>
-                  <div style="background: white; padding: 16px; border-radius: 10px; border: 2px solid #e5e7eb; transition: all 0.3s;"
-                       onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.1)'"
-                       onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                      <!-- Info -->
-                      <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                          <h3 style="font-size: 1rem; font-weight: 700; color: #1f2937; margin: 0;">
-                            <%= dir.alias %>
-                          </h3>
-                          <% if (dir.es_predeterminada) { %>
-                            <span style="padding: 2px 8px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">
-                              ⭐ PREDETERMINADA
-                            </span>
-                          <% } %>
-                        </div>
-                        
-                        <div style="color: #4b5563; font-size: 0.875rem; line-height: 1.5;">
-                          <p style="margin: 0 0 2px 0;">
-                            📍 <%= dir.calle %>, <%= dir.colonia %>
-                          </p>
-                          <p style="margin: 0 0 2px 0;">
-                            🏙️ <%= dir.ciudad %>, <%= dir.estado %>, <%= dir.cp %>
-                          </p>
-                          <% if (dir.referencia) { %>
-                            <p style="margin: 4px 0 0 0; padding: 6px 10px; background: #f9fafb; border-radius: 6px; font-size: 0.8rem;">
-                              ℹ️ <strong>Ref:</strong> <%= dir.referencia %>
-                            </p>
-                          <% } %>
-                        </div>
-                      </div>
-                      
-                      <!-- Botones -->
-                      <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                          <button 
-                            class="btn-marcar-predeterminada"
-                            data-direccion-id="<%= dir.id %>"
-                            title="Marcar como predeterminada"
-                            style="padding: 6px 10px; background: #fbbf24; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;"
-                          >
-                            <i data-lucide="star" style="width: 14px; height: 14px;"></i>
-                      </button>
-                        
-                        <button 
-                          class="btn-editar-direccion-cliente"
-                          data-id="<%= dir.id %>"
-                          data-alias="<%= dir.alias %>"
-                          data-calle="<%= dir.calle %>"
-                          data-colonia="<%= dir.colonia %>"
-                          data-ciudad="<%= dir.ciudad %>"
-                          data-estado="<%= dir.estado %>"
-                          data-cp="<%= dir.cp %>"
-                          data-referencia="<%= dir.referencia || '' %>"
-                          data-tipo="<%= dir.tipo || 'destino' %>"
-                          data-predeterminada="<%= dir.es_predeterminada ? '1' : '0' %>"
-                          style="padding: 6px 10px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;"
-                        >
-                          <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                        
-                        <button 
-                          class="btn-eliminar-direccion"
-                          data-direccion-id="<%= dir.id %>"
-                          style="padding: 6px 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;"
-                        >
-                          <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                <% }); %>
-              </div>
-            <% } else { %>
-              <div style="background: #f9fafb; padding: 32px; border-radius: 10px; text-align: center; border: 2px dashed #d1d5db; margin-top: 16px;">
-                <i data-lucide="map-pin" style="width: 48px; height: 48px; color: #9ca3af; margin: 0 auto 12px; display: block;"></i>
-                <h3 style="font-size: 1rem; font-weight: 700; color: #4b5563; margin-bottom: 6px;">
-                  No hay direcciones registradas
-                </h3>
-                <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 16px;">
-                  Agrega direcciones de destino para este cliente
-                </p>
-                <button 
-                  onclick="modalNuevaDireccionCliente()"
-                  style="padding: 10px 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
-                >
-                  <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-                  Agregar Primera Dirección
-                </button>
-              </div>
-            <% } %>
-          </div>
-        </div>
         
         <!-- COLUMNA DERECHA -->
         <div>
@@ -1551,6 +1435,122 @@
         </div>
         
       </div>
+            <!-- ============================================ -->
+      <!-- DIRECCIONES DE DESTINO (ANCHO COMPLETO) -->
+      <!-- ============================================ -->
+      <div class="info-card" style="margin-top: 24px;">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+            Direcciones de Destino
+          </h2>
+          <button 
+            onclick="modalNuevaDireccionCliente()"
+            style="padding: 8px 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.3s;"
+            onmouseover="this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.transform='translateY(0)'"
+          >
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            Nueva Dirección
+          </button>
+        </div>
+        
+        <% if (direcciones && direcciones.length > 0) { %>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 16px; margin-top: 16px;">
+            <% direcciones.forEach(function(dir) { %>
+              <div style="background: white; padding: 16px; border-radius: 10px; border: 2px solid #e5e7eb; transition: all 0.3s;"
+                   onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.1)'"
+                   onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                      <h3 style="font-size: 1rem; font-weight: 700; color: #1f2937; margin: 0;">
+                        <%= dir.alias %>
+                      </h3>
+                      <% if (dir.es_predeterminada) { %>
+                        <span style="padding: 2px 8px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">
+                          ⭐ PREDETERMINADA
+                        </span>
+                      <% } %>
+                    </div>
+                    
+                    <div style="color: #4b5563; font-size: 0.875rem; line-height: 1.5;">
+                      <p style="margin: 0 0 2px 0;">
+                        📍 <%= dir.calle %>, <%= dir.colonia %>
+                      </p>
+                      <p style="margin: 0 0 2px 0;">
+                        🏙️ <%= dir.ciudad %>, <%= dir.estado %>, <%= dir.cp %>
+                      </p>
+                      <% if (dir.referencia) { %>
+                        <p style="margin: 4px 0 0 0; padding: 6px 10px; background: #f9fafb; border-radius: 6px; font-size: 0.8rem;">
+                          ℹ️ <strong>Ref:</strong> <%= dir.referencia %>
+                        </p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Botones -->
+                <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                  <% if (!dir.es_predeterminada) { %>
+                    <button 
+                      class="btn-marcar-predeterminada"
+                      data-direccion-id="<%= dir.id %>"
+                      title="Marcar como predeterminada"
+                      style="padding: 6px 10px; background: #fbbf24; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;"
+                    >
+                      <i data-lucide="star" style="width: 14px; height: 14px;"></i>
+                    </button>
+                  <% } %>
+                  
+                  <button 
+                    class="btn-editar-direccion-cliente"
+                    data-id="<%= dir.id %>"
+                    data-alias="<%= dir.alias %>"
+                    data-calle="<%= dir.calle %>"
+                    data-colonia="<%= dir.colonia %>"
+                    data-ciudad="<%= dir.ciudad %>"
+                    data-estado="<%= dir.estado %>"
+                    data-cp="<%= dir.cp %>"
+                    data-referencia="<%= dir.referencia || '' %>"
+                    data-tipo="<%= dir.tipo || 'destino' %>"
+                    data-predeterminada="<%= dir.es_predeterminada ? '1' : '0' %>"
+                    style="padding: 6px 10px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;"
+                  >
+                    <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                  </button>
+                  
+                  <button 
+                    class="btn-eliminar-direccion"
+                    data-direccion-id="<%= dir.id %>"
+                    style="padding: 6px 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;"
+                  >
+                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div style="background: #f9fafb; padding: 32px; border-radius: 10px; text-align: center; border: 2px dashed #d1d5db; margin-top: 16px;">
+            <i data-lucide="map-pin" style="width: 48px; height: 48px; color: #9ca3af; margin: 0 auto 12px; display: block;"></i>
+            <h3 style="font-size: 1rem; font-weight: 700; color: #4b5563; margin-bottom: 6px;">
+              No hay direcciones registradas
+            </h3>
+            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 16px;">
+              Agrega direcciones de destino para este cliente
+            </p>
+            <button 
+              onclick="modalNuevaDireccionCliente()"
+              style="padding: 10px 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+            >
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              Agregar Primera Dirección
+            </button>
+          </div>
+        <% } %>
+         </div>
     </main>
     
   </div>
@@ -1685,7 +1685,7 @@ if (result.success) {
     // ============================================
     
 const clienteId = parseInt("<%= cliente.id %>");
-    
+
     // Abrir modal nueva dirección
     function modalNuevaDireccionCliente() {
       document.getElementById('modalNuevaDireccionCliente').style.display = 'flex';
