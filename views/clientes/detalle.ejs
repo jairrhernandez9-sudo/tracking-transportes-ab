@@ -1554,7 +1554,227 @@
     </main>
     
   </div>
+  <!-- ============================================ -->
+  <!-- MODALES DE DIRECCIONES DEL CLIENTE -->
+  <!-- ============================================ -->
   
+  <!-- Modal: Nueva Dirección Cliente -->
+  <div id="modalNuevaDireccionCliente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; padding: 28px; width: 90%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.4rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 10px;">
+          <i data-lucide="map-pin" style="width: 26px; height: 26px; color: #3b82f6;"></i>
+          Nueva Dirección
+        </h2>
+        <button onclick="cerrarModalNuevaDireccionCliente()" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+          <i data-lucide="x" style="width: 22px; height: 22px; color: #6b7280;"></i>
+        </button>
+      </div>
+      
+      <form id="formNuevaDireccionCliente">
+        <input type="hidden" name="cliente_id" value="<%= cliente.id %>">
+        
+        <div style="display: grid; gap: 14px;">
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">
+              🏷️ Alias *
+            </label>
+            <input type="text" name="alias" required placeholder="Ej: Sucursal Centro, Oficina Principal" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">📍 Calle y Número *</label>
+            <input type="text" name="calle" required placeholder="Ej: Av. Hidalgo 456" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🏘️ Colonia *</label>
+              <input type="text" name="colonia" required placeholder="Ej: Centro" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🔢 CP *</label>
+              <input type="text" name="cp" required placeholder="64000" maxlength="5" pattern="[0-9]{5}" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🏙️ Ciudad *</label>
+              <input type="text" name="ciudad" required placeholder="Ej: Monterrey" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">📍 Estado *</label>
+              <select name="estado" required style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
+                <option value="">Seleccionar...</option>
+                <option value="Aguascalientes">Aguascalientes</option>
+                <option value="Baja California">Baja California</option>
+                <option value="Baja California Sur">Baja California Sur</option>
+                <option value="Campeche">Campeche</option>
+                <option value="Chiapas">Chiapas</option>
+                <option value="Chihuahua">Chihuahua</option>
+                <option value="Ciudad de México">Ciudad de México</option>
+                <option value="Coahuila">Coahuila</option>
+                <option value="Colima">Colima</option>
+                <option value="Durango">Durango</option>
+                <option value="Guanajuato">Guanajuato</option>
+                <option value="Guerrero">Guerrero</option>
+                <option value="Hidalgo">Hidalgo</option>
+                <option value="Jalisco">Jalisco</option>
+                <option value="México">México</option>
+                <option value="Michoacán">Michoacán</option>
+                <option value="Morelos">Morelos</option>
+                <option value="Nayarit">Nayarit</option>
+                <option value="Nuevo León">Nuevo León</option>
+                <option value="Oaxaca">Oaxaca</option>
+                <option value="Puebla">Puebla</option>
+                <option value="Querétaro">Querétaro</option>
+                <option value="Quintana Roo">Quintana Roo</option>
+                <option value="San Luis Potosí">San Luis Potosí</option>
+                <option value="Sinaloa">Sinaloa</option>
+                <option value="Sonora">Sonora</option>
+                <option value="Tabasco">Tabasco</option>
+                <option value="Tamaulipas">Tamaulipas</option>
+                <option value="Tlaxcala">Tlaxcala</option>
+                <option value="Veracruz">Veracruz</option>
+                <option value="Yucatán">Yucatán</option>
+                <option value="Zacatecas">Zacatecas</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">ℹ️ Referencias</label>
+            <input type="text" name="referencia" placeholder="Ej: Piso 3, Oficina 305" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          
+          <div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="es_predeterminada" style="width: 16px; height: 16px; cursor: pointer;">
+              <span style="font-weight: 600; color: #92400e; font-size: 0.9rem;">⭐ Marcar como predeterminada</span>
+            </label>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" onclick="cerrarModalNuevaDireccionCliente()" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="padding: 10px 28px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Modal: Editar Dirección Cliente -->
+  <div id="modalEditarDireccionCliente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; padding: 28px; width: 90%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.4rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 10px;">
+          <i data-lucide="edit-2" style="width: 26px; height: 26px; color: #3b82f6;"></i>
+          Editar Dirección
+        </h2>
+        <button onclick="cerrarModalEditarDireccionCliente()" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+          <i data-lucide="x" style="width: 22px; height: 22px; color: #6b7280;"></i>
+        </button>
+      </div>
+      
+      <form id="formEditarDireccionCliente">
+        <input type="hidden" id="edit_cliente_direccion_id">
+        
+        <div style="display: grid; gap: 14px;">
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🏷️ Alias *</label>
+            <input type="text" id="edit_cliente_alias" name="alias" required style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">📍 Calle y Número *</label>
+            <input type="text" id="edit_cliente_calle" name="calle" required style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🏘️ Colonia *</label>
+              <input type="text" id="edit_cliente_colonia" name="colonia" required style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🔢 CP *</label>
+              <input type="text" id="edit_cliente_cp" name="cp" required maxlength="5" pattern="[0-9]{5}" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">🏙️ Ciudad *</label>
+              <input type="text" id="edit_cliente_ciudad" name="ciudad" required style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+            </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">📍 Estado *</label>
+              <select id="edit_cliente_estado" name="estado" required style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
+                <option value="">Seleccionar...</option>
+                <option value="Aguascalientes">Aguascalientes</option>
+                <option value="Baja California">Baja California</option>
+                <option value="Baja California Sur">Baja California Sur</option>
+                <option value="Campeche">Campeche</option>
+                <option value="Chiapas">Chiapas</option>
+                <option value="Chihuahua">Chihuahua</option>
+                <option value="Ciudad de México">Ciudad de México</option>
+                <option value="Coahuila">Coahuila</option>
+                <option value="Colima">Colima</option>
+                <option value="Durango">Durango</option>
+                <option value="Guanajuato">Guanajuato</option>
+                <option value="Guerrero">Guerrero</option>
+                <option value="Hidalgo">Hidalgo</option>
+                <option value="Jalisco">Jalisco</option>
+                <option value="México">México</option>
+                <option value="Michoacán">Michoacán</option>
+                <option value="Morelos">Morelos</option>
+                <option value="Nayarit">Nayarit</option>
+                <option value="Nuevo León">Nuevo León</option>
+                <option value="Oaxaca">Oaxaca</option>
+                <option value="Puebla">Puebla</option>
+                <option value="Querétaro">Querétaro</option>
+                <option value="Quintana Roo">Quintana Roo</option>
+                <option value="San Luis Potosí">San Luis Potosí</option>
+                <option value="Sinaloa">Sinaloa</option>
+                <option value="Sonora">Sonora</option>
+                <option value="Tabasco">Tabasco</option>
+                <option value="Tamaulipas">Tamaulipas</option>
+                <option value="Tlaxcala">Tlaxcala</option>
+                <option value="Veracruz">Veracruz</option>
+                <option value="Yucatán">Yucatán</option>
+                <option value="Zacatecas">Zacatecas</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">ℹ️ Referencias</label>
+            <input type="text" id="edit_cliente_referencia" name="referencia" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+          
+          <div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="edit_cliente_predeterminada" name="es_predeterminada" style="width: 16px; height: 16px; cursor: pointer;">
+              <span style="font-weight: 600; color: #92400e; font-size: 0.9rem;">⭐ Marcar como predeterminada</span>
+            </label>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" onclick="cerrarModalEditarDireccionCliente()" style="padding: 10px 20px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="padding: 10px 28px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script>
     lucide.createIcons();
     
