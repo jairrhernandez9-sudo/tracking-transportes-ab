@@ -1628,6 +1628,257 @@
     <option value="Cabo San Lucas">
   </datalist>
   
+  <!-- ============================================ -->
+<!-- MODAL: SELECCIONAR DIRECCIÓN DE ORIGEN -->
+<!-- ============================================ -->
+<div id="modalDireccionOrigen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 20px; width: 90%; max-width: 900px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 24px 30px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="color: white; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 12px; margin: 0;">
+        <i data-lucide="map-pin" style="width: 28px; height: 28px;"></i>
+        Seleccionar Dirección de ORIGEN
+      </h2>
+      <button onclick="cerrarModalOrigen()" style="background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+        <i data-lucide="x" style="width: 24px; height: 24px; color: white;"></i>
+      </button>
+    </div>
+    
+    <!-- Tabs -->
+    <div style="display: flex; border-bottom: 2px solid #e5e7eb; background: #f8fafc;">
+      <button 
+        class="tab-direccion-origen active" 
+        data-tab="bodegas"
+        onclick="cambiarTabOrigen('bodegas')"
+        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent;"
+      >
+        <i data-lucide="warehouse" style="width: 20px; height: 20px;"></i>
+        Bodegas
+      </button>
+      <button 
+        class="tab-direccion-origen" 
+        data-tab="clientes"
+        onclick="cambiarTabOrigen('clientes')"
+        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent; color: #64748b;"
+      >
+        <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+        Direcciones del Cliente
+      </button>
+    </div>
+    
+    <!-- Content -->
+    <div style="padding: 30px; max-height: 500px; overflow-y: auto;">
+      
+      <!-- Tab: Bodegas -->
+      <div id="tabOrigenBodegas" class="tab-content-origen" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+        <!-- Se llena con JavaScript -->
+      </div>
+      
+      <!-- Tab: Clientes -->
+      <div id="tabOrigenClientes" class="tab-content-origen" style="display: none;">
+        <!-- Se llena con JavaScript -->
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: SELECCIONAR DIRECCIÓN DE DESTINO -->
+<!-- ============================================ -->
+<div id="modalDireccionDestino" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 20px; width: 90%; max-width: 900px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); padding: 24px 30px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="color: white; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 12px; margin: 0;">
+        <i data-lucide="flag" style="width: 28px; height: 28px;"></i>
+        Seleccionar Dirección de DESTINO
+      </h2>
+      <button onclick="cerrarModalDestino()" style="background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+        <i data-lucide="x" style="width: 24px; height: 24px; color: white;"></i>
+      </button>
+    </div>
+    
+    <!-- Tabs -->
+    <div style="display: flex; border-bottom: 2px solid #e5e7eb; background: #f8fafc;">
+      <button 
+        class="tab-direccion-destino active" 
+        data-tab="bodegas"
+        onclick="cambiarTabDestino('bodegas')"
+        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent;"
+      >
+        <i data-lucide="warehouse" style="width: 20px; height: 20px;"></i>
+        Bodegas
+      </button>
+      <button 
+        class="tab-direccion-destino" 
+        data-tab="clientes"
+        onclick="cambiarTabDestino('clientes')"
+        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent; color: #64748b;"
+      >
+        <i data-lucide="users" style="width: 20px; height: 20px;"></i>
+        Direcciones del Cliente
+      </button>
+    </div>
+    
+    <!-- Content -->
+    <div style="padding: 30px; max-height: 500px; overflow-y: auto;">
+      
+      <!-- Tab: Bodegas -->
+      <div id="tabDestinoBodegas" class="tab-content-destino" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+        <!-- Se llena con JavaScript -->
+      </div>
+      
+      <!-- Tab: Clientes -->
+      <div id="tabDestinoClientes" class="tab-content-destino" style="display: none;">
+        <!-- Se llena con JavaScript -->
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ESTILOS PARA TABS Y TARJETAS -->
+<!-- ============================================ -->
+<style>
+/* Tabs activos */
+.tab-direccion-origen.active,
+.tab-direccion-destino.active {
+  color: #1e40af !important;
+  background: white !important;
+  border-bottom-color: #3b82f6 !important;
+}
+
+.tab-direccion-destino.active {
+  color: #dc2626 !important;
+  border-bottom-color: #ef4444 !important;
+}
+
+/* Tarjeta de dirección */
+.tarjeta-direccion {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tarjeta-direccion:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.tarjeta-direccion .badge-predeterminada {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.tarjeta-direccion .alias {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tarjeta-direccion .direccion-info {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.tarjeta-direccion .btn-seleccionar {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tarjeta-direccion:hover .btn-seleccionar {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+}
+
+/* Mensaje de advertencia */
+.mensaje-sin-cliente {
+  background: #fef3c7;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid #fbbf24;
+}
+
+.mensaje-sin-cliente i {
+  width: 48px;
+  height: 48px;
+  color: #f59e0b;
+  margin-bottom: 16px;
+}
+
+.mensaje-sin-cliente h3 {
+  color: #92400e;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.mensaje-sin-cliente p {
+  color: #78350f;
+  font-size: 0.9rem;
+}
+
+/* Mensaje sin direcciones */
+.mensaje-sin-direcciones {
+  background: #f1f5f9;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px dashed #cbd5e1;
+}
+
+.mensaje-sin-direcciones i {
+  width: 48px;
+  height: 48px;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+.mensaje-sin-direcciones h3 {
+  color: #475569;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.mensaje-sin-direcciones p {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+</style>
+
   <script>
     lucide.createIcons();
     
