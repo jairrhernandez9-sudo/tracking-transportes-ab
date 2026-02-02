@@ -1894,349 +1894,349 @@
     });
 
 
-// ============================================
-// VARIABLES GLOBALES
-// ============================================
-let direccionesBodegas = [];
-let direccionesCliente = [];
-let origenSeleccionado = null;
-let destinoSeleccionado = null;
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let direccionesBodegas = [];
+        let direccionesCliente = [];
+        let origenSeleccionado = null;
+        let destinoSeleccionado = null;
 
-// ============================================
-// ABRIR/CERRAR MODALES
-// ============================================
-function abrirModalOrigen() {
-  document.getElementById('modalDireccionOrigen').style.display = 'flex';
-  cargarDireccionesBodegas('origen');
-  
-  // Si hay cliente seleccionado, cargar sus direcciones
-  const clienteId = document.querySelector('[name="cliente_id"]')?.value;
-  if (clienteId) {
-    cargarDireccionesClienteModal(clienteId, 'origen');
-  }
-  
-  lucide.createIcons();
-}
+        // ============================================
+        // ABRIR/CERRAR MODALES
+        // ============================================
+        function abrirModalOrigen() {
+          document.getElementById('modalDireccionOrigen').style.display = 'flex';
+          cargarDireccionesBodegas('origen');
+          
+          // Si hay cliente seleccionado, cargar sus direcciones
+          const clienteId = document.querySelector('[name="cliente_id"]')?.value;
+          if (clienteId) {
+            cargarDireccionesClienteModal(clienteId, 'origen');
+          }
+          
+          lucide.createIcons();
+        }
 
-function cerrarModalOrigen() {
-  document.getElementById('modalDireccionOrigen').style.display = 'none';
-}
+        function cerrarModalOrigen() {
+          document.getElementById('modalDireccionOrigen').style.display = 'none';
+        }
 
-function abrirModalDestino() {
-  document.getElementById('modalDireccionDestino').style.display = 'flex';
-  cargarDireccionesBodegas('destino');
-  
-  // Si hay cliente seleccionado, cargar sus direcciones
-  const clienteId = document.querySelector('[name="cliente_id"]')?.value;
-  if (clienteId) {
-    cargarDireccionesClienteModal(clienteId, 'destino');
-  }
-  
-  lucide.createIcons();
-}
+        function abrirModalDestino() {
+          document.getElementById('modalDireccionDestino').style.display = 'flex';
+          cargarDireccionesBodegas('destino');
+          
+          // Si hay cliente seleccionado, cargar sus direcciones
+          const clienteId = document.querySelector('[name="cliente_id"]')?.value;
+          if (clienteId) {
+            cargarDireccionesClienteModal(clienteId, 'destino');
+          }
+          
+          lucide.createIcons();
+        }
 
-function cerrarModalDestino() {
-  document.getElementById('modalDireccionDestino').style.display = 'none';
-}
+        function cerrarModalDestino() {
+          document.getElementById('modalDireccionDestino').style.display = 'none';
+        }
 
-// Cerrar modales con ESC o click fuera
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    cerrarModalOrigen();
-    cerrarModalDestino();
-  }
-});
+        // Cerrar modales con ESC o click fuera
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            cerrarModalOrigen();
+            cerrarModalDestino();
+          }
+        });
 
-document.getElementById('modalDireccionOrigen')?.addEventListener('click', function(e) {
-  if (e.target === this) cerrarModalOrigen();
-});
+        document.getElementById('modalDireccionOrigen')?.addEventListener('click', function(e) {
+          if (e.target === this) cerrarModalOrigen();
+        });
 
-document.getElementById('modalDireccionDestino')?.addEventListener('click', function(e) {
-  if (e.target === this) cerrarModalDestino();
-});
+        document.getElementById('modalDireccionDestino')?.addEventListener('click', function(e) {
+          if (e.target === this) cerrarModalDestino();
+        });
 
-// ============================================
-// CAMBIAR ENTRE TABS
-// ============================================
-function cambiarTabOrigen(tab) {
-  // Actualizar botones de tabs
-  document.querySelectorAll('.tab-direccion-origen').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.tab === tab) {
-      btn.classList.add('active');
-    }
-  });
-  
-  // Mostrar/ocultar contenido
-  document.querySelectorAll('.tab-content-origen').forEach(content => {
-    content.style.display = 'none';
-  });
-  
-  if (tab === 'bodegas') {
-    document.getElementById('tabOrigenBodegas').style.display = 'grid';
-  } else {
-    document.getElementById('tabOrigenClientes').style.display = 'block';
-  }
-  
-  lucide.createIcons();
-}
+        // ============================================
+        // CAMBIAR ENTRE TABS
+        // ============================================
+        function cambiarTabOrigen(tab) {
+          // Actualizar botones de tabs
+          document.querySelectorAll('.tab-direccion-origen').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tab) {
+              btn.classList.add('active');
+            }
+          });
+          
+          // Mostrar/ocultar contenido
+          document.querySelectorAll('.tab-content-origen').forEach(content => {
+            content.style.display = 'none';
+          });
+          
+          if (tab === 'bodegas') {
+            document.getElementById('tabOrigenBodegas').style.display = 'grid';
+          } else {
+            document.getElementById('tabOrigenClientes').style.display = 'block';
+          }
+          
+          lucide.createIcons();
+        }
 
-function cambiarTabDestino(tab) {
-  // Actualizar botones de tabs
-  document.querySelectorAll('.tab-direccion-destino').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.tab === tab) {
-      btn.classList.add('active');
-    }
-  });
-  
-  // Mostrar/ocultar contenido
-  document.querySelectorAll('.tab-content-destino').forEach(content => {
-    content.style.display = 'none';
-  });
-  
-  if (tab === 'bodegas') {
-    document.getElementById('tabDestinoBodegas').style.display = 'grid';
-  } else {
-    document.getElementById('tabDestinoClientes').style.display = 'block';
-  }
-  
-  lucide.createIcons();
-}
+        function cambiarTabDestino(tab) {
+          // Actualizar botones de tabs
+          document.querySelectorAll('.tab-direccion-destino').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tab) {
+              btn.classList.add('active');
+            }
+          });
+          
+          // Mostrar/ocultar contenido
+          document.querySelectorAll('.tab-content-destino').forEach(content => {
+            content.style.display = 'none';
+          });
+          
+          if (tab === 'bodegas') {
+            document.getElementById('tabDestinoBodegas').style.display = 'grid';
+          } else {
+            document.getElementById('tabDestinoClientes').style.display = 'block';
+          }
+          
+          lucide.createIcons();
+        }
 
-// ============================================
-// CARGAR DIRECCIONES DE BODEGAS
-// ============================================
-async function cargarDireccionesBodegas(tipo) {
-  try {
-    const response = await fetch('/configuracion/api/direcciones');
-    const data = await response.json();
-    
-    if (data.success && data.direcciones) {
-      direccionesBodegas = data.direcciones;
-      
-      const containerId = tipo === 'origen' ? 'tabOrigenBodegas' : 'tabDestinoBodegas';
-      const container = document.getElementById(containerId);
-      
-      if (direccionesBodegas.length === 0) {
-        container.innerHTML = `
-          <div class="mensaje-sin-direcciones" style="grid-column: 1 / -1;">
-            <i data-lucide="inbox"></i>
-            <h3>No hay bodegas registradas</h3>
-            <p>Ve a Configuración para agregar direcciones de bodega</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = direccionesBodegas.map(dir => `
-          <div class="tarjeta-direccion" onclick="seleccionarDireccion('bodega', ${dir.id}, '${tipo}')">
-            ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
-            <div class="alias">
-              <i data-lucide="warehouse" style="width: 20px; height: 20px; color: #3b82f6;"></i>
-              ${dir.alias}
-            </div>
-            <div class="direccion-info">
-              📍 ${dir.calle}, ${dir.colonia}<br>
-              🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
-              ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
-            </div>
-            <button class="btn-seleccionar" type="button">
-              <i data-lucide="check" style="width: 16px; height: 16px;"></i>
-              Seleccionar
-            </button>
-          </div>
-        `).join('');
-      }
-      
-      lucide.createIcons();
-    }
-  } catch (error) {
-    console.error('Error al cargar direcciones de bodegas:', error);
-  }
-}
+        // ============================================
+        // CARGAR DIRECCIONES DE BODEGAS
+        // ============================================
+        async function cargarDireccionesBodegas(tipo) {
+          try {
+            const response = await fetch('/configuracion/api/direcciones');
+            const data = await response.json();
+            
+            if (data.success && data.direcciones) {
+              direccionesBodegas = data.direcciones;
+              
+              const containerId = tipo === 'origen' ? 'tabOrigenBodegas' : 'tabDestinoBodegas';
+              const container = document.getElementById(containerId);
+              
+              if (direccionesBodegas.length === 0) {
+                container.innerHTML = `
+                  <div class="mensaje-sin-direcciones" style="grid-column: 1 / -1;">
+                    <i data-lucide="inbox"></i>
+                    <h3>No hay bodegas registradas</h3>
+                    <p>Ve a Configuración para agregar direcciones de bodega</p>
+                  </div>
+                `;
+              } else {
+                container.innerHTML = direccionesBodegas.map(dir => `
+                  <div class="tarjeta-direccion" onclick="seleccionarDireccion('bodega', ${dir.id}, '${tipo}')">
+                    ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
+                    <div class="alias">
+                      <i data-lucide="warehouse" style="width: 20px; height: 20px; color: #3b82f6;"></i>
+                      ${dir.alias}
+                    </div>
+                    <div class="direccion-info">
+                      📍 ${dir.calle}, ${dir.colonia}<br>
+                      🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
+                      ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
+                    </div>
+                    <button class="btn-seleccionar" type="button">
+                      <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                      Seleccionar
+                    </button>
+                  </div>
+                `).join('');
+              }
+              
+              lucide.createIcons();
+            }
+          } catch (error) {
+            console.error('Error al cargar direcciones de bodegas:', error);
+          }
+        }
 
-// ============================================
-// CARGAR DIRECCIONES DEL CLIENTE
-// ============================================
-async function cargarDireccionesClienteModal(clienteId, tipo) {
-  const containerId = tipo === 'origen' ? 'tabOrigenClientes' : 'tabDestinoClientes';
-  const container = document.getElementById(containerId);
-  
-  if (!clienteId) {
-    container.innerHTML = `
-      <div class="mensaje-sin-cliente">
-        <i data-lucide="alert-circle"></i>
-        <h3>Sin cliente seleccionado</h3>
-        <p>Primero selecciona un cliente en el formulario para ver sus direcciones</p>
-      </div>
-    `;
-    lucide.createIcons();
-    return;
-  }
-  
-  try {
-    const response = await fetch(`/direcciones/cliente/${clienteId}`);
-    const data = await response.json();
-    
-    if (data.success && data.direcciones && data.direcciones.length > 0) {
-      direccionesCliente = data.direcciones;
-      
-      container.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
-          ${direccionesCliente.map(dir => `
-            <div class="tarjeta-direccion" onclick="seleccionarDireccion('cliente', ${dir.id}, '${tipo}')">
-              ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
-              <div class="alias">
-                <i data-lucide="map-pin" style="width: 20px; height: 20px; color: #ef4444;"></i>
-                ${dir.alias}
+        // ============================================
+        // CARGAR DIRECCIONES DEL CLIENTE
+        // ============================================
+        async function cargarDireccionesClienteModal(clienteId, tipo) {
+          const containerId = tipo === 'origen' ? 'tabOrigenClientes' : 'tabDestinoClientes';
+          const container = document.getElementById(containerId);
+          
+          if (!clienteId) {
+            container.innerHTML = `
+              <div class="mensaje-sin-cliente">
+                <i data-lucide="alert-circle"></i>
+                <h3>Sin cliente seleccionado</h3>
+                <p>Primero selecciona un cliente en el formulario para ver sus direcciones</p>
               </div>
-              <div class="direccion-info">
-                📍 ${dir.calle}, ${dir.colonia}<br>
-                🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
-                ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
+            `;
+            lucide.createIcons();
+            return;
+          }
+          
+          try {
+            const response = await fetch(`/direcciones/cliente/${clienteId}`);
+            const data = await response.json();
+            
+            if (data.success && data.direcciones && data.direcciones.length > 0) {
+              direccionesCliente = data.direcciones;
+              
+              container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+                  ${direccionesCliente.map(dir => `
+                    <div class="tarjeta-direccion" onclick="seleccionarDireccion('cliente', ${dir.id}, '${tipo}')">
+                      ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
+                      <div class="alias">
+                        <i data-lucide="map-pin" style="width: 20px; height: 20px; color: #ef4444;"></i>
+                        ${dir.alias}
+                      </div>
+                      <div class="direccion-info">
+                        📍 ${dir.calle}, ${dir.colonia}<br>
+                        🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
+                        ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
+                      </div>
+                      <button class="btn-seleccionar" type="button">
+                        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                        Seleccionar
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              `;
+            } else {
+              container.innerHTML = `
+                <div class="mensaje-sin-direcciones">
+                  <i data-lucide="map-pin"></i>
+                  <h3>Sin direcciones registradas</h3>
+                  <p>Este cliente no tiene direcciones guardadas. Ve al detalle del cliente para agregar direcciones.</p>
+                </div>
+              `;
+            }
+            
+            lucide.createIcons();
+          } catch (error) {
+            console.error('Error al cargar direcciones del cliente:', error);
+            container.innerHTML = `
+              <div class="mensaje-sin-direcciones">
+                <i data-lucide="alert-circle"></i>
+                <h3>Error al cargar</h3>
+                <p>No se pudieron cargar las direcciones del cliente</p>
               </div>
-              <button class="btn-seleccionar" type="button">
-                <i data-lucide="check" style="width: 16px; height: 16px;"></i>
-                Seleccionar
-              </button>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    } else {
-      container.innerHTML = `
-        <div class="mensaje-sin-direcciones">
-          <i data-lucide="map-pin"></i>
-          <h3>Sin direcciones registradas</h3>
-          <p>Este cliente no tiene direcciones guardadas. Ve al detalle del cliente para agregar direcciones.</p>
-        </div>
-      `;
-    }
-    
-    lucide.createIcons();
-  } catch (error) {
-    console.error('Error al cargar direcciones del cliente:', error);
-    container.innerHTML = `
-      <div class="mensaje-sin-direcciones">
-        <i data-lucide="alert-circle"></i>
-        <h3>Error al cargar</h3>
-        <p>No se pudieron cargar las direcciones del cliente</p>
-      </div>
-    `;
-    lucide.createIcons();
-  }
-}
+            `;
+            lucide.createIcons();
+          }
+        }
 
-// ============================================
-// SELECCIONAR DIRECCIÓN
-// ============================================
-function seleccionarDireccion(tipoDireccion, direccionId, tipoModal) {
-  // Buscar la dirección en el array correspondiente
-  let direccion;
-  if (tipoDireccion === 'bodega') {
-    direccion = direccionesBodegas.find(d => d.id === direccionId);
-  } else {
-    direccion = direccionesCliente.find(d => d.id === direccionId);
-  }
-  
-  if (!direccion) {
-    alert('Error al seleccionar la dirección');
-    return;
-  }
-  
-  // Determinar prefijo de campos (origen_ o destino_)
-  const prefijo = tipoModal === 'origen' ? 'origen' : 'destino';
-  
-  // Auto-llenar campos
-  document.querySelector(`[name="${prefijo}_calle"]`).value = direccion.calle || '';
-  document.querySelector(`[name="${prefijo}_colonia"]`).value = direccion.colonia || '';
-  document.querySelector(`[name="${prefijo}_cp"]`).value = direccion.cp || '';
-  document.querySelector(`[name="${prefijo}_ciudad"]`).value = direccion.ciudad || '';
-  document.querySelector(`[name="${prefijo}_estado"]`).value = direccion.estado || '';
-  document.querySelector(`[name="${prefijo}_referencia"]`).value = direccion.referencia || '';
-  
-  // Actualizar botón con la selección
-  const boton = document.getElementById(`btn${tipoModal.charAt(0).toUpperCase() + tipoModal.slice(1)}`);
-  const icono = tipoDireccion === 'bodega' ? '🏢' : '📍';
-  boton.innerHTML = `
-    <i data-lucide="${tipoDireccion === 'bodega' ? 'warehouse' : 'map-pin'}" style="width: 18px; height: 18px;"></i>
-    ${icono} ${direccion.alias}
-  `;
-  
-  // Guardar selección
-  if (tipoModal === 'origen') {
-    origenSeleccionado = { tipo: tipoDireccion, direccion };
-  } else {
-    destinoSeleccionado = { tipo: tipoDireccion, direccion };
-  }
-  
-  // Cerrar modal
-  if (tipoModal === 'origen') {
-    cerrarModalOrigen();
-  } else {
-    cerrarModalDestino();
-  }
-  
-  lucide.createIcons();
-}
+        // ============================================
+        // SELECCIONAR DIRECCIÓN
+        // ============================================
+        function seleccionarDireccion(tipoDireccion, direccionId, tipoModal) {
+          // Buscar la dirección en el array correspondiente
+          let direccion;
+          if (tipoDireccion === 'bodega') {
+            direccion = direccionesBodegas.find(d => d.id === direccionId);
+          } else {
+            direccion = direccionesCliente.find(d => d.id === direccionId);
+          }
+          
+          if (!direccion) {
+            alert('Error al seleccionar la dirección');
+            return;
+          }
+          
+          // Determinar prefijo de campos (origen_ o destino_)
+          const prefijo = tipoModal === 'origen' ? 'origen' : 'destino';
+          
+          // Auto-llenar campos
+          document.querySelector(`[name="${prefijo}_calle"]`).value = direccion.calle || '';
+          document.querySelector(`[name="${prefijo}_colonia"]`).value = direccion.colonia || '';
+          document.querySelector(`[name="${prefijo}_cp"]`).value = direccion.cp || '';
+          document.querySelector(`[name="${prefijo}_ciudad"]`).value = direccion.ciudad || '';
+          document.querySelector(`[name="${prefijo}_estado"]`).value = direccion.estado || '';
+          document.querySelector(`[name="${prefijo}_referencia"]`).value = direccion.referencia || '';
+          
+          // Actualizar botón con la selección
+          const boton = document.getElementById(`btn${tipoModal.charAt(0).toUpperCase() + tipoModal.slice(1)}`);
+          const icono = tipoDireccion === 'bodega' ? '🏢' : '📍';
+          boton.innerHTML = `
+            <i data-lucide="${tipoDireccion === 'bodega' ? 'warehouse' : 'map-pin'}" style="width: 18px; height: 18px;"></i>
+            ${icono} ${direccion.alias}
+          `;
+          
+          // Guardar selección
+          if (tipoModal === 'origen') {
+            origenSeleccionado = { tipo: tipoDireccion, direccion };
+          } else {
+            destinoSeleccionado = { tipo: tipoDireccion, direccion };
+          }
+          
+          // Cerrar modal
+          if (tipoModal === 'origen') {
+            cerrarModalOrigen();
+          } else {
+            cerrarModalDestino();
+          }
+          
+          lucide.createIcons();
+        }
 
-// ============================================
-// LIMPIAR SELECCIÓN
-// ============================================
-function limpiarOrigen() {
-  document.querySelector('[name="origen_calle"]').value = '';
-  document.querySelector('[name="origen_colonia"]').value = '';
-  document.querySelector('[name="origen_cp"]').value = '';
-  document.querySelector('[name="origen_ciudad"]').value = '';
-  document.querySelector('[name="origen_estado"]').value = '';
-  document.querySelector('[name="origen_referencia"]').value = '';
-  
-  document.getElementById('btnOrigen').innerHTML = `
-    <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
-    Seleccionar Dirección de Origen
-  `;
-  
-  origenSeleccionado = null;
-  lucide.createIcons();
-}
+        // ============================================
+        // LIMPIAR SELECCIÓN
+        // ============================================
+        function limpiarOrigen() {
+          document.querySelector('[name="origen_calle"]').value = '';
+          document.querySelector('[name="origen_colonia"]').value = '';
+          document.querySelector('[name="origen_cp"]').value = '';
+          document.querySelector('[name="origen_ciudad"]').value = '';
+          document.querySelector('[name="origen_estado"]').value = '';
+          document.querySelector('[name="origen_referencia"]').value = '';
+          
+          document.getElementById('btnOrigen').innerHTML = `
+            <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
+            Seleccionar Dirección de Origen
+          `;
+          
+          origenSeleccionado = null;
+          lucide.createIcons();
+        }
 
-function limpiarDestino() {
-  document.querySelector('[name="destino_calle"]').value = '';
-  document.querySelector('[name="destino_colonia"]').value = '';
-  document.querySelector('[name="destino_cp"]').value = '';
-  document.querySelector('[name="destino_ciudad"]').value = '';
-  document.querySelector('[name="destino_estado"]').value = '';
-  document.querySelector('[name="destino_referencia"]').value = '';
-  
-  document.getElementById('btnDestino').innerHTML = `
-    <i data-lucide="flag" style="width: 18px; height: 18px;"></i>
-    Seleccionar Dirección de Destino
-  `;
-  
-  destinoSeleccionado = null;
-  lucide.createIcons();
-}
+        function limpiarDestino() {
+          document.querySelector('[name="destino_calle"]').value = '';
+          document.querySelector('[name="destino_colonia"]').value = '';
+          document.querySelector('[name="destino_cp"]').value = '';
+          document.querySelector('[name="destino_ciudad"]').value = '';
+          document.querySelector('[name="destino_estado"]').value = '';
+          document.querySelector('[name="destino_referencia"]').value = '';
+          
+          document.getElementById('btnDestino').innerHTML = `
+            <i data-lucide="flag" style="width: 18px; height: 18px;"></i>
+            Seleccionar Dirección de Destino
+          `;
+          
+          destinoSeleccionado = null;
+          lucide.createIcons();
+        }
 
-// ============================================
-// DETECTAR CAMBIO DE CLIENTE
-// ============================================
-document.querySelector('[name="cliente_id"]')?.addEventListener('change', function() {
-  const clienteId = this.value;
-  
-  // Limpiar direcciones del cliente anteriores
-  direccionesCliente = [];
-  
-  // Si hay modales abiertos, recargar las direcciones del cliente
-  const modalOrigenVisible = document.getElementById('modalDireccionOrigen').style.display === 'flex';
-  const modalDestinoVisible = document.getElementById('modalDireccionDestino').style.display === 'flex';
-  
-  if (modalOrigenVisible && clienteId) {
-    cargarDireccionesClienteModal(clienteId, 'origen');
-  }
-  
-  if (modalDestinoVisible && clienteId) {
-    cargarDireccionesClienteModal(clienteId, 'destino');
-  }
-});
-  </script>
+        // ============================================
+        // DETECTAR CAMBIO DE CLIENTE
+        // ============================================
+        document.querySelector('[name="cliente_id"]')?.addEventListener('change', function() {
+          const clienteId = this.value;
+          
+          // Limpiar direcciones del cliente anteriores
+          direccionesCliente = [];
+          
+          // Si hay modales abiertos, recargar las direcciones del cliente
+          const modalOrigenVisible = document.getElementById('modalDireccionOrigen').style.display === 'flex';
+          const modalDestinoVisible = document.getElementById('modalDireccionDestino').style.display === 'flex';
+          
+          if (modalOrigenVisible && clienteId) {
+            cargarDireccionesClienteModal(clienteId, 'origen');
+          }
+          
+          if (modalDestinoVisible && clienteId) {
+            cargarDireccionesClienteModal(clienteId, 'destino');
+          }
+        });
+          </script>
 </body>
 </html>
