@@ -12,25 +12,7 @@ function isAuthenticated(req, res, next) {
 
 router.use(isAuthenticated);
 
-// ============================================
-// API: OBTENER DIRECCIONES DE UN CLIENTE
-// ============================================
-router.get('/cliente/:clienteId', isAuthenticated, async (req, res) => {
-  const { clienteId } = req.params;
-  
-  try {
-    const [direcciones] = await db.query(`
-      SELECT * FROM direcciones_cliente 
-      WHERE cliente_id = ? AND activa = 1 
-      ORDER BY es_predeterminada DESC, alias ASC
-    `, [clienteId]);
-    
-    res.json({ success: true, direcciones });
-  } catch (error) {
-    console.error('Error al obtener direcciones cliente:', error);
-    res.status(500).json({ success: false, message: 'Error al cargar direcciones' });
-  }
-});
+
 
 // ============================================
 // CREAR NUEVA DIRECCIÓN
@@ -285,6 +267,23 @@ router.post('/:id/predeterminada', async (req, res) => {
   }
 });
 
+// ============================================
+// API: OBTENER DIRECCIONES DE UN CLIENTE
+// ============================================
+router.get('/cliente/:clienteId', isAuthenticated, async (req, res) => {
+  const { clienteId } = req.params;
+  try {
+    const [direcciones] = await db.query(`
+      SELECT * FROM direcciones_cliente 
+      WHERE cliente_id = ? AND activa = 1 
+      ORDER BY es_predeterminada DESC, alias ASC
+    `, [clienteId]);
+    res.json({ success: true, direcciones });
+  } catch (error) {
+    console.error('Error al obtener direcciones cliente:', error);
+    res.status(500).json({ success: false, message: 'Error al cargar direcciones' });
+  }
+});
 
 
 module.exports = router;

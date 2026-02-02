@@ -406,7 +406,6 @@ router.get('/api/direcciones', isAuthenticated, async (req, res) => {
       WHERE activa = 1 
       ORDER BY es_predeterminada DESC, alias ASC
     `);
-    
     res.json({ success: true, direcciones });
   } catch (error) {
     console.error('Error al obtener direcciones empresa:', error);
