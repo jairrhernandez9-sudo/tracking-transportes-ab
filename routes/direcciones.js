@@ -15,20 +15,18 @@ router.use(isAuthenticated);
 // ============================================
 // API: OBTENER DIRECCIONES DE UN CLIENTE
 // ============================================
-router.get('/cliente/:clienteId', async (req, res) => {
+router.get('/api/direcciones', isAuthenticated, async (req, res) => {
   try {
-    const { clienteId } = req.params;
-    
     const [direcciones] = await db.query(`
-      SELECT * FROM direcciones_cliente 
-      WHERE cliente_id = ? AND activa = 1 
+      SELECT * FROM direcciones_empresa 
+      WHERE activa = 1 
       ORDER BY es_predeterminada DESC, alias ASC
-    `, [clienteId]);
+    `);
     
-    res.json(direcciones);
+    res.json({ success: true, direcciones });
   } catch (error) {
-    console.error('Error al obtener direcciones:', error);
-    res.status(500).json({ error: 'Error al obtener direcciones' });
+    console.error('Error al obtener direcciones empresa:', error);
+    res.status(500).json({ success: false, message: 'Error al cargar direcciones' });
   }
 });
 
@@ -284,5 +282,7 @@ router.post('/:id/predeterminada', async (req, res) => {
     });
   }
 });
+
+
 
 module.exports = router;
