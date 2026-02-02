@@ -570,6 +570,27 @@
       margin-bottom: 20px;
     }
     
+    .cliente-referencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+  vertical-align: middle;
+}
+
+.cliente-referencia i {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+}
+    
     .badge {
       display: inline-block;
       padding: 8px 16px;
@@ -1476,7 +1497,17 @@
                 </a>
               </div>
               
-              <div class="tracking-number"><%= envio.numero_tracking %></div>
+<div class="tracking-number">
+  <%= envio.numero_tracking %>
+  
+  <!-- Referencia del cliente (si existe) -->
+  <% if (envio.referencia_cliente) { %>
+    <span class="cliente-referencia">
+      <i data-lucide="file-text"></i>
+      <%= envio.referencia_cliente %>
+    </span>
+  <% } %>
+</div>
               
               <span class="badge badge-<%= envio.estado_actual %>">
                 <%= envio.estado_actual.replace('-', ' ').toUpperCase() %>
@@ -1502,11 +1533,7 @@
                   <span class="info-label">Email</span>
                   <span class="info-value"><%= envio.cliente_email || '-' %></span>
                 </div>
-                
-                <div class="info-item">
-                  <span class="info-label">Referencia del Cliente</span>
-                  <span class="info-value"><%= envio.referencia_cliente || 'Sin referencia' %></span>
-                </div>
+              
                 
                 <div class="info-item">
                   <span class="info-label">Origen</span>
