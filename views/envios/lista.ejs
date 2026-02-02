@@ -573,6 +573,20 @@
       color: #3b82f6;
       font-family: 'Courier New', monospace;
     }
+
+    /* Estilo para columna de referencia */
+.referencia-cell {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.referencia-cell.sin-referencia {
+  color: #cbd5e1;
+  font-style: italic;
+  font-family: 'Inter', sans-serif;
+}
     
     .badge {
       display: inline-block;
@@ -1084,6 +1098,7 @@
               <thead>
                 <tr>
                   <th>Tracking</th>
+                  <th>Referencia</th>
                   <th>Cliente</th>
                   <th>Origen</th>
                   <th>Destino</th>
@@ -1098,6 +1113,16 @@
                     <td>
                       <span class="tracking-number"><%= envio.numero_tracking %></span>
                     </td>
+                    <td>
+  <% if (envio.referencia_cliente) { %>
+    <span class="referencia-cell">
+      <i data-lucide="file-text" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+      <%= envio.referencia_cliente %>
+    </span>
+  <% } else { %>
+    <span class="referencia-cell sin-referencia">-</span>
+  <% } %>
+</td>
                     <td>
                       <strong><%= envio.nombre_empresa || 'Sin cliente' %></strong>
                     </td>
