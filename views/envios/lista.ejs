@@ -1113,14 +1113,11 @@
                     <td>
                       <span class="tracking-number"><%= envio.numero_tracking %></span>
                     </td>
-                    <td>
-  <% if (envio.referencia_cliente) { %>
-    <span class="referencia-cell">
-      <i data-lucide="file-text" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
-      <%= envio.referencia_cliente %>
-    </span>
+<td>
+  <% if (envio.numero_orden) { %>
+    <span class="referencia-cell"><%= envio.numero_orden %></span>
   <% } else { %>
-    <span class="referencia-cell sin-referencia">-</span>
+    <span class="referencia-cell sin-referencia">Sin ref.</span>
   <% } %>
 </td>
                     <td>
