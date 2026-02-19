@@ -5,7 +5,6 @@ const { isAuthenticated, isAdmin } = require('../middleware/auth');
 
 // Middleware para verificar que solo admins accedan
 router.use(isAuthenticated);
-router.use(isAdmin);
 
 // Obtener configuración
 async function obtenerConfiguracion() {

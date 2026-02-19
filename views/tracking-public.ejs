@@ -377,7 +377,32 @@
 const config = JSON.parse('<%- JSON.stringify(config || {}) %>');    
     // Inicializar iconos de Lucide
     lucide.createIcons();
+// ═══════════════════════════════════════════════════════
+// BÚSQUEDA AUTOMÁTICA DE TRACKING
+// ═══════════════════════════════════════════════════════
+const urlPath = window.location.pathname;
+const parts = urlPath.split('/');
+const trackingFromUrl = parts[parts.length - 1];
 
+// Si hay un tracking en la URL, buscarlo automáticamente
+if (trackingFromUrl && trackingFromUrl.length > 3 && trackingFromUrl !== 'tracking') {
+  console.log('🔍 Tracking detectado en URL:', trackingFromUrl);
+  
+  const trackingInput = document.getElementById('trackingInput');
+  if (trackingInput) {
+    // Llenar el input con el tracking
+    trackingInput.value = trackingFromUrl;
+    
+    // Ejecutar búsqueda automáticamente después de 500ms
+    setTimeout(() => {
+      console.log('🚀 Ejecutando búsqueda automática...');
+      const searchForm = document.getElementById('searchForm');
+      if (searchForm) {
+        searchForm.dispatchEvent(new Event('submit'));
+      }
+    }, 500);
+  }
+}
     // Manejo del formulario de búsqueda
     document.getElementById('searchForm').addEventListener('submit', async (e) => {
       e.preventDefault();

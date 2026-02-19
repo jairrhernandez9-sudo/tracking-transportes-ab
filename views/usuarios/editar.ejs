@@ -752,6 +752,101 @@
         padding: 25px;
       }
     }
+
+    /* PASSWORD WRAPPER - Botón mostrar/ocultar contraseña */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.password-wrapper .form-input {
+  width: 100%;
+  padding-right: 50px;
+  box-sizing: border-box;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+}
+
+.toggle-password:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+}
+
+.toggle-password:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.toggle-password i {
+  width: 20px;
+  height: 20px;
+}
+
+/* Ocultar botón de mostrar/ocultar en Microsoft Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
+/* Ocultar botón en navegadores Webkit (Chrome, Safari, Edge) */
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 0 !important;
+}
+
+/* Ocultar específicamente el botón de reveal password */
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-reveal {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Asegurar que el input tipo text también oculte botones nativos */
+input[type="text"]::-ms-reveal,
+input[type="text"]::-ms-clear {
+  display: none !important;
+}
+
+input[type="text"]::-webkit-contacts-auto-fill-button,
+input[type="text"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Para Firefox (por si acaso) */
+input[type="password"]::-moz-reveal {
+  display: none !important;
+}
+
+input[type="text"]::-moz-reveal {
+  display: none !important;
+}
   </style>
 </head>
 <body>
@@ -983,21 +1078,50 @@
               </select>
             </div>
             
-            <!-- Nueva Contraseña -->
-            <div class="form-group full-width">
-              <label class="form-label">
-                <i data-lucide="lock"></i>
-                Nueva Contraseña
-              </label>
-              <input 
-                type="password" 
-                name="password" 
-                class="form-input" 
-                placeholder="Dejar en blanco para mantener la actual"
-                autocomplete="new-password"
-              >
-              <p class="form-help">Solo completa este campo si deseas cambiar la contraseña</p>
-            </div>
+<!-- Nueva Contraseña -->
+
+<div class="form-group">
+  <label class="form-label">
+    <i data-lucide="lock"></i>
+    Nueva Contraseña
+  </label>
+  <div class="password-wrapper">
+    <input 
+      type="password" 
+      name="password_nueva" 
+      class="form-input" 
+      placeholder="Dejar en blanco para mantener la actual"
+      autocomplete="new-password"
+      id="passwordNueva"
+    >
+    <button type="button" class="toggle-password" onclick="togglePassword('passwordNueva')">
+      <i data-lucide="eye" id="icon-passwordNueva"></i>
+    </button>
+  </div>
+  <p class="form-help">Solo completa estos campos si deseas cambiar la contraseña</p>
+</div>
+
+<!-- Confirmar Nueva Contraseña -->
+
+<div class="form-group">
+  <label class="form-label">
+    <i data-lucide="lock"></i>
+    Confirmar Nueva Contraseña
+  </label>
+  <div class="password-wrapper">
+    <input 
+      type="password" 
+      name="password_confirmar" 
+      class="form-input" 
+      placeholder="Repite la nueva contraseña"
+      autocomplete="new-password"
+      id="passwordConfirmar"
+    >
+    <button type="button" class="toggle-password" onclick="togglePassword('passwordConfirmar')">
+      <i data-lucide="eye" id="icon-passwordConfirmar"></i>
+    </button>
+  </div>
+</div>
             
             <!-- Estado Activo -->
             <div class="form-group full-width">
@@ -1068,5 +1192,73 @@
       });
     }
   </script>
+
+  
+<script>
+  // ============================================
+  // FUNCIÓN: Mostrar/Ocultar Contraseña
+  // ============================================
+  function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(`icon-${inputId}`);
+    
+    if (!input || !icon) {
+      console.error('No se encontró el input o icono:', inputId);
+      return;
+    }
+    
+    if (input.type === 'password') {
+      // Mostrar contraseña
+      input.type = 'text';
+      icon.setAttribute('data-lucide', 'eye-off');
+    } else {
+      // Ocultar contraseña
+      input.type = 'password';
+      icon.setAttribute('data-lucide', 'eye');
+    }
+    
+    // Recrear iconos de Lucide para actualizar el icono
+    lucide.createIcons();
+  }
+
+  // ============================================
+  // VALIDACIÓN: Contraseñas coinciden (OPCIONAL)
+  // ============================================
+  document.addEventListener('DOMContentLoaded', function() {
+    const passwordNueva = document.getElementById('passwordNueva');
+    const passwordConfirmar = document.getElementById('passwordConfirmar');
+    
+    if (passwordNueva && passwordConfirmar) {
+      function checkPasswordMatch() {
+        const nueva = passwordNueva.value;
+        const confirmar = passwordConfirmar.value;
+        
+        // Solo validar si ambos tienen contenido
+        if (nueva.length > 0 && confirmar.length > 0) {
+          if (nueva !== confirmar) {
+            // No coinciden - borde rojo
+            passwordConfirmar.style.borderColor = '#ef4444';
+            passwordConfirmar.style.borderWidth = '2px';
+          } else {
+            // Coinciden - borde verde
+            passwordConfirmar.style.borderColor = '#10b981';
+            passwordConfirmar.style.borderWidth = '2px';
+          }
+        } else {
+          // Vacíos - borde normal
+          passwordConfirmar.style.borderColor = '#e2e8f0';
+          passwordConfirmar.style.borderWidth = '2px';
+        }
+      }
+      
+      // Ejecutar validación cuando el usuario escribe
+      passwordNueva.addEventListener('input', checkPasswordMatch);
+      passwordConfirmar.addEventListener('input', checkPasswordMatch);
+    }
+    
+    // Inicializar iconos de Lucide
+    lucide.createIcons();
+  });
+</script>
 </body>
 </html>

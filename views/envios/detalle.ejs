@@ -772,14 +772,63 @@
       transform: translateY(-2px);
     }
     
-    .timeline-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #f1f5f9;
-    }
+    /* Timeline Header con botón de eliminar */
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.timeline-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Botón de eliminar estado */
+.btn-eliminar-estado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+/* Mostrar botón al hacer hover sobre el item */
+.timeline-item:hover .btn-eliminar-estado {
+  opacity: 1;
+}
+
+.btn-eliminar-estado:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+.btn-eliminar-estado:active {
+  transform: scale(0.95);
+}
+
+.btn-eliminar-estado i {
+  width: 16px;
+  height: 16px;
+}
+
+/* Ocultar botón en estados importantes (opcional) */
+.timeline-item[data-estado="entregado"] .btn-eliminar-estado {
+  display: none; /* No permitir eliminar estado "entregado" */
+}
     
     .timeline-estado {
       font-weight: 900;
@@ -1625,17 +1674,29 @@
                         <i data-lucide="<%= iconoEstado %>"></i>
                       </div>
                       <div class="timeline-content">
-                        <div class="timeline-header">
-                          <span class="timeline-estado"><%= item.estado.replace('-', ' ') %></span>
-                          <span class="timeline-fecha">
-                            <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { 
-                              day: '2-digit', 
-                              month: 'short', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            }) %>
-                          </span>
-                        </div>
+
+<div class="timeline-header">
+  <div class="timeline-header-left">
+    <span class="timeline-estado"><%= item.estado.replace('-', ' ') %></span>
+    <span class="timeline-fecha">
+      <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { 
+        day: '2-digit', 
+        month: 'short', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }) %>
+    </span>
+  </div>
+<button 
+  type="button" 
+  class="btn-eliminar-estado" 
+  data-estado-id="<%= item.id %>"
+  data-estado-nombre="<%= item.estado %>"
+  title="Eliminar este estado"
+>
+  <i data-lucide="trash-2"></i>
+</button>
+</div>
                         
                         <div class="timeline-ubicacion">
                           <i data-lucide="map-pin"></i>
@@ -2093,5 +2154,118 @@
       window.open(url, '_blank');
     }
   </script>
+  
+
+<script>
+// ============================================
+// INICIALIZAR: Asignar eventos a botones
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Seleccionar todos los botones de eliminar estado
+  const botonesEliminar = document.querySelectorAll('.btn-eliminar-estado');
+  
+  // Asignar evento click a cada botón
+  botonesEliminar.forEach(function(boton) {
+    boton.addEventListener('click', function() {
+      // Leer los atributos data-* del botón
+      const estadoId = this.getAttribute('data-estado-id');
+      const nombreEstado = this.getAttribute('data-estado-nombre');
+      
+      // Llamar a la función de confirmación
+      confirmarEliminarEstado(estadoId, nombreEstado);
+    });
+  });
+});
+
+// ============================================
+// FUNCIÓN: Confirmar eliminar estado
+// ============================================
+function confirmarEliminarEstado(estadoId, nombreEstado) {
+  // Formatear el nombre del estado (reemplazar guiones por espacios)
+  const estadoFormateado = nombreEstado.replace(/-/g, ' ');
+  
+  // Mostrar confirmación
+  const confirmacion = confirm(
+    `¿Estás seguro de eliminar el estado "${estadoFormateado}"?\n\n` +
+    `Esta acción no se puede deshacer y eliminará:\n` +
+    `• El estado del historial\n` +
+    `• Las fotos asociadas (si las hay)\n` +
+    `• Los comentarios del estado`
+  );
+  
+  if (confirmacion) {
+    eliminarEstado(estadoId);
+  }
+}
+
+// ============================================
+// FUNCIÓN: Eliminar estado (AJAX)
+// ============================================
+async function eliminarEstado(estadoId) {
+  // Buscar el botón correspondiente
+  const btnEliminar = document.querySelector(`.btn-eliminar-estado[data-estado-id="${estadoId}"]`);
+  
+  // Mostrar indicador de carga
+  if (btnEliminar) {
+    btnEliminar.disabled = true;
+    btnEliminar.innerHTML = '<i data-lucide="loader"></i>';
+    lucide.createIcons();
+    
+    // Animar el loader
+    const loader = btnEliminar.querySelector('i');
+    if (loader) {
+      loader.style.animation = 'spin 1s linear infinite';
+    }
+  }
+  
+  try {
+    const response = await fetch(`/historial/${estadoId}/eliminar`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      // Mostrar mensaje de éxito
+      alert('✅ Estado eliminado correctamente');
+      
+      // Recargar la página para actualizar el historial
+      window.location.reload();
+    } else {
+      // Restaurar botón
+      if (btnEliminar) {
+        btnEliminar.disabled = false;
+        btnEliminar.innerHTML = '<i data-lucide="trash-2"></i>';
+        lucide.createIcons();
+      }
+      
+      alert('❌ Error: ' + (data.message || 'No se pudo eliminar el estado'));
+    }
+  } catch (error) {
+    console.error('Error al eliminar estado:', error);
+    
+    // Restaurar botón
+    if (btnEliminar) {
+      btnEliminar.disabled = false;
+      btnEliminar.innerHTML = '<i data-lucide="trash-2"></i>';
+      lucide.createIcons();
+    }
+    
+    alert('❌ Error al eliminar el estado. Intenta de nuevo.');
+  }
+}
+</script>
+
+<!-- Animación del spinner -->
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>
+
 </body>
 </html>

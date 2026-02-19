@@ -42,6 +42,69 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ✅✅✅ NUEVA RUTA: Ver tracking directo por número ✅✅✅
+router.get('/:numeroTracking', async (req, res) => {
+  try {
+    const { numeroTracking } = req.params;
+    const config = await obtenerConfiguracion();
+    
+    // Buscar el envío
+    const [envios] = await db.query(
+      `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email 
+       FROM envios e 
+       LEFT JOIN clientes c ON e.cliente_id = c.id 
+       WHERE e.numero_tracking = ? OR e.referencia_cliente = ?`,
+      [numeroTracking, numeroTracking]
+    );
+    
+    if (envios.length === 0) {
+      // Si no se encuentra, renderizar página con mensaje
+      return res.render('tracking-public', {
+        title: 'Envío no encontrado - Transportes AB',
+        config: config,
+        error: 'No se encontró ningún envío con ese número de tracking',
+        numeroTracking: numeroTracking
+      });
+    }
+    
+    const envio = envios[0];
+    
+    // Buscar historial de estados
+    const [historial] = await db.query(
+      `SELECT * FROM historial_estados 
+       WHERE envio_id = ? 
+       ORDER BY fecha_hora ASC`,
+      [envio.id]
+    );
+    
+    // Buscar fotos para cada estado del historial
+    for (let estado of historial) {
+      const [fotos] = await db.query(
+        'SELECT * FROM fotos_evidencia WHERE historial_estado_id = ?',
+        [estado.id]
+      );
+      estado.fotos = fotos;
+    }
+    
+    // Renderizar con los datos precargados
+    res.render('tracking-public', {
+      title: `Tracking ${numeroTracking} - Transportes AB`,
+      config: config,
+      envio: envio,
+      historial: historial,
+      numeroTracking: numeroTracking
+    });
+    
+  } catch (error) {
+    console.error('Error al cargar tracking:', error);
+    res.render('tracking-public', {
+      title: 'Error - Transportes AB',
+      config: {},
+      error: 'Error al cargar el tracking. Intenta de nuevo.'
+    });
+  }
+});
+
 // API para buscar envío por número de tracking O referencia del cliente
 router.get('/buscar/:numeroTracking', async (req, res) => {
   try {
@@ -103,7 +166,7 @@ router.get('/qr/:numeroTracking', async (req, res) => {
     const { numeroTracking } = req.params;
     
     // URL completa del tracking
-    const trackingURL = `${req.protocol}://${req.get('host')}/tracking?numero=${numeroTracking}`;
+    const trackingURL = `${req.protocol}://${req.get('host')}/tracking/${numeroTracking}`;
     
     // Generar QR
     const qrImage = await QRCode.toDataURL(trackingURL, {

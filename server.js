@@ -46,6 +46,7 @@ const enviosRetrasadosRoutes = require('./routes/envios-retrasados');
 const usuariosRoutes = require('./routes/usuarios');
 const perfilRoutes = require('./routes/perfil');
 const direccionesRoutes = require('./routes/direcciones');
+const historialRoutes = require('./routes/historial');
 
 
 app.use('/tracking', trackingRoutes);
@@ -53,13 +54,13 @@ app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/envios', enviosRoutes);
 app.use('/clientes', clientesRoutes);
-app.use('/', trackingRoutes);
 app.use('/reportes', reportesRoutes);
 app.use('/configuracion', configuracionRoutes);
 app.use('/envios-retrasados', enviosRetrasadosRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/mi-perfil', perfilRoutes);
 app.use('/direcciones', direccionesRoutes);
+app.use('/historial', historialRoutes);
 
 
 
