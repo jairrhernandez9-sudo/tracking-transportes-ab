@@ -74,7 +74,7 @@ router.get('/api/verificar-prefijo', isAuthenticated, async (req, res) => {
     const prefijoUpper = prefijo.toUpperCase();
     
     // Verificar si está disponible (excluyendo el cliente actual si es edición)
-    let query = 'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ?';
+    let query = 'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ? AND eliminado_en IS NULL';
     const params = [prefijoUpper];
     
     if (clienteId) {
@@ -110,7 +110,7 @@ router.get('/', isAuthenticated, async (req, res) => {
   try {
     const { buscar, orderBy } = req.query;
     
-    let query = 'SELECT * FROM clientes WHERE 1=1';
+    let query = 'SELECT * FROM clientes WHERE eliminado_en IS NULL';
     const params = [];
     
     // Filtro de búsqueda
@@ -196,7 +196,7 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
     
     // Verificar si el email ya existe
     const [existente] = await db.query(
-      'SELECT id FROM clientes WHERE email = ?',
+      'SELECT id FROM clientes WHERE email = ? AND eliminado_en IS NULL',
       [email]
     );
     
@@ -292,6 +292,39 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
 // ============================================
 // VER DETALLE DE CLIENTE
 // ============================================
+// ============================================
+// CLIENTES ELIMINADOS (solo admin)
+// ============================================
+router.get('/eliminados', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
+    const [clientes] = await db.query(
+      'SELECT * FROM clientes WHERE eliminado_en IS NOT NULL ORDER BY eliminado_en DESC'
+    );
+    
+    // Obtener total de envíos por cliente eliminado
+    for (let cliente of clientes) {
+      const [envios] = await db.query(
+        'SELECT COUNT(*) as total FROM envios WHERE cliente_id = ?',
+        [cliente.id]
+      );
+      cliente.total_envios = envios[0].total;
+    }
+    
+    res.render('clientes/eliminados', {
+      title: 'Clientes Eliminados',
+      user: {
+        nombre: req.session.userName,
+        email: req.session.userEmail,
+        rol: req.session.userRole
+      },
+      clientes
+    });
+  } catch (error) {
+    console.error('Error al cargar clientes eliminados:', error);
+    res.status(500).send('Error al cargar los clientes eliminados');
+  }
+});
+
 router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
@@ -415,7 +448,7 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     
     // Verificar si el email ya existe (excluyendo el cliente actual)
     const [existente] = await db.query(
-      'SELECT id FROM clientes WHERE email = ? AND id != ?',
+      'SELECT id FROM clientes WHERE email = ? AND id != ? AND eliminado_en IS NULL',
       [email, id]
     );
     
@@ -469,7 +502,7 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
         
         // Verificar disponibilidad (excluyendo el cliente actual)
         const [result] = await db.query(
-          'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ? AND id != ?',
+          'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ? AND id != ? AND eliminado_en IS NULL',
           [nuevoPrefijoUpper, id]
         );
         
@@ -539,21 +572,11 @@ router.post('/:id/eliminar', isAuthenticated, requireAdmin, async (req, res) => 
   try {
     const { id } = req.params;
     
-    // Verificar si tiene envíos asociados
-    const [envios] = await db.query(
-      'SELECT COUNT(*) as total FROM envios WHERE cliente_id = ?',
+    // Soft delete — marcar como eliminado sin borrar el registro
+    await db.query(
+      'UPDATE clientes SET eliminado_en = NOW() WHERE id = ? AND eliminado_en IS NULL',
       [id]
     );
-    
-    if (envios[0].total > 0) {
-      return res.json({ 
-        success: false, 
-        message: `No se puede eliminar. El cliente tiene ${envios[0].total} envío(s) asociado(s).` 
-      });
-    }
-    
-    // Eliminar cliente
-    await db.query('DELETE FROM clientes WHERE id = ?', [id]);
     
     res.json({ success: true });
     
@@ -563,6 +586,23 @@ router.post('/:id/eliminar', isAuthenticated, requireAdmin, async (req, res) => 
       success: false, 
       message: 'Error al eliminar el cliente' 
     });
+  }
+});
+
+// Restaurar cliente eliminado (solo admin)
+router.post('/:id/restaurar', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await db.query(
+      'UPDATE clientes SET eliminado_en = NULL WHERE id = ?',
+      [id]
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al restaurar cliente:', error);
+    res.status(500).json({ success: false, message: 'Error al restaurar el cliente' });
   }
 });
 
@@ -578,6 +618,32 @@ router.post('/:id/toggle-activo', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error('Error:', error);
     res.json({ success: false, message: error.message });
+  }
+});
+
+// Eliminar permanentemente (solo admin, desde la página de eliminados)
+router.post('/:id/eliminar-permanente', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Solo se puede eliminar permanentemente si ya fue soft-deleted
+    const [clientes] = await db.query(
+      'SELECT id FROM clientes WHERE id = ? AND eliminado_en IS NOT NULL',
+      [id]
+    );
+    
+    if (clientes.length === 0) {
+      return res.json({ success: false, message: 'El cliente no está en la lista de eliminados' });
+    }
+    
+    // Desvincular envíos antes de borrar (FK constraint)
+    await db.query('UPDATE envios SET cliente_id = NULL WHERE cliente_id = ?', [id]);
+    await db.query('DELETE FROM clientes WHERE id = ?', [id]);
+    res.json({ success: true });
+    
+  } catch (error) {
+    console.error('Error al eliminar permanentemente:', error);
+    res.status(500).json({ success: false, message: 'Error al eliminar el cliente' });
   }
 });
 

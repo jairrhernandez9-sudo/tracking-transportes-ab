@@ -963,7 +963,7 @@
             </div>
             <div class="user-info">
               <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
-              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
+              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3756535a5e5977434556545c5e59501954585a">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -975,7 +975,7 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="94f5f0f9fdfad4e0e6f5f7fffdfaf3baf7fbf9">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
                     <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
                   </span>
@@ -1131,10 +1131,6 @@
               <i data-lucide="eye"></i>
               Ver
             </a>
-            <button class="btn-report export" onclick="exportarPDF('general')">
-              <i data-lucide="download"></i>
-              Exportar PDF
-            </button>
           </div>
         </div>
         
@@ -1154,10 +1150,6 @@
               <i data-lucide="eye"></i>
               Ver
             </a>
-            <button class="btn-report export" onclick="exportarExcel('clientes')">
-              <i data-lucide="download"></i>
-              Exportar Excel
-            </button>
           </div>
         </div>
         
@@ -1177,10 +1169,6 @@
               <i data-lucide="eye"></i>
               Ver
             </a>
-            <button class="btn-report export" onclick="exportarPDF('periodo')">
-              <i data-lucide="download"></i>
-              Exportar PDF
-            </button>
           </div>
         </div>
         
@@ -1200,10 +1188,6 @@
               <i data-lucide="eye"></i>
               Ver
             </a>
-            <button class="btn-report export" onclick="exportarExcel('rendimiento')">
-              <i data-lucide="download"></i>
-              Exportar Excel
-            </button>
           </div>
         </div>
         
@@ -1213,7 +1197,7 @@
     
   </div>
   
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
     
     // User Profile Dropdown

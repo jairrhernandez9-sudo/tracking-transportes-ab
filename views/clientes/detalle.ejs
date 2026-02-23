@@ -1123,7 +1123,7 @@
             </div>
             <div class="user-info">
               <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
-              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
+              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="39585d545057794d4b585a5250575e175a5654">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -1135,7 +1135,7 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9ffefbf2f6f1dfebedfefcf4f6f1f8b1fcf0f2">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
                     <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
                   </span>
@@ -1793,7 +1793,7 @@
       </form>
     </div>
   </div>
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
     
     // User Profile Dropdown
@@ -1894,7 +1894,7 @@ RFC: <%= cliente.rfc || '-' %>
       const id = btnEliminar.dataset.clienteId;
       const nombre = btnEliminar.dataset.clienteNombre;
       
-      if (!confirm(`¿Estás seguro de eliminar al cliente "${nombre}"?\n\nEsta acción no se puede deshacer y eliminará todos los envíos asociados.`)) {
+      if (!confirm(`¿Eliminar al cliente "${nombre}"?\n\nEl cliente pasará a la lista de eliminados. Sus envíos existentes se conservarán y podrás restaurarlo cuando quieras.`)) {
         return;
       }
       
@@ -1907,10 +1907,10 @@ RFC: <%= cliente.rfc || '-' %>
         const result = await response.json();
         
 if (result.success) {
-          alert('Cliente eliminado correctamente');
+          alert('Cliente eliminado. Puedes restaurarlo desde Clientes → Eliminados.');
           window.location.href = '/clientes';
         } else {
-          alert('Error: ' + (result.error || 'No se pudo eliminar el cliente'));
+          alert('Error: ' + (result.message || result.error || 'No se pudo eliminar el cliente'));
         }
       } catch (error) {
         console.error('Error:', error);

@@ -77,7 +77,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     let query = `
       SELECT 
         e.*,
-        c.nombre_empresa,
+        COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa,
         c.contacto,
         u.nombre as creador_nombre
       FROM envios e
@@ -93,12 +93,13 @@ router.get('/', isAuthenticated, async (req, res) => {
       query += ` AND (
         e.numero_tracking LIKE ? OR 
         e.referencia_cliente LIKE ? OR
-        c.nombre_empresa LIKE ? OR 
+        c.nombre_empresa LIKE ? OR
+        e.cliente_nombre LIKE ? OR
         e.origen LIKE ? OR 
         e.destino LIKE ?
       )`;
       const searchTerm = `%${buscar}%`;
-      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
     
     // Filtro de estado
@@ -140,7 +141,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     const [envios] = await db.query(`
       SELECT 
         e.*,
-        c.nombre_empresa,
+        COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa,
         c.contacto,
         c.telefono,
         c.email as cliente_email,
@@ -206,7 +207,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
         ultimo_numero_tracking,
         CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
       FROM clientes 
-      WHERE activo = 1 
+      WHERE activo = 1 AND eliminado_en IS NULL 
       ORDER BY nombre_empresa
     `);
     
@@ -278,7 +279,7 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
           ultimo_numero_tracking,
           CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
         FROM clientes 
-        WHERE activo = 1 
+        WHERE activo = 1 AND eliminado_en IS NULL 
         ORDER BY nombre_empresa
       `);
       return res.render('envios/nuevo', {
@@ -296,12 +297,19 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
     
     //  GENERAR TRACKING PERSONALIZADO POR CLIENTE
     const numeroTracking = await generarSiguienteTracking(cliente_id);
+
+    // Obtener nombre del cliente para snapshot histórico
+    const [clienteRows] = await db.query(
+      'SELECT nombre_empresa FROM clientes WHERE id = ?', [cliente_id]
+    );
+    const cliente_nombre_snapshot = clienteRows.length > 0 ? clienteRows[0].nombre_empresa : null;
     
     // Insertar envío con referencia_cliente
     const [result] = await db.query(
       `INSERT INTO envios (
         numero_tracking, 
-        cliente_id, 
+        cliente_id,
+        cliente_nombre,
         referencia_cliente,  
         descripcion, 
         peso, 
@@ -321,10 +329,11 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
         destino_cp,
         destino_referencia,
         usuario_creador_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         numeroTracking, 
-        cliente_id, 
+        cliente_id,
+        cliente_nombre_snapshot,
         referencia_cliente,
         descripcion, 
         peso, 
@@ -369,7 +378,7 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
         ultimo_numero_tracking,
         CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
       FROM clientes 
-      WHERE activo = 1 
+      WHERE activo = 1 AND eliminado_en IS NULL 
       ORDER BY nombre_empresa
     `);
     res.render('envios/nuevo', {
@@ -393,7 +402,7 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
     
     const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
     const [clientes] = await db.query(
-      'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
+      'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
     );
     
     if (envios.length === 0) {
@@ -435,7 +444,7 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
 if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
         const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
       const [clientes] = await db.query(
-        'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
+        'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
       );
       
       return res.render('envios/editar', {
@@ -472,7 +481,7 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
     console.error('Error al actualizar envío:', error);
     const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [req.params.id]);
     const [clientes] = await db.query(
-      'SELECT * FROM clientes WHERE activo = 1 ORDER BY nombre_empresa'
+      'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
     );
     
     res.render('envios/editar', {

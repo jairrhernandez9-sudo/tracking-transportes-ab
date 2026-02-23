@@ -955,8 +955,13 @@
             <i data-lucide="printer"></i>
             Imprimir
           </button>
+
+          <button class="btn-export" onclick="window.location.href='/reportes/periodo/excel?'+new URLSearchParams(window.location.search).toString()">
+            <i data-lucide="table-2"></i>
+            Exportar Excel
+          </button>
           
-          <button class="btn-export" onclick="exportarPDF()">
+          <button class="btn-export" onclick="window.open('/reportes/periodo/pdf?'+new URLSearchParams(window.location.search).toString(),'_blank')">
             <i data-lucide="download"></i>
             Exportar PDF
           </button>
@@ -974,7 +979,7 @@
             </div>
             <div class="user-info">
               <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
-              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
+              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0c6d686165624c787e6d6f6765626b226f6361">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -986,7 +991,7 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a0c1c4cdc9cee0d4d2c1c3cbc9cec78ec3cfcd">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
                     <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
                   </span>
@@ -1203,7 +1208,7 @@
     
   </div>
   
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
     
     // User Profile Dropdown
@@ -1232,12 +1237,17 @@
         }
       });
     }
-    
-    // Exportar PDF
+
+    // Exportar — pasa los filtros de fecha activos
     function exportarPDF() {
-      alert('Función de exportación a PDF en desarrollo...');
-      // Aquí irá la lógica de exportación
+      const params = new URLSearchParams(window.location.search).toString();
+      window.open('/reportes/periodo/pdf?' + params, '_blank');
     }
+    function exportarExcel() {
+      const params = new URLSearchParams(window.location.search).toString();
+      window.location.href = '/reportes/periodo/excel?' + params;
+    }
+
   </script>
 </body>
 </html>

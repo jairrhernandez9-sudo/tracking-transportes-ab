@@ -451,21 +451,28 @@ const pasosProgreso = [
 
 // Calcular el progreso visual (0-100%)
 function calcularProgresoVisual(estadoActual) {
-  const indiceActual = pasosProgreso.findIndex(paso => paso.estado === estadoActual);
+  const estado = (estadoActual || '').replace(/-/g, '_');
+  // cancelado no tiene posición en el timeline, mostrar barra vacía
+  if (estado === 'cancelado') return 0;
+  const indiceActual = pasosProgreso.findIndex(paso => paso.estado === estado);
   if (indiceActual === -1) return 0;
   return (indiceActual / (pasosProgreso.length - 1)) * 100;
 }
 
 // Generar HTML de los pasos
 function generarPasosProgreso(estadoActual) {
-  const indiceActual = pasosProgreso.findIndex(paso => paso.estado === estadoActual);
+  const estado = (estadoActual || '').replace(/-/g, '_');
+  const esCancelado = estado === 'cancelado';
+  const indiceActual = pasosProgreso.findIndex(paso => paso.estado === estado);
   
   return pasosProgreso.map((paso, index) => {
     let claseEstado = 'pending';
-    if (index < indiceActual) {
-      claseEstado = 'completed';
-    } else if (index === indiceActual) {
-      claseEstado = 'current';
+    if (!esCancelado) {
+      if (index < indiceActual) {
+        claseEstado = 'completed';
+      } else if (index === indiceActual) {
+        claseEstado = 'current';
+      }
     }
     
     return `

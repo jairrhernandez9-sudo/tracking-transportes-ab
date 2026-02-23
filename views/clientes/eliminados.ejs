@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8f9fa; min-height: 100vh; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px; background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px; display: flex; flex-direction: column;
+      position: fixed; height: 100vh; overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    }
+    .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 12px; }
+    .logo-icon-image { width: 42px; height: 42px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0; }
+    .logo-icon-image img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-info { display: flex; flex-direction: column; gap: 2px; }
+    .logo-text { color: white; font-size: 1.1rem; font-weight: 900; line-height: 1; }
+    .logo-tagline { color: rgba(255,255,255,0.7); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-section { margin-bottom: 24px; }
+    .nav-section-title { font-size: 0.65rem; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; padding: 0 14px; margin-bottom: 8px; }
+    .nav-menu { list-style: none; }
+    .nav-item { margin-bottom: 4px; }
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; position: relative; }
+    .nav-link i { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(4px); }
+    .nav-link.active { background: rgba(255,255,255,0.15); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .nav-link.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: white; border-radius: 0 4px 4px 0; }
+
+    /* MAIN */
+    .main-content { margin-left: 260px; flex: 1; padding: 30px 40px; min-height: 100vh; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .page-title-section { display: flex; align-items: center; gap: 12px; }
+    .page-title { font-size: 1.75rem; font-weight: 900; color: #1f2937; margin-bottom: 4px; }
+    .page-subtitle { font-size: 0.9rem; color: #6b7280; font-weight: 500; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+
+    /* BANNER WARNING */
+    .warning-banner {
+      background: #fef3c7; border: 2px solid #fcd34d; border-radius: 12px;
+      padding: 16px 20px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .warning-banner i { width: 22px; height: 22px; color: #d97706; flex-shrink: 0; }
+    .warning-banner p { font-size: 0.9rem; color: #92400e; font-weight: 500; line-height: 1.5; }
+    .warning-banner strong { font-weight: 800; }
+
+    /* STAT */
+    .stat-banner {
+      background: white; border-radius: 12px; border: 1px solid #e5e7eb;
+      padding: 20px 24px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .stat-banner-icon { width: 50px; height: 50px; background: #fee2e2; color: #dc2626; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-banner-icon i { width: 24px; height: 24px; }
+    .stat-banner-info h3 { font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stat-banner-info .num { font-size: 2rem; font-weight: 900; color: #dc2626; }
+
+    /* GRID */
+    .clientes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+
+    /* CARD */
+    .cliente-card {
+      background: white; border-radius: 16px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 2px solid #fee2e2;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .cliente-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-color: #dc2626; }
+
+    .deleted-badge {
+      position: absolute; top: 14px; right: 14px;
+      background: #fee2e2; color: #dc2626; border-radius: 20px;
+      padding: 4px 10px; font-size: 0.72rem; font-weight: 800;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .deleted-badge i { width: 12px; height: 12px; }
+
+    .cliente-header { display: flex; align-items: flex-start; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid #f3f4f6; }
+    .cliente-icon { width: 48px; height: 48px; background: #fee2e2; color: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .cliente-icon i { width: 22px; height: 22px; }
+    .cliente-title { flex: 1; margin-left: 14px; padding-right: 70px; }
+    .cliente-nombre { font-size: 1.15rem; font-weight: 800; color: #1f2937; margin-bottom: 4px; }
+    .cliente-contacto { font-size: 0.88rem; color: #6b7280; font-weight: 600; }
+
+    .cliente-info { margin-bottom: 16px; }
+    .info-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: #4b5563; font-size: 0.9rem; }
+    .info-row i { width: 16px; height: 16px; color: #9ca3af; flex-shrink: 0; }
+
+    .fecha-eliminado { 
+      background: #fef2f2; border-radius: 8px; padding: 10px 14px;
+      font-size: 0.82rem; color: #dc2626; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    }
+    .fecha-eliminado i { width: 14px; height: 14px; flex-shrink: 0; }
+
+    .cliente-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px; }
+    .stat-box { text-align: center; padding: 10px; background: #f9fafb; border-radius: 10px; }
+    .stat-label { font-size: 0.7rem; color: #6b7280; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .stat-box .stat-value { font-size: 1.4rem; font-weight: 900; color: #6b7280; }
+
+    .cliente-actions { display: flex; gap: 10px; }
+    .btn-action { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; font-size: 0.88rem; }
+    .btn-restore { background: #d1fae5; color: #065f46; border: 2px solid #a7f3d0; }
+    .btn-restore:hover { background: #6ee7b7; border-color: #059669; }
+    .btn-delete-perm { background: white; color: #dc2626; border: 2px solid #fecaca; }
+    .btn-delete-perm:hover { background: #fef2f2; border-color: #dc2626; }
+
+    /* BTN VOLVER */
+    .btn-back {
+      padding: 10px 20px; background: white; color: #4b5563;
+      border: 1px solid #e5e7eb; border-radius: 10px; font-weight: 600;
+      font-size: 0.9rem; display: flex; align-items: center; gap: 8px;
+      text-decoration: none; transition: all 0.3s ease;
+    }
+    .btn-back:hover { border-color: #3b82f6; color: #3b82f6; }
+    .btn-back i { width: 18px; height: 18px; }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 80px 20px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .empty-icon { width: 100px; height: 100px; background: #d1fae5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .empty-icon i { width: 50px; height: 50px; }
+    .empty-title { font-size: 1.6rem; font-weight: 800; color: #1f2937; margin-bottom: 10px; }
+    .empty-text { color: #6b7280; font-size: 1rem; margin-bottom: 28px; }
+
+    /* USER */
+    .user-profile { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; }
+    .user-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.85rem; }
+    .user-info h4 { font-size: 0.85rem; font-weight: 700; color: #1f2937; }
+    .user-info p { font-size: 0.7rem; color: #6b7280; }
+
+    @media (max-width: 968px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .clientes-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon-image">
+        <img src="/images/logo-transportes-ab.png" alt="Logo">
+      </div>
+      <div class="logo-info">
+        <span class="logo-text">Transportes AB</span>
+        <span class="logo-tagline">Sistema Tracking</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">PRINCIPAL</div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="/dashboard" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="/envios" class="nav-link"><i data-lucide="package"></i><span>Envíos</span></a></li>
+        <li class="nav-item"><a href="/envios-retrasados" class="nav-link"><i data-lucide="alert-triangle"></i><span>Envíos Retrasados</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">GESTIÓN</div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="/clientes" class="nav-link active"><i data-lucide="users"></i><span>Clientes</span></a></li>
+        <li class="nav-item"><a href="/reportes" class="nav-link"><i data-lucide="bar-chart"></i><span>Reportes</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">SISTEMA</div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="/usuarios" class="nav-link"><i data-lucide="user-cog"></i><span>Usuarios</span></a></li>
+        <li class="nav-item"><a href="/configuracion" class="nav-link"><i data-lucide="settings"></i><span>Configuración</span></a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div class="page-title-section">
+        <div>
+          <h1 class="page-title">🗑️ Clientes Eliminados</h1>
+          <p class="page-subtitle">Historial de clientes eliminados — puedes restaurarlos en cualquier momento</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="/clientes" class="btn-back">
+          <i data-lucide="arrow-left"></i>
+          Volver a Clientes
+        </a>
+        <div class="user-profile">
+          <div class="user-avatar">
+            <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+          </div>
+          <div class="user-info">
+            <h4><%= user ? user.nombre : 'Admin' %></h4>
+            <p><%= user ? user.rol : '' %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WARNING BANNER -->
+    <div class="warning-banner">
+      <i data-lucide="info"></i>
+      <p>Los clientes eliminados <strong>no desaparecen del sistema</strong>. Sus envíos, historial y datos se conservan intactos. Puedes restaurar un cliente en cualquier momento o eliminarlo permanentemente si ya no necesitas su información.</p>
+    </div>
+
+    <!-- STAT -->
+    <div class="stat-banner">
+      <div class="stat-banner-icon">
+        <i data-lucide="trash-2"></i>
+      </div>
+      <div class="stat-banner-info">
+        <h3>Total eliminados</h3>
+        <div class="num"><%= clientes.length %></div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <% if (clientes && clientes.length > 0) { %>
+      <div class="clientes-grid" id="clientesEliminadosGrid">
+        <% clientes.forEach(cliente => { %>
+          <div class="cliente-card" id="card-<%= cliente.id %>">
+
+            <div class="deleted-badge">
+              <i data-lucide="trash-2"></i>
+              Eliminado
+            </div>
+
+            <div class="cliente-header">
+              <div class="cliente-icon">
+                <i data-lucide="building-2"></i>
+              </div>
+              <div class="cliente-title">
+                <div class="cliente-nombre"><%= cliente.nombre_empresa %></div>
+                <% if (cliente.contacto) { %>
+                  <div class="cliente-contacto"><%= cliente.contacto %></div>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="cliente-info">
+              <% if (cliente.email) { %>
+                <div class="info-row"><i data-lucide="mail"></i><span><%= cliente.email %></span></div>
+              <% } %>
+              <% if (cliente.telefono) { %>
+                <div class="info-row"><i data-lucide="phone"></i><span><%= cliente.telefono %></span></div>
+              <% } %>
+              <% if (cliente.direccion) { %>
+                <div class="info-row"><i data-lucide="map-pin"></i><span><%= cliente.direccion %></span></div>
+              <% } %>
+            </div>
+
+            <div class="fecha-eliminado">
+              <i data-lucide="calendar-x"></i>
+              Eliminado el <%= new Date(cliente.eliminado_en).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+            </div>
+
+            <div class="cliente-stats">
+              <div class="stat-box">
+                <div class="stat-label">Envíos</div>
+                <div class="stat-value"><%= cliente.total_envios || 0 %></div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Registrado</div>
+                <div class="stat-value" style="font-size:0.9rem;">
+                  <%= new Date(cliente.fecha_creacion).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' }) %>
+                </div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">ID</div>
+                <div class="stat-value" style="font-size:1.2rem;"><%= cliente.id %></div>
+              </div>
+            </div>
+
+            <div class="cliente-actions">
+              <button
+                class="btn-action btn-restore btn-restaurar"
+                data-cliente-id="<%= cliente.id %>"
+                data-cliente-nombre="<%= cliente.nombre_empresa %>"
+              >
+                <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+                Restaurar
+              </button>
+              <button
+                class="btn-action btn-delete-perm btn-eliminar-perm"
+                data-cliente-id="<%= cliente.id %>"
+                data-cliente-nombre="<%= cliente.nombre_empresa %>"
+                data-cliente-envios="<%= cliente.total_envios || 0 %>"
+              >
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+                Eliminar definitivo
+              </button>
+            </div>
+
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i data-lucide="check-circle"></i>
+        </div>
+        <h2 class="empty-title">No hay clientes eliminados</h2>
+        <p class="empty-text">Todos tus clientes están activos. Los que elimines aparecerán aquí.</p>
+        <a href="/clientes" class="btn-back" style="display:inline-flex;margin:0 auto;">
+          <i data-lucide="arrow-left"></i>
+          Volver a Clientes
+        </a>
+      </div>
+    <% } %>
+
+  </main>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // RESTAURAR
+  document.addEventListener('click', async function(e) {
+    const btn = e.target.closest('.btn-restaurar');
+    if (!btn) return;
+
+    const id     = btn.dataset.clienteId;
+    const nombre = btn.dataset.clienteNombre;
+
+    if (!confirm(`¿Restaurar al cliente "${nombre}"?\n\nVolverá a aparecer en la lista de clientes activos.`)) return;
+
+    try {
+      const res    = await fetch(`/clientes/${id}/restaurar`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const result = await res.json();
+
+      if (result.success) {
+        const card = document.getElementById(`card-${id}`);
+        if (card) {
+          card.style.transition = 'all 0.4s ease';
+          card.style.opacity    = '0';
+          card.style.transform  = 'scale(0.9)';
+          setTimeout(() => card.remove(), 400);
+        }
+        // Small toast
+        showToast(`✅ "${nombre}" restaurado correctamente`, '#059669');
+      } else {
+        alert('Error: ' + (result.message || 'No se pudo restaurar'));
+      }
+    } catch (err) {
+      alert('Error al conectar con el servidor');
+    }
+  });
+
+  // ELIMINAR PERMANENTE
+  document.addEventListener('click', async function(e) {
+    const btn = e.target.closest('.btn-eliminar-perm');
+    if (!btn) return;
+
+    const id     = btn.dataset.clienteId;
+    const nombre = btn.dataset.clienteNombre;
+    const envios = parseInt(btn.dataset.clienteEnvios || '0');
+
+    let msg = `⚠️ ELIMINACIÓN PERMANENTE\n\n¿Estás seguro de eliminar definitivamente a "${nombre}"?\n\nEsta acción NO se puede deshacer.`;
+    if (envios > 0) {
+      msg += `\n\nEste cliente tiene ${envios} envío(s) registrado(s). Los envíos quedarán en el sistema sin cliente asociado.`;
+    }
+
+    if (!confirm(msg)) return;
+    // Segunda confirmación por seguridad
+    if (!confirm(`Confirma una vez más:\n¿Eliminar permanentemente a "${nombre}"?`)) return;
+
+    try {
+      const res    = await fetch(`/clientes/${id}/eliminar-permanente`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const result = await res.json();
+
+      if (result.success) {
+        const card = document.getElementById(`card-${id}`);
+        if (card) {
+          card.style.transition = 'all 0.4s ease';
+          card.style.opacity    = '0';
+          card.style.transform  = 'scale(0.9)';
+          setTimeout(() => card.remove(), 400);
+        }
+        showToast(`🗑️ "${nombre}" eliminado permanentemente`, '#dc2626');
+      } else {
+        alert('Error: ' + (result.message || 'No se pudo eliminar'));
+      }
+    } catch (err) {
+      alert('Error al conectar con el servidor');
+    }
+  });
+
+  // Mini toast notification
+  function showToast(msg, color) {
+    const toast = document.createElement('div');
+    toast.textContent = msg;
+    Object.assign(toast.style, {
+      position: 'fixed', bottom: '30px', right: '30px', zIndex: '9999',
+      background: color, color: 'white', padding: '14px 22px',
+      borderRadius: '12px', fontWeight: '700', fontSize: '0.9rem',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+      transition: 'all 0.4s ease', opacity: '0', transform: 'translateY(20px)'
+    });
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; }, 50);
+    setTimeout(() => {
+      toast.style.opacity = '0'; toast.style.transform = 'translateY(20px)';
+      setTimeout(() => toast.remove(), 400);
+    }, 3500);
+  }
+</script>
+</body>
+</html>
