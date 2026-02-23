@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const { generarSiguienteTracking } = require('../utils/tracking-utils'); // ⬅️ CAMBIO 1: IMPORTAR FUNCIÓN
+const { generarSiguienteTracking } = require('../utils/tracking-utils'); 
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -198,7 +198,6 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 // Formulario crear nuevo envío
 router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
   try {
-    // ⬅️ CAMBIO 2: OBTENER CLIENTES CON SU PRÓXIMO TRACKING
     const [clientes] = await db.query(`
       SELECT 
         id,
@@ -237,14 +236,12 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
       descripcion, 
       peso, 
       fecha_estimada_entrega,
-      // ⬅️ NUEVOS CAMPOS DE ORIGEN
       origen_calle,
       origen_colonia,
       origen_ciudad,
       origen_estado,
       origen_cp,
       origen_referencia,
-      // ⬅️ NUEVOS CAMPOS DE DESTINO
       destino_calle,
       destino_colonia,
       destino_ciudad,
@@ -297,11 +294,10 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
     
-    // ⬅️ CAMBIO 3: GENERAR TRACKING PERSONALIZADO POR CLIENTE
+    //  GENERAR TRACKING PERSONALIZADO POR CLIENTE
     const numeroTracking = await generarSiguienteTracking(cliente_id);
     
     // Insertar envío con referencia_cliente
-// ⬅️ INSERTAR CON CAMPOS DETALLADOS
     const [result] = await db.query(
       `INSERT INTO envios (
         numero_tracking, 
@@ -707,37 +703,6 @@ router.post('/:id/eliminar', isAuthenticated, async (req, res) => {
 router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const [envios] = await db.query(`
-      SELECT 
-        e.*,
-        c.nombre_empresa,
-        c.contacto,
-        c.telefono,
-        c.direccion as cliente_direccion
-      FROM envios e
-      LEFT JOIN clientes c ON e.cliente_id = c.id
-      WHERE e.id = ?
-    `, [id]);
-    
-    if (envios.length === 0) {
-      return res.status(404).send('Envío no encontrado');
-    }
-    
-    res.render('envios/etiquetaT', {
-      title: 'Etiqueta de Envío',
-      envio: envios[0]
-    });
-  } catch (error) {
-    console.error('Error al generar etiqueta:', error);
-    res.status(500).send('Error al generar la etiqueta');
-  }
-});
-
-// Generar etiqueta térmica (4x6 pulgadas)
-router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
-  try {
-    const { id } = req.params;
     const cantidad = req.query.cantidad || 1; 
     
     // Obtener información del envío
@@ -825,7 +790,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
     }
     
     // Agregar configuracion y baseUrl al render
-    res.render('envios/etiqueta', {
+    res.render('envios/etiquetaT', {
       title: 'Etiqueta de Envío',
       envio: envios[0],
       cantidad: parseInt(cantidad),
