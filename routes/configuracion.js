@@ -496,19 +496,23 @@ router.post('/etiqueta', async (req, res) => {
       etiqueta_mostrar_descripcion
     } = req.body;
 
+    // Checkbox marcado = 'on', desmarcado = 'false' (del hidden input)
+    // El string 'false' es truthy en JS, hay que comparar explícitamente
+    const checked = (val) => val === 'on' || (Array.isArray(val) && val.includes('on'));
+
     const updates = [
-      ['etiqueta_mostrar_logo',               etiqueta_mostrar_logo               ? 'true' : 'false'],
-      ['etiqueta_mostrar_eslogan',             etiqueta_mostrar_eslogan            ? 'true' : 'false'],
-      ['etiqueta_mostrar_telefono',            etiqueta_mostrar_telefono           ? 'true' : 'false'],
-      ['etiqueta_mostrar_telefono_adicional',  etiqueta_mostrar_telefono_adicional ? 'true' : 'false'],
-      ['etiqueta_mostrar_email',               etiqueta_mostrar_email              ? 'true' : 'false'],
-      ['etiqueta_mostrar_sitio_web',           etiqueta_mostrar_sitio_web          ? 'true' : 'false'],
-      ['etiqueta_mostrar_rfc',                 etiqueta_mostrar_rfc                ? 'true' : 'false'],
-      ['etiqueta_mostrar_direccion_fiscal',    etiqueta_mostrar_direccion_fiscal   ? 'true' : 'false'],
-      ['etiqueta_mostrar_barcode',             etiqueta_mostrar_barcode            ? 'true' : 'false'],
-      ['etiqueta_mostrar_qr',                  etiqueta_mostrar_qr                 ? 'true' : 'false'],
-      ['etiqueta_mostrar_ruta',                etiqueta_mostrar_ruta               ? 'true' : 'false'],
-      ['etiqueta_mostrar_descripcion',         etiqueta_mostrar_descripcion        ? 'true' : 'false']
+      ['etiqueta_mostrar_logo',               checked(etiqueta_mostrar_logo)               ? 'true' : 'false'],
+      ['etiqueta_mostrar_eslogan',             checked(etiqueta_mostrar_eslogan)            ? 'true' : 'false'],
+      ['etiqueta_mostrar_telefono',            checked(etiqueta_mostrar_telefono)           ? 'true' : 'false'],
+      ['etiqueta_mostrar_telefono_adicional',  checked(etiqueta_mostrar_telefono_adicional) ? 'true' : 'false'],
+      ['etiqueta_mostrar_email',               checked(etiqueta_mostrar_email)              ? 'true' : 'false'],
+      ['etiqueta_mostrar_sitio_web',           checked(etiqueta_mostrar_sitio_web)          ? 'true' : 'false'],
+      ['etiqueta_mostrar_rfc',                 checked(etiqueta_mostrar_rfc)                ? 'true' : 'false'],
+      ['etiqueta_mostrar_direccion_fiscal',    checked(etiqueta_mostrar_direccion_fiscal)   ? 'true' : 'false'],
+      ['etiqueta_mostrar_barcode',             checked(etiqueta_mostrar_barcode)            ? 'true' : 'false'],
+      ['etiqueta_mostrar_qr',                  checked(etiqueta_mostrar_qr)                 ? 'true' : 'false'],
+      ['etiqueta_mostrar_ruta',                checked(etiqueta_mostrar_ruta)               ? 'true' : 'false'],
+      ['etiqueta_mostrar_descripcion',         checked(etiqueta_mostrar_descripcion)        ? 'true' : 'false']
     ];
 
     for (const [clave, valor] of updates) {
