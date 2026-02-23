@@ -1079,11 +1079,10 @@ input[type="text"]::-moz-reveal {
             </div>
             
 <!-- Nueva Contraseña -->
-
 <div class="form-group">
   <label class="form-label">
     <i data-lucide="lock"></i>
-    Nueva Contraseña
+    Nueva Contraseña <span style="color: #64748b; font-weight: normal;">(opcional)</span>
   </label>
   <div class="password-wrapper">
     <input 
@@ -1098,15 +1097,17 @@ input[type="text"]::-moz-reveal {
       <i data-lucide="eye" id="icon-passwordNueva"></i>
     </button>
   </div>
-  <p class="form-help">Solo completa estos campos si deseas cambiar la contraseña</p>
+  <p class="form-help">
+    <strong>⚠️ IMPORTANTE:</strong> Si dejas este campo vacío, la contraseña actual NO se modificará.
+    Solo completa estos campos si deseas cambiar la contraseña del usuario.
+  </p>
 </div>
 
 <!-- Confirmar Nueva Contraseña -->
-
 <div class="form-group">
   <label class="form-label">
     <i data-lucide="lock"></i>
-    Confirmar Nueva Contraseña
+    Confirmar Nueva Contraseña <span style="color: #64748b; font-weight: normal;">(opcional)</span>
   </label>
   <div class="password-wrapper">
     <input 
@@ -1259,6 +1260,53 @@ input[type="text"]::-moz-reveal {
     // Inicializar iconos de Lucide
     lucide.createIcons();
   });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const password1 = document.getElementById('passwordNueva');
+  const password2 = document.getElementById('passwordConfirmar');
+  
+  // Deshabilitar confirmar contraseña si no hay contraseña nueva
+  password1.addEventListener('input', function() {
+    if (!this.value) {
+      password2.value = '';
+      password2.disabled = true;
+      password2.placeholder = 'Primero ingresa una nueva contraseña';
+    } else {
+      password2.disabled = false;
+      password2.placeholder = 'Repite la nueva contraseña';
+    }
+  });
+  
+  // Validar al enviar el formulario
+  form.addEventListener('submit', function(e) {
+    const pass1 = password1.value;
+    const pass2 = password2.value;
+    
+    // Si se llenó una pero no la otra
+    if ((pass1 && !pass2) || (!pass1 && pass2)) {
+      e.preventDefault();
+      alert('Si deseas cambiar la contraseña, debes completar ambos campos.\n\nSi no deseas cambiarla, deja ambos campos vacíos.');
+      return false;
+    }
+    
+    // Si ambas tienen valor pero no coinciden
+    if (pass1 && pass2 && pass1 !== pass2) {
+      e.preventDefault();
+      alert('Las contraseñas no coinciden. Por favor verifica e intenta nuevamente.');
+      return false;
+    }
+    
+    // Si ambas están vacías, mostrar confirmación
+    if (!pass1 && !pass2) {
+      // No mostrar confirmación, esto es correcto
+      return true;
+    }
+  });
+});
 </script>
 </body>
 </html>

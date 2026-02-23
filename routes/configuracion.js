@@ -2,6 +2,30 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { isAuthenticated, isAdmin } = require('../middleware/auth');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configuración multer para logo de empresa
+const storageLogo = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'public/images';
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'logo-empresa' + path.extname(file.originalname));
+  }
+});
+const uploadLogo = multer({
+  storage: storageLogo,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: function (req, file, cb) {
+    const allowed = /jpeg|jpg|png|gif|webp|svg/;
+    if (allowed.test(path.extname(file.originalname).toLowerCase())) cb(null, true);
+    else cb(new Error('Solo imágenes (JPEG, PNG, GIF, WEBP, SVG)'));
+  }
+});
 
 // Middleware para verificar que solo admins accedan
 router.use(isAuthenticated);
@@ -15,7 +39,8 @@ async function obtenerConfiguracion() {
     tarifas: {},
     notificaciones: {},
     alertas: {},
-    tracking: {}
+    tracking: {},
+    etiqueta: {}
   };
   
   configs.forEach(config => {
@@ -80,7 +105,17 @@ router.get('/', async (req, res) => {
 // Actualizar configuración de empresa
 router.post('/empresa', async (req, res) => {
   try {
-    const { empresa_nombre, empresa_rfc, empresa_telefono, empresa_email, empresa_direccion, empresa_sitio_web } = req.body;
+    const { 
+      empresa_nombre, 
+      empresa_rfc, 
+      empresa_telefono, 
+      empresa_email, 
+      empresa_direccion, 
+      empresa_sitio_web,
+      empresa_eslogan,              // ✅ NUEVO
+      empresa_telefono_adicional,   // ✅ NUEVO
+      empresa_logo_url              // ✅ NUEVO
+    } = req.body;
     
     const updates = [
       ['empresa_nombre', empresa_nombre],
@@ -88,14 +123,18 @@ router.post('/empresa', async (req, res) => {
       ['empresa_telefono', empresa_telefono],
       ['empresa_email', empresa_email],
       ['empresa_direccion', empresa_direccion],
-      ['empresa_sitio_web', empresa_sitio_web]
+      ['empresa_sitio_web', empresa_sitio_web],
+      ['empresa_eslogan', empresa_eslogan],                      // ✅ NUEVO
+      ['empresa_telefono_adicional', empresa_telefono_adicional], // ✅ NUEVO
+      ['empresa_logo_url', empresa_logo_url]                      // ✅ NUEVO
     ];
     
     for (const [clave, valor] of updates) {
-      await db.query(
-        'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
-        [valor || '', req.session.userId, clave]
-      );
+      await db.query(`
+        INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
+        VALUES (?, ?, 'texto', 'empresa', ?, ?)
+        ON DUPLICATE KEY UPDATE valor = ?, modificado_por = ?
+      `, [clave, valor || '', 'Campo ' + clave, req.session.userId, valor || '', req.session.userId]);
     }
     
     res.redirect('/configuracion?success=empresa_actualizada');
@@ -118,10 +157,11 @@ router.post('/tarifas', async (req, res) => {
     ];
     
     for (const [clave, valor] of updates) {
-      await db.query(
-        'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
-        [valor || '0', req.session.userId, clave]
-      );
+      await db.query(`
+        INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
+        VALUES (?, ?, 'numero', 'tarifas', ?, ?)
+        ON DUPLICATE KEY UPDATE valor = ?, modificado_por = ?
+      `, [clave, valor || '0', 'Tarifa ' + clave, req.session.userId, valor || '0', req.session.userId]);
     }
     
     res.redirect('/configuracion?success=tarifas_actualizadas');
@@ -409,6 +449,81 @@ router.get('/api/direcciones', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error('Error al obtener direcciones empresa:', error);
     res.status(500).json({ success: false, message: 'Error al cargar direcciones' });
+  }
+});
+
+// ============================================
+// SUBIR LOGO DE EMPRESA
+// ============================================
+router.post('/logo/upload', uploadLogo.single('logo_file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.redirect('/configuracion?error=archivo_requerido');
+    }
+
+    const logoUrl = '/images/' + req.file.filename;
+
+    await db.query(
+      'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
+      [logoUrl, req.session.userId, 'empresa_logo_url']
+    );
+
+    console.log('✅ Logo actualizado:', logoUrl);
+    res.redirect('/configuracion?success=logo_actualizado');
+  } catch (error) {
+    console.error('Error al subir logo:', error);
+    res.redirect('/configuracion?error=error_servidor');
+  }
+});
+
+// ============================================
+// ACTUALIZAR TOGGLES DE ETIQUETA TÉRMICA
+// ============================================
+router.post('/etiqueta', async (req, res) => {
+  try {
+    const {
+      etiqueta_mostrar_logo,
+      etiqueta_mostrar_eslogan,
+      etiqueta_mostrar_telefono,
+      etiqueta_mostrar_telefono_adicional,
+      etiqueta_mostrar_email,
+      etiqueta_mostrar_sitio_web,
+      etiqueta_mostrar_rfc,
+      etiqueta_mostrar_direccion_fiscal,
+      etiqueta_mostrar_barcode,
+      etiqueta_mostrar_qr,
+      etiqueta_mostrar_ruta,
+      etiqueta_mostrar_descripcion
+    } = req.body;
+
+    const updates = [
+      ['etiqueta_mostrar_logo',               etiqueta_mostrar_logo               ? 'true' : 'false'],
+      ['etiqueta_mostrar_eslogan',             etiqueta_mostrar_eslogan            ? 'true' : 'false'],
+      ['etiqueta_mostrar_telefono',            etiqueta_mostrar_telefono           ? 'true' : 'false'],
+      ['etiqueta_mostrar_telefono_adicional',  etiqueta_mostrar_telefono_adicional ? 'true' : 'false'],
+      ['etiqueta_mostrar_email',               etiqueta_mostrar_email              ? 'true' : 'false'],
+      ['etiqueta_mostrar_sitio_web',           etiqueta_mostrar_sitio_web          ? 'true' : 'false'],
+      ['etiqueta_mostrar_rfc',                 etiqueta_mostrar_rfc                ? 'true' : 'false'],
+      ['etiqueta_mostrar_direccion_fiscal',    etiqueta_mostrar_direccion_fiscal   ? 'true' : 'false'],
+      ['etiqueta_mostrar_barcode',             etiqueta_mostrar_barcode            ? 'true' : 'false'],
+      ['etiqueta_mostrar_qr',                  etiqueta_mostrar_qr                 ? 'true' : 'false'],
+      ['etiqueta_mostrar_ruta',                etiqueta_mostrar_ruta               ? 'true' : 'false'],
+      ['etiqueta_mostrar_descripcion',         etiqueta_mostrar_descripcion        ? 'true' : 'false']
+    ];
+
+    for (const [clave, valor] of updates) {
+      await db.query(`
+        INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
+        VALUES (?, ?, 'boolean', 'etiqueta', ?, ?)
+        ON DUPLICATE KEY UPDATE valor = ?, modificado_por = ?
+      `, [clave, valor, `Toggle ${clave}`, req.session.userId, valor, req.session.userId]);
+    }
+
+    console.log('✅ Toggles de etiqueta actualizados');
+    res.redirect('/configuracion?success=etiqueta_actualizada');
+  } catch (error) {
+    console.error('Error al actualizar toggles etiqueta:', error);
+    res.redirect('/configuracion?error=error_servidor');
   }
 });
 

@@ -864,7 +864,7 @@
             </div>
             <div class="user-info">
               <h4><%= user.nombre || 'Usuario' %></h4>
-              <p><%= user.email || 'email@ejemplo.com' %></p>
+              <p><%= user.email || '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="385d55595154785d525d55485457165b5755">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -876,7 +876,7 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user.nombre || 'Usuario' %></div>
-                  <div class="user-dropdown-email"><%= user.email || 'email@ejemplo.com' %></div>
+                  <div class="user-dropdown-email"><%= user.email || '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="70151d11191c30151a151d001c1f5e131f1d">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
                     <%= user.rol === 'admin' ? 'Administrador' : 'Operador' %>
                   </span>
@@ -939,6 +939,48 @@
           </div>
         <% } %>
         
+        <% if (success === 'logo_actualizado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Logo de la empresa actualizado correctamente
+          </div>
+        <% } %>
+        
+        <% if (success === 'etiqueta_actualizada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Configuración de etiqueta actualizada
+          </div>
+        <% } %>
+        
+        <% if (success === 'direccion_creada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Dirección agregada correctamente
+          </div>
+        <% } %>
+        
+        <% if (success === 'direccion_actualizada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Dirección actualizada correctamente
+          </div>
+        <% } %>
+        
+        <% if (success === 'direccion_eliminada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Dirección eliminada
+          </div>
+        <% } %>
+        
+        <% if (success === 'predeterminada_actualizada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Dirección predeterminada actualizada
+          </div>
+        <% } %>
+        
         <% if (error === 'error_servidor') { %>
           <div class="alert alert-error">
             <i data-lucide="alert-circle" style="width: 20px; height: 20px;"></i>
@@ -951,6 +993,10 @@
           <button class="tab-btn active" onclick="openTab(event, 'empresa')">
             <i data-lucide="building-2" style="width: 18px; height: 18px;"></i>
             Empresa
+          </button>
+          <button class="tab-btn" onclick="openTab(event, 'direcciones')">
+            <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
+            Direcciones
           </button>
           <button class="tab-btn" onclick="openTab(event, 'tarifas')">
             <i data-lucide="dollar-sign" style="width: 18px; height: 18px;"></i>
@@ -967,6 +1013,10 @@
           <button class="tab-btn" onclick="openTab(event, 'tracking')">
             <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
             Tracking
+          </button>
+          <button class="tab-btn" onclick="openTab(event, 'etiqueta')">
+            <i data-lucide="tag" style="width: 18px; height: 18px;"></i>
+            Etiqueta
           </button>
         </div>
         
@@ -994,6 +1044,20 @@
                   >
                 </div>
                 
+                  <div class="form-group">
+                  <label class="form-label">Eslogan o Tagline</label>
+                  <input 
+                    type="text" 
+                    name="empresa_eslogan" 
+                    class="form-input" 
+                    value="<%= config.empresa.empresa_eslogan || '' %>"
+                    placeholder="Entrega Segura y Confiable"
+                  >
+                  <small style="color: #6b7280; font-size: 0.85rem; margin-top: 4px; display: block;">
+                    Aparecerá en las etiquetas de envío
+                  </small>
+                </div>
+
                 <div class="form-group">
                   <label class="form-label">RFC</label>
                   <input 
@@ -1014,6 +1078,20 @@
                     value="<%= config.empresa.empresa_telefono || '' %>"
                     placeholder="+52 81 1234 5678"
                   >
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Teléfono adicional (opcional)</label>
+                  <input 
+                    type="tel" 
+                    name="empresa_telefono_adicional" 
+                    class="form-input" 
+                    value="<%= config.empresa.empresa_telefono_adicional || '' %>"
+                    placeholder="+52 81 8765 4321"
+                  >
+                  <small style="color: #6b7280; font-size: 0.85rem; margin-top: 4px; display: block;">
+                    Número secundario (WhatsApp, ventas, etc.)
+                  </small>
                 </div>
               </div>
               
@@ -1058,33 +1136,93 @@
                     placeholder="Calle, Número, Colonia, CP, Ciudad"
                   >
                 </div>
-              </div>
-            </div>
-            
-            <button type="submit" class="btn-primary">
+              </div><!-- /config-card Contacto y Ubicación -->
+            </div><!-- /config-grid -->
+
+            <!-- Hidden para logo URL (actualizado por el logo upload) -->
+            <input type="hidden" name="empresa_logo_url" id="empresa_logo_url_form" value="<%= config.empresa.empresa_logo_url || '' %>">
+
+            <button type="submit" class="btn-primary" style="margin-bottom: 20px;">
               <i data-lucide="save" style="width: 18px; height: 18px;"></i>
               Guardar cambios
             </button>
           </form>
-          <!-- ============================================ -->
-          <!-- SECCIÓN: DIRECCIONES DE ORIGEN -->
-          <!-- ============================================ -->
-          <div style="margin-top: 48px; padding-top: 32px; border-top: 2px solid #e5e7eb;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+
+
+            <!-- ============================================ -->
+            <!-- CARD: BRANDING Y ETIQUETAS (full width) -->
+            <!-- ============================================ -->
+            <div class="config-card" style="margin-bottom: 20px;">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="image" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Branding y Etiquetas
+                </h2>
+                <p class="card-description">Personalización visual de las etiquetas de envío</p>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- Logo upload -->
+                <div>
+                  <label class="form-label">Logo de la empresa</label>
+
+                  <!-- Preview del logo actual -->
+                  <div id="logo-preview-container" style="width: 100%; height: 100px; border: 2px dashed #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: #f8fafc; overflow: hidden;">
+                    <% if (config.empresa.empresa_logo_url) { %>
+                      <img id="logo-preview-img" src="<%= config.empresa.empresa_logo_url %>" alt="Logo actual" style="max-height: 80px; max-width: 200px; object-fit: contain;">
+                    <% } else { %>
+                      <div id="logo-preview-placeholder" style="text-align: center; color: #94a3b8;">
+                        <i data-lucide="image-off" style="width: 32px; height: 32px; display: block; margin: 0 auto 6px;"></i>
+                        <span style="font-size: 0.8rem;">Sin logo</span>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <!-- Input URL oculto (se actualiza al subir) -->
+
+                  <!-- Botón de subir logo (form separado) -->
+                  <form action="/configuracion/logo/upload" method="POST" enctype="multipart/form-data" id="formLogoUpload">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                      <label for="logo_file_input" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: center;">
+                        <i data-lucide="upload-cloud" style="width: 18px; height: 18px;"></i>
+                        Subir nuevo logo
+                      </label>
+                      <input type="file" id="logo_file_input" name="logo_file" accept="image/*" style="display: none;" onchange="previewLogo(this); document.getElementById('formLogoUpload').submit();">
+                      <% if (config.empresa.empresa_logo_url) { %>
+                        <a href="/configuracion/logo/eliminar" 
+                           onclick="return confirm('¿Eliminar el logo actual?')"
+                           style="padding: 10px 14px; background: #fee2e2; color: #dc2626; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                          <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </a>
+                      <% } %>
+                    </div>
+                  </form>
+
+                  <small style="color: #6b7280; font-size: 0.8rem; margin-top: 8px; display: block;">
+                    💡 PNG, JPG o SVG. Máx. 2MB. Aparecerá en blanco y negro en etiquetas térmicas.
+                  </small>
+                </div>
+              </div><!-- /grid branding -->
+            </div><!-- /config-card Branding -->
+        </div><!-- /tab empresa -->
+
+
+        <!-- TAB: DIRECCIONES -->
+        <div id="direcciones" class="tab-content">
+          <div class="config-card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                  <i data-lucide="map-pin" style="width: 28px; height: 28px; color: #3b82f6;"></i>
+                <h2 class="card-title">
+                  <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
                   Direcciones de Origen
                 </h2>
-                <p style="color: #6b7280; font-size: 0.95rem;">
-                  Ubicaciones desde donde tu empresa envía paquetes
-                </p>
+                <p class="card-description">Ubicaciones desde donde tu empresa envía paquetes</p>
               </div>
               <button 
                 onclick="modalNuevaDireccion()"
-                style="padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: all 0.3s;"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.4)'"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'"
+                style="padding: 10px 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: all 0.3s; white-space: nowrap;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='translateY(0)'"
               >
                 <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
                 Nueva Dirección
@@ -1145,7 +1283,7 @@
                           </form>
                         <% } %>
                         
-<button 
+                        <button 
                           class="btn-editar-direccion"
                           data-id="<%= dir.id %>"
                           data-alias="<%= dir.alias %>"
@@ -1198,8 +1336,8 @@
                 </button>
               </div>
             <% } %>
-          </div>
-        </div>
+          </div><!-- /config-card Direcciones -->
+        </div><!-- /tab direcciones -->
         
         <!-- TAB: TARIFAS -->
         <div id="tarifas" class="tab-content">
@@ -1421,240 +1559,432 @@
         </div>
         
         <!-- TAB: TRACKING -->
-<div id="tracking" class="tab-content">
-  <form action="/configuracion/tracking" method="POST">
-    <div class="config-card" style="max-width: 800px;">
-      <div class="card-header">
+        <div id="tracking" class="tab-content">
+        <form action="/configuracion/tracking" method="POST">
+        <div class="config-card" style="max-width: 800px;">
+        <div class="card-header">
         <h2 class="card-title">
-          <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
-          Configuración de Tracking Público
+        <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+        Configuración de Tracking Público
         </h2>
         <p class="card-description">Controla qué información es visible para tus clientes en el tracking público</p>
-      </div>
+        </div>
       
-      <!-- TRACKING PÚBLICO -->
-      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px;">
+        <!-- TRACKING PÚBLICO -->
+        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px;">
         <strong style="color: #1e40af; display: block; margin-bottom: 8px;">⚙️ General</strong>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Tracking Público Activo</div>
-          <div class="switch-description">Permitir que clientes rastreen sus envíos sin iniciar sesión</div>
+        <div class="switch-title">Tracking Público Activo</div>
+        <div class="switch-description">Permitir que clientes rastreen sus envíos sin iniciar sesión</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="tracking_publico_activo" <%= config.tracking.tracking_publico_activo ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="tracking_publico_activo" <%= config.tracking.tracking_publico_activo ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <!-- EVIDENCIAS -->
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <!-- EVIDENCIAS -->
+        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
         <strong style="color: #92400e; display: block; margin-bottom: 8px;">📸 Evidencias</strong>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Fotos en Tracking</div>
-          <div class="switch-description">Mostrar fotos de evidencia en el tracking público</div>
+        <div class="switch-title">Mostrar Fotos en Tracking</div>
+        <div class="switch-description">Mostrar fotos de evidencia en el tracking público</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_fotos_tracking" <%= config.tracking.mostrar_fotos_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_fotos_tracking" <%= config.tracking.mostrar_fotos_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar PDFs Adjuntos</div>
-          <div class="switch-description">Mostrar documentos PDF de evidencia</div>
+        <div class="switch-title">Mostrar PDFs Adjuntos</div>
+        <div class="switch-description">Mostrar documentos PDF de evidencia</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_pdfs_tracking" <%= config.tracking.mostrar_pdfs_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_pdfs_tracking" <%= config.tracking.mostrar_pdfs_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <!-- INFORMACIÓN DEL ENVÍO -->
-      <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <!-- INFORMACIÓN DEL ENVÍO -->
+        <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
         <strong style="color: #1e40af; display: block; margin-bottom: 8px;">ℹ️ Información del Envío</strong>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Comentarios</div>
-          <div class="switch-description">Mostrar comentarios de los operadores</div>
+        <div class="switch-title">Mostrar Comentarios</div>
+        <div class="switch-description">Mostrar comentarios de los operadores</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_comentarios_tracking" <%= config.tracking.mostrar_comentarios_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_comentarios_tracking" <%= config.tracking.mostrar_comentarios_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Ubicaciones Detalladas</div>
-          <div class="switch-description">Mostrar ubicación en cada cambio de estado</div>
+        <div class="switch-title">Mostrar Ubicaciones Detalladas</div>
+        <div class="switch-description">Mostrar ubicación en cada cambio de estado</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_ubicaciones_tracking" <%= config.tracking.mostrar_ubicaciones_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_ubicaciones_tracking" <%= config.tracking.mostrar_ubicaciones_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Información del Cliente</div>
-          <div class="switch-description">Mostrar nombre de la empresa cliente</div>
+        <div class="switch-title">Mostrar Información del Cliente</div>
+        <div class="switch-description">Mostrar nombre de la empresa cliente</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_info_cliente_tracking" <%= config.tracking.mostrar_info_cliente_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_info_cliente_tracking" <%= config.tracking.mostrar_info_cliente_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Datos del Envío</div>
-          <div class="switch-description">Mostrar peso y descripción del paquete</div>
+        <div class="switch-title">Mostrar Datos del Envío</div>
+        <div class="switch-description">Mostrar peso y descripción del paquete</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_datos_envio_tracking" <%= config.tracking.mostrar_datos_envio_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_datos_envio_tracking" <%= config.tracking.mostrar_datos_envio_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Historial Completo</div>
-          <div class="switch-description">Mostrar todos los estados por los que pasó el envío</div>
+        <div class="switch-title">Mostrar Historial Completo</div>
+        <div class="switch-description">Mostrar todos los estados por los que pasó el envío</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_historial_completo_tracking" <%= config.tracking.mostrar_historial_completo_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_historial_completo_tracking" <%= config.tracking.mostrar_historial_completo_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <!-- FUNCIONALIDADES -->
-      <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <!-- FUNCIONALIDADES -->
+        <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
         <strong style="color: #065f46; display: block; margin-bottom: 8px;">⚡ Funcionalidades</strong>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Mostrar Código QR</div>
-          <div class="switch-description">Mostrar código QR para compartir el tracking</div>
+        <div class="switch-title">Mostrar Código QR</div>
+        <div class="switch-description">Mostrar código QR para compartir el tracking</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_qr_tracking" <%= config.tracking.mostrar_qr_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_qr_tracking" <%= config.tracking.mostrar_qr_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Botón Exportar PDF</div>
-          <div class="switch-description">Permitir descargar reporte en PDF</div>
+        <div class="switch-title">Botón Exportar PDF</div>
+        <div class="switch-description">Permitir descargar reporte en PDF</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_boton_pdf_tracking" <%= config.tracking.mostrar_boton_pdf_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_boton_pdf_tracking" <%= config.tracking.mostrar_boton_pdf_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Botón Compartir WhatsApp</div>
-          <div class="switch-description">Permitir compartir el tracking por WhatsApp</div>
+        <div class="switch-title">Botón Compartir WhatsApp</div>
+        <div class="switch-description">Permitir compartir el tracking por WhatsApp</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_boton_whatsapp_tracking" <%= config.tracking.mostrar_boton_whatsapp_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_boton_whatsapp_tracking" <%= config.tracking.mostrar_boton_whatsapp_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Botón Copiar Enlace</div>
-          <div class="switch-description">Permitir copiar el enlace de tracking</div>
+        <div class="switch-title">Botón Copiar Enlace</div>
+        <div class="switch-description">Permitir copiar el enlace de tracking</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_boton_copiar_tracking" <%= config.tracking.mostrar_boton_copiar_tracking ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_boton_copiar_tracking" <%= config.tracking.mostrar_boton_copiar_tracking ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <!-- SECCIONES INFORMATIVAS -->
-      <div style="background: #fce7f3; border-left: 4px solid #ec4899; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
+        <!-- SECCIONES INFORMATIVAS -->
+        <div style="background: #fce7f3; border-left: 4px solid #ec4899; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
         <strong style="color: #9f1239; display: block; margin-bottom: 8px;">📄 Secciones Informativas</strong>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Sección "¿Por qué elegirnos?"</div>
-          <div class="switch-description">Mostrar características y beneficios</div>
+        <div class="switch-title">Sección "¿Por qué elegirnos?"</div>
+        <div class="switch-description">Mostrar características y beneficios</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_seccion_features" <%= config.tracking.mostrar_seccion_features ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_seccion_features" <%= config.tracking.mostrar_seccion_features ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Sección de Estadísticas</div>
-          <div class="switch-description">Mostrar números y logros de la empresa</div>
+        <div class="switch-title">Sección de Estadísticas</div>
+        <div class="switch-description">Mostrar números y logros de la empresa</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_seccion_stats" <%= config.tracking.mostrar_seccion_stats ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_seccion_stats" <%= config.tracking.mostrar_seccion_stats ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Sección "¿Cómo funciona?"</div>
-          <div class="switch-description">Mostrar pasos del proceso de tracking</div>
+        <div class="switch-title">Sección "¿Cómo funciona?"</div>
+        <div class="switch-description">Mostrar pasos del proceso de tracking</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_seccion_como_funciona" <%= config.tracking.mostrar_seccion_como_funciona ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_seccion_como_funciona" <%= config.tracking.mostrar_seccion_como_funciona ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <div class="switch-group">
+        <div class="switch-group">
         <div class="switch-label">
-          <div class="switch-title">Sección de Contacto/CTA</div>
-          <div class="switch-description">Mostrar llamada a la acción y datos de contacto</div>
+        <div class="switch-title">Sección de Contacto/CTA</div>
+        <div class="switch-description">Mostrar llamada a la acción y datos de contacto</div>
         </div>
         <label class="switch">
-          <input type="checkbox" name="mostrar_seccion_cta" <%= config.tracking.mostrar_seccion_cta ? 'checked' : '' %>>
-          <span class="slider"></span>
+        <input type="checkbox" name="mostrar_seccion_cta" <%= config.tracking.mostrar_seccion_cta ? 'checked' : '' %>>
+        <span class="slider"></span>
         </label>
-      </div>
+        </div>
       
-      <!-- INFO BOX -->
-      <div class="info-box" style="margin-top: 24px;">
+        <!-- INFO BOX -->
+        <div class="info-box" style="margin-top: 24px;">
         <i data-lucide="shield" style="width: 20px; height: 20px;"></i>
         <div class="info-text">
-          <strong>Privacidad y Control:</strong> Estas opciones te permiten controlar exactamente qué información ven tus clientes en el tracking público. Desactiva las opciones que contengan información sensible o que prefieras mantener privada.
+        <strong>Privacidad y Control:</strong> Estas opciones te permiten controlar exactamente qué información ven tus clientes en el tracking público. Desactiva las opciones que contengan información sensible o que prefieras mantener privada.
         </div>
-      </div>
-    </div>
+        </div>
+        </div>
     
-    <button type="submit" class="btn-primary">
-      <i data-lucide="save" style="width: 18px; height: 18px;"></i>
-      Guardar configuración de tracking
-    </button>
-  </form>
-</div>
+        <button type="submit" class="btn-primary">
+        <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+        Guardar configuración de tracking
+        </button>
+        </form>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TAB: ETIQUETA -->
+        <!-- ============================================ -->
+        <div id="etiqueta" class="tab-content">
+          <form action="/configuracion/etiqueta" method="POST">
+            <div class="config-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="tag" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Elementos de la Etiqueta Térmica
+                </h2>
+                <p class="card-description">Controla qué información aparece en cada etiqueta de envío. Si el campo está vacío en la pestaña Empresa, no se mostrará aunque el toggle esté activo.</p>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+
+                <!-- COLUMNA IZQ: Datos de empresa -->
+                <div style="border-right: 2px solid #f1f5f9; padding-right: 30px;">
+                  <p style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Datos de la empresa</p>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">🖼️ Logo</div>
+                      <div class="switch-description">Imagen del logo en la cabecera</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_logo" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_logo" <%= (config.etiqueta.etiqueta_mostrar_logo !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">✍️ Eslogan / Tagline</div>
+                      <div class="switch-description">Frase debajo del nombre de empresa</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_eslogan" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_eslogan" <%= (config.etiqueta.etiqueta_mostrar_eslogan !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">📞 Teléfono principal</div>
+                      <div class="switch-description">Aparece en la barra de contacto</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_telefono" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_telefono" <%= (config.etiqueta.etiqueta_mostrar_telefono !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">📱 Teléfono adicional</div>
+                      <div class="switch-description">WhatsApp / número secundario</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_telefono_adicional" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_telefono_adicional" <%= (config.etiqueta.etiqueta_mostrar_telefono_adicional !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">✉️ Email corporativo</div>
+                      <div class="switch-description">Correo en barra de contacto</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_email" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_email" <%= (config.etiqueta.etiqueta_mostrar_email !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">🌐 Sitio web</div>
+                      <div class="switch-description">URL en barra de contacto</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_sitio_web" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_sitio_web" <%= (config.etiqueta.etiqueta_mostrar_sitio_web !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">🪪 RFC</div>
+                      <div class="switch-description">Aparece en el pie de la etiqueta</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_rfc" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_rfc" <%= (config.etiqueta.etiqueta_mostrar_rfc !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">📍 Dirección fiscal</div>
+                      <div class="switch-description">Aparece en el pie de la etiqueta</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_direccion_fiscal" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_direccion_fiscal" <%= (config.etiqueta.etiqueta_mostrar_direccion_fiscal !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                </div><!-- /col izquierda -->
+
+                <!-- COLUMNA DER: Elementos del envío -->
+                <div style="padding-left: 30px;">
+                  <p style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Elementos del envío</p>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">||||| Código de barras</div>
+                      <div class="switch-description">Barcode del número de tracking</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_barcode" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_barcode" <%= (config.etiqueta.etiqueta_mostrar_barcode !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">◼ Código QR</div>
+                      <div class="switch-description">QR para rastreo en línea</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_qr" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_qr" <%= (config.etiqueta.etiqueta_mostrar_qr !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">→ Ruta Origen / Destino</div>
+                      <div class="switch-description">Barra con ciudades de salida y llegada</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_ruta" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_ruta" <%= (config.etiqueta.etiqueta_mostrar_ruta !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="switch-group">
+                    <div class="switch-label">
+                      <div class="switch-title">📝 Descripción del paquete</div>
+                      <div class="switch-description">Contenido declarado en el pie</div>
+                    </div>
+                    <label class="switch">
+                      <input type="hidden" name="etiqueta_mostrar_descripcion" value="false">
+                      <input type="checkbox" name="etiqueta_mostrar_descripcion" <%= (config.etiqueta.etiqueta_mostrar_descripcion !== false) ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="info-box" style="margin-top: 24px;">
+                    <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                    <div class="info-text">
+                      Los campos vacíos no se imprimen aunque el toggle esté activo. Completa los datos en la pestaña <strong>Empresa</strong> para que aparezcan en la etiqueta.
+                    </div>
+                  </div>
+
+                </div><!-- /col derecha -->
+
+              </div><!-- /grid -->
+
+              <div style="margin-top: 24px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
+                <button type="submit" class="btn-primary">
+                  <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+                  Guardar configuración de etiqueta
+                </button>
+              </div>
+
+            </div><!-- /config-card -->
+          </form>
+        </div><!-- /tab etiqueta -->
         
       </div>
     </main>
     
   </div>
   
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
     
     // User Profile Dropdown
@@ -1928,6 +2258,17 @@
   </div>
 
   <script>
+    // Preview logo antes de subir
+    function previewLogo(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const container = document.getElementById('logo-preview-container');
+          container.innerHTML = '<img src="' + e.target.result + '" alt="Preview" style="max-height: 80px; max-width: 200px; object-fit: contain;">';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
     // Funciones para modal nueva dirección
     function modalNuevaDireccion() {
       document.getElementById('modalNuevaDireccion').style.display = 'flex';

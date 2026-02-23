@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Etiqueta - <%= envio.numero_tracking %></title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @page {
+      size: 4in 6in;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      background: #e5e7eb;
+      padding: 24px;
+    }
+
+    /* ================================================
+       BARRA DE PREVIEW (no se imprime)
+    ================================================ */
+    .preview-bar {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      border-radius: 14px;
+      padding: 18px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+    }
+
+    .preview-bar-info h2 {
+      color: white;
+      font-size: 1.15rem;
+      font-weight: 900;
+      margin-bottom: 3px;
+    }
+
+    .preview-bar-info p {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.82rem;
+    }
+
+    .preview-bar-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-print {
+      padding: 10px 22px;
+      background: white;
+      color: #1e3a8a;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s;
+    }
+
+    .btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+    .btn-back {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover { background: rgba(255,255,255,0.25); }
+
+    /* ================================================
+       ETIQUETA 4x6 PULGADAS
+    ================================================ */
+    .etiqueta {
+      width: 4in;
+      height: 6in;
+      background: white;
+      margin: 0 auto 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    /* ── CABECERA ── */
+    .cab {
+      display: flex;
+      align-items: stretch;
+      border-bottom: 3px solid #000;
+      flex-shrink: 0;
+    }
+
+    .cab-logo {
+      padding: 7px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      flex: 1;
+      border-right: 2px solid #000;
+      gap: 2px;
+    }
+
+    .cab-logo img {
+      max-width: 90px;
+      max-height: 32px;
+      object-fit: contain;
+      filter: grayscale(100%) contrast(1.3);
+      margin-bottom: 2px;
+    }
+
+    .cab-logo-nombre {
+      font-size: 13px;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: 0.5px;
+      line-height: 1;
+    }
+
+    .cab-logo-eslogan {
+      font-size: 6.5px;
+      color: #555;
+      font-style: italic;
+      letter-spacing: 0.3px;
+      line-height: 1;
+    }
+
+    .cab-fecha {
+      padding: 7px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      border-right: 2px solid #000;
+    }
+
+    .cab-fecha-label {
+      font-size: 6px;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .cab-fecha-val {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+    }
+
+    .cab-num {
+      padding: 7px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      background: #000;
+    }
+
+    .cab-num-label {
+      font-size: 5.5px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .cab-num-val {
+      font-size: 10px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    /* ── CONTACTO (toggle) ── */
+    .barra-contacto {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 3px 12px;
+      background: #f2f2f2;
+      border-bottom: 1px solid #ccc;
+      flex-shrink: 0;
+    }
+
+    .barra-contacto span {
+      font-size: 6.5px;
+      color: #444;
+    }
+
+    /* ── TRACKING ── */
+    .tracking-section {
+      text-align: center;
+      padding: 6px 12px 4px;
+      border-bottom: 1px solid #ddd;
+      flex-shrink: 0;
+    }
+
+    .tracking-label {
+      font-size: 6.5px;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .tracking-numero {
+      font-family: 'Courier New', monospace;
+      font-size: 22px;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    /* ── BARCODE (toggle) ── */
+    .barcode-wrap {
+      padding: 3px 12px 1px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      flex-shrink: 0;
+    }
+
+    .barcode-wrap svg { max-width: 100%; }
+
+    /* ── RUTA (toggle) ── */
+    .ruta {
+      display: grid;
+      grid-template-columns: 1fr 28px 1fr;
+      align-items: center;
+      background: #111;
+      color: white;
+      padding: 6px 10px;
+      flex-shrink: 0;
+    }
+
+    .ruta-box { text-align: center; }
+
+    .ruta-etiqueta {
+      font-size: 5.5px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 2px;
+    }
+
+    .ruta-ciudad {
+      font-size: 12px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .ruta-estado {
+      font-size: 6.5px;
+      color: #ccc;
+      margin-top: 1px;
+    }
+
+    .ruta-flecha {
+      font-size: 18px;
+      color: #fff;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    /* ── DESTINATARIO ── */
+    .destinatario {
+      margin: 7px 10px 5px;
+      border: 2.5px solid #000;
+      border-radius: 3px;
+      padding: 6px 9px;
+      flex-shrink: 0;
+    }
+
+    .dest-label {
+      font-size: 7px;
+      font-weight: 900;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 3px;
+      margin-bottom: 4px;
+    }
+
+    .dest-empresa {
+      font-size: 13px;
+      font-weight: 900;
+      color: #000;
+      margin-bottom: 3px;
+      line-height: 1.1;
+    }
+
+    .dest-direccion {
+      font-size: 8.5px;
+      color: #333;
+      line-height: 1.45;
+    }
+
+    .dest-contacto {
+      font-size: 8px;
+      color: #555;
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* ── DETALLES ── */
+    .detalles {
+      display: flex;
+      margin: 0 10px 5px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .detalle-item {
+      flex: 1;
+      padding: 5px 7px;
+      border-right: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .detalle-item:last-child { border-right: none; }
+
+    .detalle-etiqueta {
+      font-size: 6px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+
+    .detalle-valor {
+      font-size: 10px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1;
+    }
+
+    .detalle-valor.grande { font-size: 13px; }
+
+    /* ── DESCRIPCIÓN + QR ── */
+    .fila-bottom {
+      display: flex;
+      align-items: stretch;
+      margin: 0 10px 5px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .descripcion-box {
+      flex: 1;
+      padding: 5px 8px;
+      border-right: 1px solid #ddd;
+    }
+
+    .descripcion-etiqueta {
+      font-size: 6px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+
+    .descripcion-texto {
+      font-size: 8px;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 8px;
+      min-width: 66px;
+    }
+
+    .qr-box img { width: 52px; height: 52px; }
+
+    .qr-label {
+      font-size: 5.5px;
+      color: #888;
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    /* ── FOOTER ── */
+    .footer-etiqueta {
+      margin: 0 10px;
+      border-top: 1.5px dashed #aaa;
+      padding: 3px 0 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+
+    .footer-izq {
+      font-size: 6.5px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .footer-der {
+      font-size: 6px;
+      color: #888;
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: white; padding: 0; }
+      .no-print { display: none !important; }
+      .etiqueta { box-shadow: none; margin: 0; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <%
+    const cfg = (typeof configuracion !== 'undefined' && configuracion) ? configuracion : {};
+    // Toggles individuales — si el campo está vacío, no mostrar aunque el toggle esté activo
+    const showLogo              = cfg.mostrar_logo               !== false && !!cfg.logo_url;
+    const showNombre            = true; // nombre siempre visible en cabecera
+    const showEslogan           = cfg.mostrar_eslogan            !== false && !!cfg.eslogan;
+    const showTelefono          = cfg.mostrar_telefono           !== false && !!cfg.telefono;
+    const showTelefonoAdicional = cfg.mostrar_telefono_adicional !== false && !!cfg.telefono_adicional;
+    const showEmail             = cfg.mostrar_email              !== false && !!cfg.email;
+    const showSitioWeb          = cfg.mostrar_sitio_web          !== false && !!cfg.sitio_web;
+    const showRfc               = cfg.mostrar_rfc                !== false && !!cfg.rfc;
+    const showDireccionFiscal   = cfg.mostrar_direccion_fiscal   !== false && !!cfg.direccion;
+    const showBarcode           = cfg.mostrar_barcode            !== false;
+    const showQr                = cfg.mostrar_qr                 !== false;
+    const showRuta              = cfg.mostrar_ruta               !== false;
+    const showDesc              = cfg.mostrar_descripcion        !== false;
+    // Barra de contacto visible si al menos un dato de contacto está activo
+    const showContactoBar       = showTelefono || showTelefonoAdicional || showEmail || showSitioWeb;
+    const cantidadEtiquetas     = typeof cantidad !== 'undefined' ? parseInt(cantidad) : 1;
+    const qrBase                = typeof baseUrl !== 'undefined' ? baseUrl : 'https://portal.transportesab.com';
+  %>
+
+  <!-- BARRA DE PREVIEW (no se imprime) -->
+  <div class="preview-bar no-print">
+    <div class="preview-bar-info">
+      <h2>🏷️ Etiqueta de Envío</h2>
+      <p><%= envio.numero_tracking %> &nbsp;•&nbsp; <%= cantidadEtiquetas %> etiqueta(s) &nbsp;•&nbsp; 4 × 6 pulgadas</p>
+    </div>
+    <div class="preview-bar-actions">
+      <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
+      <a href="/envios" class="btn-back">← Volver</a>
+    </div>
+  </div>
+
+  <!-- ── LOOP ── -->
+  <% for (let i = 1; i <= cantidadEtiquetas; i++) { %>
+
+  <div class="etiqueta">
+
+    <!-- ══ CABECERA ══ -->
+    <div class="cab">
+
+      <!-- Empresa / logo -->
+      <div class="cab-logo">
+        <% if (showLogo) { %>
+          <img src="<%= cfg.logo_url %>" alt="Logo">
+        <% } %>
+        <div class="cab-logo-nombre"><%= cfg.nombre_empresa || 'TRANSPORTES AB' %></div>
+        <% if (showEslogan) { %>
+          <div class="cab-logo-eslogan"><%= cfg.eslogan %></div>
+        <% } %>
+      </div>
+
+      <!-- Fecha -->
+      <div class="cab-fecha">
+        <div class="cab-fecha-label">Fecha emisión</div>
+        <div class="cab-fecha-val">
+          <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: '2-digit' }) %>
+        </div>
+      </div>
+
+      <!-- Número de etiqueta -->
+      <div class="cab-num">
+        <div class="cab-num-label">Etiqueta</div>
+        <div class="cab-num-val"><%= i %>/<%= cantidadEtiquetas %></div>
+      </div>
+
+    </div>
+
+    <!-- ══ CONTACTO (toggles individuales) ══ -->
+    <% if (showContactoBar) { %>
+    <div class="barra-contacto">
+      <% if (showTelefono) { %><span>📞 <%= cfg.telefono %></span><% } %>
+      <% if (showTelefonoAdicional) { %><span>📱 <%= cfg.telefono_adicional %></span><% } %>
+      <% if (showEmail) { %><span>✉️ <%= cfg.email %></span><% } %>
+      <% if (showSitioWeb) { %><span>🌐 <%= cfg.sitio_web.replace(/https?:\/\/(www\.)?/,'') %></span><% } %>
+    </div>
+    <% } %>
+
+    <!-- ══ TRACKING ══ -->
+    <div class="tracking-section">
+      <div class="tracking-label">N° de Rastreo</div>
+      <div class="tracking-numero"><%= envio.numero_tracking %></div>
+    </div>
+
+    <!-- ══ CÓDIGO DE BARRAS (toggle) ══ -->
+    <% if (showBarcode) { %>
+    <div class="barcode-wrap">
+      <svg id="barcode-<%= i %>"></svg>
+    </div>
+    <% } %>
+
+    <!-- ══ RUTA (toggle) ══ -->
+    <% if (showRuta) { %>
+    <div class="ruta">
+      <div class="ruta-box">
+        <div class="ruta-etiqueta">Origen</div>
+        <div class="ruta-ciudad"><%= (envio.origen_ciudad || envio.origen.split(',')[0]).toUpperCase() %></div>
+        <% if (envio.origen_estado) { %><div class="ruta-estado"><%= envio.origen_estado %></div><% } %>
+      </div>
+      <div class="ruta-flecha">→</div>
+      <div class="ruta-box">
+        <div class="ruta-etiqueta">Destino</div>
+        <div class="ruta-ciudad"><%= (envio.destino_ciudad || envio.destino.split(',')[0]).toUpperCase() %></div>
+        <% if (envio.destino_estado) { %><div class="ruta-estado"><%= envio.destino_estado %></div><% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- ══ DESTINATARIO ══ -->
+    <div class="destinatario">
+      <div class="dest-label">📦 Entregar a:</div>
+      <div class="dest-empresa"><%= envio.nombre_empresa || 'Cliente Final' %></div>
+      <div class="dest-direccion">
+        <% if (envio.destino_calle) { %>
+          <%= envio.destino_calle %><% if (envio.destino_colonia) { %>, Col. <%= envio.destino_colonia %><% } %><br>
+          CP <%= envio.destino_cp || '' %>&nbsp; <%= envio.destino_ciudad || '' %>, <%= envio.destino_estado || '' %>
+        <% } else { %>
+          <%= envio.destino %>
+        <% } %>
+        <% if (envio.destino_referencia) { %>
+          <br><em style="font-size:7.5px;color:#666;">Ref: <%= envio.destino_referencia %></em>
+        <% } %>
+      </div>
+      <% if (envio.contacto || envio.telefono) { %>
+      <div class="dest-contacto">
+        <% if (envio.contacto) { %><span>👤 <%= envio.contacto %></span><% } %>
+        <% if (envio.telefono) { %><span>📞 <%= envio.telefono %></span><% } %>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- ══ DETALLES DEL PAQUETE ══ -->
+    <div class="detalles">
+      <div class="detalle-item">
+        <div class="detalle-etiqueta">Peso</div>
+        <div class="detalle-valor grande"><%= envio.peso || '—' %> <span style="font-size:7px;font-weight:600;">kg</span></div>
+      </div>
+      <div class="detalle-item">
+        <div class="detalle-etiqueta">Entrega estimada</div>
+        <div class="detalle-valor">
+          <% if (envio.fecha_estimada_entrega) { %>
+            <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'}) %>
+          <% } else { %> — <% } %>
+        </div>
+      </div>
+      <div class="detalle-item">
+        <div class="detalle-etiqueta">Ref. cliente</div>
+        <div class="detalle-valor" style="font-size:9px;"><%= envio.referencia_cliente || '—' %></div>
+      </div>
+    </div>
+
+    <!-- ══ DESCRIPCIÓN + QR (toggles) ══ -->
+    <% if (showDesc || showQr) { %>
+    <div class="fila-bottom">
+      <% if (showDesc) { %>
+      <div class="descripcion-box">
+        <div class="descripcion-etiqueta">Descripción / Contenido</div>
+        <div class="descripcion-texto"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
+      </div>
+      <% } %>
+      <% if (showQr) { %>
+      <div class="qr-box">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=104x104&data=<%= encodeURIComponent(qrBase + '/tracking?numero=' + envio.numero_tracking) %>&color=000000&bgcolor=ffffff&margin=0" alt="QR Tracking">
+        <div class="qr-label">Rastrear envío</div>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- ══ FOOTER ══ -->
+    <div class="footer-etiqueta">
+      <div class="footer-izq">
+        <% if (showRfc) { %><strong>RFC:</strong> <%= cfg.rfc %><br><% } %>
+        <% if (showDireccionFiscal) { %><%= cfg.direccion %><% } %>
+      </div>
+      <div class="footer-der">
+        <% if (showEslogan) { %><em><%= cfg.eslogan %></em><br><% } %>
+        <span style="color:#bbb;">transportesab.com</span>
+      </div>
+    </div>
+
+  </div><!-- /etiqueta -->
+
+  <% } %><!-- /loop -->
+
+  <!-- Datos para el script (EJS los renderiza, VS Code no los lintea) -->
+  <script id="etiqueta-config" type="application/json">
+    {
+      "showBarcode": <%= showBarcode ? 'true' : 'false' %>,
+      "tracking":    "<%= envio.numero_tracking %>",
+      "total":       <%= cantidadEtiquetas %>
+    }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var cfg    = JSON.parse(document.getElementById('etiqueta-config').textContent);
+
+      if (cfg.showBarcode) {
+        for (var i = 1; i <= cfg.total; i++) {
+          try {
+            JsBarcode('#barcode-' + i, cfg.tracking, {
+              format: 'CODE128',
+              width: 1.7,
+              height: 42,
+              displayValue: false,
+              margin: 0,
+              background: 'transparent'
+            });
+          } catch(e) { console.warn('Barcode ' + i + ':', e); }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -724,9 +724,118 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       return res.status(404).send('Envío no encontrado');
     }
     
-    res.render('envios/etiqueta', {
+    res.render('envios/etiquetaT', {
       title: 'Etiqueta de Envío',
       envio: envios[0]
+    });
+  } catch (error) {
+    console.error('Error al generar etiqueta:', error);
+    res.status(500).send('Error al generar la etiqueta');
+  }
+});
+
+// Generar etiqueta térmica (4x6 pulgadas)
+router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cantidad = req.query.cantidad || 1; 
+    
+    // Obtener información del envío
+    const [envios] = await db.query(`
+      SELECT 
+        e.*,
+        c.nombre_empresa,
+        c.contacto,
+        c.telefono,
+        c.direccion as cliente_direccion
+      FROM envios e
+      LEFT JOIN clientes c ON e.cliente_id = c.id
+      WHERE e.id = ?
+    `, [id]);
+    
+    if (envios.length === 0) {
+      return res.status(404).send('Envío no encontrado');
+    }
+    
+    // Obtener configuración desde configuracion_sistema
+    let configuracion = {
+      nombre_empresa: 'TRANSPORTES AB',
+      eslogan: 'Entrega Segura y Confiable',
+      telefono: '',
+      email: '',
+      sitio_web: '',
+      telefono_adicional: '',
+      logo_url: null,
+      rfc: '',
+      direccion: '',
+      // Toggles individuales (true por defecto)
+      mostrar_logo:               true,
+      mostrar_eslogan:            true,
+      mostrar_telefono:           true,
+      mostrar_telefono_adicional: true,
+      mostrar_email:              true,
+      mostrar_sitio_web:          true,
+      mostrar_rfc:                true,
+      mostrar_direccion_fiscal:   true,
+      mostrar_barcode:            true,
+      mostrar_qr:                 true,
+      mostrar_ruta:               true,
+      mostrar_descripcion:        true
+    };
+    
+    try {
+      // Obtener configuración de la empresa y etiqueta
+      const [config] = await db.query(`
+        SELECT clave, valor 
+        FROM configuracion_sistema 
+        WHERE categoria IN ('empresa', 'etiqueta')
+      `);
+      
+      if (config && config.length > 0) {
+        config.forEach(item => {
+          switch(item.clave) {
+            // Datos empresa
+            case 'empresa_nombre':              configuracion.nombre_empresa        = item.valor || 'TRANSPORTES AB'; break;
+            case 'empresa_eslogan':             configuracion.eslogan               = item.valor || ''; break;
+            case 'empresa_telefono':            configuracion.telefono              = item.valor || ''; break;
+            case 'empresa_telefono_adicional':  configuracion.telefono_adicional    = item.valor || ''; break;
+            case 'empresa_email':               configuracion.email                 = item.valor || ''; break;
+            case 'empresa_sitio_web':           configuracion.sitio_web             = item.valor || ''; break;
+            case 'empresa_logo_url':            configuracion.logo_url              = item.valor || null; break;
+            case 'empresa_rfc':                 configuracion.rfc                   = item.valor || ''; break;
+            case 'empresa_direccion':           configuracion.direccion             = item.valor || ''; break;
+            // Toggles individuales
+            case 'etiqueta_mostrar_logo':               configuracion.mostrar_logo               = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_eslogan':            configuracion.mostrar_eslogan            = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_telefono':           configuracion.mostrar_telefono           = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_telefono_adicional': configuracion.mostrar_telefono_adicional = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_email':              configuracion.mostrar_email              = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_sitio_web':          configuracion.mostrar_sitio_web          = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_rfc':                configuracion.mostrar_rfc                = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_direccion_fiscal':   configuracion.mostrar_direccion_fiscal   = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_barcode':            configuracion.mostrar_barcode            = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_qr':                 configuracion.mostrar_qr                 = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_ruta':               configuracion.mostrar_ruta               = item.valor !== 'false'; break;
+            case 'etiqueta_mostrar_descripcion':        configuracion.mostrar_descripcion        = item.valor !== 'false'; break;
+          }
+        });
+      }
+    } catch (error) {
+      console.log('Error al obtener configuración, usando valores por defecto:', error.message);
+    }
+    
+    // Agregar configuracion y baseUrl al render
+    res.render('envios/etiqueta', {
+      title: 'Etiqueta de Envío',
+      envio: envios[0],
+      cantidad: parseInt(cantidad),
+      baseUrl: `${req.protocol}://${req.get('host')}`,
+      configuracion: configuracion,
+      user: {
+        nombre: req.session.userName || 'Usuario',
+        email: req.session.userEmail || 'usuario@sistema.com',
+        rol: req.session.userRole || 'operador'
+      }
     });
   } catch (error) {
     console.error('Error al generar etiqueta:', error);

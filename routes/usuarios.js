@@ -18,6 +18,7 @@ router.get('/', isAuthenticated, requireAdmin, async (req, res) => {
         nombre,
         email,
         rol,
+        activo,
         fecha_creacion
       FROM usuarios
       WHERE 1=1
@@ -84,6 +85,46 @@ router.get('/nuevo', isAuthenticated, requireAdmin, (req, res) => {
     },
     error: null
   });
+});
+
+// ============================================
+// VER DETALLE DE USUARIO
+// ============================================
+router.get('/:id', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    // Obtener datos del usuario
+    const [usuarios] = await db.query(
+      'SELECT id, nombre, email, rol, activo, fecha_creacion FROM usuarios WHERE id = ?',
+      [userId]
+    );
+    
+    if (usuarios.length === 0) {
+      return res.redirect('/usuarios?error=notfound');
+    }
+    
+    // Contar envíos creados por este usuario
+    const [enviosCount] = await db.query(
+      'SELECT COUNT(*) as total FROM envios WHERE usuario_creador_id = ?',
+      [userId]
+    );
+    
+    res.render('usuarios/detalle', {
+      title: 'Detalle del Usuario',
+      user: {
+        nombre: req.session.userName,
+        email: req.session.userEmail,
+        rol: req.session.userRole
+      },
+      usuario: usuarios[0],
+      totalEnvios: enviosCount[0].total
+    });
+    
+  } catch (error) {
+    console.error('Error al cargar usuario:', error);
+    res.redirect('/usuarios?error=load');
+  }
 });
 
 // ============================================
@@ -179,10 +220,13 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // Obtener valor de activo (checkbox)
+    const activo = req.body.activo ? 1 : 0;
+    
     // Crear usuario
     await db.query(
-      'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
-      [nombre, email, hashedPassword, rol]
+      'INSERT INTO usuarios (nombre, email, password, rol, activo) VALUES (?, ?, ?, ?, ?)',
+      [nombre, email, hashedPassword, rol, activo]
     );
     
     res.redirect('/usuarios?success=created');
@@ -207,7 +251,7 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
 router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
   try {
     const [usuarios] = await db.query(
-      'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = ?',
+      'SELECT id, nombre, email, rol, activo, fecha_creacion FROM usuarios WHERE id = ?',
       [req.params.id]
     );
     
@@ -305,8 +349,10 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
     }
     
     // Si se proporciona nueva contraseña
-    let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ? WHERE id = ?';
-    let updateParams = [nombre, email, rol, userId];
+    const activo = req.body.activo ? 1 : 0;
+    
+    let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ? WHERE id = ?';
+    let updateParams = [nombre, email, rol, activo, userId];
     
     if (password_nueva) {
       // Validar contraseñas
@@ -340,8 +386,8 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
       
       // Hash de la nueva contraseña
       const hashedPassword = await bcrypt.hash(password_nueva, 10);
-      updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, password = ? WHERE id = ?';
-      updateParams = [nombre, email, rol, hashedPassword, userId];
+      updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, password = ? WHERE id = ?';
+      updateParams = [nombre, email, rol, activo, hashedPassword, userId];
     }
     
     // Actualizar usuario

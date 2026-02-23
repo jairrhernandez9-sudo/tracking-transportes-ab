@@ -771,6 +771,761 @@
         justify-content: center;
       }
     }
+
+    /* ========================================
+   SECCIONES DE INFORMACIÓN
+   ======================================== */
+
+.info-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.section-title i {
+  color: #3b82f6;
+}
+
+/* ========================================
+   GRID DE INFORMACIÓN
+   ======================================== */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-label i {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+}
+
+.info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+.text-success {
+  color: #10b981 !important;
+}
+
+.text-danger {
+  color: #ef4444 !important;
+}
+
+/* ========================================
+   PERMISOS
+   ======================================== */
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.permission-item.allowed {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.permission-item.allowed i {
+  width: 18px;
+  height: 18px;
+  color: #10b981;
+}
+
+.permission-item.denied {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.permission-item.denied i {
+  width: 18px;
+  height: 18px;
+  color: #ef4444;
+}
+
+/* ========================================
+   ESTADÍSTICAS MEJORADAS
+   ======================================== */
+
+.stats-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+}
+
+.stats-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.stats-title i {
+  color: #3b82f6;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-box {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.stat-box:hover {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon i {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+/* ========================================
+   BADGES DE PERFIL
+   ======================================== */
+
+.profile-badge.badge-super {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.badge-activo {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.badge-inactivo {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* ========================================
+   BOTONES DE ACCIÓN
+   ======================================== */
+
+.actions-section {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-edit {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.btn-edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+}
+
+.alert-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.alert-info i {
+  width: 18px;
+  height: 18px;
+  color: #3b82f6;
+}
+
+/* ========================================
+   PAGE ACTIONS
+   ======================================== */
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .info-grid,
+  .permissions-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-box {
+    padding: 16px;
+  }
+  
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .stat-icon i {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .stat-value {
+    font-size: 20px;
+  }
+  
+  .actions-section {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ========================================
+   CONTENEDOR COMPACTO
+   ======================================== */
+
+.content-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1400px;
+}
+
+/* ========================================
+   FILA PRINCIPAL (Info + Stats)
+   ======================================== */
+
+.row-main {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+}
+
+/* ========================================
+   CARD USUARIO COMPACTO
+   ======================================== */
+
+.card-usuario {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.usuario-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.usuario-avatar-large {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  color: white;
+  flex-shrink: 0;
+}
+
+.usuario-info {
+  flex: 1;
+}
+
+.usuario-nombre {
+  font-size: 22px;
+  font-weight: 900;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.usuario-email {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.usuario-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge i {
+  width: 14px;
+  height: 14px;
+}
+
+.badge-admin {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.badge-super {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+}
+
+.badge-operador {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.badge-activo {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.badge-inactivo {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* ========================================
+   INFO GRID COMPACTO
+   ======================================== */
+
+.info-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.info-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-icon {
+  width: 18px;
+  height: 18px;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.info-label-compact {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.info-value-compact {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* ========================================
+   ESTADÍSTICAS COMPACTAS
+   ======================================== */
+
+.stats-compactas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-box-compact {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stat-icon-compact {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-compact i {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.stat-value-compact {
+  font-size: 28px;
+  font-weight: 900;
+  color: #1e293b;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label-compact {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   CARD PERMISOS COMPACTO
+   ======================================== */
+
+.card-permisos-compact {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+}
+
+.card-title-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.card-title-compact i {
+  width: 18px;
+  height: 18px;
+  color: #3b82f6;
+}
+
+.permisos-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.permiso-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.permiso-allowed {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.permiso-denied {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* ========================================
+   FILA DE ACCIONES
+   ======================================== */
+
+.actions-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-action i {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+}
+
+.alert-info-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.alert-info-inline i {
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .row-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-compactas {
+    flex-direction: row;
+  }
+  
+  .stat-box-compact {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-grid-compact {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-compactas {
+    flex-direction: column;
+  }
+  
+  .actions-row {
+    flex-direction: column;
+  }
+  
+  .btn-action {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .permisos-inline {
+    flex-direction: column;
+  }
+  
+  .permiso-tag {
+    width: 100%;
+    justify-content: center;
+  }
+}
   </style>
 </head>
 <body>
@@ -850,91 +1605,33 @@
       </div>
     </aside>
     
-    <!-- MAIN CONTENT -->
+   <!-- MAIN CONTENT -->
     <main class="main-content">
       
-      <!-- HEADER -->
-      <header class="page-header">
-        <div class="header-left">
-          <a href="/usuarios" class="back-btn" title="Volver a usuarios">
-            <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
-          </a>
-          <div class="page-title-section">
-            <h1 class="page-title"><span class="title-icon">👤</span> Detalle de Usuario</h1>
-            <p class="page-subtitle">Información completa del usuario</p>
-          </div>
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Detalle del Usuario</h1>
+          <nav class="breadcrumb">
+            <a href="/dashboard">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/usuarios">Usuarios</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current"><%= usuario.nombre %></span>
+          </nav>
         </div>
-        
-        <div class="header-actions">
-          <a href="/usuarios/<%= usuario.id %>/editar" class="btn-primary">
-            <i data-lucide="edit"></i>
-            Editar Usuario
+        <div class="page-actions">
+          <a href="/usuarios" class="btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            Volver
           </a>
-          
-          <a href="/envios-retrasados" class="notification-btn">
-            <i data-lucide="bell"></i>
-            <% if (typeof enviosRetrasados !== 'undefined' && enviosRetrasados > 0) { %>
-              <span class="notification-badge"><%= enviosRetrasados %></span>
-            <% } %>
-          </a>
-          
-          <div class="user-profile" id="userProfileBtn">
-            <div class="user-avatar">
-              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
-            </div>
-            <div class="user-info">
-              <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
-              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
-            </div>
-            <i data-lucide="chevron-down" class="user-chevron"></i>
-            
-            <!-- Dropdown del perfil -->
-            <div class="user-dropdown" id="userDropdown">
-              <div class="user-dropdown-header">
-                <div class="user-dropdown-avatar">
-                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
-                </div>
-                <div class="user-dropdown-info">
-                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
-                  <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
-                  </span>
-                </div>
-              </div>
-              
-              <div class="user-dropdown-divider"></div>
-              
-              <a href="/mi-perfil" class="user-dropdown-item">
-                <i data-lucide="user"></i>
-                <span>Mi perfil</span>
-              </a>
-              
-              <div class="user-dropdown-divider"></div>
-              
-              <a href="/auth/logout" class="user-dropdown-item logout">
-                <i data-lucide="log-out"></i>
-                <span>Cerrar sesión</span>
-              </a>
-            </div>
-          </div>
         </div>
-      </header>
-      
-      <!-- BREADCRUMB -->
-      <nav class="breadcrumb">
-        <a href="/dashboard">
-          <i data-lucide="home" style="width: 14px; height: 14px;"></i>
-        </a>
-        <span class="breadcrumb-separator">/</span>
-        <a href="/usuarios">Usuarios</a>
-        <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current"><%= usuario.nombre %></span>
-      </nav>
+      </div>
       
       <!-- PROFILE CARD -->
       <div class="profile-card">
-        <!-- Header -->
+        
+        <!-- Header con Avatar y Info Principal -->
         <div class="profile-header">
           <div class="profile-avatar-large">
             <%= usuario.nombre.charAt(0).toUpperCase() %>
@@ -943,9 +1640,9 @@
             <h2 class="profile-name"><%= usuario.nombre %></h2>
             <p class="profile-email"><%= usuario.email %></p>
             <div class="profile-badges">
-              <span class="profile-badge <%= usuario.rol === 'admin' ? 'badge-admin' : 'badge-operador' %>">
-                <i data-lucide="<%= usuario.rol === 'admin' ? 'shield' : 'user' %>"></i>
-                <%= usuario.rol === 'admin' ? 'Administrador' : 'Operador' %>
+              <span class="profile-badge <%= usuario.rol === 'admin' ? 'badge-admin' : (usuario.rol === 'super_usuario' ? 'badge-super' : 'badge-operador') %>">
+                <i data-lucide="<%= usuario.rol === 'admin' ? 'shield' : (usuario.rol === 'super_usuario' ? 'shield-check' : 'user') %>"></i>
+                <%= usuario.rol === 'admin' ? 'Administrador' : (usuario.rol === 'super_usuario' ? 'Super Usuario' : 'Operador') %>
               </span>
               <span class="profile-badge <%= usuario.activo ? 'badge-activo' : 'badge-inactivo' %>">
                 <i data-lucide="<%= usuario.activo ? 'check-circle' : 'x-circle' %>"></i>
@@ -955,66 +1652,302 @@
           </div>
         </div>
         
-        <!-- Info Grid -->
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">
-              <i data-lucide="calendar"></i>
-              Fecha de Registro
+        <!-- Grid de Información Básica -->
+        <div class="info-section">
+          <h3 class="section-title">
+            <i data-lucide="user" style="width: 20px; height: 20px;"></i>
+            Información Personal
+          </h3>
+          <div class="info-grid">
+            
+            <!-- ID de Usuario -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="hash"></i>
+                ID de Usuario
+              </div>
+              <div class="info-value">#<%= usuario.id %></div>
             </div>
-            <div class="info-value">
-              <%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', { 
-                day: '2-digit', 
-                month: 'long', 
-                year: 'numeric' 
-              }) %>
+            
+            <!-- Nombre Completo -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="user"></i>
+                Nombre Completo
+              </div>
+              <div class="info-value"><%= usuario.nombre %></div>
             </div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">
-              <i data-lucide="hash"></i>
-              ID de Usuario
+            
+            <!-- Correo Electrónico -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="mail"></i>
+                Correo Electrónico
+              </div>
+              <div class="info-value" style="font-size: 0.95rem; word-break: break-all;">
+                <%= usuario.email %>
+              </div>
             </div>
-            <div class="info-value">#<%= usuario.id %></div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">
-              <i data-lucide="mail"></i>
-              Correo Electrónico
+            
+            <!-- Rol / Nivel de Acceso -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="shield-check"></i>
+                Rol / Nivel de Acceso
+              </div>
+              <div class="info-value">
+                <%= usuario.rol === 'admin' ? 'Administrador Total' : (usuario.rol === 'super_usuario' ? 'Super Usuario' : 'Operador Limitado') %>
+              </div>
             </div>
-            <div class="info-value" style="font-size: 0.95rem; word-break: break-all;">
-              <%= usuario.email %>
+            
+            <!-- Estado de la Cuenta -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="<%= usuario.activo ? 'check-circle-2' : 'x-circle' %>"></i>
+                Estado de la Cuenta
+              </div>
+              <div class="info-value">
+                <span class="<%= usuario.activo ? 'text-success' : 'text-danger' %>">
+                  <%= usuario.activo ? 'Cuenta Activa - Puede iniciar sesión' : 'Cuenta Deshabilitada - No puede iniciar sesión' %>
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div class="info-item">
-            <div class="info-label">
-              <i data-lucide="shield-check"></i>
-              Nivel de Acceso
+            
+            <!-- Fecha de Registro -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="calendar"></i>
+                Fecha de Registro
+              </div>
+              <div class="info-value">
+                <%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', { 
+                  day: '2-digit', 
+                  month: 'long', 
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) %>
+              </div>
             </div>
-            <div class="info-value">
-              <%= usuario.rol === 'admin' ? 'Administrador Total' : 'Operador Limitado' %>
+            
+            <!-- Antigüedad -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="clock"></i>
+                Antigüedad en el Sistema
+              </div>
+              <div class="info-value">
+                <% 
+                  const fechaRegistro = new Date(usuario.fecha_creacion);
+                  const hoy = new Date();
+                  const diasDesdeRegistro = Math.floor((hoy - fechaRegistro) / (1000 * 60 * 60 * 24));
+                  const mesesDesdeRegistro = Math.floor(diasDesdeRegistro / 30);
+                  const anosDesdeRegistro = Math.floor(diasDesdeRegistro / 365);
+                %>
+                
+                <% if (anosDesdeRegistro > 0) { %>
+                  <%= anosDesdeRegistro %> <%= anosDesdeRegistro === 1 ? 'año' : 'años' %>
+                  <% const mesesRestantes = Math.floor((diasDesdeRegistro % 365) / 30); %>
+                  <% if (mesesRestantes > 0) { %>
+                    y <%= mesesRestantes %> <%= mesesRestantes === 1 ? 'mes' : 'meses' %>
+                  <% } %>
+                <% } else if (mesesDesdeRegistro > 0) { %>
+                  <%= mesesDesdeRegistro %> <%= mesesDesdeRegistro === 1 ? 'mes' : 'meses' %>
+                <% } else { %>
+                  <%= diasDesdeRegistro %> <%= diasDesdeRegistro === 1 ? 'día' : 'días' %>
+                <% } %>
+              </div>
             </div>
+            
+            <!-- Última Modificación -->
+            <div class="info-item">
+              <div class="info-label">
+                <i data-lucide="edit-3"></i>
+                Última Modificación
+              </div>
+              <div class="info-value">
+                <% if (usuario.fecha_modificacion) { %>
+                  <%= new Date(usuario.fecha_modificacion).toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) %>
+                <% } else { %>
+                  Sin modificaciones
+                <% } %>
+              </div>
+            </div>
+            
           </div>
         </div>
         
-        <!-- Stats Section -->
+        <!-- Sección de Permisos -->
+        <div class="info-section">
+          <h3 class="section-title">
+            <i data-lucide="key" style="width: 20px; height: 20px;"></i>
+            Permisos y Accesos
+          </h3>
+          <div class="permissions-grid">
+            
+            <% if (usuario.rol === 'admin') { %>
+              <!-- Admin tiene todos los permisos -->
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Acceso Total al Sistema</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Gestionar Usuarios</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Modificar Configuración</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Eliminar Envíos</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Ver Reportes Financieros</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Gestionar Clientes</span>
+              </div>
+            
+            <% } else if (usuario.rol === 'super_usuario') { %>
+              <!-- Super Usuario permisos avanzados -->
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Crear y Editar Envíos</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Eliminar Envíos</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Gestionar Clientes</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Ver Reportes Financieros</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Eliminar Estados del Historial</span>
+              </div>
+              <div class="permission-item denied">
+                <i data-lucide="x-circle"></i>
+                <span>Gestionar Usuarios (No permitido)</span>
+              </div>
+              <div class="permission-item denied">
+                <i data-lucide="x-circle"></i>
+                <span>Modificar Configuración (No permitido)</span>
+              </div>
+            
+            <% } else { %>
+              <!-- Operador permisos básicos -->
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Ver Envíos</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Crear Envíos</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Ver Clientes</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Agregar Estados al Historial</span>
+              </div>
+              <div class="permission-item allowed">
+                <i data-lucide="check-circle"></i>
+                <span>Ver Reportes Básicos</span>
+              </div>
+              <div class="permission-item denied">
+                <i data-lucide="x-circle"></i>
+                <span>Eliminar Envíos (No permitido)</span>
+              </div>
+              <div class="permission-item denied">
+                <i data-lucide="x-circle"></i>
+                <span>Gestionar Usuarios (No permitido)</span>
+              </div>
+              <div class="permission-item denied">
+                <i data-lucide="x-circle"></i>
+                <span>Modificar Configuración (No permitido)</span>
+              </div>
+            <% } %>
+            
+          </div>
+        </div>
+        
+        <!-- Estadísticas de Actividad -->
         <div class="stats-section">
           <h3 class="stats-title">
             <i data-lucide="bar-chart-2" style="width: 20px; height: 20px;"></i>
-            Estadísticas
+            Estadísticas de Actividad
           </h3>
           <div class="stats-grid">
+            
             <div class="stat-box">
-              <div class="stat-label">Envíos Creados</div>
-              <div class="stat-value"><%= totalEnvios || 0 %></div>
+              <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                <i data-lucide="package"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-label">Envíos Creados</div>
+                <div class="stat-value"><%= totalEnvios || 0 %></div>
+              </div>
             </div>
+            
+            <div class="stat-box">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <i data-lucide="calendar-days"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-label">Días en el Sistema</div>
+                <div class="stat-value"><%= Math.floor((new Date() - new Date(usuario.fecha_creacion)) / (1000 * 60 * 60 * 24)) %></div>
+              </div>
+            </div>
+            
+            <div class="stat-box">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-label">Última Sesión</div>
+                <div class="stat-value" style="font-size: 0.9rem;">
+                  <% if (usuario.ultima_sesion) { %>
+                    <%= new Date(usuario.ultima_sesion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) %>
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            
+            <div class="stat-box">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                <i data-lucide="activity"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-label">Estado Actual</div>
+                <div class="stat-value" style="font-size: 0.9rem;">
+                  <%= usuario.activo ? 'Activo' : 'Inactivo' %>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
         
-        <!-- Actions -->
+        <!-- Botones de Acción -->
         <div class="actions-section">
           <a href="/usuarios/<%= usuario.id %>/editar" class="btn btn-edit">
             <i data-lucide="edit"></i>
@@ -1031,8 +1964,14 @@
               <i data-lucide="trash-2"></i>
               Eliminar Usuario
             </button>
+          <% } else { %>
+            <div class="alert-info">
+              <i data-lucide="info"></i>
+              No puedes eliminar tu propia cuenta
+            </div>
           <% } %>
         </div>
+        
       </div>
       
     </main>

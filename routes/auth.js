@@ -25,9 +25,9 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    // Buscar usuario
+    // Buscar usuario (SIN filtrar por activo todavía)
     const [users] = await db.query(
-      'SELECT * FROM usuarios WHERE email = ? AND activo = true',
+      'SELECT * FROM usuarios WHERE email = ?',
       [email]
     );
     
@@ -47,6 +47,14 @@ router.post('/login', async (req, res) => {
       return res.render('login', {
         title: 'Iniciar Sesión',
         error: 'Credenciales incorrectas'
+      });
+    }
+    
+    // Verificar si el usuario está activo
+    if (!user.activo || user.activo === 0) {
+      return res.render('login', {
+        title: 'Iniciar Sesión',
+        error: 'Tu cuenta ha sido desactivada por un administrador. Contacta con soporte para más información.'
       });
     }
     

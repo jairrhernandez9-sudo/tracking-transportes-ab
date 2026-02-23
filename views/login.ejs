@@ -242,15 +242,132 @@
         padding: 30px 20px;
       }
     }
+
+    
+/* Modal de Usuario Inactivo */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-icon i {
+  width: 32px;
+  height: 32px;
+  color: white;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.modal-message {
+  font-size: 16px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.modal-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.modal-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.modal-btn-secondary {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.modal-btn-secondary:hover {
+  background: #e2e8f0;
+}
   </style>
 </head>
-<body>
+<body data-usuario-inactivo="<%= error && error.includes('desactivada') ? 'true' : 'false' %>">
   
   <div class="login-container">
     
     <!-- Botón volver -->
     <div class="back-to-home">
-      <a href="/" class="back-btn">
+      <a href="/tracking" class="back-btn">
         <i data-lucide="arrow-left"></i>
         Volver al inicio
       </a>
@@ -327,5 +444,69 @@
     lucide.createIcons();
   </script>
 
+
+<!-- Modal de Usuario Inactivo -->
+<div id="modalInactivo" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-icon">
+      <i data-lucide="lock"></i>
+    </div>
+    <h2 class="modal-title">Cuenta Deshabilitada</h2>
+    <p class="modal-message">
+      Tu cuenta ha sido desactivada por un administrador. 
+      No puedes iniciar sesión en este momento.
+    </p>
+    <p class="modal-message" style="font-size: 14px; margin-bottom: 32px;">
+      Si crees que esto es un error, por favor contacta al administrador del sistema.
+    </p>
+    <div class="modal-actions">
+      <button onclick="cerrarModal()" class="modal-btn modal-btn-primary">
+        Entendido
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  // Verificar si el usuario está inactivo
+  const usuarioInactivo = document.body.getAttribute('data-usuario-inactivo') === 'true';
+  
+  if (usuarioInactivo) {
+    // Mostrar modal
+    document.getElementById('modalInactivo').classList.add('active');
+    
+    // Ocultar mensaje de error normal
+    const errorDiv = document.querySelector('.error-message');
+    if (errorDiv) {
+      errorDiv.style.display = 'none';
+    }
+  }
+});
+
+function cerrarModal() {
+  const modal = document.getElementById('modalInactivo');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+// Cerrar modal al hacer click fuera de él
+const modalInactivo = document.getElementById('modalInactivo');
+if (modalInactivo) {
+  modalInactivo.addEventListener('click', function(e) {
+    if (e.target === this) {
+      cerrarModal();
+    }
+  });
+}
+
+// Cerrar modal con tecla ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    cerrarModal();
+  }
+});
+</script>
 </body>
 </html>
