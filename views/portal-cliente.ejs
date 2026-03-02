@@ -246,10 +246,17 @@
     }
     .dir-active-badge a:hover { color: #3b82f6; }
 
+    @media (max-width: 768px) {
+      .portal-main { padding: 20px 16px; }
+      .welcome-bar { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .table-card  { overflow-x: auto; }
+      .toolbar     { flex-direction: column; }
+      .search-box  { min-width: 0; }
+    }
+
     @media (max-width: 640px) {
       .portal-header { padding: 0 16px; }
-      .portal-main   { padding: 20px 16px; }
-      .welcome-bar   { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .portal-user-info { display: none; }
       table thead    { display: none; }
       tbody td       { display: block; padding: 6px 16px; }
       tbody td::before { content: attr(data-label); font-weight: 700; color: #94a3b8; font-size: 10px; display: block; }

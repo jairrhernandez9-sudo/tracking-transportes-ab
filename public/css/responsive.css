@@ -1,0 +1,264 @@
+/* ================================================================
+   responsive.css — Sistema de diseño responsivo
+   Transportes AB — Tracking Logística
+   ================================================================ */
+
+/* ── Hamburger button ──────────────────────────────────────────── */
+.menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  flex-shrink: 0;
+  transition: border-color 0.2s, color 0.2s;
+  margin-right: 4px;
+}
+.menu-toggle:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.menu-toggle svg {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+/* ── Sidebar overlay (mobile) ──────────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  cursor: pointer;
+}
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ── Force sidebar visible on desktop (overrides any display:none) */
+@media (min-width: 769px) {
+  .sidebar {
+    display: flex !important;
+    transform: translateX(0) !important;
+  }
+}
+
+/* ── Tablet (max-width: 1024px) ────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px !important;
+    padding: 20px 12px !important;
+  }
+  .main-content {
+    margin-left: 220px !important;
+    padding: 28px 24px !important;
+  }
+  /* Dashboard uses .dashboard instead of .page-wrapper */
+  .dashboard > .main-content {
+    margin-left: 220px !important;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .search-input {
+    width: 200px !important;
+  }
+}
+
+/* ── Mobile (max-width: 768px) ─────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Show hamburger button */
+  .menu-toggle {
+    display: flex;
+  }
+
+  /* Sidebar: slide off screen, slide in on .open */
+  .sidebar {
+    display: flex !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+    z-index: 1000 !important;
+    width: 260px !important;
+    padding: 24px 16px !important;
+  }
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  /* Main content takes full width */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 20px 16px !important;
+  }
+
+  /* Header: wrap to 2 rows */
+  .header,
+  .page-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+  .welcome,
+  .page-title-section {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .welcome h1,
+  .page-title-section h1 {
+    font-size: 1.4rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .welcome p {
+    font-size: 0.82rem !important;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 10px !important;
+  }
+  .search-box {
+    flex: 1;
+  }
+  .search-input {
+    width: 100% !important;
+  }
+
+  /* Hide user text, keep avatar only */
+  .user-info {
+    display: none !important;
+  }
+  .user-chevron {
+    display: none !important;
+  }
+  .user-profile {
+    padding: 8px !important;
+    gap: 0 !important;
+  }
+
+  /* Tables scroll horizontally */
+  .table-container,
+  .table-responsive,
+  .clientes-table-container,
+  .envios-table-container,
+  .users-table-container,
+  .items-table-wrapper,
+  .table-card,
+  .info-card {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Common form grids → single column */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stat card grids → 2 columns */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Toolbar wraps */
+  .toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .toolbar-left {
+    overflow-x: auto;
+  }
+  .toolbar-right {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  .toolbar-right > * {
+    flex-shrink: 0;
+  }
+
+  /* Filter/tab bars scroll horizontally */
+  .filters-bar,
+  .filter-tabs,
+  .tab-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    padding-bottom: 4px;
+  }
+  .filter-tab,
+  .tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Cards grid → 2 columns */
+  .cards-grid,
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Charts section → single column */
+  .charts-section {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modals full width */
+  .modal-content,
+  .modal-box {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 20px auto !important;
+    border-radius: 12px !important;
+  }
+
+  /* Detail/info grids → single column */
+  .info-grid,
+  .detail-grid,
+  .data-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Small mobile (max-width: 480px) ───────────────────────────── */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 16px 12px !important;
+  }
+  .welcome h1 {
+    font-size: 1.15rem !important;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .stats-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .stat-card {
+    padding: 16px 14px !important;
+  }
+  .cards-grid,
+  .card-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Notification badge button smaller */
+  .notification-btn {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
