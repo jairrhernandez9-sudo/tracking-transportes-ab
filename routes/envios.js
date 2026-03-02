@@ -178,6 +178,23 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       estado.fotos = fotos;
     }
     
+    const [items] = await db.query(
+      'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
+    );
+
+    // Guías parciales relacionadas
+    let guiaOrigen = null;
+    let guiasRelacionadas = [];
+    if (envio.envio_relacionado_id) {
+      const [origenRows] = await db.query('SELECT * FROM envios WHERE id = ?', [envio.envio_relacionado_id]);
+      guiaOrigen = origenRows[0] || null;
+    }
+    const [relacionadas] = await db.query(
+      'SELECT * FROM envios WHERE envio_relacionado_id = ? ORDER BY numero_parte ASC, fecha_creacion ASC',
+      [id]
+    );
+    guiasRelacionadas = relacionadas;
+
     res.render('envios/detalle', {
       title: 'Detalle del Envío',
       user: {
@@ -188,6 +205,9 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       },
       envio,
       historial,
+      items,
+      guiaOrigen,
+      guiasRelacionadas,
       success
     });
   } catch (error) {
@@ -234,8 +254,7 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
     const { 
       cliente_id, 
       referencia_cliente,
-      descripcion, 
-      peso, 
+      envio_relacionado_id,
       fecha_estimada_entrega,
       origen_calle,
       origen_colonia,
@@ -295,6 +314,14 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
     
+    // Calcular peso y descripcion desde items del formulario
+    const _iCant = [].concat(req.body['item_cant'] || []);
+    const _iTipo = [].concat(req.body['item_tipo']     || []);
+    const _iDesc = [].concat(req.body['item_desc'] || []);
+    const _iPeso = [].concat(req.body['item_peso']     || []);
+    const peso = _iTipo.reduce((s,t,i) => s + (t&&t.trim() ? parseFloat(_iPeso[i])||0 : 0), 0);
+    const descripcion = _iTipo.map((t,i) => t&&t.trim() ? `${_iCant[i]||1}x ${t.trim()}` : null).filter(Boolean).join(', ') || null;
+
     //  GENERAR TRACKING PERSONALIZADO POR CLIENTE
     const numeroTracking = await generarSiguienteTracking(cliente_id);
 
@@ -304,7 +331,23 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
     );
     const cliente_nombre_snapshot = clienteRows.length > 0 ? clienteRows[0].nombre_empresa : null;
     
-    // Insertar envío con referencia_cliente
+    // Parsear flags de parcial desde form (strings '0'/'1')
+    const es_parcial     = req.body.es_parcial     === '1' ? 1 : 0;
+    const es_complemento = req.body.es_complemento === '1' ? 1 : 0;
+
+    // Calcular numero_parte
+    let numeroParte = null;
+    if (es_complemento === 1 && envio_relacionado_id) {
+      const [partes] = await db.query(
+        'SELECT COUNT(*) as total FROM envios WHERE envio_relacionado_id = ?',
+        [parseInt(envio_relacionado_id)]
+      );
+      numeroParte = (partes[0].total || 0) + 2; // raíz=1, primer complemento=2, etc.
+    } else if (es_parcial === 1) {
+      numeroParte = 1; // la raíz siempre es parte 1
+    }
+
+    // Insertar envío
     const [result] = await db.query(
       `INSERT INTO envios (
         numero_tracking, 
@@ -328,8 +371,12 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
         destino_estado,
         destino_cp,
         destino_referencia,
-        usuario_creador_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        usuario_creador_id,
+        es_parcial,
+        es_complemento,
+        envio_relacionado_id,
+        numero_parte
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         numeroTracking, 
         cliente_id,
@@ -352,12 +399,35 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
         destino_estado,
         destino_cp,
         destino_referencia || null,
-        req.session.userId
+        req.session.userId,
+        es_parcial,
+        es_complemento,
+        (es_complemento || es_parcial) && envio_relacionado_id ? parseInt(envio_relacionado_id) : null,
+        numeroParte
       ]
     );
     
     const envioId = result.insertId;
-    
+
+    // Insertar items
+    console.log('_iTipo:', _iTipo, 'length:', _iTipo.length);
+    for (let i = 0; i < _iTipo.length; i++) {
+      console.log(`item[${i}]:`, _iCant[i], _iTipo[i], _iDesc[i], _iPeso[i]);
+      if (_iTipo[i] && _iTipo[i].trim()) {
+        try {
+          await db.query(
+            'INSERT INTO envio_items (envio_id, cantidad, tipo, descripcion, peso) VALUES (?, ?, ?, ?, ?)',
+            [envioId, parseInt(_iCant[i])||1, _iTipo[i].trim(),
+             _iDesc[i] ? _iDesc[i].trim()||null : null,
+             parseFloat(_iPeso[i])||0]
+          );
+          console.log(`✅ item[${i}] insertado`);
+        } catch(itemErr) {
+          console.error(`❌ item[${i}] error:`, itemErr.message);
+        }
+      }
+    }
+
     // Crear primer registro en historial
     await db.query(
       `INSERT INTO historial_estados (envio_id, estado, ubicacion, comentarios, usuario_id)
@@ -409,6 +479,9 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       return res.status(404).send('Envío no encontrado');
     }
     
+    const [itemsEditar] = await db.query(
+      'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
+    );
     res.render('envios/editar', {
       title: 'Editar Envío',
       user: {
@@ -419,6 +492,7 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       },
       envio: envios[0],
       clientes,
+      items: itemsEditar,
       error: null
     });
   } catch (error) {
@@ -434,12 +508,18 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     const { 
       cliente_id, 
       referencia_cliente,
-      descripcion, 
-      peso, 
       fecha_estimada_entrega, 
       origen, 
       destino 
     } = req.body;
+
+    // Calcular peso y descripcion desde items
+    const _iCantE = [].concat(req.body['item_cant'] || []);
+    const _iTipoE = [].concat(req.body['item_tipo']     || []);
+    const _iDescE = [].concat(req.body['item_desc'] || []);
+    const _iPesoE = [].concat(req.body['item_peso']     || []);
+    const peso = _iTipoE.reduce((s,t,i) => s + (t&&t.trim() ? parseFloat(_iPesoE[i])||0 : 0), 0);
+    const descripcion = _iTipoE.map((t,i) => t&&t.trim() ? `${_iCantE[i]||1}x ${t.trim()}` : null).filter(Boolean).join(', ') || null;
     
 if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
         const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
@@ -447,6 +527,9 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
         'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
       );
       
+      const [itemsVal] = await db.query(
+        'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
+      );
       return res.render('envios/editar', {
         title: 'Editar Envío',
         user: {
@@ -457,6 +540,7 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
         },
         envio: envios[0],
         clientes,
+        items: itemsVal,
         error: 'Cliente, origen y destino son obligatorios'
       });
     }
@@ -474,6 +558,19 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       [cliente_id, referencia_cliente, descripcion, peso, fecha_estimada_entrega, origen, destino, id]
     );
     
+    // Reemplazar items
+    await db.query('DELETE FROM envio_items WHERE envio_id = ?', [id]);
+    for (let i = 0; i < _iTipoE.length; i++) {
+      if (_iTipoE[i] && _iTipoE[i].trim()) {
+        await db.query(
+          'INSERT INTO envio_items (envio_id, cantidad, tipo, descripcion, peso) VALUES (?, ?, ?, ?, ?)',
+          [id, parseInt(_iCantE[i])||1, _iTipoE[i].trim(),
+           _iDescE[i] ? _iDescE[i].trim()||null : null,
+           parseFloat(_iPesoE[i])||0]
+        );
+      }
+    }
+
     console.log('✅ Envío actualizado:', id);
     res.redirect(`/envios/${id}?success=actualizado`);
     
@@ -484,6 +581,9 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
     );
     
+    const [itemsCatch] = await db.query(
+      'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [req.params.id]
+    ).catch(() => [[]]); 
     res.render('envios/editar', {
       title: 'Editar Envío',
       user: {
@@ -494,6 +594,7 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       },
       envio: envios[0],
       clientes,
+      items: itemsCatch,
       error: 'Error al actualizar el envío: ' + error.message
     });
   }
@@ -613,8 +714,8 @@ router.post('/:id/cancelar', isAuthenticated, async (req, res) => {
     const { id } = req.params;
     const { motivo, comentarios } = req.body;
     
-    // Solo admin puede cancelar
-    if (req.session.userRole !== 'admin') {
+    // Solo admin y superusuario pueden cancelar
+    if (!['admin', 'superusuario'].includes(req.session.userRole)) {
       return res.status(403).json({ success: false, message: 'No tienes permisos para cancelar envíos' });
     }
     
@@ -799,12 +900,32 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
     }
     
     // Agregar configuracion y baseUrl al render
+    const [itemsEtiq] = await db.query(
+      'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
+    );
+    // Para mostrar PARTE x/x en etiqueta
+    const envioData = envios[0];
+    let guiasRelEtiq = [];
+    if (envioData.es_parcial) {
+      const [comps] = await db.query(
+        'SELECT id FROM envios WHERE envio_relacionado_id = ? ORDER BY numero_parte ASC', [id]
+      );
+      guiasRelEtiq = comps;
+    } else if (envioData.es_complemento && envioData.envio_relacionado_id) {
+      const [comps] = await db.query(
+        'SELECT id FROM envios WHERE envio_relacionado_id = ? ORDER BY numero_parte ASC',
+        [envioData.envio_relacionado_id]
+      );
+      guiasRelEtiq = comps;
+    }
     res.render('envios/etiquetaT', {
       title: 'Etiqueta de Envío',
-      envio: envios[0],
+      envio: envioData,
       cantidad: parseInt(cantidad),
       baseUrl: `${req.protocol}://${req.get('host')}`,
       configuracion: configuracion,
+      items: itemsEtiq,
+      guiasRelacionadas: guiasRelEtiq,
       user: {
         nombre: req.session.userName || 'Usuario',
         email: req.session.userEmail || 'usuario@sistema.com',
@@ -814,6 +935,38 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error('Error al generar etiqueta:', error);
     res.status(500).send('Error al generar la etiqueta');
+  }
+});
+
+
+// Guías de un cliente para selector de guía parcial
+router.get('/parciales-por-cliente/:clienteId', isAuthenticated, async (req, res) => {
+  try {
+    const { clienteId } = req.params;
+    const [envios] = await db.query(
+      `SELECT id, numero_tracking, fecha_creacion, estado_actual
+       FROM envios 
+       WHERE cliente_id = ? AND es_parcial = 1
+       ORDER BY fecha_creacion DESC LIMIT 50`,
+      [clienteId]
+    );
+    res.json({ success: true, envios });
+  } catch (error) {
+    res.json({ success: false, envios: [] });
+  }
+});
+
+// Items de un envío como JSON (para pre-cargar en guía parcial)
+router.get('/:id/items-json', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [items] = await db.query(
+      'SELECT cantidad, tipo, descripcion, peso FROM envio_items WHERE envio_id = ? ORDER BY id ASC',
+      [id]
+    );
+    res.json({ success: true, items });
+  } catch (error) {
+    res.json({ success: false, items: [] });
   }
 });
 

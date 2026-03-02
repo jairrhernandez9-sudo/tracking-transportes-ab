@@ -1,9 +1,7 @@
-const bcrypt = require('bcrypt');
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
-const db = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Configurar sesiones
 app.use(session({
-  secret: process.env.JWT_SECRET,
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { 
@@ -31,6 +29,19 @@ app.use(session({
 // Hacer disponible la sesión en todas las vistas
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
+  next();
+});
+
+// ── Bloqueo global para rol cliente ──────────────────────
+// El cliente SOLO puede acceder a /portal-cliente y /auth
+app.use((req, res, next) => {
+  if (req.session && req.session.userRole === 'cliente') {
+    const permitidas = ['/portal-cliente', '/auth'];
+    const permitida  = permitidas.some(p => req.path.startsWith(p));
+    if (!permitida) {
+      return res.redirect('/portal-cliente');
+    }
+  }
   next();
 });
 
@@ -46,7 +57,8 @@ const enviosRetrasadosRoutes = require('./routes/envios-retrasados');
 const usuariosRoutes = require('./routes/usuarios');
 const perfilRoutes = require('./routes/perfil');
 const direccionesRoutes = require('./routes/direcciones');
-const historialRoutes = require('./routes/historial');
+const historialRoutes    = require('./routes/historial');
+const portalClienteRoutes = require('./routes/portal-cliente');
 
 
 app.use('/tracking', trackingRoutes);
@@ -61,6 +73,7 @@ app.use('/usuarios', usuariosRoutes);
 app.use('/mi-perfil', perfilRoutes);
 app.use('/direcciones', direccionesRoutes);
 app.use('/historial', historialRoutes);
+app.use('/portal-cliente', portalClienteRoutes);
 
 
 

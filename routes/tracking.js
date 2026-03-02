@@ -53,8 +53,10 @@ router.get('/:numeroTracking', async (req, res) => {
       `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email 
        FROM envios e 
        LEFT JOIN clientes c ON e.cliente_id = c.id 
-       WHERE e.numero_tracking = ? OR e.referencia_cliente = ?`,
-      [numeroTracking, numeroTracking]
+       WHERE e.numero_tracking = ? 
+          OR e.referencia_cliente = ?
+          OR FIND_IN_SET(?, REPLACE(e.referencia_cliente, ', ', ',')) > 0`,
+      [numeroTracking, numeroTracking, numeroTracking]
     );
     
     if (envios.length === 0) {
@@ -69,6 +71,16 @@ router.get('/:numeroTracking', async (req, res) => {
     
     const envio = envios[0];
     
+
+    // Info de guía origen si es parcial
+    if (envio.envio_relacionado_id) {
+      const [origenRows] = await db.query(
+        'SELECT numero_tracking FROM envios WHERE id = ?', [envio.envio_relacionado_id]
+      );
+      if (origenRows.length > 0) {
+        envio.guia_origen_tracking = origenRows[0].numero_tracking;
+      }
+    }
     // Buscar historial de estados
     const [historial] = await db.query(
       `SELECT * FROM historial_estados 
@@ -115,8 +127,10 @@ router.get('/buscar/:numeroTracking', async (req, res) => {
       `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email 
        FROM envios e 
        LEFT JOIN clientes c ON e.cliente_id = c.id 
-       WHERE e.numero_tracking = ? OR e.referencia_cliente = ?`,
-      [numeroTracking, numeroTracking]
+       WHERE e.numero_tracking = ? 
+          OR e.referencia_cliente = ?
+          OR FIND_IN_SET(?, REPLACE(e.referencia_cliente, ', ', ',')) > 0`,
+      [numeroTracking, numeroTracking, numeroTracking]
     );
     
     if (envios.length === 0) {
@@ -128,6 +142,16 @@ router.get('/buscar/:numeroTracking', async (req, res) => {
     
     const envio = envios[0];
     
+
+    // Info de guía origen si es complemento
+    if (envio.envio_relacionado_id) {
+      const [origenRows] = await db.query(
+        'SELECT numero_tracking FROM envios WHERE id = ?', [envio.envio_relacionado_id]
+      );
+      if (origenRows.length > 0) {
+        envio.guia_origen_tracking = origenRows[0].numero_tracking;
+      }
+    }
     // Buscar historial de estados
     const [historial] = await db.query(
       `SELECT * FROM historial_estados 

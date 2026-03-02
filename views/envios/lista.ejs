@@ -231,6 +231,26 @@
       color: #94a3b8;
       pointer-events: none;
     }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #94a3b8;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 50%;
+      transition: color 0.2s, background 0.2s;
+    }
+    .search-clear-btn:hover {
+      color: #ef4444;
+      background: #fee2e2;
+    }
     
     .notification-btn {
       width: 45px;
@@ -921,6 +941,13 @@
         overflow-x: auto;
       }
     }
+
+    .badge-parcial {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+      border-radius: 5px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .3px; margin-left: 5px;
+    }
   </style>
 </head>
 <body>
@@ -972,12 +999,14 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
       
@@ -1014,13 +1043,16 @@
         
         <div class="header-actions">
           <div class="search-box">
-            <input 
-              type="text" 
-              class="search-input" 
-              placeholder="Buscar envío, cliente..."
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Tracking, referencia, cliente, destino..."
               autocomplete="off"
+              value="<%= filtros.buscar || '' %>"
             >
-            <i data-lucide="search" class="search-icon"></i>
+            <i data-lucide="search" class="search-icon" id="searchIconLupa"></i>
+            <button type="button" class="search-clear-btn" id="searchClearBtn" style="display:none" title="Limpiar búsqueda">&times;</button>
           </div>
           
           <a href="/envios-retrasados" class="notification-btn">
@@ -1035,7 +1067,7 @@
             </div>
             <div class="user-info">
               <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
-              <p><%= user && user.email ? user.email : 'email@ejemplo.com' %></p>
+              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fd98909c9491bd989798908d9192d39e9290">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -1047,9 +1079,9 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'email@ejemplo.com' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="543139353d3814313e313924383b7a373b39">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>
@@ -1130,6 +1162,17 @@
                   <tr>
                     <td>
                       <span class="tracking-number"><%= envio.numero_tracking %></span>
+                      <% if (envio.es_parcial) { %>
+                        <span class="badge-parcial">
+                          <i data-lucide="git-branch" style="width:9px;height:9px;"></i>
+                          PARTE 1
+                        </span>
+                      <% } else if (envio.es_complemento) { %>
+                        <span class="badge-parcial" style="background:#f0fdf4;color:#166534;border-color:#86efac;">
+                          <i data-lucide="plus-circle" style="width:9px;height:9px;"></i>
+                          PARTE <%= envio.numero_parte || '?' %>
+                        </span>
+                      <% } %>
                     </td>
 <td>
   <% if (envio.referencia_cliente) { %>
@@ -1161,8 +1204,8 @@
                           <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                         </a>
                         
-                        <!-- Cancelar (Solo Admin) -->
-                        <% if (user && user.rol === 'admin' && envio.estado_actual !== 'cancelado' && envio.estado_actual !== 'entregado') { %>
+                        <!-- Cancelar (Admin y Superusuario) -->
+                        <% if (user && (user.rol === 'admin' || user.rol === 'superusuario') && envio.estado_actual !== 'cancelado' && envio.estado_actual !== 'entregado') { %>
                           <button class="btn-icon cancel" data-id="<%= envio.id %>" data-tracking="<%= envio.numero_tracking %>" title="Cancelar envío">
                             <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i>
                           </button>
@@ -1245,7 +1288,7 @@
     </div>
   </div>
   
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
     
     // User Profile Dropdown
@@ -1275,6 +1318,59 @@
       });
     }
     
+    // ── Buscador de envíos ──────────────────────────────────
+    (function() {
+      const input    = document.getElementById('searchInput');
+      const iconLupa = document.getElementById('searchIconLupa');
+      const clearBtn = document.getElementById('searchClearBtn');
+      if (!input) return;
+
+      let timer;
+      const estadoActual = '<%= filtros.estado || "todos" %>';
+
+      function setIconState(hasText) {
+        iconLupa.style.display = hasText ? 'none' : '';
+        clearBtn.style.display = hasText ? '' : 'none';
+      }
+
+      function goSearch(term) {
+        const params = new URLSearchParams();
+        if (term) params.set('buscar', term);
+        if (estadoActual && estadoActual !== 'todos') params.set('estado', estadoActual);
+        window.location.href = '/envios?' + params.toString();
+      }
+
+      input.addEventListener('input', function() {
+        clearTimeout(timer);
+        const val = this.value.trim();
+        setIconState(!!val);
+        timer = setTimeout(() => goSearch(val), 500);
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          clearTimeout(timer);
+          goSearch(this.value.trim());
+        }
+        if (e.key === 'Escape') {
+          clearTimeout(timer);
+          this.value = '';
+          setIconState(false);
+          goSearch('');
+        }
+      });
+
+      clearBtn.addEventListener('click', function() {
+        input.value = '';
+        setIconState(false);
+        input.focus();
+        goSearch('');
+      });
+
+      // Estado inicial: si hay término activo al cargar la página
+      setIconState(!!input.value);
+    })();
+
     // Variables globales para cancelación
     let envioIdCancelar = null;
     
@@ -1359,6 +1455,7 @@
     }
     
     // Cerrar modal con tecla ESC
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         cerrarModalCancelar();

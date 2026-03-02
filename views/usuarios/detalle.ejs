@@ -581,6 +581,16 @@
       height: 16px;
     }
     
+    .badge-superusuario {
+      background: #ede9fe;
+      color: #6d28d9;
+      border: 1.5px solid #c4b5fd;
+    }
+    .badge-cliente {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1.5px solid #fcd34d;
+    }
     .badge-admin {
       background: #dbeafe;
       color: #1e40af;
@@ -1640,9 +1650,14 @@
             <h2 class="profile-name"><%= usuario.nombre %></h2>
             <p class="profile-email"><%= usuario.email %></p>
             <div class="profile-badges">
-              <span class="profile-badge <%= usuario.rol === 'admin' ? 'badge-admin' : (usuario.rol === 'super_usuario' ? 'badge-super' : 'badge-operador') %>">
-                <i data-lucide="<%= usuario.rol === 'admin' ? 'shield' : (usuario.rol === 'super_usuario' ? 'shield-check' : 'user') %>"></i>
-                <%= usuario.rol === 'admin' ? 'Administrador' : (usuario.rol === 'super_usuario' ? 'Super Usuario' : 'Operador') %>
+              <%
+                const _badgeClass = { admin:'badge-admin', superusuario:'badge-superusuario', operador:'badge-operador', cliente:'badge-cliente' };
+                const _badgeIcon  = { admin:'shield', superusuario:'shield-check', operador:'user', cliente:'building-2' };
+                const _badgeLabel = { admin:'Administrador', superusuario:'Superusuario', operador:'Operador', cliente:'Cliente' };
+              %>
+              <span class="profile-badge <%= _badgeClass[usuario.rol] || 'badge-operador' %>">
+                <i data-lucide="<%= _badgeIcon[usuario.rol] || 'user' %>"></i>
+                <%= _badgeLabel[usuario.rol] || usuario.rol %>
               </span>
               <span class="profile-badge <%= usuario.activo ? 'badge-activo' : 'badge-inactivo' %>">
                 <i data-lucide="<%= usuario.activo ? 'check-circle' : 'x-circle' %>"></i>
@@ -1696,7 +1711,10 @@
                 Rol / Nivel de Acceso
               </div>
               <div class="info-value">
-                <%= usuario.rol === 'admin' ? 'Administrador Total' : (usuario.rol === 'super_usuario' ? 'Super Usuario' : 'Operador Limitado') %>
+                <%
+                  const _rolDesc = { admin:'Administrador Total', superusuario:'Superusuario', operador:'Operador Limitado', cliente:'Cliente' };
+                %>
+                <%= _rolDesc[usuario.rol] || usuario.rol %>
               </div>
             </div>
             
@@ -1791,98 +1809,31 @@
           </h3>
           <div class="permissions-grid">
             
-            <% if (usuario.rol === 'admin') { %>
-              <!-- Admin tiene todos los permisos -->
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Acceso Total al Sistema</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Gestionar Usuarios</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Modificar Configuración</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Eliminar Envíos</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Ver Reportes Financieros</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Gestionar Clientes</span>
-              </div>
-            
-            <% } else if (usuario.rol === 'super_usuario') { %>
-              <!-- Super Usuario permisos avanzados -->
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Crear y Editar Envíos</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Eliminar Envíos</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Gestionar Clientes</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Ver Reportes Financieros</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Eliminar Estados del Historial</span>
-              </div>
-              <div class="permission-item denied">
-                <i data-lucide="x-circle"></i>
-                <span>Gestionar Usuarios (No permitido)</span>
-              </div>
-              <div class="permission-item denied">
-                <i data-lucide="x-circle"></i>
-                <span>Modificar Configuración (No permitido)</span>
-              </div>
-            
-            <% } else { %>
-              <!-- Operador permisos básicos -->
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Ver Envíos</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Crear Envíos</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Ver Clientes</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Agregar Estados al Historial</span>
-              </div>
-              <div class="permission-item allowed">
-                <i data-lucide="check-circle"></i>
-                <span>Ver Reportes Básicos</span>
-              </div>
-              <div class="permission-item denied">
-                <i data-lucide="x-circle"></i>
-                <span>Eliminar Envíos (No permitido)</span>
-              </div>
-              <div class="permission-item denied">
-                <i data-lucide="x-circle"></i>
-                <span>Gestionar Usuarios (No permitido)</span>
-              </div>
-              <div class="permission-item denied">
-                <i data-lucide="x-circle"></i>
-                <span>Modificar Configuración (No permitido)</span>
-              </div>
+            <% if (usuario.rol === 'admin' || usuario.rol === 'superusuario') { %>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Acceso Total al Sistema</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Gestionar Usuarios</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Modificar Configuración</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Eliminar Envíos</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Ver Reportes Financieros</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Gestionar Clientes</span></div>
+
+            <% } else if (usuario.rol === 'operador') { %>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Ver Envíos</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Crear Envíos</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Ver Clientes</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Agregar Estados al Historial</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Ver Reportes Básicos</span></div>
+              <div class="permission-item denied"><i data-lucide="x-circle"></i><span>Eliminar Envíos (No permitido)</span></div>
+              <div class="permission-item denied"><i data-lucide="x-circle"></i><span>Gestionar Usuarios (No permitido)</span></div>
+              <div class="permission-item denied"><i data-lucide="x-circle"></i><span>Modificar Configuración (No permitido)</span></div>
+
+            <% } else if (usuario.rol === 'cliente') { %>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Ver sus propios envíos</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Buscar por tracking o referencia</span></div>
+              <div class="permission-item allowed"><i data-lucide="check-circle"></i><span>Ver historial de estados</span></div>
+              <div class="permission-item denied"><i data-lucide="x-circle"></i><span>Ver envíos de otros clientes (No permitido)</span></div>
+              <div class="permission-item denied"><i data-lucide="x-circle"></i><span>Crear o editar envíos (No permitido)</span></div>
+              <div class="permission-item denied"><i data-lucide="x-circle"></i><span>Acceso a configuración (No permitido)</span></div>
             <% } %>
             
           </div>

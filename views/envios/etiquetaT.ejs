@@ -380,8 +380,9 @@
 
     .descripcion-box {
       flex: 1;
-      padding: 5px 8px;
+      padding: 4px 6px;
       border-right: 1px solid #ddd;
+      overflow: hidden;
     }
 
     .descripcion-etiqueta {
@@ -389,7 +390,7 @@
       color: #888;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
 
     .descripcion-texto {
@@ -471,13 +472,24 @@
     const showContactoBar       = showTelefono || showTelefonoAdicional || showEmail || showSitioWeb;
     const cantidadEtiquetas     = typeof cantidad !== 'undefined' ? parseInt(cantidad) : 1;
     const qrBase                = typeof baseUrl !== 'undefined' ? baseUrl : 'https://portal.transportesab.com';
+    // Expandir items en unidades individuales
+    const unidades = [];
+    if (typeof items !== 'undefined' && items && items.length > 0) {
+      items.forEach(function(it) {
+        const cant = parseInt(it.cantidad) || 1;
+        for (let u = 0; u < cant; u++) {
+          unidades.push({ tipo: it.tipo, descripcion: it.descripcion });
+        }
+      });
+    }
+    const totalUnidades = unidades.length > 0 ? unidades.length : cantidadEtiquetas;
   %>
 
   <!-- BARRA DE PREVIEW (no se imprime) -->
   <div class="preview-bar no-print">
     <div class="preview-bar-info">
       <h2>🏷️ Etiqueta de Envío</h2>
-      <p><%= envio.numero_tracking %> &nbsp;•&nbsp; <%= cantidadEtiquetas %> etiqueta(s) &nbsp;•&nbsp; 4 × 6 pulgadas</p>
+      <p><%= envio.numero_tracking %> &nbsp;•&nbsp; <%= totalUnidades %> etiqueta(s) &nbsp;•&nbsp; 4 × 6 pulgadas</p>
     </div>
     <div class="preview-bar-actions">
       <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
@@ -485,8 +497,10 @@
     </div>
   </div>
 
-  <!-- ── LOOP ── -->
-  <% for (let i = 1; i <= cantidadEtiquetas; i++) { %>
+  <!-- ── LOOP POR UNIDADES ── -->
+  <% for (let i = 1; i <= totalUnidades; i++) { 
+     const unidadActual = unidades[i-1] || null;
+  %>
 
   <div class="etiqueta">
 
@@ -515,7 +529,7 @@
       <!-- Número de etiqueta -->
       <div class="cab-num">
         <div class="cab-num-label">Etiqueta</div>
-        <div class="cab-num-val"><%= i %>/<%= cantidadEtiquetas %></div>
+        <div class="cab-num-val"><%= i %>/<%= totalUnidades %></div>
       </div>
 
     </div>
@@ -532,6 +546,17 @@
 
     <!-- ══ TRACKING ══ -->
     <div class="tracking-section">
+      <% if (unidadActual) { %>
+        <div style="text-align:center;margin-bottom:2px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#555;">
+          <%= unidadActual.tipo %><% if (unidadActual.descripcion) { %> — <%= unidadActual.descripcion %><% } %>
+        </div>
+      <% } %>
+      <% if (envio.es_parcial || envio.es_complemento) { %>
+        <% const parteLabel = envio.es_parcial ? '1' : (envio.numero_parte || '?'); %>
+        <div style="text-align:center;margin-bottom:3px;">
+          <span class="sello-parcial">★ PARTE <%= parteLabel %> ★</span>
+        </div>
+      <% } %>
       <div class="tracking-label">N° de Rastreo</div>
       <div class="tracking-numero"><%= envio.numero_tracking %></div>
     </div>
@@ -609,7 +634,35 @@
       <% if (showDesc) { %>
       <div class="descripcion-box">
         <div class="descripcion-etiqueta">Descripción / Contenido</div>
-        <div class="descripcion-texto"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
+        <% if (typeof items !== 'undefined' && items && items.length > 0) { %>
+          <% let _eTotPeso = 0; %>
+          <table style="width:100%;border-collapse:collapse;font-size:7px;line-height:1.3;">
+            <thead><tr>
+              <th style="background:#222;color:#fff;font-size:6px;font-weight:700;text-transform:uppercase;padding:2px 3px;text-align:center;width:22px;">Cant.</th>
+              <th style="background:#222;color:#fff;font-size:6px;font-weight:700;text-transform:uppercase;padding:2px 3px;">Tipo</th>
+              <th style="background:#222;color:#fff;font-size:6px;font-weight:700;text-transform:uppercase;padding:2px 3px;">Descripción</th>
+              <th style="background:#222;color:#fff;font-size:6px;font-weight:700;text-transform:uppercase;padding:2px 3px;text-align:right;width:30px;">kg</th>
+            </tr></thead>
+            <tbody>
+              <% items.forEach(function(it) { _eTotPeso += parseFloat(it.peso)||0; %>
+              <tr>
+                <td style="padding:1.5px 3px;border-bottom:1px solid #eee;font-size:7px;text-align:center;"><%= it.cantidad %></td>
+                <td style="padding:1.5px 3px;border-bottom:1px solid #eee;font-size:7px;font-weight:700;"><%= it.tipo %></td>
+                <td style="padding:1.5px 3px;border-bottom:1px solid #eee;font-size:7px;color:#555;"><%= it.descripcion || '' %></td>
+                <td style="padding:1.5px 3px;border-bottom:1px solid #eee;font-size:7px;text-align:right;"><%= parseFloat(it.peso).toFixed(2) %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="padding:2px 3px;font-size:7px;font-weight:700;text-align:right;background:#eee;border-top:1px solid #ccc;">Total</td>
+                <td style="padding:2px 3px;font-size:7px;font-weight:700;text-align:right;background:#eee;border-top:1px solid #ccc;"><%= _eTotPeso.toFixed(2) %></td>
+              </tr>
+            </tfoot>
+          </table>
+        <% } else { %>
+          <div class="descripcion-texto"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
+        <% } %>
       </div>
       <% } %>
       <% if (showQr) { %>
@@ -642,7 +695,7 @@
     {
       "showBarcode": <%= showBarcode ? 'true' : 'false' %>,
       "tracking":    "<%= envio.numero_tracking %>",
-      "total":       <%= cantidadEtiquetas %>
+      "total":       <%= totalUnidades %>
     }
   </script>
 

@@ -206,33 +206,50 @@ res.json(datosFormateados);
 router.get('/api/buscar', isAuthenticated, async (req, res) => {
   try {
     const { q } = req.query;
-    
+
     if (!q || q.trim().length < 2) {
-      return res.json([]);
+      return res.json({ envios: [], clientes: [] });
     }
-    
+
     const searchTerm = `%${q}%`;
-    
-    const [resultados] = await db.query(`
-      SELECT 
+
+    const [envios] = await db.query(`
+      SELECT
         e.id,
         e.numero_tracking,
+        e.referencia_cliente,
         e.estado_actual,
+        e.origen,
         e.destino,
         e.fecha_creacion,
-        c.nombre_empresa
+        COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa
       FROM envios e
       LEFT JOIN clientes c ON e.cliente_id = c.id
-      WHERE 
+      WHERE
         e.numero_tracking LIKE ? OR
+        e.referencia_cliente LIKE ? OR
+        e.cliente_nombre LIKE ? OR
         c.nombre_empresa LIKE ? OR
+        e.origen LIKE ? OR
         e.destino LIKE ?
       ORDER BY e.fecha_creacion DESC
-      LIMIT 10
+      LIMIT 8
+    `, [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm]);
+
+    const [clientes] = await db.query(`
+      SELECT id, nombre_empresa, contacto, email, telefono
+      FROM clientes
+      WHERE eliminado_en IS NULL AND (
+        nombre_empresa LIKE ? OR
+        contacto LIKE ? OR
+        email LIKE ?
+      )
+      ORDER BY nombre_empresa ASC
+      LIMIT 4
     `, [searchTerm, searchTerm, searchTerm]);
-    
-    res.json(resultados);
-    
+
+    res.json({ envios, clientes });
+
   } catch (error) {
     console.error('Error en búsqueda:', error);
     res.status(500).json({ error: 'Error al buscar' });

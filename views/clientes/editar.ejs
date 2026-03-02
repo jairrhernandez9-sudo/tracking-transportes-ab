@@ -803,9 +803,10 @@
         
         <div class="header-actions">
           <div class="search-box">
-            <input 
-              type="text" 
-              class="search-input" 
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
               placeholder="Buscar en clientes..."
               autocomplete="off"
             >
@@ -839,7 +840,7 @@
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
                   <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>
@@ -1068,7 +1069,27 @@
   
   <script>
     lucide.createIcons();
-    
+
+    // ── Búsqueda global ──────────────────────────────────
+    (function() {
+      var si = document.getElementById('searchInput');
+      if (!si) return;
+      var t;
+      si.addEventListener('input', function() {
+        clearTimeout(t);
+        var v = this.value.trim();
+        if (v) t = setTimeout(function() {
+          window.location.href = '/envios?buscar=' + encodeURIComponent(v);
+        }, 500);
+      });
+      si.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          clearTimeout(t);
+          window.location.href = '/envios?buscar=' + encodeURIComponent(this.value.trim());
+        }
+      });
+    })();
+
     // User Profile Dropdown
     const userProfileBtn = document.getElementById('userProfileBtn');
     const userDropdown = document.getElementById('userDropdown');

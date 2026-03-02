@@ -457,9 +457,42 @@
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
-    
+
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .search-section-label {
+      padding: 8px 18px 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .search-section-label:first-child {
+      border-top: none;
+    }
+
+    .search-footer {
+      border-top: 1px solid #f1f5f9;
+      padding: 10px 18px;
+      text-align: center;
+    }
+    .search-footer-link {
+      font-size: 0.82rem;
+      color: #3b82f6;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .search-footer-link:hover {
+      text-decoration: underline;
+    }
+
+    .icon-client {
+      background: #f0f9ff;
+      color: #0ea5e9;
     }
     
     .notification-btn {
@@ -1322,12 +1355,14 @@
           <span>Clientes</span>
         </a>
       </li>
+      <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
       <li class="nav-item">
         <a href="/reportes" class="nav-link">
           <i data-lucide="bar-chart"></i>
           <span>Reportes</span>
         </a>
       </li>
+      <% } %>
     </ul>
   </div>
   
@@ -1406,7 +1441,7 @@
       <div class="user-dropdown-name"><%= user.nombre %></div>
       <div class="user-dropdown-email"><%= user.email %></div>
       <span class="user-dropdown-badge">
-        <%= user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+        <%= user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador' %>
       </span>
     </div>
   </div>
@@ -1691,19 +1726,33 @@
     // ========================================
     // BÚSQUEDA EN TIEMPO REAL
     // ========================================
-    
+
     let searchTimeout;
+    let searchQuery = '';
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
-    
-    // Función de búsqueda
+
+    function estadoBadge(estado) {
+      const map = {
+        'entregado':              { cls: 'badge-completed',    emoji: '✓',  txt: 'ENTREGADO' },
+        'en_transito':            { cls: 'badge-in-transit',   emoji: '🚚', txt: 'EN TRÁNSITO' },
+        'en_ruta_entrega':        { cls: 'badge-in-transit',   emoji: '🚚', txt: 'EN RUTA' },
+        'en_preparacion':         { cls: 'badge-preparation',  emoji: '📋', txt: 'EN PREPARACIÓN' },
+        'en_centro_distribucion': { cls: 'badge-distribution', emoji: '🏭', txt: 'CENTRO DIST.' },
+        'cancelado':              { cls: 'badge-cancelled',    emoji: '✕',  txt: 'CANCELADO' },
+        'pendiente':              { cls: 'badge-pending',      emoji: '⏳', txt: 'PENDIENTE' },
+      };
+      const d = map[estado] || { cls: 'badge-pending', emoji: '📦', txt: (estado || '').replace(/_/g, ' ').toUpperCase() };
+      return d;
+    }
+
     async function buscarEnvios(query) {
+      searchQuery = query;
       if (query.trim().length < 2) {
         searchResults.classList.remove('show');
         return;
       }
-      
-      // Mostrar loading
+
       searchResults.innerHTML = `
         <div class="search-loading">
           <div class="search-spinner"></div>
@@ -1711,68 +1760,70 @@
         </div>
       `;
       searchResults.classList.add('show');
-      
+
       try {
         const response = await fetch(`/dashboard/api/buscar?q=${encodeURIComponent(query)}`);
-        const resultados = await response.json();
-        
-        if (resultados.length === 0) {
+        const data = await response.json();
+        const { envios = [], clientes = [] } = data;
+
+        if (envios.length === 0 && clientes.length === 0) {
           searchResults.innerHTML = `
             <div class="search-empty">
               <i data-lucide="search-x"></i>
-              <p style="font-weight: 600; margin-top: 8px;">No se encontraron resultados</p>
-              <p style="font-size: 0.85rem; margin-top: 4px;">Intenta con otro término</p>
+              <p style="font-weight: 600; margin-top: 8px;">Sin resultados para "${query}"</p>
+              <p style="font-size: 0.85rem; margin-top: 4px; color: #94a3b8;">Intenta con tracking, referencia, cliente o destino</p>
             </div>
           `;
           lucide.createIcons();
           return;
         }
-        
-        // Renderizar resultados
-        searchResults.innerHTML = resultados.map(envio => {
-          let badgeClass = 'badge-pending';
-          let iconClass = 'icon-pending';
-          let iconEmoji = '📦';
-          let statusText = envio.estado_actual.replace(/_/g, ' ').toUpperCase();
-          
-          if (envio.estado_actual === 'entregado') {
-            badgeClass = 'badge-completed';
-            iconClass = 'icon-completed';
-            iconEmoji = '✓';
-            statusText = 'ENTREGADO';
-          } else if (envio.estado_actual === 'en_transito' || envio.estado_actual === 'en_ruta_entrega') {
-            badgeClass = 'badge-in-transit';
-            iconClass = 'icon-in-transit';
-            iconEmoji = '🚚';
-            statusText = 'EN TRÁNSITO';
-          } else if (envio.estado_actual === 'en_preparacion') {
-            badgeClass = 'badge-preparation';
-            statusText = 'EN PREPARACIÓN';
-          } else if (envio.estado_actual === 'en_centro_distribucion') {
-            badgeClass = 'badge-distribution';
-            statusText = 'EN CENTRO DISTRIBUCIÓN';
-          }
-          
-          return `
-            <a href="/envios/${envio.id}" class="search-result-item">
-              <div class="search-result-icon ${iconClass}">
-                ${iconEmoji}
-              </div>
-              <div class="search-result-info">
-                <div class="search-result-tracking">${envio.numero_tracking}</div>
-                <div class="search-result-details">
-                  ${envio.nombre_empresa || 'Cliente'} → ${envio.destino}
+
+        let html = '';
+
+        // ── Sección envíos ──
+        if (envios.length > 0) {
+          html += `<div class="search-section-label">Envíos</div>`;
+          html += envios.map(envio => {
+            const b = estadoBadge(envio.estado_actual);
+            const subInfo = envio.referencia_cliente
+              ? `Ref: ${envio.referencia_cliente} &nbsp;·&nbsp; ${envio.origen || ''} → ${envio.destino || ''}`
+              : `${envio.nombre_empresa || 'Sin cliente'} &nbsp;·&nbsp; ${envio.origen || ''} → ${envio.destino || ''}`;
+            return `
+              <a href="/envios/${envio.id}" class="search-result-item">
+                <div class="search-result-icon ${b.cls.replace('badge-', 'icon-')}">${b.emoji}</div>
+                <div class="search-result-info">
+                  <div class="search-result-tracking">${envio.numero_tracking}</div>
+                  <div class="search-result-details">${subInfo}</div>
                 </div>
+                <span class="search-result-badge ${b.cls}">${b.txt}</span>
+              </a>`;
+          }).join('');
+        }
+
+        // ── Sección clientes ──
+        if (clientes.length > 0) {
+          html += `<div class="search-section-label">Clientes</div>`;
+          html += clientes.map(c => `
+            <a href="/clientes/${c.id}" class="search-result-item">
+              <div class="search-result-icon icon-client">🏢</div>
+              <div class="search-result-info">
+                <div class="search-result-tracking">${c.nombre_empresa}</div>
+                <div class="search-result-details">${c.contacto || ''} ${c.email ? '· ' + c.email : ''}</div>
               </div>
-              <span class="search-result-badge ${badgeClass}">
-                ${statusText}
-              </span>
+            </a>`).join('');
+        }
+
+        // ── Footer "ver todos" ──
+        html += `
+          <div class="search-footer">
+            <a href="/envios?buscar=${encodeURIComponent(query)}" class="search-footer-link">
+              Ver todos los resultados de envíos &rarr;
             </a>
-          `;
-        }).join('');
-        
+          </div>`;
+
+        searchResults.innerHTML = html;
         lucide.createIcons();
-        
+
       } catch (error) {
         console.error('Error en búsqueda:', error);
         searchResults.innerHTML = `
@@ -1782,35 +1833,38 @@
         `;
       }
     }
-    
+
     // Event listener para el input
     if (searchInput) {
       searchInput.addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          buscarEnvios(e.target.value);
-        }, 300); // Debounce de 300ms
+        searchTimeout = setTimeout(() => buscarEnvios(e.target.value), 300);
       });
-      
-      // Limpiar resultados al hacer focus
+
       searchInput.addEventListener('focus', function() {
-        if (this.value.trim().length >= 2) {
-          buscarEnvios(this.value);
+        if (this.value.trim().length >= 2) buscarEnvios(this.value);
+      });
+
+      // Enter → ir a lista de envíos con el término
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          window.location.href = `/envios?buscar=${encodeURIComponent(this.value.trim())}`;
         }
       });
     }
-    
+
     // Cerrar resultados al hacer click fuera
     document.addEventListener('click', function(e) {
       if (searchInput && searchResults && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
         searchResults.classList.remove('show');
       }
     });
-    
+
     // Cerrar resultados con ESC
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && searchResults) {
         searchResults.classList.remove('show');
+        if (searchInput) searchInput.blur();
       }
     });
     

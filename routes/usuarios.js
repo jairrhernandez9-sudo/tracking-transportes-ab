@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { isAuthenticated } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/roles');
 
@@ -41,10 +41,15 @@ router.get('/', isAuthenticated, requireAdmin, async (req, res) => {
     const [usuarios] = await db.query(query, params);
     
     // Estadísticas
-    const [statsTotal] = await db.query('SELECT COUNT(*) as total FROM usuarios');
-    const [statsAdmin] = await db.query('SELECT COUNT(*) as total FROM usuarios WHERE rol = "admin"');
-    const [statsOperador] = await db.query('SELECT COUNT(*) as total FROM usuarios WHERE rol = "operador"');
-    
+    const [statsTotal]        = await db.query('SELECT COUNT(*) as total FROM usuarios');
+    const [statsAdmin]        = await db.query('SELECT COUNT(*) as total FROM usuarios WHERE rol = "admin"');
+    const [statsSuper]        = await db.query('SELECT COUNT(*) as total FROM usuarios WHERE rol = "superusuario"');
+    const [statsOperador]     = await db.query('SELECT COUNT(*) as total FROM usuarios WHERE rol = "operador"');
+    const [statsCliente]      = await db.query('SELECT COUNT(*) as total FROM usuarios WHERE rol = "cliente"');
+
+    // Clientes para selector
+    const [clientes] = await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa');
+
 res.render('usuarios/lista', {
   title: 'Gestión de Usuarios',
   user: {
@@ -53,10 +58,13 @@ res.render('usuarios/lista', {
     rol: req.session.userRole
   },
   usuarios,
+  clientes,
   stats: {
-    total: statsTotal[0].total,
-    admin: statsAdmin[0].total,
-    operador: statsOperador[0].total
+    total:     statsTotal[0].total,
+    admin:     statsAdmin[0].total,
+    superusuario: statsSuper[0].total,
+    operador:  statsOperador[0].total,
+    cliente:   statsCliente[0].total
   },
   filtros: {
     buscar: buscar || '',
@@ -75,16 +83,27 @@ res.render('usuarios/lista', {
 // ============================================
 // FORMULARIO NUEVO USUARIO
 // ============================================
-router.get('/nuevo', isAuthenticated, requireAdmin, (req, res) => {
-  res.render('usuarios/nuevo', {
-    title: 'Nuevo Usuario',
-    user: {
-      nombre: req.session.userName,
-      email: req.session.userEmail,
-      rol: req.session.userRole
-    },
-    error: null
-  });
+router.get('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
+    const [clientes] = await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa');
+    res.render('usuarios/nuevo', {
+      title: 'Nuevo Usuario',
+      user: {
+        nombre: req.session.userName,
+        email: req.session.userEmail,
+        rol: req.session.userRole
+      },
+      clientes,
+      error: null
+    });
+  } catch(e) {
+    res.render('usuarios/nuevo', {
+      title: 'Nuevo Usuario',
+      user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+      clientes: [],
+      error: null
+    });
+  }
 });
 
 // ============================================
@@ -187,7 +206,7 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
     }
     
     // Validar rol
-    if (!['admin', 'operador'].includes(rol)) {
+    if (!['admin', 'superusuario', 'operador', 'cliente'].includes(rol)) {
       return res.render('usuarios/nuevo', {
         title: 'Nuevo Usuario',
         user: {
@@ -195,6 +214,7 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
           email: req.session.userEmail,
           rol: req.session.userRole
         },
+        clientes: [],
         error: 'Rol inválido'
       });
     }
@@ -223,10 +243,14 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
     // Obtener valor de activo (checkbox)
     const activo = req.body.activo ? 1 : 0;
     
+    // cliente_id solo para rol cliente
+    const { cliente_id } = req.body;
+    const clienteIdVal = (rol === 'cliente' && cliente_id) ? parseInt(cliente_id) : null;
+
     // Crear usuario
     await db.query(
-      'INSERT INTO usuarios (nombre, email, password, rol, activo) VALUES (?, ?, ?, ?, ?)',
-      [nombre, email, hashedPassword, rol, activo]
+      'INSERT INTO usuarios (nombre, email, password, rol, activo, cliente_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, email, hashedPassword, rol, activo, clienteIdVal]
     );
     
     res.redirect('/usuarios?success=created');
@@ -259,6 +283,7 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
       return res.redirect('/usuarios?error=notfound');
     }
     
+    const [clientes] = await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa');
     res.render('usuarios/editar', {
       title: 'Editar Usuario',
       user: {
@@ -267,6 +292,7 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
         rol: req.session.userRole
       },
       usuario: usuarios[0],
+      clientes,
       error: null,
       success: null
     });
@@ -351,8 +377,9 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
     // Si se proporciona nueva contraseña
     const activo = req.body.activo ? 1 : 0;
     
-    let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ? WHERE id = ?';
-    let updateParams = [nombre, email, rol, activo, userId];
+    const cliente_id_edit = (rol === 'cliente' && req.body.cliente_id) ? parseInt(req.body.cliente_id) : null;
+    let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ? WHERE id = ?';
+    let updateParams = [nombre, email, rol, activo, cliente_id_edit, userId];
     
     if (password_nueva) {
       // Validar contraseñas
@@ -386,8 +413,8 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
       
       // Hash de la nueva contraseña
       const hashedPassword = await bcrypt.hash(password_nueva, 10);
-      updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, password = ? WHERE id = ?';
-      updateParams = [nombre, email, rol, activo, hashedPassword, userId];
+      updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ?, password = ? WHERE id = ?';
+      updateParams = [nombre, email, rol, activo, cliente_id_edit, hashedPassword, userId];
     }
     
     // Actualizar usuario
@@ -395,9 +422,10 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
     
     // Si el usuario editó su propio perfil, actualizar sesión
     if (userId == req.session.userId) {
-      req.session.userName = nombre;
+      req.session.userName  = nombre;
       req.session.userEmail = email;
-      req.session.userRole = rol;
+      req.session.userRole  = rol;
+      req.session.clienteId = cliente_id_edit;
     }
     
     res.redirect('/usuarios?success=updated');

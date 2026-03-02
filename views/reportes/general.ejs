@@ -865,7 +865,7 @@
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
                   <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3756535a5e5977434556545c5e59501954585a">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>

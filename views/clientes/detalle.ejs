@@ -1054,12 +1054,14 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
       
@@ -1101,9 +1103,10 @@
         
         <div class="header-actions">
           <div class="search-box">
-            <input 
-              type="text" 
-              class="search-input" 
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
               placeholder="Buscar en clientes..."
               autocomplete="off"
             >
@@ -1137,7 +1140,7 @@
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
                   <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9ffefbf2f6f1dfebedfefcf4f6f1f8b1fcf0f2">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>
@@ -1795,7 +1798,27 @@
   </div>
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
-    
+
+    // ── Búsqueda global ──────────────────────────────────
+    (function() {
+      var si = document.getElementById('searchInput');
+      if (!si) return;
+      var t;
+      si.addEventListener('input', function() {
+        clearTimeout(t);
+        var v = this.value.trim();
+        if (v) t = setTimeout(function() {
+          window.location.href = '/envios?buscar=' + encodeURIComponent(v);
+        }, 500);
+      });
+      si.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          clearTimeout(t);
+          window.location.href = '/envios?buscar=' + encodeURIComponent(this.value.trim());
+        }
+      });
+    })();
+
     // User Profile Dropdown
     const userProfileBtn = document.getElementById('userProfileBtn');
     const userDropdown = document.getElementById('userDropdown');

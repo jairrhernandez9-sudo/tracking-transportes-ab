@@ -718,6 +718,127 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ── Items table ── */
+    .items-table-wrapper { border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .items-table { width: 100%; border-collapse: collapse; }
+    .items-table th {
+      background: #1e3a8a; color: #fff; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .4px; padding: 10px 12px; text-align: left;
+    }
+    .items-table th.c { text-align: center; }
+    .items-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; background: #fff; }
+    .items-table tr:last-child td { border-bottom: none; }
+    .items-table tr:nth-child(even) td { background: #f8faff; }
+    .items-table input {
+      width: 100%; border: 1.5px solid #e2e8f0; border-radius: 7px;
+      padding: 6px 9px; font-size: 13px; outline: none; background: #fff;
+      transition: border-color .15s;
+    }
+    .items-table input:focus { border-color: #3b82f6; }
+    .td-cant { width: 70px; }
+    .td-tipo { width: 160px; }
+    .td-peso { width: 90px; }
+    .td-del  { width: 44px; text-align: center; }
+    .btn-add-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; background: #eff6ff; color: #1d4ed8;
+      border: 1.5px dashed #93c5fd; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;
+      transition: background .15s;
+    }
+    .btn-add-item:hover { background: #dbeafe; }
+    .btn-del-item {
+      background: none; border: none; cursor: pointer; color: #ef4444;
+      padding: 4px; border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .btn-del-item:hover { background: #fee2e2; }
+    .items-peso-total {
+      display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+      margin-top: 10px; font-size: 14px; color: #374151;
+    }
+    .items-peso-total strong { font-size: 18px; color: #1e3a8a; }
+
+    /* ── Parcial toggle ── */
+    .parcial-toggle-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      background: #fffbeb; border: 1.5px solid #fcd34d;
+      border-radius: 10px; cursor: pointer; user-select: none;
+      transition: background .15s;
+    }
+    .parcial-toggle-row:hover { background: #fef3c7; }
+    .parcial-toggle-row input[type=checkbox] { display:none; }
+    .parcial-toggle-track {
+      width: 40px; height: 22px; background: #d1d5db; border-radius: 11px;
+      position: relative; transition: background .2s; flex-shrink: 0;
+    }
+    .parcial-toggle-track::after {
+      content:''; position:absolute; top:3px; left:3px;
+      width:16px; height:16px; background:#fff; border-radius:50%;
+      transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .parcial-toggle-row.active .parcial-toggle-track { background: #f59e0b; }
+    .parcial-toggle-row.active .parcial-toggle-track::after { transform: translateX(18px); }
+    .parcial-toggle-label { font-size: 14px; font-weight: 600; color: #92400e; }
+    .parcial-toggle-sublabel { font-size: 12px; color: #a16207; margin-top: 1px; }
+
+    .parcial-tipo-selector {
+      display: none; margin-top: 12px; gap: 10px;
+    }
+    .parcial-tipo-selector.visible { display: flex; }
+    .parcial-tipo-btn {
+      flex: 1; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px;
+      background: #fff; cursor: pointer; text-align: center; transition: all .15s;
+    }
+    .parcial-tipo-btn:hover { border-color: #f59e0b; background: #fffbeb; }
+    .parcial-tipo-btn.selected { border-color: #f59e0b; background: #fffbeb; }
+    .parcial-tipo-btn .ptb-icon { font-size: 22px; margin-bottom: 4px; }
+    .parcial-tipo-btn .ptb-title { font-size: 13px; font-weight: 700; color: #92400e; }
+    .parcial-tipo-btn .ptb-desc { font-size: 11px; color: #a16207; margin-top: 2px; }
+
+    .parcial-options {
+      display: none; margin-top: 12px;
+      background: #fffbeb; border: 1px solid #fcd34d;
+      border-radius: 10px; padding: 16px;
+    }
+    .parcial-options.visible { display: block; }
+    .parcial-options .form-label { color: #92400e; }
+
+    .items-pendientes-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; background: #f59e0b; color: #fff;
+      border: none; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer; margin-top: 8px; transition: background .15s;
+    }
+    .items-pendientes-btn:hover { background: #d97706; }
+    .items-pendientes-btn:disabled { background: #d1d5db; cursor: not-allowed; }
+
+    /* ── Referencias múltiples ── */
+    .ref-tags-wrapper {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      min-height: 42px; padding: 6px 10px;
+      border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
+      cursor: text; transition: border-color .15s;
+    }
+    .ref-tags-wrapper:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+    .ref-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+      border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .ref-tag-del {
+      cursor: pointer; color: #93c5fd; font-size: 14px; line-height: 1;
+      background: none; border: none; padding: 0;
+    }
+    .ref-tag-del:hover { color: #1d4ed8; }
+    .ref-tag-input {
+      border: none; outline: none; font-size: 13px; color: #374151;
+      min-width: 140px; flex: 1; background: transparent; padding: 2px 0;
+    }
+    .ref-add-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -769,12 +890,14 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
       
@@ -816,9 +939,10 @@
         
         <div class="header-actions">
           <div class="search-box">
-            <input 
-              type="text" 
-              class="search-input" 
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
               placeholder="Buscar envío, cliente..."
               autocomplete="off"
             >
@@ -837,7 +961,7 @@
             </div>
             <div class="user-info">
               <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
-              <p><%= user && user.email ? user.email : 'email@ejemplo.com' %></p>
+              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e7828a868e8ba7828d828a978b88c984888a">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -849,9 +973,9 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'email@ejemplo.com' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7e1b131f17123e1b141b130e1211501d1113">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>
@@ -916,20 +1040,78 @@
                 <p class="form-help">Selecciona el cliente al que pertenece este envío</p>
               </div>
               
-              <!-- ⬇️ NUEVO CAMPO: REFERENCIA DEL CLIENTE -->
+              <!-- REFERENCIAS DEL CLIENTE (múltiples) -->
               <div class="form-group">
-                <label class="form-label">Referencia del Cliente</label>
-                <input 
-                  type="text" 
-                  name="referencia_cliente" 
-                  class="form-input" 
-                  placeholder="Ej: PO-2024-001, ORD-12345, REF-ABC"
-                  maxlength="100"
-                >
-                <p class="form-help">
-                  <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-                  Número de orden o referencia interna del cliente (opcional)
+                <label class="form-label">Referencias del Cliente</label>
+                <div class="ref-tags-wrapper" id="refTagsWrapper" onclick="document.getElementById('refTagInput').focus()">
+                  <div id="refTagsContainer"></div>
+                  <input
+                    type="text"
+                    id="refTagInput"
+                    class="ref-tag-input"
+                    placeholder="Ej: PO-2024-001 y presiona Enter"
+                    maxlength="100"
+                    onkeydown="refTagKeydown(event)"
+                  >
+                </div>
+                <input type="hidden" name="referencia_cliente" id="refTagHidden" value="">
+                <p class="ref-add-hint">
+                  <i data-lucide="corner-down-left" style="width:11px;height:11px;display:inline;vertical-align:middle;"></i>
+                  Presiona <strong>Enter</strong> o <strong>,</strong> para agregar cada referencia
                 </p>
+              </div>
+
+              <!-- ── GUÍA PARCIAL ── -->
+              <div class="form-group" style="margin-top:4px;">
+                <label class="parcial-toggle-row" id="parcialToggleRow" for="esParcialCheck">
+                  <input type="checkbox" id="esParcialCheck" onchange="toggleParcial()">
+                  <div class="parcial-toggle-track" id="parcialTrack"></div>
+                  <div>
+                    <div class="parcial-toggle-label">
+                      <i data-lucide="git-branch" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px;"></i>
+                      ¿Envío en partes?
+                    </div>
+                    <div class="parcial-toggle-sublabel">Activa si este pedido se enviará en múltiples guías</div>
+                  </div>
+                </label>
+
+                <!-- Selector de tipo: Guía raíz o Complemento -->
+                <div class="parcial-tipo-selector" id="parcialTipoSelector">
+                  <div class="parcial-tipo-btn selected" id="btnTipoRaiz" onclick="seleccionarTipo('raiz')">
+                    <div class="ptb-icon">📦</div>
+                    <div class="ptb-title">Primera parte</div>
+                    <div class="ptb-desc">Esta guía inicia el pedido parcial</div>
+                  </div>
+                  <div class="parcial-tipo-btn" id="btnTipoComplemento" onclick="seleccionarTipo('complemento')">
+                    <div class="ptb-icon">➕</div>
+                    <div class="ptb-title">Complemento</div>
+                    <div class="ptb-desc">Continúa un pedido parcial existente</div>
+                  </div>
+                </div>
+
+                <!-- Hidden fields -->
+                <input type="hidden" name="es_parcial" id="hiddenEsParcial" value="0">
+                <input type="hidden" name="es_complemento" id="hiddenEsComplemento" value="0">
+                <input type="hidden" name="envio_relacionado_id" id="hiddenEnvioRelacionado" value="">
+
+                <!-- Opciones complemento -->
+                <div class="parcial-options" id="parcialOptions">
+                  <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" style="color:#92400e;">Guía raíz del pedido</label>
+                    <select id="envioRelacionadoSelect" class="form-select" onchange="onGuiaOrigenChange()">
+                      <option value="">Seleccionar guía raíz...</option>
+                    </select>
+                    <p class="form-help" style="color:#a16207;">
+                      Selecciona la primera guía del pedido al que pertenece este complemento
+                    </p>
+                  </div>
+                  <button type="button" class="items-pendientes-btn" id="btnCargarItems"
+                          onclick="cargarItemsPendientes()" disabled>
+                    <i data-lucide="package" style="width:14px;height:14px;"></i>
+                    Cargar ítems de guía raíz
+                  </button>
+                  <p class="form-help" style="color:#a16207;margin-top:6px;display:none;" id="parcialHelp"></p>
+                </div>
               </div>
             </div>
             
@@ -941,27 +1123,33 @@
               </h2>
               
               <div class="form-group">
-                <label class="form-label">Descripción del contenido</label>
-                <textarea 
-                  name="descripcion" 
-                  class="form-textarea"
-                  placeholder="Describe el contenido del envío..."
-                ></textarea>
+                <label class="form-label">
+                  <i data-lucide="package" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>
+                  Detalle del Contenido
+                </label>
+                <div class="items-table-wrapper">
+                  <table class="items-table">
+                    <thead><tr>
+                      <th class="td-cant c">Cant.</th>
+                      <th class="td-tipo">Tipo</th>
+                      <th>Descripción <span style="font-weight:400;opacity:.7;">(opcional)</span></th>
+                      <th class="td-peso c">Peso kg</th>
+                      <th class="td-del"></th>
+                    </tr></thead>
+                    <tbody id="itemsTbody"></tbody>
+                  </table>
+                </div>
+                <button type="button" class="btn-add-item" onclick="agregarItem()">
+                  <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+                  Agregar ítem
+                </button>
+                <div class="items-peso-total">
+                  Peso total aprox.:&nbsp;<strong id="pesoTotal">0.00</strong>&nbsp;kg
+                </div>
+                <input type="hidden" name="peso" id="pesoHidden" value="0">
               </div>
               
               <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Peso (kg)</label>
-                  <input 
-                    type="number" 
-                    name="peso" 
-                    class="form-input" 
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                  >
-                </div>
-                
                 <div class="form-group">
                   <label class="form-label">Fecha estimada de entrega</label>
                   <input 
@@ -1643,17 +1831,55 @@
       </button>
     </div>
     
+    <!-- Buscador -->
+    <div style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb; background:#f8fafc;">
+      <div style="position:relative;">
+        <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;"></i>
+        <input id="origenBuscador" type="text" placeholder="Buscar bodega o dirección..."
+          oninput="filtrarModal('origen')"
+          style="width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+      </div>
+    </div>
+
     <!-- Content -->
-    <div style="padding: 30px; max-height: 500px; overflow-y: auto;">
+    <div style="padding: 20px 24px; max-height: 500px; overflow-y: auto;">
       
       <!-- Tab: Bodegas -->
-      <div id="tabOrigenBodegas" class="tab-content-origen" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
-        <!-- Se llena con JavaScript -->
+      <div id="tabOrigenBodegas" class="tab-content-origen">
+        <!-- Favoritos -->
+        <div id="origenFavoritosSection">
+          <div class="modal-section-title">⭐ Favoritos</div>
+          <div id="origenFavoritosGrid" class="dir-grid"></div>
+        </div>
+        <!-- Recientes -->
+        <div id="origenRecientesSection">
+          <div class="modal-section-title">🕐 Recientemente usados</div>
+          <div id="origenRecientesGrid" class="dir-grid"></div>
+        </div>
+        <!-- Todos -->
+        <div id="origenTodosSection">
+          <div class="modal-section-title">📋 Todos los registrados</div>
+          <div id="origenTodosGrid" class="dir-grid"></div>
+        </div>
       </div>
       
       <!-- Tab: Clientes -->
       <div id="tabOrigenClientes" class="tab-content-origen" style="display: none;">
-        <!-- Se llena con JavaScript -->
+        <!-- Favoritos -->
+        <div id="origenClienteFavSection">
+          <div class="modal-section-title">⭐ Favoritos</div>
+          <div id="origenClienteFavGrid" class="dir-grid"></div>
+        </div>
+        <!-- Recientes -->
+        <div id="origenClienteRecSection">
+          <div class="modal-section-title">🕐 Recientemente usados</div>
+          <div id="origenClienteRecGrid" class="dir-grid"></div>
+        </div>
+        <!-- Todos -->
+        <div id="origenClienteTodosSection">
+          <div class="modal-section-title">📋 Todos los registrados</div>
+          <div id="origenClienteTodosGrid" class="dir-grid"></div>
+        </div>
       </div>
       
     </div>
@@ -1699,17 +1925,49 @@
       </button>
     </div>
     
+    <!-- Buscador -->
+    <div style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb; background:#f8fafc;">
+      <div style="position:relative;">
+        <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;"></i>
+        <input id="destinoBuscador" type="text" placeholder="Buscar bodega o dirección..."
+          oninput="filtrarModal('destino')"
+          style="width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+      </div>
+    </div>
+
     <!-- Content -->
-    <div style="padding: 30px; max-height: 500px; overflow-y: auto;">
+    <div style="padding: 20px 24px; max-height: 500px; overflow-y: auto;">
       
       <!-- Tab: Bodegas -->
-      <div id="tabDestinoBodegas" class="tab-content-destino" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
-        <!-- Se llena con JavaScript -->
+      <div id="tabDestinoBodegas" class="tab-content-destino">
+        <div id="destinoFavoritosSection">
+          <div class="modal-section-title">⭐ Favoritos</div>
+          <div id="destinoFavoritosGrid" class="dir-grid"></div>
+        </div>
+        <div id="destinoRecientesSection">
+          <div class="modal-section-title">🕐 Recientemente usados</div>
+          <div id="destinoRecientesGrid" class="dir-grid"></div>
+        </div>
+        <div id="destinoTodosSection">
+          <div class="modal-section-title">📋 Todos los registrados</div>
+          <div id="destinoTodosGrid" class="dir-grid"></div>
+        </div>
       </div>
       
       <!-- Tab: Clientes -->
       <div id="tabDestinoClientes" class="tab-content-destino" style="display: none;">
-        <!-- Se llena con JavaScript -->
+        <div id="destinoClienteFavSection">
+          <div class="modal-section-title">⭐ Favoritos</div>
+          <div id="destinoClienteFavGrid" class="dir-grid"></div>
+        </div>
+        <div id="destinoClienteRecSection">
+          <div class="modal-section-title">🕐 Recientemente usados</div>
+          <div id="destinoClienteRecGrid" class="dir-grid"></div>
+        </div>
+        <div id="destinoClienteTodosSection">
+          <div class="modal-section-title">📋 Todos los registrados</div>
+          <div id="destinoClienteTodosGrid" class="dir-grid"></div>
+        </div>
       </div>
       
     </div>
@@ -1720,7 +1978,30 @@
 <!-- ESTILOS PARA TABS Y TARJETAS -->
 <!-- ============================================ -->
 <style>
-/* Tabs activos */
+
+    /* ── Modal direcciones rediseñado ── */
+    .modal-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: #6b7280; margin: 14px 0 8px;
+      padding-bottom: 4px; border-bottom: 1px solid #f3f4f6;
+    }
+    .dir-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px; margin-bottom: 4px;
+    }
+    .dir-grid:empty + .modal-section-title,
+    .dir-section-empty { display: none; }
+    .pin-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: none; border: none; cursor: pointer;
+      font-size: 15px; opacity: .4; transition: opacity .15s, transform .15s;
+      padding: 2px;
+    }
+    .pin-btn:hover { opacity: 1; transform: scale(1.2); }
+    .pin-btn.pinned { opacity: 1; }
+    .tarjeta-direccion { position: relative; }
+    /* Tabs activos */
 .tab-direccion-origen.active,
 .tab-direccion-destino.active {
   color: #1e40af !important;
@@ -1855,9 +2136,29 @@
 }
 </style>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
-    
+
+    // ── Búsqueda global ──────────────────────────────────
+    (function() {
+      var si = document.getElementById('searchInput');
+      if (!si) return;
+      var t;
+      si.addEventListener('input', function() {
+        clearTimeout(t);
+        var v = this.value.trim();
+        if (v) t = setTimeout(function() {
+          window.location.href = '/envios?buscar=' + encodeURIComponent(v);
+        }, 500);
+      });
+      si.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          clearTimeout(t);
+          window.location.href = '/envios?buscar=' + encodeURIComponent(this.value.trim());
+        }
+      });
+    })();
+
     // User Profile Dropdown
     const userProfileBtn = document.getElementById('userProfileBtn');
     const userDropdown = document.getElementById('userDropdown');
@@ -1924,6 +2225,7 @@
         // ============================================
         function abrirModalOrigen() {
           document.getElementById('modalDireccionOrigen').style.display = 'flex';
+          const b = document.getElementById('origenBuscador'); if (b) b.value = '';
           cargarDireccionesBodegas('origen');
           
           // Si hay cliente seleccionado, cargar sus direcciones
@@ -1941,6 +2243,7 @@
 
         function abrirModalDestino() {
           document.getElementById('modalDireccionDestino').style.display = 'flex';
+          const b = document.getElementById('destinoBuscador'); if (b) b.value = '';
           cargarDireccionesBodegas('destino');
           
           // Si hay cliente seleccionado, cargar sus direcciones
@@ -2022,48 +2325,138 @@
         }
 
         // ============================================
+        // UTILIDADES FAVORITOS Y RECIENTES (localStorage)
+        // ============================================
+        const LS_FAV  = 'dir_favoritas';
+        const LS_REC  = 'dir_recientes';
+
+        function getFavoritas() {
+          try { return JSON.parse(localStorage.getItem(LS_FAV) || '[]'); } catch { return []; }
+        }
+        function toggleFavorita(key) {
+          let favs = getFavoritas();
+          if (favs.includes(key)) { favs = favs.filter(k => k !== key); }
+          else { favs.push(key); }
+          localStorage.setItem(LS_FAV, JSON.stringify(favs));
+        }
+        function esFavorita(key) { return getFavoritas().includes(key); }
+
+        function getRecientes() {
+          try { return JSON.parse(localStorage.getItem(LS_REC) || '[]'); } catch { return []; }
+        }
+        function agregarReciente(key) {
+          let recs = getRecientes().filter(k => k !== key);
+          recs.unshift(key);
+          localStorage.setItem(LS_REC, JSON.stringify(recs.slice(0, 5)));
+        }
+
+        // ============================================
+        // RENDER TARJETA DIRECCIÓN
+        // ============================================
+        function renderTarjeta(dir, tipo, tipoModal) {
+          const key = `${tipo}-${dir.id}`;
+          const fav = esFavorita(key);
+          const icono = tipo === 'bodega' ? 'warehouse' : 'map-pin';
+          const iconColor = tipo === 'bodega' ? '#3b82f6' : '#ef4444';
+          return `
+            <div class="tarjeta-direccion" onclick="seleccionarDireccion('${tipo}', ${dir.id}, '${tipoModal}')">
+              ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
+              <button class="pin-btn ${fav ? 'pinned' : ''}" title="${fav ? 'Quitar favorito' : 'Añadir a favoritos'}"
+                onclick="event.stopPropagation(); toggleFavDir('${key}', '${tipoModal}')">
+                ${fav ? '⭐' : '☆'}
+              </button>
+              <div class="alias">
+                <i data-lucide="${icono}" style="width:20px;height:20px;color:${iconColor};"></i>
+                ${dir.alias}
+              </div>
+              <div class="direccion-info">
+                📍 ${dir.calle}, ${dir.colonia}<br>
+                🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
+                ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
+              </div>
+              <button class="btn-seleccionar" type="button">
+                <i data-lucide="check" style="width:16px;height:16px;"></i>
+                Seleccionar
+              </button>
+            </div>`;
+        }
+
+        function toggleFavDir(key, tipoModal) {
+          toggleFavorita(key);
+          renderModalSections(tipoModal);
+          lucide.createIcons();
+        }
+
+        // ============================================
+        // RENDER SECCIONES DEL MODAL
+        // ============================================
+        function renderModalSections(tipoModal) {
+          const query   = document.getElementById(tipoModal + 'Buscador')?.value?.toLowerCase() || '';
+          const favKeys = getFavoritas();
+          const recKeys = getRecientes();
+
+          // Bodegas
+          const bodegas = (direccionesBodegas || []).filter(d =>
+            !query || d.alias.toLowerCase().includes(query) ||
+            d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query)
+          );
+          const bodFav  = bodegas.filter(d => favKeys.includes(`bodega-${d.id}`) || d.es_predeterminada);
+          const bodRec  = bodegas.filter(d => recKeys.includes(`bodega-${d.id}`) && !bodFav.find(f => f.id === d.id));
+          const bodTodos = bodegas.filter(d => !bodFav.find(f => f.id === d.id) && !bodRec.find(r => r.id === d.id));
+
+          const prefix = tipoModal === 'origen' ? 'origen' : 'destino';
+
+          // Render bodegas
+          setGrid(`${prefix}FavoritosGrid`,  bodFav,  'bodega', tipoModal);
+          setGrid(`${prefix}RecientesGrid`,  bodRec,  'bodega', tipoModal);
+          setGrid(`${prefix}TodosGrid`,      bodTodos,'bodega', tipoModal);
+          toggleSection(`${prefix}FavoritosSection`,  bodFav.length > 0);
+          toggleSection(`${prefix}RecientesSection`,  bodRec.length > 0);
+          toggleSection(`${prefix}TodosSection`,      bodTodos.length > 0);
+
+          // Direcciones cliente
+          const clDirs = (direccionesCliente || []).filter(d =>
+            !query || d.alias.toLowerCase().includes(query) ||
+            d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query)
+          );
+          const clFav   = clDirs.filter(d => favKeys.includes(`cliente-${d.id}`) || d.es_predeterminada);
+          const clRec   = clDirs.filter(d => recKeys.includes(`cliente-${d.id}`) && !clFav.find(f => f.id === d.id));
+          const clTodos = clDirs.filter(d => !clFav.find(f => f.id === d.id) && !clRec.find(r => r.id === d.id));
+
+          setGrid(`${prefix}ClienteFavGrid`,   clFav,   'cliente', tipoModal);
+          setGrid(`${prefix}ClienteRecGrid`,   clRec,   'cliente', tipoModal);
+          setGrid(`${prefix}ClienteTodosGrid`, clTodos, 'cliente', tipoModal);
+          toggleSection(`${prefix}ClienteFavSection`,   clFav.length > 0);
+          toggleSection(`${prefix}ClienteRecSection`,   clRec.length > 0);
+          toggleSection(`${prefix}ClienteTodosSection`, clTodos.length > 0);
+        }
+
+        function setGrid(id, dirs, tipo, tipoModal) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.innerHTML = dirs.map(d => renderTarjeta(d, tipo, tipoModal)).join('');
+        }
+
+        function toggleSection(id, visible) {
+          const el = document.getElementById(id);
+          if (el) el.style.display = visible ? '' : 'none';
+        }
+
+        function filtrarModal(tipoModal) {
+          renderModalSections(tipoModal);
+          lucide.createIcons();
+        }
+
+        // ============================================
         // CARGAR DIRECCIONES DE BODEGAS
         // ============================================
         async function cargarDireccionesBodegas(tipo) {
           try {
             const response = await fetch('/configuracion/api/direcciones');
             const data = await response.json();
-            
             if (data.success && data.direcciones) {
               direccionesBodegas = data.direcciones;
-              
-              const containerId = tipo === 'origen' ? 'tabOrigenBodegas' : 'tabDestinoBodegas';
-              const container = document.getElementById(containerId);
-              
-              if (direccionesBodegas.length === 0) {
-                container.innerHTML = `
-                  <div class="mensaje-sin-direcciones" style="grid-column: 1 / -1;">
-                    <i data-lucide="inbox"></i>
-                    <h3>No hay bodegas registradas</h3>
-                    <p>Ve a Configuración para agregar direcciones de bodega</p>
-                  </div>
-                `;
-              } else {
-                container.innerHTML = direccionesBodegas.map(dir => `
-                  <div class="tarjeta-direccion" onclick="seleccionarDireccion('bodega', ${dir.id}, '${tipo}')">
-                    ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
-                    <div class="alias">
-                      <i data-lucide="warehouse" style="width: 20px; height: 20px; color: #3b82f6;"></i>
-                      ${dir.alias}
-                    </div>
-                    <div class="direccion-info">
-                      📍 ${dir.calle}, ${dir.colonia}<br>
-                      🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
-                      ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
-                    </div>
-                    <button class="btn-seleccionar" type="button">
-                      <i data-lucide="check" style="width: 16px; height: 16px;"></i>
-                      Seleccionar
-                    </button>
-                  </div>
-                `).join('');
-              }
-              
+              renderModalSections(tipo);
               lucide.createIcons();
             }
           } catch (error) {
@@ -2075,71 +2468,20 @@
         // CARGAR DIRECCIONES DEL CLIENTE
         // ============================================
         async function cargarDireccionesClienteModal(clienteId, tipo) {
-          const containerId = tipo === 'origen' ? 'tabOrigenClientes' : 'tabDestinoClientes';
-          const container = document.getElementById(containerId);
-          
           if (!clienteId) {
-            container.innerHTML = `
-              <div class="mensaje-sin-cliente">
-                <i data-lucide="alert-circle"></i>
-                <h3>Sin cliente seleccionado</h3>
-                <p>Primero selecciona un cliente en el formulario para ver sus direcciones</p>
-              </div>
-            `;
-            lucide.createIcons();
+            direccionesCliente = [];
+            renderModalSections(tipo);
             return;
           }
-          
           try {
             const response = await fetch(`/direcciones/cliente/${clienteId}`);
             const data = await response.json();
-            
-            if (data.success && data.direcciones && data.direcciones.length > 0) {
-              direccionesCliente = data.direcciones;
-              
-              container.innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
-                  ${direccionesCliente.map(dir => `
-                    <div class="tarjeta-direccion" onclick="seleccionarDireccion('cliente', ${dir.id}, '${tipo}')">
-                      ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
-                      <div class="alias">
-                        <i data-lucide="map-pin" style="width: 20px; height: 20px; color: #ef4444;"></i>
-                        ${dir.alias}
-                      </div>
-                      <div class="direccion-info">
-                        📍 ${dir.calle}, ${dir.colonia}<br>
-                        🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
-                        ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
-                      </div>
-                      <button class="btn-seleccionar" type="button">
-                        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
-                        Seleccionar
-                      </button>
-                    </div>
-                  `).join('')}
-                </div>
-              `;
-            } else {
-              container.innerHTML = `
-                <div class="mensaje-sin-direcciones">
-                  <i data-lucide="map-pin"></i>
-                  <h3>Sin direcciones registradas</h3>
-                  <p>Este cliente no tiene direcciones guardadas. Ve al detalle del cliente para agregar direcciones.</p>
-                </div>
-              `;
-            }
-            
+            direccionesCliente = (data.success && data.direcciones) ? data.direcciones : [];
+            renderModalSections(tipo);
             lucide.createIcons();
           } catch (error) {
             console.error('Error al cargar direcciones del cliente:', error);
-            container.innerHTML = `
-              <div class="mensaje-sin-direcciones">
-                <i data-lucide="alert-circle"></i>
-                <h3>Error al cargar</h3>
-                <p>No se pudieron cargar las direcciones del cliente</p>
-              </div>
-            `;
-            lucide.createIcons();
+            direccionesCliente = [];
           }
         }
 
@@ -2179,7 +2521,9 @@
             ${icono} ${direccion.alias}
           `;
           
-          // Guardar selección
+          // Guardar selección y registrar en recientes
+          const recKey = `${tipoDireccion}-${direccionId}`;
+          agregarReciente(recKey);
           if (tipoModal === 'origen') {
             origenSeleccionado = { tipo: tipoDireccion, direccion };
           } else {
@@ -2244,16 +2588,233 @@
           
           // Si hay modales abiertos, recargar las direcciones del cliente
           const modalOrigenVisible = document.getElementById('modalDireccionOrigen').style.display === 'flex';
-          const modalDestinoVisible = document.getElementById('modalDireccionDestino').style.display === 'flex';
-          
-          if (modalOrigenVisible && clienteId) {
-            cargarDireccionesClienteModal(clienteId, 'origen');
-          }
-          
-          if (modalDestinoVisible && clienteId) {
-            cargarDireccionesClienteModal(clienteId, 'destino');
-          }
+          ay === 'flex';
+          if (modalOrigenVisible)  cargarDireccionesCliente(clienteId, 'origen');
+          if (modalDestinoVisible) cargarDireccionesCliente(clienteId, 'destino');
         });
-          </script>
+
+
+
+    // ══ Referencias múltiples ══════════════════════════════════════════
+    const _refs = [];
+
+    function refTagKeydown(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        refTagAgregar();
+      } else if (e.key === 'Backspace' && e.target.value === '' && _refs.length > 0) {
+        refTagEliminar(_refs.length - 1);
+      }
+    }
+
+    function refTagAgregar() {
+      const input = document.getElementById('refTagInput');
+      const val = input.value.trim().replace(/,+$/, '');
+      if (!val) return;
+      if (_refs.includes(val)) { input.value = ''; return; }
+      _refs.push(val);
+      refTagRender();
+      input.value = '';
+    }
+
+    function refTagEliminar(idx) {
+      _refs.splice(idx, 1);
+      refTagRender();
+    }
+
+    function refTagRender() {
+      const container = document.getElementById('refTagsContainer');
+      const hidden    = document.getElementById('refTagHidden');
+      container.innerHTML = _refs.map((r, i) => `
+        <span class="ref-tag">
+          ${r}
+          <button type="button" class="ref-tag-del" onclick="refTagEliminar(${i})">×</button>
+        </span>
+      `).join('');
+      hidden.value = _refs.join(', ');
+    }
+    // ══════════════════════════════════════════════════════════════════
+    // ══ Parcial logic ══════════════════════════════════════════════════
+    let _tipoParcial = 'raiz'; // 'raiz' o 'complemento'
+
+    function toggleParcial() {
+      const check  = document.getElementById('esParcialCheck');
+      const row    = document.getElementById('parcialToggleRow');
+      const tipoSel = document.getElementById('parcialTipoSelector');
+      const opts   = document.getElementById('parcialOptions');
+      const activo = check.checked;
+
+      row.classList.toggle('active', activo);
+      tipoSel.classList.toggle('visible', activo);
+
+      if (!activo) {
+        // Reset todo
+        opts.classList.remove('visible');
+        document.getElementById('hiddenEsParcial').value = '0';
+        document.getElementById('hiddenEsComplemento').value = '0';
+        document.getElementById('hiddenEnvioRelacionado').value = '';
+        seleccionarTipo('raiz'); // reset visual
+      } else {
+        seleccionarTipo('raiz'); // default al activar
+      }
+    }
+
+    function seleccionarTipo(tipo) {
+      _tipoParcial = tipo;
+      const btnRaiz = document.getElementById('btnTipoRaiz');
+      const btnComp = document.getElementById('btnTipoComplemento');
+      const opts    = document.getElementById('parcialOptions');
+
+      btnRaiz.classList.toggle('selected', tipo === 'raiz');
+      btnComp.classList.toggle('selected', tipo === 'complemento');
+
+      if (tipo === 'raiz') {
+        // Esta guía ES la raíz parcial — parte 1
+        document.getElementById('hiddenEsParcial').value = '1';
+        document.getElementById('hiddenEsComplemento').value = '0';
+        document.getElementById('hiddenEnvioRelacionado').value = '';
+        opts.classList.remove('visible');
+      } else {
+        // Es complemento — necesita seleccionar guía raíz
+        document.getElementById('hiddenEsParcial').value = '0';
+        document.getElementById('hiddenEsComplemento').value = '1';
+        opts.classList.add('visible');
+        cargarGuiasRaizPorCliente();
+      }
+    }
+
+    async function cargarGuiasRaizPorCliente() {
+      const clienteId = document.querySelector('[name="cliente_id"]')?.value;
+      const sel = document.getElementById('envioRelacionadoSelect');
+      sel.innerHTML = '<option value="">Cargando...</option>';
+      if (!clienteId) {
+        sel.innerHTML = '<option value="">Primero selecciona un cliente</option>';
+        return;
+      }
+      try {
+        const res  = await fetch(`/envios/parciales-por-cliente/${clienteId}`);
+        const data = await res.json();
+        sel.innerHTML = '<option value="">Seleccionar guía raíz...</option>';
+        if (data.envios && data.envios.length > 0) {
+          data.envios.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id;
+            opt.textContent = `${e.numero_tracking} — ${new Date(e.fecha_creacion).toLocaleDateString('es-MX')} — ${e.estado_actual.toUpperCase()}`;
+            sel.appendChild(opt);
+          });
+        } else {
+          sel.innerHTML = '<option value="">Sin guías parciales para este cliente</option>';
+        }
+      } catch(err) {
+        sel.innerHTML = '<option value="">Error al cargar guías</option>';
+      }
+    }
+
+    function onGuiaOrigenChange() {
+      const sel = document.getElementById('envioRelacionadoSelect');
+      const btn = document.getElementById('btnCargarItems');
+      document.getElementById('hiddenEnvioRelacionado').value = sel.value;
+      btn.disabled = !sel.value;
+    }
+
+    async function cargarItemsPendientes() {
+      const sel = document.getElementById('envioRelacionadoSelect');
+      if (!sel.value) return;
+      const btn  = document.getElementById('btnCargarItems');
+      const help = document.getElementById('parcialHelp');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" style="width:14px;height:14px;"></i> Cargando...';
+      try {
+        const res  = await fetch(`/envios/${sel.value}/items-json`);
+        const data = await res.json();
+        if (data.items && data.items.length > 0) {
+          document.getElementById('itemsTbody').innerHTML = '';
+          data.items.forEach(it => agregarItem(it.cantidad, it.tipo, it.descripcion, it.peso));
+          help.style.display = 'block';
+          help.textContent = `✅ Se cargaron ${data.items.length} ítem(s) de la guía raíz. Ajusta las cantidades según lo que va en este complemento.`;
+        } else {
+          help.style.display = 'block';
+          help.textContent = 'La guía raíz no tiene ítems registrados.';
+        }
+      } catch(err) {
+        help.style.display = 'block';
+        help.textContent = 'Error al cargar ítems.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="package" style="width:14px;height:14px;"></i> Cargar ítems de guía raíz';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // Re-cargar guías cuando cambie el cliente (si ya está en modo complemento)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('[name="cliente_id"]')?.addEventListener('change', () => {
+        if (_tipoParcial === 'complemento' && document.getElementById('esParcialCheck').checked) {
+          cargarGuiasRaizPorCliente();
+        }
+      });
+    });
+    // ══════════════════════════════════════════════════════════════════
+    // ══ Items table functions ══════════════════════════════════════════
+    const TIPOS_COMUNES = ['BULTOS','TARIMA','BOTES','CAJA','PALLET','PROTEGIDO',
+      'GUACAL','EMPLEADO','SACO','TAMBOR','ROLLO','TUBO','PIEZAS','KIT','SOBRE'];
+
+    function crearFilaItem(cant, tipo, desc, peso) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-cant">
+          <input type="number" name="item_cant[]" value="${cant||1}" min="1" step="1"
+            style="text-align:center;" oninput="actualizarPesoTotal()">
+        </td>
+        <td class="td-tipo">
+          <input type="text" name="item_tipo[]" value="${tipo||''}"
+            placeholder="Ej: BULTOS" list="tiposComunes" oninput="actualizarPesoTotal()">
+        </td>
+        <td>
+          <input type="text" name="item_desc[]" value="${desc||''}"
+            placeholder="Descripción adicional...">
+        </td>
+        <td class="td-peso">
+          <input type="number" name="item_peso[]" value="${peso!=null&&peso!==''?peso:''}"
+            min="0" step="0.01" placeholder="0.00"
+            style="text-align:right;" oninput="actualizarPesoTotal()">
+        </td>
+        <td class="td-del">
+          <button type="button" class="btn-del-item"
+            onclick="this.closest('tr').remove();actualizarPesoTotal();" title="Eliminar">
+            <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+          </button>
+        </td>`;
+      return tr;
+    }
+
+    function agregarItem(cant, tipo, desc, peso) {
+      const tbody = document.getElementById('itemsTbody');
+      tbody.appendChild(crearFilaItem(cant||1, tipo||'', desc||'', peso!=null?peso:''));
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      actualizarPesoTotal();
+    }
+
+    function actualizarPesoTotal() {
+      const total = [...document.querySelectorAll('#itemsTbody [name="item_peso[]"]')]
+        .reduce((s, el) => s + (parseFloat(el.value)||0), 0);
+      const elT = document.getElementById('pesoTotal');
+      const elH = document.getElementById('pesoHidden');
+      if (elT) elT.textContent = total.toFixed(2);
+      if (elH) elH.value = total.toFixed(2);
+    }
+
+    // Datalist con tipos comunes
+    (() => {
+      const dl = document.createElement('datalist');
+      dl.id = 'tiposComunes';
+      TIPOS_COMUNES.forEach(t => { const o = document.createElement('option'); o.value = t; dl.appendChild(o); });
+      document.body.appendChild(dl);
+    })();
+    // ══════════════════════════════════════════════════════════════════
+
+    document.addEventListener('DOMContentLoaded', () => { agregarItem(); });
+
+  </script>
 </body>
 </html>

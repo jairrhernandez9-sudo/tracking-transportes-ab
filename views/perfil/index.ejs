@@ -467,12 +467,14 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
       
@@ -563,7 +565,7 @@
               <div class="perfil-nombre"><%= user.nombre %></div>
               <div class="perfil-email"><%= user.email %></div>
               <span class="perfil-rol-badge">
-                <%= user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                <%= user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador' %>
               </span>
             </div>
             

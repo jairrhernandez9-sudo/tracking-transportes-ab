@@ -27,6 +27,9 @@ function isAdmin(req, res, next) {
 // Middleware para redirigir si ya está autenticado
 function redirectIfAuthenticated(req, res, next) {
   if (req.session && req.session.userId) {
+    if (req.session.userRole === 'cliente') {
+      return res.redirect('/portal-cliente');
+    }
     return res.redirect('/dashboard');
   }
   next();

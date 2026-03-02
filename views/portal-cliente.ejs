@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Portal de Seguimiento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      color: #1e293b;
+    }
+
+    /* ── HEADER ── */
+    .portal-header {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .portal-brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .portal-brand-icon {
+      width: 36px; height: 36px; background: #f59e0b;
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    }
+    .portal-brand-name {
+      color: #fff; font-size: 16px; font-weight: 700;
+    }
+    .portal-brand-sub {
+      color: #94a3b8; font-size: 12px;
+    }
+    .portal-user {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .portal-user-info {
+      text-align: right;
+    }
+    .portal-user-name {
+      color: #f1f5f9; font-size: 13px; font-weight: 600;
+    }
+    .portal-user-company {
+      color: #94a3b8; font-size: 11px;
+    }
+    .btn-logout {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; background: rgba(255,255,255,.08);
+      color: #cbd5e1; border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px; font-size: 12px; font-weight: 600;
+      text-decoration: none; transition: all .15s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+    /* ── MAIN ── */
+    .portal-main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── WELCOME ── */
+    .welcome-bar {
+      background: #fff; border-radius: 16px; padding: 24px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .welcome-text h1 { font-size: 22px; font-weight: 800; color: #1e293b; }
+    .welcome-text p  { font-size: 13px; color: #64748b; margin-top: 2px; }
+    .welcome-badge {
+      background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d;
+      border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700;
+    }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #94a3b8; }
+    .stat-value { font-size: 32px; font-weight: 800; color: #1e293b; line-height: 1; }
+    .stat-card.creado    .stat-value { color: #64748b; }
+    .stat-card.transito  .stat-value { color: #2563eb; }
+    .stat-card.entregado .stat-value { color: #16a34a; }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1; min-width: 220px; position: relative;
+    }
+    .search-box i {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; color: #94a3b8;
+    }
+    .search-box input {
+      width: 100%; padding: 10px 12px 10px 36px;
+      border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 13px; outline: none; transition: border-color .15s;
+      font-family: inherit;
+    }
+    .search-box input:focus { border-color: #3b82f6; }
+
+    .filter-select {
+      padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; outline: none;
+    }
+    .btn-buscar {
+      padding: 10px 20px; background: #1e293b; color: #fff;
+      border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s;
+    }
+    .btn-buscar:hover { background: #334155; }
+
+    /* ── TABLE ── */
+    .table-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden;
+    }
+    .table-header {
+      padding: 18px 24px; border-bottom: 1px solid #f1f5f9;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-header h2 { font-size: 15px; font-weight: 700; color: #1e293b; }
+    .table-count { font-size: 12px; color: #94a3b8; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 12px 16px; text-align: left;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; color: #64748b;
+      background: #f8fafc; border-bottom: 1px solid #f1f5f9;
+    }
+    tbody tr { border-bottom: 1px solid #f8fafc; transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+    tbody td { padding: 14px 16px; font-size: 13px; color: #374151; vertical-align: middle; }
+
+    .tracking-link {
+      font-weight: 700; font-size: 13px; color: #2563eb;
+      text-decoration: none; letter-spacing: .3px;
+    }
+    .tracking-link:hover { text-decoration: underline; }
+
+    /* Estado badges */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge-creado       { background: #f1f5f9; color: #475569; }
+    .badge-en-transito  { background: #dbeafe; color: #1d4ed8; }
+    .badge-entregado    { background: #dcfce7; color: #15803d; }
+    .badge-cancelado    { background: #fee2e2; color: #dc2626; }
+    .badge-en-bodega    { background: #fef9c3; color: #854d0e; }
+    .badge-retrasado    { background: #ffedd5; color: #c2410c; }
+
+    .ref-cell { font-size: 12px; color: #64748b; }
+    .no-ref   { color: #d1d5db; font-style: italic; }
+
+    .dest-cell { font-size: 12px; color: #374151; max-width: 180px; }
+
+    .fecha-cell { font-size: 12px; color: #64748b; white-space: nowrap; }
+
+    .btn-ver {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 12px; background: #f1f5f9; color: #374151;
+      border: none; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all .15s;
+    }
+    .btn-ver:hover { background: #e2e8f0; color: #1e293b; }
+
+    /* Parcial badge */
+    .badge-parte {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+      border-radius: 5px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+      margin-left: 4px;
+    }
+    .badge-parte.complemento {
+      background: #f0fdf4; color: #166534; border-color: #86efac;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 60px 24px; text-align: center;
+    }
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+    .empty-state p  { font-size: 13px; color: #9ca3af; }
+
+    /* Paginación */
+    .pagination {
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+      padding: 20px;
+    }
+    .page-btn {
+      padding: 7px 13px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: #374151; background: #fff;
+      text-decoration: none; transition: all .15s;
+    }
+    .page-btn:hover { border-color: #1e293b; color: #1e293b; }
+    .page-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+    .page-btn.disabled { opacity: .35; pointer-events: none; }
+
+    /* Selector de dirección */
+    .dir-select-wrap {
+      position: relative; min-width: 200px;
+    }
+    .dir-select-wrap select {
+      appearance: none; width: 100%;
+      padding: 10px 36px 10px 14px;
+      border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 13px; font-family: inherit;
+      background: #fff; cursor: pointer; outline: none;
+      transition: border-color .15s;
+    }
+    .dir-select-wrap select:focus { border-color: #3b82f6; }
+    .dir-select-wrap::after {
+      content: ''; position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-top-color: #94a3b8; margin-top: 3px; pointer-events: none;
+    }
+    .dir-active-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #eff6ff; color: #1d4ed8;
+      border: 1.5px solid #bfdbfe; border-radius: 20px;
+      padding: 4px 12px; font-size: 12px; font-weight: 600;
+    }
+    .dir-active-badge a {
+      color: #93c5fd; text-decoration: none; font-weight: 700; margin-left: 2px;
+    }
+    .dir-active-badge a:hover { color: #3b82f6; }
+
+    @media (max-width: 640px) {
+      .portal-header { padding: 0 16px; }
+      .portal-main   { padding: 20px 16px; }
+      .welcome-bar   { flex-direction: column; gap: 12px; align-items: flex-start; }
+      table thead    { display: none; }
+      tbody td       { display: block; padding: 6px 16px; }
+      tbody td::before { content: attr(data-label); font-weight: 700; color: #94a3b8; font-size: 10px; display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="portal-header">
+  <div class="portal-brand">
+    <div class="portal-brand-icon">
+      <i data-lucide="truck" style="width:18px;height:18px;color:#1e293b;"></i>
+    </div>
+    <div>
+      <div class="portal-brand-name">Portal de Seguimiento</div>
+      <div class="portal-brand-sub">Transportes AB</div>
+    </div>
+  </div>
+
+  <div class="portal-user">
+    <div class="portal-user-info">
+      <div class="portal-user-name"><%= user.nombre %></div>
+      <div class="portal-user-company"><%= cliente.nombre_empresa %></div>
+    </div>
+    <a href="/auth/logout" class="btn-logout">
+      <i data-lucide="log-out" style="width:14px;height:14px;"></i>
+      Salir
+    </a>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="portal-main">
+
+  <!-- Welcome -->
+  <div class="welcome-bar">
+    <div class="welcome-text">
+      <h1>Bienvenido, <%= user.nombre %></h1>
+      <p>Consulta el estado de tus envíos en tiempo real</p>
+    </div>
+    <span class="welcome-badge">🏢 <%= cliente.nombre_empresa %></span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total envíos</div>
+      <div class="stat-value"><%= stats.total || 0 %></div>
+    </div>
+    <div class="stat-card creado">
+      <div class="stat-label">Creados</div>
+      <div class="stat-value"><%= stats.creados || 0 %></div>
+    </div>
+    <div class="stat-card transito">
+      <div class="stat-label">En tránsito</div>
+      <div class="stat-value"><%= stats.en_transito || 0 %></div>
+    </div>
+    <div class="stat-card entregado">
+      <div class="stat-label">Entregados</div>
+      <div class="stat-value"><%= stats.entregados || 0 %></div>
+    </div>
+  </div>
+
+  <!-- Toolbar de búsqueda -->
+  <form method="GET" action="/portal-cliente" class="toolbar">
+    <div class="search-box">
+      <i data-lucide="search"></i>
+      <input type="text" name="buscar" placeholder="Buscar por tracking o referencia..."
+             value="<%= filtros.buscar %>">
+    </div>
+
+    <!-- Filtro por dirección/alias -->
+    <% if (direcciones && direcciones.length > 0) { %>
+    <div class="dir-select-wrap">
+      <select name="direccion_id" onchange="this.form.submit()">
+        <option value="">📍 Todas las direcciones</option>
+        <% direcciones.forEach(dir => { %>
+          <option value="<%= dir.id %>" <%= filtros.direccion_id == dir.id ? 'selected' : '' %>>
+            <%= dir.tipo === 'origen' ? '🔵' : dir.tipo === 'destino' ? '🔴' : '🟡' %>
+            <%= dir.alias %> — <%= dir.ciudad %>
+          </option>
+        <% }); %>
+      </select>
+    </div>
+    <% } %>
+
+    <select name="estado" class="filter-select">
+      <option value="todos"       <%= filtros.estado === 'todos'       ? 'selected' : '' %>>Todos los estados</option>
+      <option value="creado"      <%= filtros.estado === 'creado'      ? 'selected' : '' %>>Creado</option>
+      <option value="en-transito" <%= filtros.estado === 'en-transito' ? 'selected' : '' %>>En tránsito</option>
+      <option value="en-bodega"   <%= filtros.estado === 'en-bodega'   ? 'selected' : '' %>>En bodega</option>
+      <option value="entregado"   <%= filtros.estado === 'entregado'   ? 'selected' : '' %>>Entregado</option>
+      <option value="retrasado"   <%= filtros.estado === 'retrasado'   ? 'selected' : '' %>>Retrasado</option>
+      <option value="cancelado"   <%= filtros.estado === 'cancelado'   ? 'selected' : '' %>>Cancelado</option>
+    </select>
+    <button type="submit" class="btn-buscar">
+      <i data-lucide="search" style="width:14px;height:14px;"></i>
+      Buscar
+    </button>
+    <% if (filtros.buscar || filtros.estado !== 'todos' || filtros.direccion_id) { %>
+      <a href="/portal-cliente" class="btn-ver">✕ Limpiar</a>
+    <% } %>
+  </form>
+
+  <!-- Badge de dirección activa -->
+  <% if (filtros.direccion_id && direcciones) {
+       const dirActiva = direcciones.find(d => d.id == filtros.direccion_id);
+       if (dirActiva) { %>
+  <div style="margin-bottom:12px;">
+    <span class="dir-active-badge">
+      <i data-lucide="map-pin" style="width:13px;height:13px;"></i>
+      Filtrando por: <strong><%= dirActiva.alias %></strong> — <%= dirActiva.calle %>, <%= dirActiva.ciudad %>
+      <a href="/portal-cliente">✕</a>
+    </span>
+  </div>
+  <% } } %>
+
+  <!-- Tabla de envíos -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>Mis Envíos</h2>
+      <span class="table-count"><%= envios.length %> resultado(s)</span>
+    </div>
+
+    <% if (envios.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <h3>No se encontraron envíos</h3>
+        <p>Intenta con otros filtros de búsqueda</p>
+      </div>
+    <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Tracking</th>
+          <th>Referencia</th>
+          <th>Destino</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Entrega est.</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% envios.forEach(envio => { %>
+        <tr>
+          <td data-label="Tracking">
+            <a href="/portal-cliente/envio/<%= envio.id %>" class="tracking-link">
+              <%= envio.numero_tracking %>
+            </a>
+            <% if (envio.es_parcial) { %>
+              <span class="badge-parte">PARTE 1</span>
+            <% } else if (envio.es_complemento) { %>
+              <span class="badge-parte complemento">PARTE <%= envio.numero_parte || '?' %></span>
+            <% } %>
+          </td>
+          <td data-label="Referencia">
+            <% if (envio.referencia_cliente) { %>
+              <span class="ref-cell"><%= envio.referencia_cliente %></span>
+            <% } else { %>
+              <span class="no-ref">Sin ref.</span>
+            <% } %>
+          </td>
+          <td data-label="Destino">
+            <span class="dest-cell"><%= envio.destino %></span>
+          </td>
+          <td data-label="Estado">
+            <span class="badge badge-<%= envio.estado_actual %>">
+              <%= envio.estado_actual.replace('-',' ').toUpperCase() %>
+            </span>
+          </td>
+          <td data-label="Fecha" class="fecha-cell">
+            <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit'}) %>
+          </td>
+          <td data-label="Entrega est." class="fecha-cell">
+            <% if (envio.fecha_estimada_entrega) { %>
+              <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit'}) %>
+            <% } else { %>
+              <span style="color:#d1d5db;">—</span>
+            <% } %>
+          </td>
+          <td>
+            <a href="/portal-cliente/envio/<%= envio.id %>" class="btn-ver">
+              <i data-lucide="eye" style="width:13px;height:13px;"></i>
+              Ver
+            </a>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <% if (paginacion.total > 1) { %>
+    <div class="pagination">
+      <a href="?page=<%= paginacion.actual - 1 %>&buscar=<%= filtros.buscar %>&estado=<%= filtros.estado %>"
+         class="page-btn <%= paginacion.actual <= 1 ? 'disabled' : '' %>">← Anterior</a>
+      <% for (let p = 1; p <= paginacion.total; p++) { %>
+        <a href="?page=<%= p %>&buscar=<%= filtros.buscar %>&estado=<%= filtros.estado %>"
+           class="page-btn <%= p === paginacion.actual ? 'active' : '' %>"><%= p %></a>
+      <% } %>
+      <a href="?page=<%= paginacion.actual + 1 %>&buscar=<%= filtros.buscar %>&estado=<%= filtros.estado %>"
+         class="page-btn <%= paginacion.actual >= paginacion.total ? 'disabled' : '' %>">Siguiente →</a>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+</main>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

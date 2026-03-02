@@ -740,10 +740,17 @@
       background: #dbeafe;
       color: #1e40af;
     }
-    
+    .rol-superusuario {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
     .rol-operador {
       background: #f3f4f6;
       color: #4b5563;
+    }
+    .rol-cliente {
+      background: #fef3c7;
+      color: #92400e;
     }
     
     .status-badge {
@@ -997,7 +1004,7 @@
             </div>
             <div class="user-info">
               <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
-              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
+              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5130353c383f11252330323a383f367f323e3c">[email&#160;protected]</a>' %></p>
             </div>
             <i data-lucide="chevron-down" class="user-chevron"></i>
             
@@ -1009,9 +1016,9 @@
                 </div>
                 <div class="user-dropdown-info">
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2140454c484f61555340424a484f460f424e4c">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>
@@ -1052,47 +1059,46 @@
       <% } %>
       
       <!-- STATS -->
-      <div class="stats-grid">
+      <div class="stats-grid" style="grid-template-columns: repeat(5,1fr);">
         <div class="stat-card primary">
           <div class="stat-info">
-            <h3>Total Usuarios</h3>
+            <h3>Total</h3>
             <div class="stat-value"><%= usuarios.length %></div>
-            <div class="stat-footer">
-              <i data-lucide="users"></i>
-              En el sistema
-            </div>
+            <div class="stat-footer"><i data-lucide="users"></i> Usuarios</div>
           </div>
-          <div class="stat-icon">
-            <i data-lucide="users"></i>
-          </div>
+          <div class="stat-icon"><i data-lucide="users"></i></div>
         </div>
-        
         <div class="stat-card success">
           <div class="stat-info">
-            <h3>Administradores</h3>
+            <h3>Admins</h3>
             <div class="stat-value"><%= usuarios.filter(u => u.rol === 'admin').length %></div>
-            <div class="stat-footer">
-              <i data-lucide="shield"></i>
-              Acceso total
-            </div>
+            <div class="stat-footer"><i data-lucide="shield"></i> Acceso total</div>
           </div>
-          <div class="stat-icon">
-            <i data-lucide="shield"></i>
-          </div>
+          <div class="stat-icon"><i data-lucide="shield"></i></div>
         </div>
-        
+        <div class="stat-card" style="border-left:4px solid #7c3aed;">
+          <div class="stat-info">
+            <h3>Superusuarios</h3>
+            <div class="stat-value" style="color:#6d28d9;"><%= usuarios.filter(u => u.rol === 'superusuario').length %></div>
+            <div class="stat-footer"><i data-lucide="shield-check"></i> Acceso total</div>
+          </div>
+          <div class="stat-icon" style="background:#ede9fe;"><i data-lucide="shield-check" style="color:#6d28d9;"></i></div>
+        </div>
         <div class="stat-card warning">
           <div class="stat-info">
             <h3>Operadores</h3>
             <div class="stat-value"><%= usuarios.filter(u => u.rol === 'operador').length %></div>
-            <div class="stat-footer">
-              <i data-lucide="user"></i>
-              Acceso limitado
-            </div>
+            <div class="stat-footer"><i data-lucide="user"></i> Acceso limitado</div>
           </div>
-          <div class="stat-icon">
-            <i data-lucide="user"></i>
+          <div class="stat-icon"><i data-lucide="user"></i></div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #f59e0b;">
+          <div class="stat-info">
+            <h3>Clientes</h3>
+            <div class="stat-value" style="color:#92400e;"><%= usuarios.filter(u => u.rol === 'cliente').length %></div>
+            <div class="stat-footer"><i data-lucide="building-2"></i> Portal propio</div>
           </div>
+          <div class="stat-icon" style="background:#fef3c7;"><i data-lucide="building-2" style="color:#92400e;"></i></div>
         </div>
       </div>
       
@@ -1106,8 +1112,10 @@
           
           <div class="filter-tabs">
             <button class="filter-tab active" data-filter="todos">Todos</button>
-            <button class="filter-tab" data-filter="admin">Administradores</button>
+            <button class="filter-tab" data-filter="admin">Admins</button>
+            <button class="filter-tab" data-filter="superusuario">Superusuarios</button>
             <button class="filter-tab" data-filter="operador">Operadores</button>
+            <button class="filter-tab" data-filter="cliente">Clientes</button>
           </div>
         </div>
         
@@ -1138,7 +1146,15 @@
                   </td>
                   <td>
                     <span class="rol-badge rol-<%= usuario.rol %>">
-                      <%= usuario.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                      <%
+                        const rolLabels = {
+                          admin:        '🔑 Administrador',
+                          superusuario: '⚡ Superusuario',
+                          operador:     '🛠️ Operador',
+                          cliente:      '🏢 Cliente'
+                        };
+                      %>
+                      <%= rolLabels[usuario.rol] || usuario.rol %>
                     </span>
                   </td>
                   <td>
@@ -1188,7 +1204,7 @@
     
   </div>
   
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
     
     // User Profile Dropdown

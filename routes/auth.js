@@ -63,8 +63,12 @@ router.post('/login', async (req, res) => {
     req.session.userName = user.nombre;
     req.session.userEmail = user.email;
     req.session.userRole = user.rol;
-    
-    // Redirigir al dashboard
+    req.session.clienteId = user.cliente_id || null;
+
+    // Redirigir según rol
+    if (user.rol === 'cliente') {
+      return res.redirect('/portal-cliente');
+    }
     res.redirect('/dashboard');
     
   } catch (error) {

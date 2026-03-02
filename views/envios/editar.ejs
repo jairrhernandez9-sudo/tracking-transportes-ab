@@ -426,6 +426,47 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ── Items table ── */
+    .items-table-wrapper { border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .items-table { width: 100%; border-collapse: collapse; }
+    .items-table th {
+      background: #1e3a8a; color: #fff; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .4px; padding: 10px 12px; text-align: left;
+    }
+    .items-table th.c { text-align: center; }
+    .items-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; background: #fff; }
+    .items-table tr:last-child td { border-bottom: none; }
+    .items-table tr:nth-child(even) td { background: #f8faff; }
+    .items-table input {
+      width: 100%; border: 1.5px solid #e2e8f0; border-radius: 7px;
+      padding: 6px 9px; font-size: 13px; outline: none; background: #fff;
+      transition: border-color .15s;
+    }
+    .items-table input:focus { border-color: #3b82f6; }
+    .td-cant { width: 70px; }
+    .td-tipo { width: 160px; }
+    .td-peso { width: 90px; }
+    .td-del  { width: 44px; text-align: center; }
+    .btn-add-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; background: #eff6ff; color: #1d4ed8;
+      border: 1.5px dashed #93c5fd; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 10px;
+      transition: background .15s;
+    }
+    .btn-add-item:hover { background: #dbeafe; }
+    .btn-del-item {
+      background: none; border: none; cursor: pointer; color: #ef4444;
+      padding: 4px; border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .btn-del-item:hover { background: #fee2e2; }
+    .items-peso-total {
+      display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+      margin-top: 10px; font-size: 14px; color: #374151;
+    }
+    .items-peso-total strong { font-size: 18px; color: #1e3a8a; }
   </style>
 </head>
 <body>
@@ -477,12 +518,14 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
       
@@ -593,28 +636,33 @@
               </div>
               
               <div class="form-group">
-                <label class="form-label">Descripción del contenido</label>
-                <textarea 
-                  name="descripcion" 
-                  class="form-textarea"
-                  placeholder="Describe el contenido del envío..."
-                ><%= envio.descripcion || '' %></textarea>
+                <label class="form-label">
+                  <i data-lucide="package" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"></i>
+                  Detalle del Contenido
+                </label>
+                <div class="items-table-wrapper">
+                  <table class="items-table">
+                    <thead><tr>
+                      <th class="td-cant c">Cant.</th>
+                      <th class="td-tipo">Tipo</th>
+                      <th>Descripción <span style="font-weight:400;opacity:.7;">(opcional)</span></th>
+                      <th class="td-peso c">Peso kg</th>
+                      <th class="td-del"></th>
+                    </tr></thead>
+                    <tbody id="itemsTbody"></tbody>
+                  </table>
+                </div>
+                <button type="button" class="btn-add-item" onclick="agregarItem()">
+                  <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+                  Agregar ítem
+                </button>
+                <div class="items-peso-total">
+                  Peso total aprox.:&nbsp;<strong id="pesoTotal">0.00</strong>&nbsp;kg
+                </div>
+                <input type="hidden" name="peso" id="pesoHidden" value="0">
               </div>
               
               <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Peso (kg)</label>
-                  <input 
-                    type="number" 
-                    name="peso" 
-                    class="form-input" 
-                    value="<%= envio.peso || '' %>"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                  >
-                </div>
-                
                 <div class="form-group">
                   <label class="form-label">Fecha estimada de entrega</label>
                   <input 
@@ -683,6 +731,75 @@
   
   <script>
     lucide.createIcons();
+
+    // ══ Items table functions ══════════════════════════════════════════
+    const TIPOS_COMUNES = ['BULTOS','TARIMA','BOTES','CAJA','PALLET','PROTEGIDO',
+      'GUACAL','EMPLEADO','SACO','TAMBOR','ROLLO','TUBO','PIEZAS','KIT','SOBRE'];
+
+    function crearFilaItem(cant, tipo, desc, peso) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-cant">
+          <input type="number" name="item_cant[]" value="${cant||1}" min="1" step="1"
+            style="text-align:center;" oninput="actualizarPesoTotal()">
+        </td>
+        <td class="td-tipo">
+          <input type="text" name="item_tipo[]" value="${tipo||''}"
+            placeholder="Ej: BULTOS" list="tiposComunes" oninput="actualizarPesoTotal()">
+        </td>
+        <td>
+          <input type="text" name="item_desc[]" value="${desc||''}"
+            placeholder="Descripción adicional...">
+        </td>
+        <td class="td-peso">
+          <input type="number" name="item_peso[]" value="${peso!=null&&peso!==''?peso:''}"
+            min="0" step="0.01" placeholder="0.00"
+            style="text-align:right;" oninput="actualizarPesoTotal()">
+        </td>
+        <td class="td-del">
+          <button type="button" class="btn-del-item"
+            onclick="this.closest('tr').remove();actualizarPesoTotal();" title="Eliminar">
+            <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+          </button>
+        </td>`;
+      return tr;
+    }
+
+    function agregarItem(cant, tipo, desc, peso) {
+      const tbody = document.getElementById('itemsTbody');
+      tbody.appendChild(crearFilaItem(cant||1, tipo||'', desc||'', peso!=null?peso:''));
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      actualizarPesoTotal();
+    }
+
+    function actualizarPesoTotal() {
+      const total = [...document.querySelectorAll('#itemsTbody [name="item_peso[]"]')]
+        .reduce((s, el) => s + (parseFloat(el.value)||0), 0);
+      const elT = document.getElementById('pesoTotal');
+      const elH = document.getElementById('pesoHidden');
+      if (elT) elT.textContent = total.toFixed(2);
+      if (elH) elH.value = total.toFixed(2);
+    }
+
+    (() => {
+      const dl = document.createElement('datalist');
+      dl.id = 'tiposComunes';
+      TIPOS_COMUNES.forEach(t => { const o = document.createElement('option'); o.value = t; dl.appendChild(o); });
+      document.body.appendChild(dl);
+    })();
+    // ══════════════════════════════════════════════════════════════════
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const el = document.getElementById('items-data');
+      const existingItems = el ? JSON.parse(el.textContent) : [];
+      if (existingItems.length > 0) {
+        existingItems.forEach(it => agregarItem(it.cantidad, it.tipo, it.descripcion, it.peso));
+      } else {
+        agregarItem();
+      }
+    });
+
   </script>
+<script id="items-data" type="application/json"><%- JSON.stringify(items || []) %></script>
 </body>
 </html>

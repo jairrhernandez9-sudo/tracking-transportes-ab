@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const ExcelJS = require('exceljs');
+const { requireAdminOrSuper } = require('../middleware/roles');
 
 // Middleware de autenticación
 function isAuthenticated(req, res, next) {
@@ -10,6 +11,9 @@ function isAuthenticated(req, res, next) {
   }
   res.redirect('/auth/login');
 }
+
+// Solo admin y superusuario pueden acceder a reportes
+router.use(isAuthenticated, requireAdminOrSuper);
 
 // ==================== PÁGINA PRINCIPAL ====================
 router.get('/', isAuthenticated, async (req, res) => {

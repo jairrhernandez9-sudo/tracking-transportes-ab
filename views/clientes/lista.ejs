@@ -929,12 +929,14 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
       
@@ -996,10 +998,12 @@
               Eliminados
             </a>
           <% } %>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <a href="/clientes/nuevo" class="btn-primary">
             <i data-lucide="plus"></i>
             Nuevo Cliente
           </a>
+          <% } %>
           
           <div class="user-profile" id="userProfileBtn">
             <div class="user-avatar">
@@ -1021,7 +1025,7 @@
                   <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
                   <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d7b6b3babeb997a3a5b6b4bcbeb9b0f9b4b8ba">[email&#160;protected]</a>' %></div>
                   <span class="user-dropdown-badge">
-                    <%= user && user.rol === 'admin' ? 'Administrador' : 'Operador' %>
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
                   </span>
                 </div>
               </div>
@@ -1215,10 +1219,12 @@
                   <i data-lucide="eye"></i>
                   Ver
                 </a>
+                <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
                 <a href="/clientes/<%= cliente.id %>/editar" class="btn-action btn-secondary">
                   <i data-lucide="edit"></i>
                   Editar
                 </a>
+                <% } %>
                 <% if (user && user.rol === 'admin') { %>
                   <button 
                     class="btn-action btn-danger btn-eliminar"

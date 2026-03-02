@@ -1,4 +1,4 @@
-const { requireAdmin, requireAdminOrOperator } = require('../middleware/roles');
+const { requireAdmin, requireAdminOrOperator, requireAdminOrSuper } = require('../middleware/roles');
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
@@ -155,7 +155,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 // ============================================
 // FORMULARIO NUEVO CLIENTE
 // ============================================
-router.get('/nuevo', isAuthenticated, (req, res) => {
+router.get('/nuevo', isAuthenticated, requireAdminOrSuper, (req, res) => {
   res.render('clientes/nuevo', {
     title: 'Nuevo Cliente',
     user: {
@@ -170,7 +170,7 @@ router.get('/nuevo', isAuthenticated, (req, res) => {
 // ============================================
 // CREAR CLIENTE (POST) - MODIFICADO
 // ============================================
-router.post('/nuevo', isAuthenticated, async (req, res) => {
+router.post('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { 
       nombre_empresa, 
@@ -389,7 +389,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 // ============================================
 // EDITAR CLIENTE (GET)
 // ============================================
-router.get('/:id/editar', isAuthenticated, async (req, res) => {
+router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -419,7 +419,7 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
 // ============================================
 // EDITAR CLIENTE (POST) - MODIFICADO
 // ============================================
-router.post('/:id/editar', isAuthenticated, async (req, res) => {
+router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { id } = req.params;
     const { 
@@ -607,7 +607,7 @@ router.post('/:id/restaurar', isAuthenticated, requireAdmin, async (req, res) =>
 });
 
 // Toggle activo/inactivo
-router.post('/:id/toggle-activo', isAuthenticated, async (req, res) => {
+router.post('/:id/toggle-activo', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { id } = req.params;
     const { activo } = req.body;
