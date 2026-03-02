@@ -7,24 +7,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f8f9fa;
-      min-height: 100vh;
-    }
-    
-    .page-wrapper {
-      display: flex;
-      min-height: 100vh;
-    }
-    
-    /* SIDEBAR */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ────────────────────────────────────────────────── */
     .sidebar {
       width: 260px;
       background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
@@ -34,1122 +21,594 @@
       position: fixed;
       height: 100vh;
       overflow-y: auto;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.1);
     }
-    
     .logo {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 32px;
       padding: 12px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255,255,255,0.1);
       border-radius: 12px;
     }
-    
-    .logo-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      flex-shrink: 0;
-    }
-
     .logo-icon-image {
-  width: 42px;
-  height: 42px;
-  background: white;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  flex-shrink: 0;
-}
-
-.logo-icon-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-    
-    .logo-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      width: 42px; height: 42px;
+      background: white; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 6px; flex-shrink: 0;
     }
-    
-    .logo-text {
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 900;
-      line-height: 1;
-    }
-    
-    .logo-tagline {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .nav-section {
-      margin-bottom: 24px;
-    }
-    
-    .nav-section-title {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: rgba(255, 255, 255, 0.5);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 0 14px;
-      margin-bottom: 8px;
-    }
-    
-    .nav-menu {
-      list-style: none;
-    }
-    
-    .nav-item {
-      margin-bottom: 4px;
-    }
-    
+    .logo-icon-image img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-info { display: flex; flex-direction: column; gap: 2px; }
+    .logo-text { color: white; font-size: 1.1rem; font-weight: 900; line-height: 1; }
+    .logo-tagline { color: rgba(255,255,255,0.7); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-section { margin-bottom: 24px; }
+    .nav-section-title { font-size: 0.65rem; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; padding: 0 14px; margin-bottom: 8px; }
+    .nav-menu { list-style: none; }
+    .nav-item { margin-bottom: 4px; }
     .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-      position: relative;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; color: rgba(255,255,255,0.8);
+      text-decoration: none; border-radius: 10px;
+      font-weight: 600; font-size: 0.9rem;
+      transition: all 0.2s ease; position: relative;
     }
-    
-    .nav-link i {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
+    .nav-link i { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(4px); }
+    .nav-link.active { background: rgba(255,255,255,0.15); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .nav-link.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: white; border-radius: 0 4px 4px 0; }
+
+    /* ── MAIN ───────────────────────────────────────────────────── */
+    .main-content { margin-left: 260px; flex: 1; padding: 40px; min-height: 100vh; }
+
+    /* ── HEADER ─────────────────────────────────────────────────── */
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 36px; padding-bottom: 28px;
+      border-bottom: 2px solid #f1f5f9;
     }
-    
-    .nav-link:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      transform: translateX(4px);
+    .header-left { flex: 1; }
+    .welcome h1 {
+      font-size: 2rem; font-weight: 900; color: #0f172a;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
     }
-    
-    .nav-link.active {
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .nav-link.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 24px;
-      background: white;
-      border-radius: 0 4px 4px 0;
-    }
-    
-    /* MAIN CONTENT */
-    .main-content {
-      margin-left: 260px;
-      flex: 1;
-      padding: 30px 40px;
-      min-height: 100vh;
-      max-width: 1600px;
-    }
-    
-    /* HEADER */
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-    
-    .page-title-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .title-icon {
-      font-size: 2rem;
-    }
-    
-    .page-title {
-      font-size: 1.75rem;
-      font-weight: 900;
-      color: #1f2937;
-      margin-bottom: 4px;
-    }
-    
-    .page-subtitle {
-      font-size: 0.9rem;
-      color: #6b7280;
-      font-weight: 500;
-    }
-    
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    
-    .search-box {
-      position: relative;
-    }
-    
+    .welcome p { color: #64748b; font-size: 0.95rem; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+
+    .search-box { position: relative; }
     .search-input {
-      width: 320px;
-      padding: 10px 40px 10px 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      font-size: 0.9rem;
+      width: 250px; padding: 11px 44px 11px 16px;
+      border: 2px solid #e2e8f0; border-radius: 14px;
+      font-size: 0.88rem; background: white;
       transition: all 0.3s ease;
     }
-    
-    .search-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .search-icon {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      pointer-events: none;
-    }
-    
+    .search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+    .search-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
+
     .notification-btn {
-      width: 40px;
-      height: 40px;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: inherit;
+      width: 45px; height: 45px; background: white;
+      border: 2px solid #e2e8f0; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative;
+      transition: all 0.3s ease; text-decoration: none; color: inherit;
     }
-    
-    .notification-btn:hover {
-      border-color: #3b82f6;
-      color: #3b82f6;
-    }
-    
+    .notification-btn:hover { border-color: #3b82f6; color: #3b82f6; }
     .notification-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      min-width: 18px;
-      height: 18px;
-      background: #ef4444;
-      border-radius: 9px;
-      color: white;
-      font-size: 0.65rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 5px;
+      position: absolute; top: -5px; right: -5px;
+      min-width: 20px; height: 20px;
+      background: #ef4444; border-radius: 10px;
+      color: white; font-size: 0.68rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; padding: 0 5px;
     }
-    
+
     .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 12px 6px 6px;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 12px 7px 7px; background: white;
+      border: 2px solid #e2e8f0; border-radius: 14px;
+      cursor: pointer; transition: all 0.3s ease; position: relative;
     }
-    
-    .user-profile:hover {
-      border-color: #3b82f6;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-    }
-    
+    .user-profile:hover { border-color: #3b82f6; }
     .user-avatar {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 0.85rem;
-      flex-shrink: 0;
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
     }
-    
-    .user-info h4 {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #1f2937;
-    }
-    
-    .user-info p {
-      font-size: 0.7rem;
-      color: #6b7280;
-    }
-    
-    .user-chevron {
-      width: 14px;
-      height: 14px;
-      color: #9ca3af;
-    }
-    
-    /* User Dropdown */
+    .user-info h4 { font-size: 0.84rem; font-weight: 700; color: #1f2937; }
+    .user-info p  { font-size: 0.7rem; color: #6b7280; }
+    .user-chevron { width: 14px; height: 14px; color: #9ca3af; }
+
     .user-dropdown {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      width: 260px;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: all 0.3s ease;
-      z-index: 2000;
-      overflow: hidden;
+      position: absolute; top: calc(100% + 8px); right: 0;
+      width: 260px; background: white;
+      border: 1px solid #e5e7eb; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      opacity: 0; visibility: hidden; transform: translateY(-10px);
+      transition: all 0.3s ease; z-index: 2000; overflow: hidden;
     }
-    
-    .user-dropdown.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-    
-    .user-dropdown-header {
-      padding: 16px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-    
-    .user-dropdown-avatar {
-      width: 42px;
-      height: 42px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 900;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-    
-    .user-dropdown-info {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .user-dropdown-name {
-      color: white;
-      font-weight: 800;
-      font-size: 0.95rem;
-      margin-bottom: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .user-dropdown-email {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.75rem;
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .user-dropdown-badge {
-      display: inline-block;
-      padding: 3px 8px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      color: white;
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .user-dropdown-divider {
-      height: 1px;
-      background: #e5e7eb;
-      margin: 6px 0;
-    }
-    
-    .user-dropdown-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      color: #4b5563;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: all 0.2s ease;
-    }
-    
-    .user-dropdown-item i {
-      width: 18px;
-      height: 18px;
-      color: #9ca3af;
-    }
-    
-    .user-dropdown-item:hover {
-      background: #f9fafb;
-      color: #3b82f6;
-    }
-    
-    .user-dropdown-item:hover i {
-      color: #3b82f6;
-    }
-    
-    .user-dropdown-item.logout {
-      color: #ef4444;
-    }
-    
-    .user-dropdown-item.logout i {
-      color: #ef4444;
-    }
-    
-    .user-dropdown-item.logout:hover {
-      background: #fef2f2;
-    }
-    
-    /* STATS CARDS */
-    .stats-grid {
+    .user-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .user-dropdown-header { padding: 16px; background: linear-gradient(135deg,#3b82f6,#2563eb); display: flex; gap: 12px; align-items: center; }
+    .user-dropdown-avatar { width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.1rem; flex-shrink: 0; }
+    .user-dropdown-info { flex: 1; min-width: 0; }
+    .user-dropdown-name  { color: white; font-weight: 800; font-size: 0.95rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-dropdown-email { color: rgba(255,255,255,0.9); font-size: 0.75rem; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-dropdown-badge { display: inline-block; padding: 3px 8px; background: rgba(255,255,255,0.2); border-radius: 10px; color: white; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-dropdown-divider { height: 1px; background: #e5e7eb; margin: 6px 0; }
+    .user-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #4b5563; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.2s ease; }
+    .user-dropdown-item i { width: 18px; height: 18px; color: #9ca3af; }
+    .user-dropdown-item:hover { background: #f9fafb; color: #3b82f6; }
+    .user-dropdown-item:hover i { color: #3b82f6; }
+    .user-dropdown-item.logout { color: #ef4444; }
+    .user-dropdown-item.logout i { color: #ef4444; }
+    .user-dropdown-item.logout:hover { background: #fef2f2; }
+
+    /* ── STATS ROW ──────────────────────────────────────────────── */
+    .stats-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .stat-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .stat-info h3 {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #1f2937;
-      margin-bottom: 6px;
-    }
-    
-    .stat-footer {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #6b7280;
-    }
-    
-    .stat-footer i {
-      width: 12px;
-      height: 12px;
-    }
-    
-    .stat-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .stat-icon i {
-      width: 24px;
-      height: 24px;
-    }
-    
-    .stat-card.danger .stat-icon {
-      background: #fee2e2;
-      color: #dc2626;
-    }
-    
-    .stat-card.warning .stat-icon {
-      background: #fef3c7;
-      color: #d97706;
-    }
-    
-    .stat-card.info .stat-icon {
-      background: #dbeafe;
-      color: #2563eb;
-    }
-    
-    /* FILTERS */
-    .filters-section {
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-      padding: 16px 20px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
       margin-bottom: 20px;
     }
-    
-    .filters-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin-bottom: 12px;
+    .stat-card {
+      background: white; border-radius: 16px;
+      padding: 20px; border: 1.5px solid #e2e8f0;
+      display: flex; align-items: center; gap: 14px;
     }
-    
-    .filters-grid {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 12px;
-      align-items: center;
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    
-    .filter-select {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #1f2937;
-      transition: all 0.3s ease;
+    .stat-icon i { width: 24px; height: 24px; }
+    .stat-icon.red    { background: #fee2e2; color: #dc2626; }
+    .stat-icon.orange { background: #fef3c7; color: #d97706; }
+    .stat-icon.yellow { background: #fefce8; color: #ca8a04; }
+    .stat-icon.blue   { background: #dbeafe; color: #2563eb; }
+    .stat-body { flex: 1; min-width: 0; }
+    .stat-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1; }
+    .stat-lbl { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px; }
+
+    /* ── SEVERITY BAR ───────────────────────────────────────────── */
+    .severity-wrap {
+      background: white; border: 1.5px solid #e2e8f0;
+      border-radius: 16px; padding: 18px 22px; margin-bottom: 20px;
     }
-    
-    .filter-select:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    .severity-title { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; margin-bottom: 10px; }
+    .severity-bar { display: flex; height: 10px; border-radius: 100px; overflow: hidden; gap: 3px; }
+    .sev-seg { border-radius: 100px; min-width: 4px; }
+    .sev-legend { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+    .sev-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #475569; font-weight: 500; }
+    .sev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── FILTER TABS ────────────────────────────────────────────── */
+    .filter-bar {
+      background: white; border: 1.5px solid #e2e8f0;
+      border-radius: 16px; padding: 12px 16px;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
-    
-    .filter-button {
-      padding: 8px 16px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.3s ease;
-      text-decoration: none;
+    .filter-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .4px; margin-right: 6px; white-space: nowrap; }
+    .filter-tab {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 10px;
+      font-size: 0.83rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; color: #64748b;
+      border: 1.5px solid transparent;
+      transition: all 0.2s;
     }
-    
-    .filter-button:hover {
-      background: #2563eb;
+    .filter-tab i { width: 14px; height: 14px; }
+    .filter-tab:hover { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+    .filter-tab.active       { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+    .filter-tab.active-red   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+    .filter-tab.active-orange{ background: #fefce8; color: #ca8a04; border-color: #fde68a; }
+    .filter-tab.active-blue  { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+    .ftab-count {
+      background: #e2e8f0; color: #475569;
+      font-size: 0.7rem; font-weight: 800; padding: 1px 6px; border-radius: 20px;
     }
-    
-    .filter-button i {
-      width: 16px;
-      height: 16px;
+    .filter-tab.active        .ftab-count { background: #cbd5e1; color: #334155; }
+    .filter-tab.active-red    .ftab-count { background: #fecaca; color: #b91c1c; }
+    .filter-tab.active-orange .ftab-count { background: #fde68a; color: #92400e; }
+    .filter-tab.active-blue   .ftab-count { background: #bfdbfe; color: #1d4ed8; }
+
+    /* ── TABLE ──────────────────────────────────────────────────── */
+    .table-card {
+      background: white; border-radius: 16px;
+      border: 1.5px solid #e2e8f0; overflow: hidden;
     }
-    
-    .filter-button.secondary {
-      background: #6b7280;
+    .table-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; border-bottom: 1.5px solid #f1f5f9;
     }
-    
-    .filter-button.secondary:hover {
-      background: #4b5563;
+    .table-card-title { font-size: 1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .table-card-title i { width: 18px; height: 18px; color: #64748b; }
+    .table-card-count { background: #f1f5f9; color: #64748b; font-size: 0.74rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f8fafc; }
+    th {
+      padding: 11px 16px; text-align: left;
+      font-size: 0.69rem; font-weight: 700; color: #64748b;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1.5px solid #f1f5f9;
     }
-    
-    /* TABLE */
-    .table-container {
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-      overflow: hidden;
-    }
-    
-    .table-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .table-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: #1f2937;
-    }
-    
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .table thead {
-      background: #f9fafb;
-    }
-    
-    .table th {
-      padding: 12px 20px;
-      text-align: left;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .table tbody tr {
-      border-bottom: 1px solid #f3f4f6;
-      transition: all 0.2s ease;
-    }
-    
-    .table tbody tr:hover {
-      background: #f9fafb;
-    }
-    
-    .table tbody tr:last-child {
-      border-bottom: none;
-    }
-    
-    .table td {
-      padding: 14px 20px;
-      font-size: 0.85rem;
-    }
-    
-    .tracking-cell {
-      font-family: 'Courier New', monospace;
-      font-weight: 700;
-      color: #3b82f6;
-      font-size: 0.85rem;
-    }
-    
-    .cliente-cell {
-      font-weight: 600;
-      color: #1f2937;
-    }
-    
-    .ruta-cell {
-      color: #6b7280;
-      font-size: 0.8rem;
-    }
-    
-    .ruta-arrow {
-      margin: 0 6px;
-      color: #9ca3af;
-    }
-    
+    tbody tr { border-bottom: 1px solid #f8fafc; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+    td { padding: 13px 16px; font-size: 0.85rem; vertical-align: middle; }
+
+    /* Left border by severity */
+    .row-critical { border-left: 4px solid #ef4444; }
+    .row-high     { border-left: 4px solid #f59e0b; }
+    .row-medium   { border-left: 4px solid #3b82f6; }
+
+    /* Cell types */
+    .cell-tracking { font-family: 'Courier New', monospace; font-weight: 700; font-size: 0.84rem; }
+    .cell-tracking a { color: #2563eb; text-decoration: none; }
+    .cell-tracking a:hover { text-decoration: underline; }
+    .cell-client { font-weight: 600; color: #0f172a; }
+    .cell-route { color: #64748b; font-size: 0.8rem; }
+    .cell-route .arr { color: #cbd5e1; margin: 0 5px; }
+    .cell-route .city { white-space: nowrap; }
+
+    /* Delay badge */
     .delay-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border-radius: 8px;
+      font-size: 0.76rem; font-weight: 700; white-space: nowrap;
     }
-    
-    .delay-critical {
-      background: #fee2e2;
-      color: #dc2626;
-    }
-    
-    .delay-high {
-      background: #fef3c7;
-      color: #d97706;
-    }
-    
-    .delay-medium {
-      background: #dbeafe;
-      color: #2563eb;
-    }
-    
+    .delay-badge i { width: 12px; height: 12px; }
+    .delay-critical { background: #fef2f2; color: #dc2626; }
+    .delay-high     { background: #fefce8; color: #ca8a04; }
+    .delay-medium   { background: #eff6ff; color: #2563eb; }
+
+    /* Estado badge */
     .estado-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+      display: inline-block; padding: 4px 10px; border-radius: 6px;
+      font-size: 0.69rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
     }
-    
-    .estado-pendiente { background: #fef3c7; color: #92400e; }
-    .estado-en-transito { background: #dbeafe; color: #1e40af; }
-    .estado-creado { background: #f3f4f6; color: #4b5563; }
-    .estado-en-centro-distribucion { background: #e0e7ff; color: #4338ca; }
-    .estado-en-preparacion { background: #fce7f3; color: #be185d; }
-    
-    .btn-action {
-      padding: 6px 12px;
-      border: 1px solid #e5e7eb;
-      background: white;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      text-decoration: none;
-      color: #4b5563;
+    .estado-pendiente               { background: #fef3c7; color: #92400e; }
+    .estado-en-transito             { background: #dbeafe; color: #1e40af; }
+    .estado-creado                  { background: #f3f4f6; color: #4b5563; }
+    .estado-en-centro-distribucion  { background: #e0e7ff; color: #4338ca; }
+    .estado-en-preparacion          { background: #fce7f3; color: #be185d; }
+    .estado-default                 { background: #f1f5f9; color: #475569; }
+
+    /* Action button */
+    .btn-ver {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 13px; background: #f8fafc;
+      border: 1.5px solid #e2e8f0; border-radius: 9px;
+      font-size: 0.78rem; font-weight: 600; color: #475569;
+      text-decoration: none; transition: all 0.2s; white-space: nowrap;
     }
-    
-    .btn-action:hover {
-      border-color: #3b82f6;
-      color: #3b82f6;
-      background: #eff6ff;
+    .btn-ver i { width: 13px; height: 13px; }
+    .btn-ver:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+
+    /* ── EMPTY STATE ────────────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 64px 20px; }
+    .empty-icon {
+      width: 72px; height: 72px; background: #d1fae5;
+      border-radius: 20px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
     }
-    
-    .btn-action i {
-      width: 12px;
-      height: 12px;
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #9ca3af;
-    }
-    
-    .empty-state i {
-      width: 64px;
-      height: 64px;
-      margin-bottom: 16px;
-      color: #d1d5db;
-    }
-    
-    .empty-state h3 {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #6b7280;
-      margin-bottom: 8px;
-    }
-    
-    .empty-state p {
-      font-size: 0.9rem;
-    }
-    
-    @media (max-width: 1200px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .filters-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    
+    .empty-icon i { width: 36px; height: 36px; color: #059669; }
+    .empty-state h3 { font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .empty-state p  { font-size: 0.9rem; color: #64748b; }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────────── */
+    @media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 968px) {
-      .sidebar {
-        display: none;
-      }
-      
-      .main-content {
-        margin-left: 0;
-      }
-      
-      .page-header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-      }
-      
-      .search-input {
-        width: 100%;
-      }
-      
-      .header-actions {
-        width: 100%;
-      }
-      
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .table-container {
-        overflow-x: auto;
-      }
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .header { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .table-card { overflow-x: auto; }
     }
+    @media (max-width: 600px) { .stats-row { grid-template-columns: 1fr 1fr; } }
   </style>
 </head>
 <body>
-  
-  <div class="page-wrapper">
-    
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-<div class="logo">
-  <div class="logo-icon-image">
-    <img src="/images/logo-transportes-ab.png" alt="Logo">
-  </div>
-  <div class="logo-info">
-    <span class="logo-text">Transportes AB</span>
-    <span class="logo-tagline">Sistema Tracking</span>
-  </div>
-</div>
-      
-      <div class="nav-section">
-        <div class="nav-section-title">PRINCIPAL</div>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="/dashboard" class="nav-link">
-              <i data-lucide="layout-dashboard"></i>
-              <span>Dashboard</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="/envios" class="nav-link">
-              <i data-lucide="package"></i>
-              <span>Envíos</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="/envios-retrasados" class="nav-link active">
-              <i data-lucide="alert-triangle"></i>
-              <span>Envíos Retrasados</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-      
-      <div class="nav-section">
-        <div class="nav-section-title">GESTIÓN</div>
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="/clientes" class="nav-link">
-              <i data-lucide="users"></i>
-              <span>Clientes</span>
-            </a>
-          </li>
-          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
-          <li class="nav-item">
-            <a href="/reportes" class="nav-link">
-              <i data-lucide="bar-chart"></i>
-              <span>Reportes</span>
-            </a>
-          </li>
-          <% } %>
-        </ul>
-      </div>
-      
-      <% if (user && user.rol === 'admin') { %>
-        <div class="nav-section">
-          <div class="nav-section-title">SISTEMA</div>
-          <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="/usuarios" class="nav-link">
-                <i data-lucide="user-cog"></i>
-                <span>Usuarios</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/configuracion" class="nav-link">
-                <i data-lucide="settings"></i>
-                <span>Configuración</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      <% } %>
-    </aside>
-    
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      
-      <!-- HEADER -->
-      <div class="page-header">
-        <div class="page-title-section">
-          <div>
-            <h1 class="page-title"><span class="title-icon">⏰</span> Envíos Retrasados</h1>
-            <p class="page-subtitle">Monitoreo de envíos que superaron su fecha estimada de entrega</p>
-          </div>
-        </div>
-        
-        <div class="header-actions">
-          <div class="search-box">
-            <input
-              type="text"
-              id="searchInput"
-              class="search-input"
-              placeholder="Buscar por tracking, cliente..."
-              autocomplete="off"
-            >
-            <i data-lucide="search" class="search-icon"></i>
-          </div>
-          
-          <a href="/envios-retrasados" class="notification-btn">
-            <i data-lucide="bell"></i>
-            <span class="notification-badge"><%= enviosRetrasados.length %></span>
-          </a>
-          
-          <div class="user-profile" id="userProfileBtn">
-            <div class="user-avatar">
-              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
-            </div>
-            <div class="user-info">
-              <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
-              <p><%= user && user.email ? user.email : 'admin@tracking.com' %></p>
-            </div>
-            <i data-lucide="chevron-down" class="user-chevron"></i>
-            
-            <!-- Dropdown del perfil -->
-            <div class="user-dropdown" id="userDropdown">
-              <div class="user-dropdown-header">
-                <div class="user-dropdown-avatar">
-                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
-                </div>
-                <div class="user-dropdown-info">
-                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : 'admin@tracking.com' %></div>
-                  <span class="user-dropdown-badge">
-                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
-                  </span>
-                </div>
-              </div>
-              
-              <div class="user-dropdown-divider"></div>
-              
-              <a href="/mi-perfil" class="user-dropdown-item">
-                <i data-lucide="user"></i>
-                <span>Mi perfil</span>
-              </a>
-              
-              <div class="user-dropdown-divider"></div>
-              
-              <a href="/auth/logout" class="user-dropdown-item logout">
-                <i data-lucide="log-out"></i>
-                <span>Cerrar sesión</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- STATS CARDS -->
-      <div class="stats-grid">
-        <div class="stat-card danger">
-          <div class="stat-info">
-            <h3>Total Retrasados</h3>
-            <div class="stat-value"><%= enviosRetrasados.length %></div>
-            <div class="stat-footer">
-              <i data-lucide="clock"></i>
-              Requieren atención inmediata
-            </div>
-          </div>
-          <div class="stat-icon">
-            <i data-lucide="alert-triangle"></i>
-          </div>
-        </div>
-        
-        <div class="stat-card warning">
-          <div class="stat-info">
-            <h3>Críticos (+7 días)</h3>
-            <div class="stat-value"><%= enviosRetrasados.filter(e => e.dias_retraso > 7).length %></div>
-            <div class="stat-footer">
-              <i data-lucide="trending-up"></i>
-              Prioridad alta
-            </div>
-          </div>
-          <div class="stat-icon">
-            <i data-lucide="alert-circle"></i>
-          </div>
-        </div>
-        
-        <div class="stat-card info">
-          <div class="stat-info">
-            <h3>En Tránsito</h3>
-            <div class="stat-value"><%= enviosRetrasados.filter(e => e.estado_actual === 'en-transito' || e.estado_actual.includes('transito')).length %></div>
-            <div class="stat-footer">
-              <i data-lucide="navigation"></i>
-              Actualmente en ruta
-            </div>
-          </div>
-          <div class="stat-icon">
-            <i data-lucide="truck"></i>
-          </div>
-        </div>
-      </div>
-      
-      <!-- FILTERS -->
-      <div class="filters-section">
-        <div class="filters-title">Filtrar por criticidad</div>
-        <form method="GET" action="/envios-retrasados">
-          <div class="filters-grid">
-            <select name="criticidad" class="filter-select">
-              <option value="todos" <%= criticidad === 'todos' ? 'selected' : '' %>>Todos los envíos</option>
-              <option value="critico" <%= criticidad === 'critico' ? 'selected' : '' %>>Críticos (+7 días)</option>
-              <option value="alto" <%= criticidad === 'alto' ? 'selected' : '' %>>Alto (4-7 días)</option>
-              <option value="medio" <%= criticidad === 'medio' ? 'selected' : '' %>>Medio (1-3 días)</option>
-            </select>
-            
-            <button type="submit" class="filter-button">
-              <i data-lucide="filter"></i>
-              Aplicar filtros
-            </button>
-            
-            <a href="/envios-retrasados" class="filter-button secondary">
-              <i data-lucide="x"></i>
-              Limpiar
-            </a>
-          </div>
-        </form>
-      </div>
-      
-      <!-- TABLE -->
-      <div class="table-container">
-        <div class="table-header">
-          <h2 class="table-title">Lista de Envíos Retrasados</h2>
-        </div>
-        
-        <% if (enviosRetrasados && enviosRetrasados.length > 0) { %>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>TRACKING</th>
-                <th>CLIENTE</th>
-                <th>RUTA</th>
-                <th>DÍAS DE RETRASO</th>
-                <th>ESTADO</th>
-                <th>FECHA ESTIMADA</th>
-                <th>ACCIONES</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% enviosRetrasados.forEach(envio => { 
-                let delayClass = 'delay-medium';
-                if (envio.dias_retraso > 7) delayClass = 'delay-critical';
-                else if (envio.dias_retraso > 3) delayClass = 'delay-high';
-              %>
-                <tr>
-                  <td class="tracking-cell"><%= envio.numero_tracking %></td>
-                  <td class="cliente-cell"><%= envio.nombre_empresa || 'Sin cliente' %></td>
-                  <td class="ruta-cell">
-                    <%= envio.origen || 'N/A' %>
-                    <span class="ruta-arrow">→</span>
-                    <%= envio.destino || 'N/A' %>
-                  </td>
-                  <td>
-                    <span class="delay-badge <%= delayClass %>">
-                      <%= envio.dias_retraso %> <%= envio.dias_retraso === 1 ? 'DÍA' : 'DÍAS' %>
-                    </span>
-                  </td>
-                  <td>
-                    <span class="estado-badge estado-<%= envio.estado_actual %>">
-                      <%= envio.estado_actual.replace(/-/g, ' ').toUpperCase() %>
-                    </span>
-                  </td>
-                  <td><%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
-                  <td>
-                    <a href="/envios/<%= envio.id %>" class="btn-action">
-                      <i data-lucide="eye"></i>
-                      Ver
-                    </a>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <div class="empty-state">
-            <i data-lucide="check-circle"></i>
-            <h3>¡No hay envíos retrasados!</h3>
-            <p>Todos los envíos están dentro del tiempo estimado.</p>
-          </div>
-        <% } %>
-      </div>
-      
-    </main>
-    
-  </div>
-  
-  <script>
-    lucide.createIcons();
-    
-    // User Profile Dropdown
-    const userProfileBtn = document.getElementById('userProfileBtn');
-    const userDropdown = document.getElementById('userDropdown');
-    
-    // ── Buscador de envíos retrasados ──────────────────────
-    (function() {
-      const input = document.getElementById('searchInput');
-      if (!input) return;
-      input.addEventListener('input', function() {
-        const term = this.value.toLowerCase().trim();
-        document.querySelectorAll('tbody tr').forEach(function(row) {
-          const tracking = (row.querySelector('.tracking-cell') || row.cells[0] || {}).textContent || '';
-          const cliente  = (row.querySelector('.cliente-cell') || row.cells[1] || {}).textContent || '';
-          const ruta     = (row.querySelector('.ruta-cell')    || row.cells[2] || {}).textContent || '';
-          const visible  = !term || [tracking, cliente, ruta].some(t => t.toLowerCase().includes(term));
-          row.style.display = visible ? '' : 'none';
-        });
-      });
-    })();
+<div class="page-wrapper">
 
-    if (userProfileBtn && userDropdown) {
-      userProfileBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        userProfileBtn.classList.toggle('open');
-        userDropdown.classList.toggle('show');
-        lucide.createIcons();
+  <!-- ── SIDEBAR ───────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon-image">
+        <img src="/images/logo-transportes-ab.png" alt="Logo">
+      </div>
+      <div class="logo-info">
+        <span class="logo-text">Transportes AB</span>
+        <span class="logo-tagline">Sistema Tracking</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">PRINCIPAL</div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="/dashboard" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="/envios" class="nav-link"><i data-lucide="package"></i><span>Envíos</span></a></li>
+        <li class="nav-item"><a href="/envios-retrasados" class="nav-link active"><i data-lucide="alert-triangle"></i><span>Envíos Retrasados</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">GESTIÓN</div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="/clientes" class="nav-link"><i data-lucide="users"></i><span>Clientes</span></a></li>
+        <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+        <li class="nav-item"><a href="/reportes" class="nav-link"><i data-lucide="bar-chart"></i><span>Reportes</span></a></li>
+        <% } %>
+      </ul>
+    </div>
+
+    <% if (user && user.rol === 'admin') { %>
+    <div class="nav-section">
+      <div class="nav-section-title">SISTEMA</div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="/usuarios" class="nav-link"><i data-lucide="user-cog"></i><span>Usuarios</span></a></li>
+        <li class="nav-item"><a href="/configuracion" class="nav-link"><i data-lucide="settings"></i><span>Configuración</span></a></li>
+      </ul>
+    </div>
+    <% } %>
+  </aside>
+
+  <!-- ── MAIN ──────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="welcome">
+          <h1>
+            <i data-lucide="alert-triangle" style="width:32px;height:32px;color:#ef4444;"></i>
+            Envíos Retrasados
+          </h1>
+          <p>Monitoreo de envíos que superaron su fecha estimada de entrega</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <input type="text" id="searchInput" class="search-input"
+            placeholder="Buscar tracking, cliente..." autocomplete="off">
+          <i data-lucide="search" class="search-icon" style="width:16px;height:16px;"></i>
+        </div>
+
+        <a href="/envios-retrasados" class="notification-btn">
+          <i data-lucide="bell" style="width:18px;height:18px;"></i>
+          <% if (counts.total > 0) { %>
+            <span class="notification-badge"><%= counts.total %></span>
+          <% } %>
+        </a>
+
+        <div class="user-profile" id="userProfileBtn">
+          <div class="user-avatar">
+            <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+          </div>
+          <div class="user-info">
+            <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
+            <p><%= user && user.email ? user.email : '' %></p>
+          </div>
+          <i data-lucide="chevron-down" class="user-chevron"></i>
+
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-header">
+              <div class="user-dropdown-avatar">
+                <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+              </div>
+              <div class="user-dropdown-info">
+                <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
+                <div class="user-dropdown-email"><%= user && user.email ? user.email : '' %></div>
+                <span class="user-dropdown-badge">
+                  <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
+                </span>
+              </div>
+            </div>
+            <div class="user-dropdown-divider"></div>
+            <a href="/mi-perfil" class="user-dropdown-item"><i data-lucide="user"></i><span>Mi perfil</span></a>
+            <div class="user-dropdown-divider"></div>
+            <a href="/auth/logout" class="user-dropdown-item logout"><i data-lucide="log-out"></i><span>Cerrar sesión</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon red"><i data-lucide="alert-triangle"></i></div>
+        <div class="stat-body">
+          <div class="stat-num"><%= counts.total %></div>
+          <div class="stat-lbl">Total retrasados</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange"><i data-lucide="alert-circle"></i></div>
+        <div class="stat-body">
+          <div class="stat-num" style="color:#dc2626;"><%= counts.criticos %></div>
+          <div class="stat-lbl">Críticos (+7 días)</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow"><i data-lucide="clock"></i></div>
+        <div class="stat-body">
+          <div class="stat-num" style="color:#ca8a04;"><%= counts.altos %></div>
+          <div class="stat-lbl">Altos (4–7 días)</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><i data-lucide="timer"></i></div>
+        <div class="stat-body">
+          <div class="stat-num" style="color:#2563eb;"><%= counts.medios %></div>
+          <div class="stat-lbl">Medios (1–3 días)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEVERITY BAR -->
+    <% if (counts.total > 0) { %>
+    <div class="severity-wrap">
+      <div class="severity-title">Distribución de criticidad</div>
+      <div class="severity-bar">
+        <% if (counts.criticos > 0) { %><div class="sev-seg" data-flex="<%= counts.criticos %>" style="background:#ef4444;"></div><% } %>
+        <% if (counts.altos    > 0) { %><div class="sev-seg" data-flex="<%= counts.altos %>"    style="background:#f59e0b;"></div><% } %>
+        <% if (counts.medios   > 0) { %><div class="sev-seg" data-flex="<%= counts.medios %>"   style="background:#3b82f6;"></div><% } %>
+      </div>
+      <div class="sev-legend">
+        <div class="sev-legend-item"><div class="sev-dot" style="background:#ef4444;"></div><span>Críticos: <strong><%= counts.criticos %></strong></span></div>
+        <div class="sev-legend-item"><div class="sev-dot" style="background:#f59e0b;"></div><span>Altos: <strong><%= counts.altos %></strong></span></div>
+        <div class="sev-legend-item"><div class="sev-dot" style="background:#3b82f6;"></div><span>Medios: <strong><%= counts.medios %></strong></span></div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- FILTER TABS -->
+    <div class="filter-bar">
+      <span class="filter-label">Filtrar</span>
+      <a href="/envios-retrasados" class="filter-tab <%= criticidad === 'todos' ? 'active' : '' %>">
+        <i data-lucide="list"></i>
+        Todos <span class="ftab-count"><%= counts.total %></span>
+      </a>
+      <a href="/envios-retrasados?criticidad=critico" class="filter-tab <%= criticidad === 'critico' ? 'active-red' : '' %>">
+        <i data-lucide="alert-circle"></i>
+        Críticos <span class="ftab-count"><%= counts.criticos %></span>
+      </a>
+      <a href="/envios-retrasados?criticidad=alto" class="filter-tab <%= criticidad === 'alto' ? 'active-orange' : '' %>">
+        <i data-lucide="clock"></i>
+        Altos <span class="ftab-count"><%= counts.altos %></span>
+      </a>
+      <a href="/envios-retrasados?criticidad=medio" class="filter-tab <%= criticidad === 'medio' ? 'active-blue' : '' %>">
+        <i data-lucide="timer"></i>
+        Medios <span class="ftab-count"><%= counts.medios %></span>
+      </a>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">
+          <i data-lucide="package-x"></i>
+          Lista de Envíos Retrasados
+          <% if (criticidad !== 'todos') { %>
+            <span style="font-size:0.75rem;font-weight:600;color:#64748b;">
+              — filtrando por: <em><%= criticidad %></em>
+            </span>
+          <% } %>
+        </div>
+        <span class="table-card-count"><%= enviosRetrasados.length %> envío<%= enviosRetrasados.length !== 1 ? 's' : '' %></span>
+      </div>
+
+      <% if (enviosRetrasados.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <th>TRACKING</th>
+            <th>CLIENTE</th>
+            <th>RUTA</th>
+            <th>RETRASO</th>
+            <th>ESTADO</th>
+            <th>FECHA EST.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% enviosRetrasados.forEach(function(envio) {
+            var rowCls   = envio.dias_retraso > 7 ? 'row-critical' : envio.dias_retraso > 3 ? 'row-high' : 'row-medium';
+            var delayCls = envio.dias_retraso > 7 ? 'delay-critical' : envio.dias_retraso > 3 ? 'delay-high' : 'delay-medium';
+            var delayIco = envio.dias_retraso > 7 ? 'alert-circle' : 'clock';
+            var estadoCls= 'estado-' + (envio.estado_actual || 'default').replace(/[^a-z-]/g,'');
+            var origen   = (envio.origen_ciudad || (envio.origen  || 'N/A').split(',')[0]).trim();
+            var destino  = (envio.destino_ciudad|| (envio.destino || 'N/A').split(',')[0]).trim();
+          %>
+          <tr class="<%= rowCls %>">
+            <td class="cell-tracking">
+              <a href="/envios/<%= envio.id %>"><%= envio.numero_tracking %></a>
+            </td>
+            <td class="cell-client"><%= envio.nombre_empresa || 'Sin cliente' %></td>
+            <td class="cell-route">
+              <span class="city"><%= origen %></span>
+              <span class="arr">→</span>
+              <span class="city"><%= destino %></span>
+            </td>
+            <td>
+              <span class="delay-badge <%= delayCls %>">
+                <i data-lucide="<%= delayIco %>"></i>
+                <%= envio.dias_retraso %> <%= envio.dias_retraso === 1 ? 'día' : 'días' %>
+              </span>
+            </td>
+            <td>
+              <span class="estado-badge <%= estadoCls %>">
+                <%= (envio.estado_actual || 'sin estado').replace(/-/g,' ').toUpperCase() %>
+              </span>
+            </td>
+            <td style="color:#64748b;font-size:0.82rem;white-space:nowrap;">
+              <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) %>
+            </td>
+            <td>
+              <a href="/envios/<%= envio.id %>" class="btn-ver">
+                <i data-lucide="eye"></i> Ver
+              </a>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <div class="empty-state">
+        <div class="empty-icon"><i data-lucide="check-circle"></i></div>
+        <h3>¡Sin envíos en esta categoría!</h3>
+        <p>
+          <% if (criticidad !== 'todos') { %>
+            No hay envíos con criticidad "<%= criticidad %>" en este momento.
+            <a href="/envios-retrasados" style="color:#3b82f6;">Ver todos</a>
+          <% } else { %>
+            Todos los envíos están dentro del tiempo estimado de entrega.
+          <% } %>
+        </p>
+      </div>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // Severity bar — aplicar flex desde data-flex (evita EJS en atributo style)
+  document.querySelectorAll('.sev-seg[data-flex]').forEach(function (el) {
+    el.style.flex = el.getAttribute('data-flex');
+  });
+
+  // Buscador en tabla
+  (function () {
+    var input = document.getElementById('searchInput');
+    if (!input) return;
+    input.addEventListener('input', function () {
+      var term = this.value.toLowerCase().trim();
+      document.querySelectorAll('tbody tr').forEach(function (row) {
+        row.style.display = !term || row.textContent.toLowerCase().includes(term) ? '' : 'none';
       });
-      
-      document.addEventListener('click', function(e) {
-        if (!userProfileBtn.contains(e.target)) {
-          userProfileBtn.classList.remove('open');
-          userDropdown.classList.remove('show');
-        }
-      });
-      
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          userProfileBtn.classList.remove('open');
-          userDropdown.classList.remove('show');
-        }
-      });
-    }
-  </script>
+    });
+  })();
+
+  // User dropdown
+  var profileBtn  = document.getElementById('userProfileBtn');
+  var userDropdown = document.getElementById('userDropdown');
+  if (profileBtn && userDropdown) {
+    profileBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      userDropdown.classList.toggle('show');
+      lucide.createIcons();
+    });
+    document.addEventListener('click', function (e) {
+      if (!profileBtn.contains(e.target)) userDropdown.classList.remove('show');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') userDropdown.classList.remove('show');
+    });
+  }
+</script>
+<script src="/js/notifications.js"></script>
 </body>
 </html>

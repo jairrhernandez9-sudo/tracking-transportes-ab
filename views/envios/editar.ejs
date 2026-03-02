@@ -265,6 +265,52 @@
     .form-section {
       margin-bottom: 30px;
     }
+
+    .dir-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 768px) {
+      .dir-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .dir-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Modales de dirección */
+    .dir-modal-overlay {
+      display: none;
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.65); z-index:9999;
+      align-items: center; justify-content: center;
+    }
+    .dir-modal-overlay.open { display: flex; }
+    .dir-modal-box {
+      background: white; border-radius: 20px;
+      width: 90%; max-width: 860px; max-height: 88vh;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+    }
+    .dir-modal-header {
+      background: linear-gradient(135deg,#1e40af,#3b82f6);
+      padding: 20px 28px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .dir-modal-header h2 { color: white; font-size: 1.25rem; font-weight:800; margin:0; display:flex; align-items:center; gap:10px; }
+    .dir-modal-close { background:rgba(255,255,255,0.2); border:none; width:38px; height:38px; border-radius:9px; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; }
+    .dir-modal-close:hover { background:rgba(255,255,255,0.3); }
+    .dir-modal-tabs { display:flex; border-bottom:2px solid #e5e7eb; background:#f8fafc; }
+    .dir-tab-btn { flex:1; padding:14px; background:none; border:none; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; border-bottom:3px solid transparent; color:#64748b; transition:all 0.2s; }
+    .dir-tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; background:white; }
+    .dir-modal-search { padding:14px 20px; border-bottom:1px solid #e5e7eb; background:#f8fafc; }
+    .dir-modal-search input { width:100%; padding:9px 12px 9px 36px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; box-sizing:border-box; position:relative; }
+    .dir-modal-body { padding:18px 20px; overflow-y:auto; flex:1; }
+    .dir-card { border:1.5px solid #e2e8f0; border-radius:12px; padding:14px 16px; cursor:pointer; transition:all 0.2s; margin-bottom:10px; }
+    .dir-card:hover { border-color:#3b82f6; background:#eff6ff; }
+    .dir-card-alias { font-weight:700; font-size:0.95rem; margin-bottom:4px; }
+    .dir-card-addr { font-size:0.83rem; color:#64748b; }
+    .dir-empty { text-align:center; color:#94a3b8; padding:32px 0; font-size:0.9rem; }
     
     .form-section:last-child {
       margin-bottom: 0;
@@ -675,36 +721,127 @@
               </div>
             </div>
             
-            <!-- Sección 2: Ubicaciones -->
+            <!-- Sección 2: Dirección de Origen -->
             <div class="form-section">
               <h2 class="section-title">
                 <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
-                Ubicaciones
+                Dirección de Origen
               </h2>
-              
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label required">Origen</label>
-                  <input 
-                    type="text" 
-                    name="origen" 
-                    class="form-input" 
-                    value="<%= envio.origen || '' %>"
-                    placeholder="Ciudad, Estado"
-                    required
-                  >
+
+              <div style="grid-column:1/-1; display:flex; gap:12px; align-items:center; margin-bottom:4px;">
+                <button type="button" id="btnOrigen" onclick="abrirModalOrigen()"
+                  style="flex:1; padding:12px 20px; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; justify-content:center;">
+                  <i data-lucide="warehouse" style="width:18px;height:18px;"></i>
+                  Seleccionar Dirección Guardada
+                </button>
+                <button type="button" onclick="limpiarOrigen()"
+                  style="padding:12px 16px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; cursor:pointer; color:#64748b;">
+                  <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+                </button>
+              </div>
+
+              <div class="dir-grid">
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label required">Calle y Número</label>
+                  <input type="text" name="origen_calle" class="form-input" required
+                    value="<%= envio.origen_calle || '' %>" placeholder="Ej: Av. Constitución 123">
                 </div>
-                
                 <div class="form-group">
-                  <label class="form-label required">Destino</label>
-                  <input 
-                    type="text" 
-                    name="destino" 
-                    class="form-input" 
-                    value="<%= envio.destino || '' %>"
-                    placeholder="Ciudad, Estado"
-                    required
-                  >
+                  <label class="form-label">Colonia</label>
+                  <input type="text" name="origen_colonia" class="form-input"
+                    value="<%= envio.origen_colonia || '' %>" placeholder="Ej: Centro">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">C.P.</label>
+                  <input type="text" name="origen_cp" class="form-input" maxlength="5" pattern="[0-9]{5}" required
+                    value="<%= envio.origen_cp || '' %>" placeholder="64000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Ciudad</label>
+                  <input type="text" name="origen_ciudad" class="form-input" list="ciudadesOrigen" required
+                    value="<%= envio.origen_ciudad || '' %>" placeholder="Escribe la ciudad">
+                  <datalist id="ciudadesOrigen">
+                    <option value="Monterrey"><option value="Ciudad de México"><option value="Guadalajara">
+                    <option value="Puebla"><option value="Tijuana"><option value="León"><option value="Juárez">
+                    <option value="Torreón"><option value="Querétaro"><option value="San Luis Potosí">
+                  </datalist>
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Estado</label>
+                  <select name="origen_estado" class="form-select" required>
+                    <option value="">Selecciona...</option>
+                    <% const estadosMX = ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas']; %>
+                    <% estadosMX.forEach(est => { %>
+                      <option value="<%= est %>" <%= (envio.origen_estado === est) ? 'selected' : '' %>><%= est %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Referencia</label>
+                  <input type="text" name="origen_referencia" class="form-input"
+                    value="<%= envio.origen_referencia || '' %>" placeholder="Ej: Detrás del banco, piso 2">
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 3: Dirección de Destino -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i data-lucide="map-pin-off" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                Dirección de Destino
+              </h2>
+
+              <div style="grid-column:1/-1; display:flex; gap:12px; align-items:center; margin-bottom:4px;">
+                <button type="button" id="btnDestino" onclick="abrirModalDestino()"
+                  style="flex:1; padding:12px 20px; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; justify-content:center;">
+                  <i data-lucide="map-pin" style="width:18px;height:18px;"></i>
+                  Seleccionar Dirección Guardada
+                </button>
+                <button type="button" onclick="limpiarDestino()"
+                  style="padding:12px 16px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; cursor:pointer; color:#64748b;">
+                  <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+                </button>
+              </div>
+
+              <div class="dir-grid">
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label required">Calle y Número</label>
+                  <input type="text" name="destino_calle" class="form-input" required
+                    value="<%= envio.destino_calle || '' %>" placeholder="Ej: Calle Morelos 45">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Colonia</label>
+                  <input type="text" name="destino_colonia" class="form-input"
+                    value="<%= envio.destino_colonia || '' %>" placeholder="Ej: Obispado">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">C.P.</label>
+                  <input type="text" name="destino_cp" class="form-input" maxlength="5" pattern="[0-9]{5}" required
+                    value="<%= envio.destino_cp || '' %>" placeholder="64060">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Ciudad</label>
+                  <input type="text" name="destino_ciudad" class="form-input" list="ciudadesDestino" required
+                    value="<%= envio.destino_ciudad || '' %>" placeholder="Escribe la ciudad">
+                  <datalist id="ciudadesDestino">
+                    <option value="Monterrey"><option value="Ciudad de México"><option value="Guadalajara">
+                    <option value="Puebla"><option value="Tijuana"><option value="León"><option value="Juárez">
+                    <option value="Torreón"><option value="Querétaro"><option value="San Luis Potosí">
+                  </datalist>
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Estado</label>
+                  <select name="destino_estado" class="form-select" required>
+                    <option value="">Selecciona...</option>
+                    <% estadosMX.forEach(est => { %>
+                      <option value="<%= est %>" <%= (envio.destino_estado === est) ? 'selected' : '' %>><%= est %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Referencia</label>
+                  <input type="text" name="destino_referencia" class="form-input"
+                    value="<%= envio.destino_referencia || '' %>" placeholder="Ej: Casa blanca, portón azul">
                 </div>
               </div>
             </div>
@@ -729,6 +866,52 @@
     
   </div>
   
+  <!-- Modal Seleccionar Dirección de ORIGEN -->
+  <div id="modalOrigenDir" class="dir-modal-overlay">
+    <div class="dir-modal-box">
+      <div class="dir-modal-header">
+        <h2><i data-lucide="map-pin" style="width:22px;height:22px;"></i> Dirección de Origen</h2>
+        <button class="dir-modal-close" onclick="cerrarModalOrigen()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+      </div>
+      <div class="dir-modal-tabs">
+        <button class="dir-tab-btn active" id="tabOrigenBodegaBtn" onclick="cambiarTabDir('origen','bodegas')">
+          <i data-lucide="warehouse" style="width:17px;height:17px;"></i> Bodegas
+        </button>
+        <button class="dir-tab-btn" id="tabOrigenClienteBtn" onclick="cambiarTabDir('origen','clientes')">
+          <i data-lucide="users" style="width:17px;height:17px;"></i> Del Cliente
+        </button>
+      </div>
+      <div class="dir-modal-search" style="position:relative;">
+        <i data-lucide="search" style="position:absolute;left:32px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#9ca3af;"></i>
+        <input id="origenBuscador" type="text" placeholder="Buscar dirección..." oninput="filtrarDirModal('origen')">
+      </div>
+      <div class="dir-modal-body" id="origenModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal Seleccionar Dirección de DESTINO -->
+  <div id="modalDestinoDir" class="dir-modal-overlay">
+    <div class="dir-modal-box">
+      <div class="dir-modal-header">
+        <h2><i data-lucide="map-pin-off" style="width:22px;height:22px;"></i> Dirección de Destino</h2>
+        <button class="dir-modal-close" onclick="cerrarModalDestino()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+      </div>
+      <div class="dir-modal-tabs">
+        <button class="dir-tab-btn active" id="tabDestinoBodegaBtn" onclick="cambiarTabDir('destino','bodegas')">
+          <i data-lucide="warehouse" style="width:17px;height:17px;"></i> Bodegas
+        </button>
+        <button class="dir-tab-btn" id="tabDestinoClienteBtn" onclick="cambiarTabDir('destino','clientes')">
+          <i data-lucide="users" style="width:17px;height:17px;"></i> Del Cliente
+        </button>
+      </div>
+      <div class="dir-modal-search" style="position:relative;">
+        <i data-lucide="search" style="position:absolute;left:32px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#9ca3af;"></i>
+        <input id="destinoBuscador" type="text" placeholder="Buscar dirección..." oninput="filtrarDirModal('destino')">
+      </div>
+      <div class="dir-modal-body" id="destinoModalBody"></div>
+    </div>
+  </div>
+
   <script>
     lucide.createIcons();
 
@@ -799,7 +982,141 @@
       }
     });
 
+    // ══ Modales de dirección ══════════════════════════════════════════
+    let _bodegas = [];
+    let _dirCliente = [];
+    let _tabActual = { origen: 'bodegas', destino: 'bodegas' };
+
+    async function abrirModalOrigen() {
+      document.getElementById('modalOrigenDir').classList.add('open');
+      document.getElementById('origenBuscador').value = '';
+      await _cargarBodegas();
+      const cid = document.querySelector('[name="cliente_id"]')?.value;
+      if (cid) await _cargarDirCliente(cid);
+      _renderDirModal('origen');
+      lucide.createIcons();
+    }
+    async function abrirModalDestino() {
+      document.getElementById('modalDestinoDir').classList.add('open');
+      document.getElementById('destinoBuscador').value = '';
+      await _cargarBodegas();
+      const cid = document.querySelector('[name="cliente_id"]')?.value;
+      if (cid) await _cargarDirCliente(cid);
+      _renderDirModal('destino');
+      lucide.createIcons();
+    }
+    function cerrarModalOrigen()  { document.getElementById('modalOrigenDir').classList.remove('open'); }
+    function cerrarModalDestino() { document.getElementById('modalDestinoDir').classList.remove('open'); }
+
+    async function _cargarBodegas() {
+      if (_bodegas.length) return;
+      try {
+        const r = await fetch('/configuracion/api/direcciones');
+        const d = await r.json();
+        _bodegas = (d.success && d.direcciones) ? d.direcciones : [];
+      } catch(e) { _bodegas = []; }
+    }
+    async function _cargarDirCliente(clienteId) {
+      if (!clienteId) { _dirCliente = []; return; }
+      try {
+        const r = await fetch(`/direcciones/cliente/${clienteId}`);
+        const d = await r.json();
+        _dirCliente = (d.success && d.direcciones) ? d.direcciones : [];
+      } catch(e) { _dirCliente = []; }
+    }
+
+    function cambiarTabDir(tipo, tab) {
+      _tabActual[tipo] = tab;
+      const pfx = tipo === 'origen' ? 'tabOrigen' : 'tabDestino';
+      document.getElementById(pfx+'BodegaBtn').classList.toggle('active', tab === 'bodegas');
+      document.getElementById(pfx+'ClienteBtn').classList.toggle('active', tab === 'clientes');
+      const busq = document.getElementById(tipo === 'origen' ? 'origenBuscador' : 'destinoBuscador');
+      if (busq) busq.value = '';
+      _renderDirModal(tipo);
+    }
+
+    function filtrarDirModal(tipo) { _renderDirModal(tipo); }
+
+    function _renderDirModal(tipo) {
+      const bodyEl = document.getElementById(tipo + 'ModalBody');
+      const tab    = _tabActual[tipo];
+      const term   = (document.getElementById(tipo === 'origen' ? 'origenBuscador' : 'destinoBuscador')?.value || '').toLowerCase();
+      const lista  = tab === 'bodegas' ? _bodegas : _dirCliente;
+      const filtered = lista.filter(d =>
+        (d.alias||'').toLowerCase().includes(term) ||
+        (d.calle||'').toLowerCase().includes(term) ||
+        (d.ciudad||'').toLowerCase().includes(term)
+      );
+      if (!filtered.length) {
+        bodyEl.innerHTML = `<div class="dir-empty">${tab === 'bodegas' ? 'No hay bodegas registradas' : 'Este cliente no tiene direcciones guardadas'}</div>`;
+        return;
+      }
+      bodyEl.innerHTML = filtered.map(d => `
+        <div class="dir-card" onclick="seleccionarDirModal('${tipo}', ${d.id}, '${tab}')">
+          <div class="dir-card-alias">${d.alias}</div>
+          <div class="dir-card-addr">${[d.calle, d.colonia, d.ciudad, d.estado].filter(Boolean).join(', ')}</div>
+        </div>
+      `).join('');
+    }
+
+    function seleccionarDirModal(tipo, id, tab) {
+      const lista = tab === 'bodegas' ? _bodegas : _dirCliente;
+      const d = lista.find(x => x.id === id);
+      if (!d) return;
+      const p = tipo;
+      document.querySelector(`[name="${p}_calle"]`).value      = d.calle      || '';
+      document.querySelector(`[name="${p}_colonia"]`).value    = d.colonia    || '';
+      document.querySelector(`[name="${p}_cp"]`).value         = d.cp         || '';
+      document.querySelector(`[name="${p}_ciudad"]`).value     = d.ciudad     || '';
+      document.querySelector(`[name="${p}_estado"]`).value     = d.estado     || '';
+      document.querySelector(`[name="${p}_referencia"]`).value = d.referencia || '';
+      const btnId = tipo === 'origen' ? 'btnOrigen' : 'btnDestino';
+      document.getElementById(btnId).textContent = '✓ ' + d.alias;
+      tipo === 'origen' ? cerrarModalOrigen() : cerrarModalDestino();
+    }
+
+    function limpiarOrigen() {
+      ['calle','colonia','cp','ciudad','estado','referencia'].forEach(f => {
+        const el = document.querySelector(`[name="origen_${f}"]`);
+        if (el) el.value = '';
+      });
+      document.getElementById('btnOrigen').innerHTML = '<i data-lucide="warehouse" style="width:18px;height:18px;"></i> Seleccionar Dirección Guardada';
+      lucide.createIcons();
+    }
+    function limpiarDestino() {
+      ['calle','colonia','cp','ciudad','estado','referencia'].forEach(f => {
+        const el = document.querySelector(`[name="destino_${f}"]`);
+        if (el) el.value = '';
+      });
+      document.getElementById('btnDestino').innerHTML = '<i data-lucide="map-pin" style="width:18px;height:18px;"></i> Seleccionar Dirección Guardada';
+      lucide.createIcons();
+    }
+
+    document.getElementById('modalOrigenDir').addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalOrigen(); });
+    document.getElementById('modalDestinoDir').addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalDestino(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { cerrarModalOrigen(); cerrarModalDestino(); }
+    });
+
+    // Búsqueda global del header → redirige a lista
+    (function() {
+      var si = document.getElementById('searchInput');
+      if (!si) return;
+      var t;
+      si.addEventListener('input', function() {
+        clearTimeout(t);
+        var v = this.value.trim();
+        if (v) t = setTimeout(function() { window.location.href = '/envios?buscar=' + encodeURIComponent(v); }, 500);
+      });
+      si.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          clearTimeout(t);
+          window.location.href = '/envios?buscar=' + encodeURIComponent(this.value.trim());
+        }
+      });
+    })();
   </script>
 <script id="items-data" type="application/json"><%- JSON.stringify(items || []) %></script>
+  <script src="/js/notifications.js"></script>
 </body>
 </html>

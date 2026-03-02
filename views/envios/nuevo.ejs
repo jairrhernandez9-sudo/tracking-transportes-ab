@@ -839,6 +839,36 @@
       min-width: 140px; flex: 1; background: transparent; padding: 2px 0;
     }
     .ref-add-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+    /* ── dir-grid (campos de dirección desglosados) ── */
+    .dir-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 768px) { .dir-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .dir-grid { grid-template-columns: 1fr; } }
+
+    /* ── Modales de dirección ── */
+    .dir-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:9999; align-items:center; justify-content:center; }
+    .dir-modal-overlay.open { display:flex; }
+    .dir-modal-box { background:white; border-radius:20px; width:90%; max-width:860px; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.3); }
+    .dir-modal-header { background:linear-gradient(135deg,#1e40af,#3b82f6); padding:20px 28px; display:flex; justify-content:space-between; align-items:center; }
+    .dir-modal-header h2 { color:white; font-size:1.25rem; font-weight:800; margin:0; display:flex; align-items:center; gap:10px; }
+    .dir-modal-close { background:rgba(255,255,255,0.2); border:none; width:38px; height:38px; border-radius:9px; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; }
+    .dir-modal-close:hover { background:rgba(255,255,255,0.3); }
+    .dir-modal-tabs { display:flex; border-bottom:2px solid #e5e7eb; background:#f8fafc; }
+    .dir-tab-btn { flex:1; padding:14px; background:none; border:none; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; border-bottom:3px solid transparent; color:#64748b; transition:all 0.2s; }
+    .dir-tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; background:white; }
+    .dir-modal-search { padding:14px 20px; border-bottom:1px solid #e5e7eb; background:#f8fafc; position:relative; }
+    .dir-modal-search input { width:100%; padding:9px 12px 9px 36px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; box-sizing:border-box; }
+    .dir-modal-body { padding:18px 20px; overflow-y:auto; flex:1; }
+    .dir-card { border:1.5px solid #e2e8f0; border-radius:12px; padding:14px 16px; cursor:pointer; transition:all 0.2s; margin-bottom:10px; position:relative; }
+    .dir-card:hover { border-color:#3b82f6; background:#eff6ff; }
+    .dir-card-alias { font-weight:700; font-size:0.95rem; margin-bottom:4px; }
+    .dir-card-addr { font-size:0.83rem; color:#64748b; }
+    .dir-empty { text-align:center; color:#94a3b8; padding:32px 0; font-size:0.9rem; }
   </style>
 </head>
 <body>
@@ -934,66 +964,6 @@
           <div class="welcome">
             <h1>➕ Crear Nuevo Envío</h1>
             <p>Registra un nuevo envío en el sistema</p>
-          </div>
-        </div>
-        
-        <div class="header-actions">
-          <div class="search-box">
-            <input
-              type="text"
-              id="searchInput"
-              class="search-input"
-              placeholder="Buscar envío, cliente..."
-              autocomplete="off"
-            >
-            <i data-lucide="search" class="search-icon"></i>
-          </div>
-          
-          <a href="/envios-retrasados" class="notification-btn">
-            <i data-lucide="bell"></i>
-            <span class="notification-badge">4</span>
-          </a>
-          
-          <div class="user-profile" id="userProfileBtn">
-            <div class="user-avatar">
-              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
-              <span class="user-status-dot"></span>
-            </div>
-            <div class="user-info">
-              <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
-              <p><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e7828a868e8ba7828d828a978b88c984888a">[email&#160;protected]</a>' %></p>
-            </div>
-            <i data-lucide="chevron-down" class="user-chevron"></i>
-            
-            <!-- Dropdown del perfil -->
-            <div class="user-dropdown" id="userDropdown">
-              <div class="user-dropdown-header">
-                <div class="user-dropdown-avatar">
-                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
-                </div>
-                <div class="user-dropdown-info">
-                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
-                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7e1b131f17123e1b141b130e1211501d1113">[email&#160;protected]</a>' %></div>
-                  <span class="user-dropdown-badge">
-                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
-                  </span>
-                </div>
-              </div>
-              
-              <div class="user-dropdown-divider"></div>
-              
-              <a href="/mi-perfil" class="user-dropdown-item">
-                <i data-lucide="user"></i>
-                <span>Mi perfil</span>
-              </a>
-              
-              <div class="user-dropdown-divider"></div>
-              
-              <a href="/auth/logout" class="user-dropdown-item logout">
-                <i data-lucide="log-out"></i>
-                <span>Cerrar sesión</span>
-              </a>
-            </div>
           </div>
         </div>
       </header>
@@ -1168,371 +1138,174 @@
               </div>
             </div>
             
-            <!-- Sección 3: Ubicaciones -->
+            <!-- Sección 3: Dirección de Origen -->
             <div class="form-section">
               <h2 class="section-title">
                 <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
-                Ubicaciones
+                Dirección de Origen
               </h2>
-              
-<div class="form-row">
 
-                <!-- ============================================ -->
-                <!-- ORIGEN - CAMPOS DETALLADOS -->
-                <!-- ============================================ -->
-                 <div class="form-group" style="grid-column: 1 / -1;">
-  <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-    <span style="display: flex; align-items: center; gap: 8px;">
-      <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i>
-      Dirección de Origen
-    </span>
-    <button 
-      type="button" 
-      onclick="limpiarOrigen()" 
-      style="padding: 6px 12px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.3s;"
-      onmouseover="this.style.background='#e2e8f0'"
-      onmouseout="this.style.background='#f1f5f9'"
-    >
-      <i data-lucide="x" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-      Limpiar
-    </button>
-  </label>
-  
-  <button 
-    type="button"
-    id="btnOrigen"
-    onclick="abrirModalOrigen()"
-    style="width: 100%; padding: 16px 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);"
-    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.4)'"
-    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'"
-  >
-    <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
-    Seleccionar Dirección de Origen
-  </button>
-  
-  <p class="form-help" style="margin-top: 8px;">
-    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-    Selecciona una bodega o dirección del cliente como punto de partida
-  </p>
-</div>
-                <div class="form-group" style="grid-column: 1 / -1;">
-                  <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e40af; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
-                    Dirección de Origen
-                  </h3>
-                  
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #f0f9ff; padding: 20px; border-radius: 12px; border: 2px solid #3b82f6;">
-                    
-                    <!-- Calle y Número -->
-                    <div style="grid-column: 1 / -1;">
-                      <label class="form-label required">
-                        <i data-lucide="home" style="width: 14px; height: 14px;"></i>
-                        Calle y Número
-                      </label>
-                      <input 
-                        type="text" 
-                        name="origen_calle" 
-                        class="form-input" 
-                        placeholder="Ej: Av. Constitución 123"
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Colonia -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="map" style="width: 14px; height: 14px;"></i>
-                        Colonia
-                      </label>
-                      <input 
-                        type="text" 
-                        name="origen_colonia" 
-                        class="form-input" 
-                        placeholder="Ej: Centro"
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Código Postal -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="hash" style="width: 14px; height: 14px;"></i>
-                        Código Postal
-                      </label>
-                      <input 
-                        type="text" 
-                        name="origen_cp" 
-                        class="form-input" 
-                        placeholder="Ej: 64000"
-                        maxlength="5"
-                        pattern="[0-9]{5}"
-                        title="Debe ser un código postal de 5 dígitos"
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Ciudad -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="building-2" style="width: 14px; height: 14px;"></i>
-                        Ciudad
-                      </label>
-                      <input 
-                        type="text" 
-                        name="origen_ciudad" 
-                        class="form-input" 
-                        list="ciudades"
-                        placeholder="Escribe o selecciona..."
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Estado -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="map-pinned" style="width: 14px; height: 14px;"></i>
-                        Estado
-                      </label>
-                      <select 
-                        name="origen_estado" 
-                        class="form-input" 
-                        required
-                        style="cursor: pointer;"
-                      >
-                        <option value="">Selecciona un estado...</option>
-                        <option value="Aguascalientes">Aguascalientes</option>
-                        <option value="Baja California">Baja California</option>
-                        <option value="Baja California Sur">Baja California Sur</option>
-                        <option value="Campeche">Campeche</option>
-                        <option value="Chiapas">Chiapas</option>
-                        <option value="Chihuahua">Chihuahua</option>
-                        <option value="Ciudad de México">Ciudad de México</option>
-                        <option value="Coahuila">Coahuila</option>
-                        <option value="Colima">Colima</option>
-                        <option value="Durango">Durango</option>
-                        <option value="Guanajuato">Guanajuato</option>
-                        <option value="Guerrero">Guerrero</option>
-                        <option value="Hidalgo">Hidalgo</option>
-                        <option value="Jalisco">Jalisco</option>
-                        <option value="México">México</option>
-                        <option value="Michoacán">Michoacán</option>
-                        <option value="Morelos">Morelos</option>
-                        <option value="Nayarit">Nayarit</option>
-                        <option value="Nuevo León">Nuevo León</option>
-                        <option value="Oaxaca">Oaxaca</option>
-                        <option value="Puebla">Puebla</option>
-                        <option value="Querétaro">Querétaro</option>
-                        <option value="Quintana Roo">Quintana Roo</option>
-                        <option value="San Luis Potosí">San Luis Potosí</option>
-                        <option value="Sinaloa">Sinaloa</option>
-                        <option value="Sonora">Sonora</option>
-                        <option value="Tabasco">Tabasco</option>
-                        <option value="Tamaulipas">Tamaulipas</option>
-                        <option value="Tlaxcala">Tlaxcala</option>
-                        <option value="Veracruz">Veracruz</option>
-                        <option value="Yucatán">Yucatán</option>
-                        <option value="Zacatecas">Zacatecas</option>
-                      </select>
-                    </div>
-                    
-                    <!-- Referencias/Detalles adicionales -->
-                    <div style="grid-column: 1 / -1;">
-                      <label class="form-label">
-                        <i data-lucide="info" style="width: 14px; height: 14px;"></i>
-                        Referencias / Detalles Adicionales
-                      </label>
-                      <input 
-                        type="text" 
-                        name="origen_referencia" 
-                        class="form-input" 
-                        placeholder="Ej: Sucursal 30, Local 300, Entre calles X y Y, Edificio azul, etc."
-                      >
-                      <p class="form-help" style="margin-top: 6px; font-size: 0.75rem; color: #64748b;">
-                        <i data-lucide="lightbulb" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-                        Opcional: Información adicional para facilitar la ubicación
-                      </p>
-                    </div>
-                    
-                  </div>
+              <div style="display:flex; gap:12px; align-items:center; margin-bottom:4px;">
+                <button type="button" id="btnOrigen" onclick="abrirModalOrigen()"
+                  style="flex:1; padding:12px 20px; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; justify-content:center;">
+                  <i data-lucide="warehouse" style="width:18px;height:18px;"></i>
+                  Seleccionar Dirección Guardada
+                </button>
+                <button type="button" onclick="limpiarOrigen()"
+                  style="padding:12px 16px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; cursor:pointer; color:#64748b;">
+                  <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+                </button>
+              </div>
+
+              <div class="dir-grid">
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label required">Calle y Número</label>
+                  <input type="text" name="origen_calle" class="form-input" required
+                    placeholder="Ej: Av. Constitución 123">
                 </div>
-                
-                <!-- ============================================ -->
-                <!-- DESTINO - CAMPOS DETALLADOS -->
-                <!-- ============================================ -->
-                 <div class="form-group" style="grid-column: 1 / -1;">
-  <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-    <span style="display: flex; align-items: center; gap: 8px;">
-      <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i>
-      Dirección de Destino
-    </span>
-    <button 
-      type="button" 
-      onclick="limpiarDestino()" 
-      style="padding: 6px 12px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.3s;"
-      onmouseover="this.style.background='#e2e8f0'"
-      onmouseout="this.style.background='#f1f5f9'"
-    >
-      <i data-lucide="x" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-      Limpiar
-    </button>
-  </label>
-  
-  <button 
-    type="button"
-    id="btnDestino"
-    onclick="abrirModalDestino()"
-    style="width: 100%; padding: 16px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);"
-    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)'"
-    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'"
-  >
-    <i data-lucide="flag" style="width: 20px; height: 20px;"></i>
-    Seleccionar Dirección de Destino
-  </button>
-  
-  <p class="form-help" style="margin-top: 8px;">
-    <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-    Selecciona una bodega o dirección del cliente como punto de llegada
-  </p>
-</div>
-                <div class="form-group" style="grid-column: 1 / -1;">
-                  <h3 style="font-size: 1.1rem; font-weight: 700; color: #dc2626; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
-                    Dirección de Destino
-                  </h3>
-                  
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #fef2f2; padding: 20px; border-radius: 12px; border: 2px solid #ef4444;">
-                    
-                    <!-- Calle y Número -->
-                    <div style="grid-column: 1 / -1;">
-                      <label class="form-label required">
-                        <i data-lucide="home" style="width: 14px; height: 14px;"></i>
-                        Calle y Número
-                      </label>
-                      <input 
-                        type="text" 
-                        name="destino_calle" 
-                        class="form-input" 
-                        placeholder="Ej: Calle Morelos 456"
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Colonia -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="map" style="width: 14px; height: 14px;"></i>
-                        Colonia
-                      </label>
-                      <input 
-                        type="text" 
-                        name="destino_colonia" 
-                        class="form-input" 
-                        placeholder="Ej: San Jerónimo"
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Código Postal -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="hash" style="width: 14px; height: 14px;"></i>
-                        Código Postal
-                      </label>
-                      <input 
-                        type="text" 
-                        name="destino_cp" 
-                        class="form-input" 
-                        placeholder="Ej: 01000"
-                        maxlength="5"
-                        pattern="[0-9]{5}"
-                        title="Debe ser un código postal de 5 dígitos"
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Ciudad -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="building-2" style="width: 14px; height: 14px;"></i>
-                        Ciudad
-                      </label>
-                      <input 
-                        type="text" 
-                        name="destino_ciudad" 
-                        class="form-input" 
-                        list="ciudades"
-                        placeholder="Escribe o selecciona..."
-                        required
-                      >
-                    </div>
-                    
-                    <!-- Estado -->
-                    <div>
-                      <label class="form-label required">
-                        <i data-lucide="map-pinned" style="width: 14px; height: 14px;"></i>
-                        Estado
-                      </label>
-                      <select 
-                        name="destino_estado" 
-                        class="form-input" 
-                        required
-                        style="cursor: pointer;"
-                      >
-                        <option value="">Selecciona un estado...</option>
-                        <option value="Aguascalientes">Aguascalientes</option>
-                        <option value="Baja California">Baja California</option>
-                        <option value="Baja California Sur">Baja California Sur</option>
-                        <option value="Campeche">Campeche</option>
-                        <option value="Chiapas">Chiapas</option>
-                        <option value="Chihuahua">Chihuahua</option>
-                        <option value="Ciudad de México">Ciudad de México</option>
-                        <option value="Coahuila">Coahuila</option>
-                        <option value="Colima">Colima</option>
-                        <option value="Durango">Durango</option>
-                        <option value="Guanajuato">Guanajuato</option>
-                        <option value="Guerrero">Guerrero</option>
-                        <option value="Hidalgo">Hidalgo</option>
-                        <option value="Jalisco">Jalisco</option>
-                        <option value="México">México</option>
-                        <option value="Michoacán">Michoacán</option>
-                        <option value="Morelos">Morelos</option>
-                        <option value="Nayarit">Nayarit</option>
-                        <option value="Nuevo León">Nuevo León</option>
-                        <option value="Oaxaca">Oaxaca</option>
-                        <option value="Puebla">Puebla</option>
-                        <option value="Querétaro">Querétaro</option>
-                        <option value="Quintana Roo">Quintana Roo</option>
-                        <option value="San Luis Potosí">San Luis Potosí</option>
-                        <option value="Sinaloa">Sinaloa</option>
-                        <option value="Sonora">Sonora</option>
-                        <option value="Tabasco">Tabasco</option>
-                        <option value="Tamaulipas">Tamaulipas</option>
-                        <option value="Tlaxcala">Tlaxcala</option>
-                        <option value="Veracruz">Veracruz</option>
-                        <option value="Yucatán">Yucatán</option>
-                        <option value="Zacatecas">Zacatecas</option>
-                      </select>
-                    </div>
-                    
-                    <!-- Referencias/Detalles adicionales -->
-                    <div style="grid-column: 1 / -1;">
-                      <label class="form-label">
-                        <i data-lucide="info" style="width: 14px; height: 14px;"></i>
-                        Referencias / Detalles Adicionales
-                      </label>
-                      <input 
-                        type="text" 
-                        name="destino_referencia" 
-                        class="form-input" 
-                        placeholder="Ej: Bodega 5, Muelle B, Atención: Juan Pérez, Torre Norte, etc."
-                      >
-                      <p class="form-help" style="margin-top: 6px; font-size: 0.75rem; color: #64748b;">
-                        <i data-lucide="lightbulb" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-                        Opcional: Información adicional para facilitar la entrega
-                      </p>
-                    </div>
-                    
-                  </div>
+                <div class="form-group">
+                  <label class="form-label required">Colonia</label>
+                  <input type="text" name="origen_colonia" class="form-input" required
+                    placeholder="Ej: Centro">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">C.P.</label>
+                  <input type="text" name="origen_cp" class="form-input" maxlength="5" pattern="[0-9]{5}" required
+                    placeholder="64000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Ciudad</label>
+                  <input type="text" name="origen_ciudad" class="form-input" list="ciudades" required
+                    placeholder="Escribe la ciudad">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Estado</label>
+                  <select name="origen_estado" class="form-input" required>
+                    <option value="">Selecciona un estado...</option>
+                    <option value="Aguascalientes">Aguascalientes</option>
+                    <option value="Baja California">Baja California</option>
+                    <option value="Baja California Sur">Baja California Sur</option>
+                    <option value="Campeche">Campeche</option>
+                    <option value="Chiapas">Chiapas</option>
+                    <option value="Chihuahua">Chihuahua</option>
+                    <option value="Ciudad de México">Ciudad de México</option>
+                    <option value="Coahuila">Coahuila</option>
+                    <option value="Colima">Colima</option>
+                    <option value="Durango">Durango</option>
+                    <option value="Guanajuato">Guanajuato</option>
+                    <option value="Guerrero">Guerrero</option>
+                    <option value="Hidalgo">Hidalgo</option>
+                    <option value="Jalisco">Jalisco</option>
+                    <option value="México">México</option>
+                    <option value="Michoacán">Michoacán</option>
+                    <option value="Morelos">Morelos</option>
+                    <option value="Nayarit">Nayarit</option>
+                    <option value="Nuevo León">Nuevo León</option>
+                    <option value="Oaxaca">Oaxaca</option>
+                    <option value="Puebla">Puebla</option>
+                    <option value="Querétaro">Querétaro</option>
+                    <option value="Quintana Roo">Quintana Roo</option>
+                    <option value="San Luis Potosí">San Luis Potosí</option>
+                    <option value="Sinaloa">Sinaloa</option>
+                    <option value="Sonora">Sonora</option>
+                    <option value="Tabasco">Tabasco</option>
+                    <option value="Tamaulipas">Tamaulipas</option>
+                    <option value="Tlaxcala">Tlaxcala</option>
+                    <option value="Veracruz">Veracruz</option>
+                    <option value="Yucatán">Yucatán</option>
+                    <option value="Zacatecas">Zacatecas</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Referencia</label>
+                  <input type="text" name="origen_referencia" class="form-input"
+                    placeholder="Ej: Sucursal 30, Edificio azul, Entre calles X y Y">
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 4: Dirección de Destino -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <i data-lucide="map-pin-off" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                Dirección de Destino
+              </h2>
+
+              <div style="display:flex; gap:12px; align-items:center; margin-bottom:4px;">
+                <button type="button" id="btnDestino" onclick="abrirModalDestino()"
+                  style="flex:1; padding:12px 20px; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; justify-content:center;">
+                  <i data-lucide="map-pin" style="width:18px;height:18px;"></i>
+                  Seleccionar Dirección Guardada
+                </button>
+                <button type="button" onclick="limpiarDestino()"
+                  style="padding:12px 16px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; cursor:pointer; color:#64748b;">
+                  <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+                </button>
+              </div>
+
+              <div class="dir-grid">
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label required">Calle y Número</label>
+                  <input type="text" name="destino_calle" class="form-input" required
+                    placeholder="Ej: Calle Morelos 456">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Colonia</label>
+                  <input type="text" name="destino_colonia" class="form-input" required
+                    placeholder="Ej: San Jerónimo">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">C.P.</label>
+                  <input type="text" name="destino_cp" class="form-input" maxlength="5" pattern="[0-9]{5}" required
+                    placeholder="01000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Ciudad</label>
+                  <input type="text" name="destino_ciudad" class="form-input" list="ciudades" required
+                    placeholder="Escribe la ciudad">
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Estado</label>
+                  <select name="destino_estado" class="form-input" required>
+                    <option value="">Selecciona un estado...</option>
+                    <option value="Aguascalientes">Aguascalientes</option>
+                    <option value="Baja California">Baja California</option>
+                    <option value="Baja California Sur">Baja California Sur</option>
+                    <option value="Campeche">Campeche</option>
+                    <option value="Chiapas">Chiapas</option>
+                    <option value="Chihuahua">Chihuahua</option>
+                    <option value="Ciudad de México">Ciudad de México</option>
+                    <option value="Coahuila">Coahuila</option>
+                    <option value="Colima">Colima</option>
+                    <option value="Durango">Durango</option>
+                    <option value="Guanajuato">Guanajuato</option>
+                    <option value="Guerrero">Guerrero</option>
+                    <option value="Hidalgo">Hidalgo</option>
+                    <option value="Jalisco">Jalisco</option>
+                    <option value="México">México</option>
+                    <option value="Michoacán">Michoacán</option>
+                    <option value="Morelos">Morelos</option>
+                    <option value="Nayarit">Nayarit</option>
+                    <option value="Nuevo León">Nuevo León</option>
+                    <option value="Oaxaca">Oaxaca</option>
+                    <option value="Puebla">Puebla</option>
+                    <option value="Querétaro">Querétaro</option>
+                    <option value="Quintana Roo">Quintana Roo</option>
+                    <option value="San Luis Potosí">San Luis Potosí</option>
+                    <option value="Sinaloa">Sinaloa</option>
+                    <option value="Sonora">Sonora</option>
+                    <option value="Tabasco">Tabasco</option>
+                    <option value="Tamaulipas">Tamaulipas</option>
+                    <option value="Tlaxcala">Tlaxcala</option>
+                    <option value="Veracruz">Veracruz</option>
+                    <option value="Yucatán">Yucatán</option>
+                    <option value="Zacatecas">Zacatecas</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Referencia</label>
+                  <input type="text" name="destino_referencia" class="form-input"
+                    placeholder="Ej: Bodega 5, Muelle B, Atención: Juan Pérez">
                 </div>
               </div>
             </div>
@@ -1795,93 +1568,55 @@
   <!-- ============================================ -->
 <!-- MODAL: SELECCIONAR DIRECCIÓN DE ORIGEN -->
 <!-- ============================================ -->
-<div id="modalDireccionOrigen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 20px; width: 90%; max-width: 900px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);">
-    
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 24px 30px; display: flex; justify-content: space-between; align-items: center;">
-      <h2 style="color: white; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 12px; margin: 0;">
-        <i data-lucide="map-pin" style="width: 28px; height: 28px;"></i>
-        Seleccionar Dirección de ORIGEN
-      </h2>
-      <button onclick="cerrarModalOrigen()" style="background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-        <i data-lucide="x" style="width: 24px; height: 24px; color: white;"></i>
+<div id="modalDireccionOrigen" class="dir-modal-overlay">
+  <div class="dir-modal-box">
+    <div class="dir-modal-header">
+      <h2><i data-lucide="map-pin" style="width:22px;height:22px;"></i> Dirección de Origen</h2>
+      <button class="dir-modal-close" onclick="cerrarModalOrigen()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+    </div>
+    <div class="dir-modal-tabs">
+      <button class="dir-tab-btn active tab-direccion-origen" data-tab="bodegas" onclick="cambiarTabOrigen('bodegas')">
+        <i data-lucide="warehouse" style="width:17px;height:17px;"></i> Bodegas
+      </button>
+      <button class="dir-tab-btn tab-direccion-origen" data-tab="clientes" onclick="cambiarTabOrigen('clientes')">
+        <i data-lucide="users" style="width:17px;height:17px;"></i> Direcciones del Cliente
       </button>
     </div>
-    
-    <!-- Tabs -->
-    <div style="display: flex; border-bottom: 2px solid #e5e7eb; background: #f8fafc;">
-      <button 
-        class="tab-direccion-origen active" 
-        data-tab="bodegas"
-        onclick="cambiarTabOrigen('bodegas')"
-        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent;"
-      >
-        <i data-lucide="warehouse" style="width: 20px; height: 20px;"></i>
-        Bodegas
-      </button>
-      <button 
-        class="tab-direccion-origen" 
-        data-tab="clientes"
-        onclick="cambiarTabOrigen('clientes')"
-        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent; color: #64748b;"
-      >
-        <i data-lucide="users" style="width: 20px; height: 20px;"></i>
-        Direcciones del Cliente
-      </button>
+    <div class="dir-modal-search" style="position:relative;">
+      <i data-lucide="search" style="position:absolute;left:32px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#9ca3af;"></i>
+      <input id="origenBuscador" type="text" placeholder="Buscar dirección..." oninput="filtrarModal('origen')">
     </div>
-    
-    <!-- Buscador -->
-    <div style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb; background:#f8fafc;">
-      <div style="position:relative;">
-        <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;"></i>
-        <input id="origenBuscador" type="text" placeholder="Buscar bodega o dirección..."
-          oninput="filtrarModal('origen')"
-          style="width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
-      </div>
-    </div>
-
-    <!-- Content -->
-    <div style="padding: 20px 24px; max-height: 500px; overflow-y: auto;">
-      
+    <div class="dir-modal-body">
       <!-- Tab: Bodegas -->
       <div id="tabOrigenBodegas" class="tab-content-origen">
-        <!-- Favoritos -->
         <div id="origenFavoritosSection">
           <div class="modal-section-title">⭐ Favoritos</div>
-          <div id="origenFavoritosGrid" class="dir-grid"></div>
+          <div id="origenFavoritosGrid"></div>
         </div>
-        <!-- Recientes -->
         <div id="origenRecientesSection">
           <div class="modal-section-title">🕐 Recientemente usados</div>
-          <div id="origenRecientesGrid" class="dir-grid"></div>
+          <div id="origenRecientesGrid"></div>
         </div>
-        <!-- Todos -->
         <div id="origenTodosSection">
           <div class="modal-section-title">📋 Todos los registrados</div>
-          <div id="origenTodosGrid" class="dir-grid"></div>
+          <div id="origenTodosGrid"></div>
         </div>
       </div>
-      
       <!-- Tab: Clientes -->
       <div id="tabOrigenClientes" class="tab-content-origen" style="display: none;">
-        <!-- Favoritos -->
         <div id="origenClienteFavSection">
           <div class="modal-section-title">⭐ Favoritos</div>
-          <div id="origenClienteFavGrid" class="dir-grid"></div>
+          <div id="origenClienteFavGrid"></div>
         </div>
-        <!-- Recientes -->
         <div id="origenClienteRecSection">
           <div class="modal-section-title">🕐 Recientemente usados</div>
-          <div id="origenClienteRecGrid" class="dir-grid"></div>
+          <div id="origenClienteRecGrid"></div>
         </div>
-        <!-- Todos -->
         <div id="origenClienteTodosSection">
           <div class="modal-section-title">📋 Todos los registrados</div>
-          <div id="origenClienteTodosGrid" class="dir-grid"></div>
+          <div id="origenClienteTodosGrid"></div>
         </div>
       </div>
-      
     </div>
   </div>
 </div>
@@ -1889,303 +1624,79 @@
 <!-- ============================================ -->
 <!-- MODAL: SELECCIONAR DIRECCIÓN DE DESTINO -->
 <!-- ============================================ -->
-<div id="modalDireccionDestino" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 20px; width: 90%; max-width: 900px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);">
-    
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); padding: 24px 30px; display: flex; justify-content: space-between; align-items: center;">
-      <h2 style="color: white; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 12px; margin: 0;">
-        <i data-lucide="flag" style="width: 28px; height: 28px;"></i>
-        Seleccionar Dirección de DESTINO
-      </h2>
-      <button onclick="cerrarModalDestino()" style="background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-        <i data-lucide="x" style="width: 24px; height: 24px; color: white;"></i>
+<div id="modalDireccionDestino" class="dir-modal-overlay">
+  <div class="dir-modal-box">
+    <div class="dir-modal-header">
+      <h2><i data-lucide="map-pin-off" style="width:22px;height:22px;"></i> Dirección de Destino</h2>
+      <button class="dir-modal-close" onclick="cerrarModalDestino()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+    </div>
+    <div class="dir-modal-tabs">
+      <button class="dir-tab-btn active tab-direccion-destino" data-tab="bodegas" onclick="cambiarTabDestino('bodegas')">
+        <i data-lucide="warehouse" style="width:17px;height:17px;"></i> Bodegas
+      </button>
+      <button class="dir-tab-btn tab-direccion-destino" data-tab="clientes" onclick="cambiarTabDestino('clientes')">
+        <i data-lucide="users" style="width:17px;height:17px;"></i> Direcciones del Cliente
       </button>
     </div>
-    
-    <!-- Tabs -->
-    <div style="display: flex; border-bottom: 2px solid #e5e7eb; background: #f8fafc;">
-      <button 
-        class="tab-direccion-destino active" 
-        data-tab="bodegas"
-        onclick="cambiarTabDestino('bodegas')"
-        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent;"
-      >
-        <i data-lucide="warehouse" style="width: 20px; height: 20px;"></i>
-        Bodegas
-      </button>
-      <button 
-        class="tab-direccion-destino" 
-        data-tab="clientes"
-        onclick="cambiarTabDestino('clientes')"
-        style="flex: 1; padding: 16px 24px; background: none; border: none; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; border-bottom: 3px solid transparent; color: #64748b;"
-      >
-        <i data-lucide="users" style="width: 20px; height: 20px;"></i>
-        Direcciones del Cliente
-      </button>
+    <div class="dir-modal-search" style="position:relative;">
+      <i data-lucide="search" style="position:absolute;left:32px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#9ca3af;"></i>
+      <input id="destinoBuscador" type="text" placeholder="Buscar dirección..." oninput="filtrarModal('destino')">
     </div>
-    
-    <!-- Buscador -->
-    <div style="padding: 16px 24px; border-bottom: 1px solid #e5e7eb; background:#f8fafc;">
-      <div style="position:relative;">
-        <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;"></i>
-        <input id="destinoBuscador" type="text" placeholder="Buscar bodega o dirección..."
-          oninput="filtrarModal('destino')"
-          style="width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
-      </div>
-    </div>
-
-    <!-- Content -->
-    <div style="padding: 20px 24px; max-height: 500px; overflow-y: auto;">
-      
+    <div class="dir-modal-body">
       <!-- Tab: Bodegas -->
       <div id="tabDestinoBodegas" class="tab-content-destino">
         <div id="destinoFavoritosSection">
           <div class="modal-section-title">⭐ Favoritos</div>
-          <div id="destinoFavoritosGrid" class="dir-grid"></div>
+          <div id="destinoFavoritosGrid"></div>
         </div>
         <div id="destinoRecientesSection">
           <div class="modal-section-title">🕐 Recientemente usados</div>
-          <div id="destinoRecientesGrid" class="dir-grid"></div>
+          <div id="destinoRecientesGrid"></div>
         </div>
         <div id="destinoTodosSection">
           <div class="modal-section-title">📋 Todos los registrados</div>
-          <div id="destinoTodosGrid" class="dir-grid"></div>
+          <div id="destinoTodosGrid"></div>
         </div>
       </div>
-      
       <!-- Tab: Clientes -->
       <div id="tabDestinoClientes" class="tab-content-destino" style="display: none;">
         <div id="destinoClienteFavSection">
           <div class="modal-section-title">⭐ Favoritos</div>
-          <div id="destinoClienteFavGrid" class="dir-grid"></div>
+          <div id="destinoClienteFavGrid"></div>
         </div>
         <div id="destinoClienteRecSection">
           <div class="modal-section-title">🕐 Recientemente usados</div>
-          <div id="destinoClienteRecGrid" class="dir-grid"></div>
+          <div id="destinoClienteRecGrid"></div>
         </div>
         <div id="destinoClienteTodosSection">
           <div class="modal-section-title">📋 Todos los registrados</div>
-          <div id="destinoClienteTodosGrid" class="dir-grid"></div>
+          <div id="destinoClienteTodosGrid"></div>
         </div>
       </div>
-      
     </div>
   </div>
 </div>
 
-<!-- ============================================ -->
-<!-- ESTILOS PARA TABS Y TARJETAS -->
-<!-- ============================================ -->
 <style>
-
-    /* ── Modal direcciones rediseñado ── */
-    .modal-section-title {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .6px; color: #6b7280; margin: 14px 0 8px;
-      padding-bottom: 4px; border-bottom: 1px solid #f3f4f6;
-    }
-    .dir-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 10px; margin-bottom: 4px;
-    }
-    .dir-grid:empty + .modal-section-title,
-    .dir-section-empty { display: none; }
-    .pin-btn {
-      position: absolute; top: 8px; right: 8px;
-      background: none; border: none; cursor: pointer;
-      font-size: 15px; opacity: .4; transition: opacity .15s, transform .15s;
-      padding: 2px;
-    }
-    .pin-btn:hover { opacity: 1; transform: scale(1.2); }
-    .pin-btn.pinned { opacity: 1; }
-    .tarjeta-direccion { position: relative; }
-    /* Tabs activos */
-.tab-direccion-origen.active,
-.tab-direccion-destino.active {
-  color: #1e40af !important;
-  background: white !important;
-  border-bottom-color: #3b82f6 !important;
-}
-
-.tab-direccion-destino.active {
-  color: #dc2626 !important;
-  border-bottom-color: #ef4444 !important;
-}
-
-/* Tarjeta de dirección */
-.tarjeta-direccion {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  border: 2px solid #e5e7eb;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.tarjeta-direccion:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
-  transform: translateY(-2px);
-}
-
-.tarjeta-direccion .badge-predeterminada {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 4px 10px;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.tarjeta-direccion .alias {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tarjeta-direccion .direccion-info {
-  color: #64748b;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
-.tarjeta-direccion .btn-seleccionar {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.tarjeta-direccion:hover .btn-seleccionar {
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-  transform: translateY(-1px);
-}
-
-/* Mensaje de advertencia */
-.mensaje-sin-cliente {
-  background: #fef3c7;
-  padding: 40px;
-  border-radius: 12px;
-  text-align: center;
-  border: 2px solid #fbbf24;
-}
-
-.mensaje-sin-cliente i {
-  width: 48px;
-  height: 48px;
-  color: #f59e0b;
-  margin-bottom: 16px;
-}
-
-.mensaje-sin-cliente h3 {
-  color: #92400e;
-  font-weight: 800;
-  margin-bottom: 8px;
-}
-
-.mensaje-sin-cliente p {
-  color: #78350f;
-  font-size: 0.9rem;
-}
-
-/* Mensaje sin direcciones */
-.mensaje-sin-direcciones {
-  background: #f1f5f9;
-  padding: 40px;
-  border-radius: 12px;
-  text-align: center;
-  border: 2px dashed #cbd5e1;
-}
-
-.mensaje-sin-direcciones i {
-  width: 48px;
-  height: 48px;
-  color: #94a3b8;
-  margin-bottom: 16px;
-}
-
-.mensaje-sin-direcciones h3 {
-  color: #475569;
-  font-weight: 800;
-  margin-bottom: 8px;
-}
-
-.mensaje-sin-direcciones p {
-  color: #64748b;
-  font-size: 0.9rem;
-}
+  /* ── Modal direcciones: secciones y pin ── */
+  .modal-section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .6px; color: #6b7280; margin: 14px 0 8px;
+    padding-bottom: 4px; border-bottom: 1px solid #f3f4f6;
+  }
+  .pin-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; cursor: pointer;
+    font-size: 15px; opacity: .4; transition: opacity .15s, transform .15s;
+    padding: 2px;
+  }
+  .pin-btn:hover { opacity: 1; transform: scale(1.2); }
+  .pin-btn.pinned { opacity: 1; }
 </style>
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     lucide.createIcons();
 
-    // ── Búsqueda global ──────────────────────────────────
-    (function() {
-      var si = document.getElementById('searchInput');
-      if (!si) return;
-      var t;
-      si.addEventListener('input', function() {
-        clearTimeout(t);
-        var v = this.value.trim();
-        if (v) t = setTimeout(function() {
-          window.location.href = '/envios?buscar=' + encodeURIComponent(v);
-        }, 500);
-      });
-      si.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && this.value.trim()) {
-          clearTimeout(t);
-          window.location.href = '/envios?buscar=' + encodeURIComponent(this.value.trim());
-        }
-      });
-    })();
-
-    // User Profile Dropdown
-    const userProfileBtn = document.getElementById('userProfileBtn');
-    const userDropdown = document.getElementById('userDropdown');
-    
-    if (userProfileBtn && userDropdown) {
-      userProfileBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        userProfileBtn.classList.toggle('open');
-        userDropdown.classList.toggle('show');
-        lucide.createIcons();
-      });
-      
-      document.addEventListener('click', function(e) {
-        if (!userProfileBtn.contains(e.target)) {
-          userProfileBtn.classList.remove('open');
-          userDropdown.classList.remove('show');
-        }
-      });
-      
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          userProfileBtn.classList.remove('open');
-          userDropdown.classList.remove('show');
-        }
-      });
-    }
-    
     // Función para establecer fechas rápidas
     function setQuickDate(days) {
       const today = new Date();
@@ -2224,39 +1735,29 @@
         // ABRIR/CERRAR MODALES
         // ============================================
         function abrirModalOrigen() {
-          document.getElementById('modalDireccionOrigen').style.display = 'flex';
+          document.getElementById('modalDireccionOrigen').classList.add('open');
           const b = document.getElementById('origenBuscador'); if (b) b.value = '';
           cargarDireccionesBodegas('origen');
-          
-          // Si hay cliente seleccionado, cargar sus direcciones
           const clienteId = document.querySelector('[name="cliente_id"]')?.value;
-          if (clienteId) {
-            cargarDireccionesClienteModal(clienteId, 'origen');
-          }
-          
+          if (clienteId) cargarDireccionesClienteModal(clienteId, 'origen');
           lucide.createIcons();
         }
 
         function cerrarModalOrigen() {
-          document.getElementById('modalDireccionOrigen').style.display = 'none';
+          document.getElementById('modalDireccionOrigen').classList.remove('open');
         }
 
         function abrirModalDestino() {
-          document.getElementById('modalDireccionDestino').style.display = 'flex';
+          document.getElementById('modalDireccionDestino').classList.add('open');
           const b = document.getElementById('destinoBuscador'); if (b) b.value = '';
           cargarDireccionesBodegas('destino');
-          
-          // Si hay cliente seleccionado, cargar sus direcciones
           const clienteId = document.querySelector('[name="cliente_id"]')?.value;
-          if (clienteId) {
-            cargarDireccionesClienteModal(clienteId, 'destino');
-          }
-          
+          if (clienteId) cargarDireccionesClienteModal(clienteId, 'destino');
           lucide.createIcons();
         }
 
         function cerrarModalDestino() {
-          document.getElementById('modalDireccionDestino').style.display = 'none';
+          document.getElementById('modalDireccionDestino').classList.remove('open');
         }
 
         // Cerrar modales con ESC o click fuera
@@ -2356,28 +1857,14 @@
         function renderTarjeta(dir, tipo, tipoModal) {
           const key = `${tipo}-${dir.id}`;
           const fav = esFavorita(key);
-          const icono = tipo === 'bodega' ? 'warehouse' : 'map-pin';
-          const iconColor = tipo === 'bodega' ? '#3b82f6' : '#ef4444';
           return `
-            <div class="tarjeta-direccion" onclick="seleccionarDireccion('${tipo}', ${dir.id}, '${tipoModal}')">
-              ${dir.es_predeterminada ? '<span class="badge-predeterminada">⭐ PREDETERMINADA</span>' : ''}
+            <div class="dir-card" onclick="seleccionarDireccion('${tipo}', ${dir.id}, '${tipoModal}')">
               <button class="pin-btn ${fav ? 'pinned' : ''}" title="${fav ? 'Quitar favorito' : 'Añadir a favoritos'}"
                 onclick="event.stopPropagation(); toggleFavDir('${key}', '${tipoModal}')">
                 ${fav ? '⭐' : '☆'}
               </button>
-              <div class="alias">
-                <i data-lucide="${icono}" style="width:20px;height:20px;color:${iconColor};"></i>
-                ${dir.alias}
-              </div>
-              <div class="direccion-info">
-                📍 ${dir.calle}, ${dir.colonia}<br>
-                🏙️ ${dir.ciudad}, ${dir.estado}, ${dir.cp}
-                ${dir.referencia ? `<br>ℹ️ ${dir.referencia}` : ''}
-              </div>
-              <button class="btn-seleccionar" type="button">
-                <i data-lucide="check" style="width:16px;height:16px;"></i>
-                Seleccionar
-              </button>
+              <div class="dir-card-alias">${dir.es_predeterminada ? '⭐ ' : ''}${dir.alias}</div>
+              <div class="dir-card-addr">${[dir.calle, dir.colonia, dir.ciudad, dir.estado].filter(Boolean).join(', ')}</div>
             </div>`;
         }
 
@@ -2515,11 +2002,7 @@
           
           // Actualizar botón con la selección
           const boton = document.getElementById(`btn${tipoModal.charAt(0).toUpperCase() + tipoModal.slice(1)}`);
-          const icono = tipoDireccion === 'bodega' ? '🏢' : '📍';
-          boton.innerHTML = `
-            <i data-lucide="${tipoDireccion === 'bodega' ? 'warehouse' : 'map-pin'}" style="width: 18px; height: 18px;"></i>
-            ${icono} ${direccion.alias}
-          `;
+          boton.textContent = '✓ ' + direccion.alias;
           
           // Guardar selección y registrar en recientes
           const recKey = `${tipoDireccion}-${direccionId}`;
@@ -2551,10 +2034,8 @@
           document.querySelector('[name="origen_estado"]').value = '';
           document.querySelector('[name="origen_referencia"]').value = '';
           
-          document.getElementById('btnOrigen').innerHTML = `
-            <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
-            Seleccionar Dirección de Origen
-          `;
+          document.getElementById('btnOrigen').innerHTML = '<i data-lucide="warehouse" style="width:18px;height:18px;"></i> Seleccionar Dirección Guardada';
+          lucide.createIcons();
           
           origenSeleccionado = null;
           lucide.createIcons();
@@ -2568,10 +2049,8 @@
           document.querySelector('[name="destino_estado"]').value = '';
           document.querySelector('[name="destino_referencia"]').value = '';
           
-          document.getElementById('btnDestino').innerHTML = `
-            <i data-lucide="flag" style="width: 18px; height: 18px;"></i>
-            Seleccionar Dirección de Destino
-          `;
+          document.getElementById('btnDestino').innerHTML = '<i data-lucide="map-pin" style="width:18px;height:18px;"></i> Seleccionar Dirección Guardada';
+          lucide.createIcons();
           
           destinoSeleccionado = null;
           lucide.createIcons();
@@ -2582,15 +2061,11 @@
         // ============================================
         document.querySelector('[name="cliente_id"]')?.addEventListener('change', function() {
           const clienteId = this.value;
-          
-          // Limpiar direcciones del cliente anteriores
           direccionesCliente = [];
-          
-          // Si hay modales abiertos, recargar las direcciones del cliente
-          const modalOrigenVisible = document.getElementById('modalDireccionOrigen').style.display === 'flex';
-          ay === 'flex';
-          if (modalOrigenVisible)  cargarDireccionesCliente(clienteId, 'origen');
-          if (modalDestinoVisible) cargarDireccionesCliente(clienteId, 'destino');
+          const modalOrigenVisible  = document.getElementById('modalDireccionOrigen').classList.contains('open');
+          const modalDestinoVisible = document.getElementById('modalDireccionDestino').classList.contains('open');
+          if (modalOrigenVisible)  cargarDireccionesClienteModal(clienteId, 'origen');
+          if (modalDestinoVisible) cargarDireccionesClienteModal(clienteId, 'destino');
         });
 
 
@@ -2816,5 +2291,6 @@
     document.addEventListener('DOMContentLoaded', () => { agregarItem(); });
 
   </script>
+  <script src="/js/notifications.js"></script>
 </body>
 </html>

@@ -691,6 +691,72 @@
       color: #f59e0b;
     }
     
+    /* PAGINACIÓN */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+      border-radius: 0 0 16px 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .pagination-info {
+      font-size: 0.83rem;
+      color: #64748b;
+    }
+
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pag-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #374151;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: #fff;
+      transition: all 0.18s;
+    }
+
+    .pag-btn:hover:not(.disabled):not(.active) {
+      border-color: #3b82f6;
+      color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .pag-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+    }
+
+    .pag-btn.disabled {
+      opacity: 0.38;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .pag-ellipsis {
+      padding: 0 4px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      user-select: none;
+    }
+
     .empty-state {
       text-align: center;
       padding: 80px 20px;
@@ -1187,8 +1253,8 @@
                     <td><%= envio.origen || '-' %></td>
                     <td><%= envio.destino || '-' %></td>
                     <td>
-                      <span class="badge badge-<%= envio.estado_actual %>">
-                        <%= envio.estado_actual.replace('-', ' ').toUpperCase() %>
+                      <span class="badge badge-<%= envio.estado_actual || 'creado' %>">
+                        <%= (envio.estado_actual || 'creado').replace(/_/g, ' ').toUpperCase() %>
                       </span>
                     </td>
                     <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX') %></td>
@@ -1217,17 +1283,67 @@
               </tbody>
             </table>
           <% } else { %>
-<div class="empty-state">
-  <div class="empty-state-icon">
-    <i data-lucide="package-x"></i>
-  </div>
-  <h3>No hay envíos registrados</h3>
-  <p>Aqui apareceran los envios que filtres</p>
-
-</div>
+          <div class="empty-state">
+            <i data-lucide="package-x"></i>
+            <h3>No hay envíos registrados</h3>
+            <p>Aquí aparecerán los envíos que filtres</p>
+          </div>
           <% } %>
         </div>
-        
+
+        <!-- PAGINACIÓN -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+        <div class="pagination-bar">
+          <span class="pagination-info">
+            Mostrando <%= ((pagination.page - 1) * pagination.limit) + 1 %>–<%= Math.min(pagination.page * pagination.limit, pagination.totalEnvios) %> de <%= pagination.totalEnvios %> envíos
+          </span>
+          <div class="pagination-controls">
+            <% var buildUrl = function(p) {
+              var q = [];
+              if (filtros.buscar)  q.push('buscar='  + encodeURIComponent(filtros.buscar));
+              if (filtros.estado && filtros.estado !== 'todos') q.push('estado=' + encodeURIComponent(filtros.estado));
+              if (filtros.orderBy) q.push('orderBy=' + encodeURIComponent(filtros.orderBy));
+              q.push('page=' + p);
+              return '/envios?' + q.join('&');
+            }; %>
+
+            <a href="<%= buildUrl(pagination.page - 1) %>"
+               class="pag-btn <%= pagination.page <= 1 ? 'disabled' : '' %>"
+               <%= pagination.page <= 1 ? 'aria-disabled="true"' : '' %>>
+              <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
+            </a>
+
+            <%
+              var total = pagination.totalPages;
+              var cur   = pagination.page;
+              var pages = [];
+              if (total <= 7) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+              } else {
+                pages.push(1);
+                if (cur > 3) pages.push('…');
+                for (let i = Math.max(2, cur-1); i <= Math.min(total-1, cur+1); i++) pages.push(i);
+                if (cur < total - 2) pages.push('…');
+                pages.push(total);
+              }
+            %>
+            <% pages.forEach(p => { %>
+              <% if (p === '…') { %>
+                <span class="pag-ellipsis">…</span>
+              <% } else { %>
+                <a href="<%= buildUrl(p) %>" class="pag-btn <%= p === cur ? 'active' : '' %>"><%= p %></a>
+              <% } %>
+            <% }); %>
+
+            <a href="<%= buildUrl(pagination.page + 1) %>"
+               class="pag-btn <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>"
+               <%= pagination.page >= pagination.totalPages ? 'aria-disabled="true"' : '' %>>
+              <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+            </a>
+          </div>
+        </div>
+        <% } %>
+
       </div>
     </main>
     
@@ -1469,5 +1585,6 @@
       }
     });
   </script>
+  <script src="/js/notifications.js"></script>
 </body>
 </html>

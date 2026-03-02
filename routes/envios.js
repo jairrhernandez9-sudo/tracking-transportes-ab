@@ -69,51 +69,62 @@ const upload = multer({
 
 // ==================== RUTAS ====================
 
-// Lista de envíos con filtros
+// Lista de envíos con filtros y paginación
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     const { buscar, estado, orderBy } = req.query;
-    
-    let query = `
-      SELECT 
-        e.*,
-        COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa,
-        c.contacto,
-        u.nombre as creador_nombre
-      FROM envios e
-      LEFT JOIN clientes c ON e.cliente_id = c.id
-      LEFT JOIN usuarios u ON e.usuario_creador_id = u.id
-      WHERE 1=1
-    `;
-    
+    const page  = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = 25;
+
+    let whereClause = ' WHERE 1=1';
     const params = [];
-    
-    // Filtro de búsqueda
+
     if (buscar) {
-      query += ` AND (
-        e.numero_tracking LIKE ? OR 
+      whereClause += ` AND (
+        e.numero_tracking LIKE ? OR
         e.referencia_cliente LIKE ? OR
         c.nombre_empresa LIKE ? OR
         e.cliente_nombre LIKE ? OR
-        e.origen LIKE ? OR 
+        e.origen LIKE ? OR
         e.destino LIKE ?
       )`;
       const searchTerm = `%${buscar}%`;
       params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
-    
-    // Filtro de estado
+
     if (estado && estado !== 'todos') {
-      query += ` AND e.estado_actual = ?`;
+      whereClause += ` AND e.estado_actual = ?`;
       params.push(estado);
     }
-    
-    // Ordenamiento
+
+    const [countResult] = await db.query(
+      `SELECT COUNT(*) as total
+       FROM envios e
+       LEFT JOIN clientes c ON e.cliente_id = c.id
+       ${whereClause}`,
+      params
+    );
+    const totalEnvios = countResult[0].total;
+    const totalPages  = Math.ceil(totalEnvios / limit) || 1;
+    const currentPage = Math.min(page, totalPages);
+    const offset      = (currentPage - 1) * limit;
+
     const order = orderBy === 'asc' ? 'ASC' : 'DESC';
-    query += ` ORDER BY e.fecha_creacion ${order}`;
-    
-    const [envios] = await db.query(query, params);
-    
+    const [envios] = await db.query(
+      `SELECT
+        e.*,
+        COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa,
+        c.contacto,
+        u.nombre as creador_nombre
+       FROM envios e
+       LEFT JOIN clientes c ON e.cliente_id = c.id
+       LEFT JOIN usuarios u ON e.usuario_creador_id = u.id
+       ${whereClause}
+       ORDER BY e.fecha_creacion ${order}
+       LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+
     res.render('envios/lista', {
       title: 'Lista de Envíos',
       user: {
@@ -123,7 +134,8 @@ router.get('/', isAuthenticated, async (req, res) => {
         rol: req.session.userRole
       },
       envios,
-      filtros: { buscar, estado: estado || 'todos', orderBy }
+      filtros: { buscar, estado: estado || 'todos', orderBy },
+      pagination: { page: currentPage, totalPages, totalEnvios, limit }
     });
   } catch (error) {
     console.error('Error al obtener envíos:', error);
@@ -347,97 +359,61 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       numeroParte = 1; // la raíz siempre es parte 1
     }
 
-    // Insertar envío
-    const [result] = await db.query(
-      `INSERT INTO envios (
-        numero_tracking, 
-        cliente_id,
-        cliente_nombre,
-        referencia_cliente,  
-        descripcion, 
-        peso, 
-        fecha_estimada_entrega, 
-        origen, 
-        destino,
-        origen_calle,
-        origen_colonia,
-        origen_ciudad,
-        origen_estado,
-        origen_cp,
-        origen_referencia,
-        destino_calle,
-        destino_colonia,
-        destino_ciudad,
-        destino_estado,
-        destino_cp,
-        destino_referencia,
-        usuario_creador_id,
-        es_parcial,
-        es_complemento,
-        envio_relacionado_id,
-        numero_parte
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        numeroTracking, 
-        cliente_id,
-        cliente_nombre_snapshot,
-        referencia_cliente,
-        descripcion, 
-        peso, 
-        fecha_estimada_entrega, 
-        origen, 
-        destino,
-        origen_calle,
-        origen_colonia,
-        origen_ciudad,
-        origen_estado,
-        origen_cp,
-        origen_referencia || null,
-        destino_calle,
-        destino_colonia,
-        destino_ciudad,
-        destino_estado,
-        destino_cp,
-        destino_referencia || null,
-        req.session.userId,
-        es_parcial,
-        es_complemento,
-        (es_complemento || es_parcial) && envio_relacionado_id ? parseInt(envio_relacionado_id) : null,
-        numeroParte
-      ]
-    );
-    
-    const envioId = result.insertId;
+    // Insertar en transacción
+    const conn = await db.getConnection();
+    let envioId;
+    try {
+      await conn.beginTransaction();
 
-    // Insertar items
-    console.log('_iTipo:', _iTipo, 'length:', _iTipo.length);
-    for (let i = 0; i < _iTipo.length; i++) {
-      console.log(`item[${i}]:`, _iCant[i], _iTipo[i], _iDesc[i], _iPeso[i]);
-      if (_iTipo[i] && _iTipo[i].trim()) {
-        try {
-          await db.query(
+      const [result] = await conn.query(
+        `INSERT INTO envios (
+          numero_tracking, cliente_id, cliente_nombre, referencia_cliente,
+          descripcion, peso, fecha_estimada_entrega, origen, destino,
+          origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia,
+          destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia,
+          usuario_creador_id, es_parcial, es_complemento, envio_relacionado_id, numero_parte
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          numeroTracking, cliente_id, cliente_nombre_snapshot, referencia_cliente,
+          descripcion, peso, fecha_estimada_entrega, origen, destino,
+          origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia || null,
+          destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia || null,
+          req.session.userId, es_parcial, es_complemento,
+          (es_complemento || es_parcial) && envio_relacionado_id ? parseInt(envio_relacionado_id) : null,
+          numeroParte
+        ]
+      );
+
+      envioId = result.insertId;
+
+      for (let i = 0; i < _iTipo.length; i++) {
+        if (_iTipo[i] && _iTipo[i].trim()) {
+          await conn.query(
             'INSERT INTO envio_items (envio_id, cantidad, tipo, descripcion, peso) VALUES (?, ?, ?, ?, ?)',
             [envioId, parseInt(_iCant[i])||1, _iTipo[i].trim(),
              _iDesc[i] ? _iDesc[i].trim()||null : null,
              parseFloat(_iPeso[i])||0]
           );
-          console.log(`✅ item[${i}] insertado`);
-        } catch(itemErr) {
-          console.error(`❌ item[${i}] error:`, itemErr.message);
         }
       }
+
+      await conn.query(
+        `INSERT INTO historial_estados (envio_id, estado, ubicacion, comentarios, usuario_id)
+         VALUES (?, 'creado', ?, 'Envío creado', ?)`,
+        [envioId, origen, req.session.userId]
+      );
+
+      await conn.commit();
+    } catch (txErr) {
+      await conn.rollback();
+      throw txErr;
+    } finally {
+      conn.release();
     }
 
-    // Crear primer registro en historial
-    await db.query(
-      `INSERT INTO historial_estados (envio_id, estado, ubicacion, comentarios, usuario_id)
-       VALUES (?, 'creado', ?, 'Envío creado', ?)`,
-      [envioId, origen, req.session.userId]
-    );
-    
     console.log('✅ Envío creado:', numeroTracking);
     res.redirect(`/envios/${envioId}?success=creado`);
-    
+
   } catch (error) {
     console.error('Error al crear envío:', error);
     const [clientes] = await db.query(`
@@ -503,98 +479,105 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
 
 // Actualizar envío (POST)
 router.post('/:id/editar', isAuthenticated, async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const { 
-      cliente_id, 
+    const {
+      cliente_id,
       referencia_cliente,
-      fecha_estimada_entrega, 
-      origen, 
-      destino 
+      fecha_estimada_entrega,
+      origen_calle,
+      origen_colonia,
+      origen_ciudad,
+      origen_estado,
+      origen_cp,
+      origen_referencia,
+      destino_calle,
+      destino_colonia,
+      destino_ciudad,
+      destino_estado,
+      destino_cp,
+      destino_referencia
     } = req.body;
 
-    // Calcular peso y descripcion desde items
+    const origen  = construirDireccionCompleta(origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia);
+    const destino = construirDireccionCompleta(destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia);
+
     const _iCantE = [].concat(req.body['item_cant'] || []);
-    const _iTipoE = [].concat(req.body['item_tipo']     || []);
+    const _iTipoE = [].concat(req.body['item_tipo'] || []);
     const _iDescE = [].concat(req.body['item_desc'] || []);
-    const _iPesoE = [].concat(req.body['item_peso']     || []);
-    const peso = _iTipoE.reduce((s,t,i) => s + (t&&t.trim() ? parseFloat(_iPesoE[i])||0 : 0), 0);
+    const _iPesoE = [].concat(req.body['item_peso'] || []);
+    const peso        = _iTipoE.reduce((s,t,i) => s + (t&&t.trim() ? parseFloat(_iPesoE[i])||0 : 0), 0);
     const descripcion = _iTipoE.map((t,i) => t&&t.trim() ? `${_iCantE[i]||1}x ${t.trim()}` : null).filter(Boolean).join(', ') || null;
-    
-if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
-        const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
-      const [clientes] = await db.query(
-        'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
-      );
-      
-      const [itemsVal] = await db.query(
-        'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
-      );
+
+    if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
+      const [[envioRow], [clientes], [itemsVal]] = await Promise.all([
+        db.query('SELECT * FROM envios WHERE id = ?', [id]),
+        db.query('SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'),
+        db.query('SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id])
+      ]);
       return res.render('envios/editar', {
         title: 'Editar Envío',
-        user: {
-          id: req.session.userId,
-          nombre: req.session.userName,
-          email: req.session.userEmail,
-          rol: req.session.userRole
-        },
-        envio: envios[0],
-        clientes,
-        items: itemsVal,
-        error: 'Cliente, origen y destino son obligatorios'
+        user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+        envio: envioRow[0], clientes, items: itemsVal,
+        error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
-    
-    await db.query(
-      `UPDATE envios SET 
-        cliente_id = ?, 
-        referencia_cliente = ?,
-        descripcion = ?, 
-        peso = ?, 
-        fecha_estimada_entrega = ?, 
-        origen = ?, 
-        destino = ?
-       WHERE id = ?`,
-      [cliente_id, referencia_cliente, descripcion, peso, fecha_estimada_entrega, origen, destino, id]
-    );
-    
-    // Reemplazar items
-    await db.query('DELETE FROM envio_items WHERE envio_id = ?', [id]);
-    for (let i = 0; i < _iTipoE.length; i++) {
-      if (_iTipoE[i] && _iTipoE[i].trim()) {
-        await db.query(
-          'INSERT INTO envio_items (envio_id, cantidad, tipo, descripcion, peso) VALUES (?, ?, ?, ?, ?)',
-          [id, parseInt(_iCantE[i])||1, _iTipoE[i].trim(),
-           _iDescE[i] ? _iDescE[i].trim()||null : null,
-           parseFloat(_iPesoE[i])||0]
-        );
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      await conn.query(
+        `UPDATE envios SET
+          cliente_id = ?, referencia_cliente = ?, descripcion = ?, peso = ?,
+          fecha_estimada_entrega = ?,
+          origen = ?, destino = ?,
+          origen_calle = ?, origen_colonia = ?, origen_ciudad = ?, origen_estado = ?, origen_cp = ?, origen_referencia = ?,
+          destino_calle = ?, destino_colonia = ?, destino_ciudad = ?, destino_estado = ?, destino_cp = ?, destino_referencia = ?
+         WHERE id = ?`,
+        [
+          cliente_id, referencia_cliente, descripcion, peso, fecha_estimada_entrega,
+          origen, destino,
+          origen_calle, origen_colonia || null, origen_ciudad, origen_estado, origen_cp, origen_referencia || null,
+          destino_calle, destino_colonia || null, destino_ciudad, destino_estado, destino_cp, destino_referencia || null,
+          id
+        ]
+      );
+
+      await conn.query('DELETE FROM envio_items WHERE envio_id = ?', [id]);
+      for (let i = 0; i < _iTipoE.length; i++) {
+        if (_iTipoE[i] && _iTipoE[i].trim()) {
+          await conn.query(
+            'INSERT INTO envio_items (envio_id, cantidad, tipo, descripcion, peso) VALUES (?, ?, ?, ?, ?)',
+            [id, parseInt(_iCantE[i])||1, _iTipoE[i].trim(),
+             _iDescE[i] ? _iDescE[i].trim()||null : null,
+             parseFloat(_iPesoE[i])||0]
+          );
+        }
       }
+
+      await conn.commit();
+    } catch (txErr) {
+      await conn.rollback();
+      throw txErr;
+    } finally {
+      conn.release();
     }
 
     console.log('✅ Envío actualizado:', id);
     res.redirect(`/envios/${id}?success=actualizado`);
-    
+
   } catch (error) {
     console.error('Error al actualizar envío:', error);
-    const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [req.params.id]);
-    const [clientes] = await db.query(
-      'SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'
-    );
-    
-    const [itemsCatch] = await db.query(
-      'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [req.params.id]
-    ).catch(() => [[]]); 
+    const [[envioRow], [clientes], [itemsCatch]] = await Promise.all([
+      db.query('SELECT * FROM envios WHERE id = ?', [id]),
+      db.query('SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'),
+      db.query('SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]).catch(() => [[]])
+    ]);
     res.render('envios/editar', {
       title: 'Editar Envío',
-      user: {
-        id: req.session.userId,
-        nombre: req.session.userName,
-        email: req.session.userEmail,
-        rol: req.session.userRole
-      },
-      envio: envios[0],
-      clientes,
-      items: itemsCatch,
+      user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+      envio: envioRow[0], clientes, items: itemsCatch,
       error: 'Error al actualizar el envío: ' + error.message
     });
   }
