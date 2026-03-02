@@ -9,6 +9,11 @@ const { isAuthenticated } = require('../middleware/auth');
 router.delete('/:id/eliminar', isAuthenticated, async (req, res) => {
   try {
     const estadoId = req.params.id;
+
+    // Solo admin y superusuario pueden eliminar estados
+    if (!['admin', 'superusuario'].includes(req.session.userRole)) {
+      return res.status(403).json({ success: false, message: 'No tienes permisos para eliminar estados' });
+    }
     
     // Verificar que el estado existe
     const [estados] = await db.query(
@@ -24,15 +29,7 @@ router.delete('/:id/eliminar', isAuthenticated, async (req, res) => {
     }
     
     const estado = estados[0];
-    
-    // OPCIONAL: No permitir eliminar el estado "entregado"
-    if (estado.estado === 'entregado') {
-      return res.status(400).json({
-        success: false,
-        message: 'No se puede eliminar el estado "entregado"'
-      });
-    }
-    
+
     // ============================================
     // COMENTADO: La tabla fotos_historial no existe
     // Si necesitas esta funcionalidad, crea la tabla primero

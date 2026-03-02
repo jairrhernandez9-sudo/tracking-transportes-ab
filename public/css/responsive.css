@@ -93,20 +93,31 @@
     transform: translateX(0) !important;
   }
 
-  /* Main content takes full width */
+  /* Main content takes full width — no horizontal overflow */
   .main-content {
     margin-left: 0 !important;
     padding: 20px 16px !important;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  /* Dashboard uses higher-specificity rule at 1024px — override here */
+  .dashboard > .main-content {
+    margin-left: 0 !important;
   }
 
-  /* Header: wrap to 2 rows */
+  /* Header: hamburger stays on same row as title */
   .header,
   .page-header {
+    flex-direction: row !important;
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 24px !important;
     align-items: center !important;
     justify-content: flex-start !important;
+  }
+  .header-left {
+    flex: 1;
+    min-width: 0;
   }
   .welcome,
   .page-title-section {

@@ -825,11 +825,6 @@
   height: 16px;
 }
 
-/* Ocultar botón en estados importantes (opcional) */
-.timeline-item[data-estado="entregado"] .btn-eliminar-estado {
-  display: none; /* No permitir eliminar estado "entregado" */
-}
-    
     .timeline-estado {
       font-weight: 900;
       color: #0f172a;
@@ -1850,7 +1845,7 @@
       }) %>
     </span>
   </div>
-<% if (user && user.rol === 'admin') { %>
+<% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
 <button
   type="button"
   class="btn-eliminar-estado"
