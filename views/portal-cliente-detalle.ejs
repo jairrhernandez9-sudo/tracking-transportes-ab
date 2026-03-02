@@ -8,189 +8,449 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; color: #1e293b; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(160deg, #eef2ff 0%, #f8fafc 50%, #f0f7ff 100%);
+      min-height: 100vh; color: #0f172a;
+    }
 
-    /* ── HEADER ── */
+    /* ══ HEADER ═══════════════════════════════════════════════════════ */
     .portal-header {
-      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-      padding: 0 32px; display: flex; align-items: center; justify-content: space-between;
-      height: 64px; box-shadow: 0 2px 12px rgba(0,0,0,.25);
-      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+      box-shadow: 0 4px 30px rgba(30,58,138,.4);
+      position: sticky; top: 0; z-index: 100; overflow: hidden;
     }
-    .portal-brand { display: flex; align-items: center; gap: 12px; }
-    .portal-brand-icon {
-      width: 36px; height: 36px; background: #f59e0b;
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    .portal-header::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 18px 18px; pointer-events: none;
     }
-    .portal-brand-name { color: #fff; font-size: 16px; font-weight: 700; }
-    .portal-brand-sub  { color: #94a3b8; font-size: 12px; }
-    .btn-back {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px; background: rgba(255,255,255,.1);
-      color: #e2e8f0; border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px; font-size: 13px; font-weight: 600;
-      text-decoration: none; transition: all .15s;
+    .portal-header::after {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(255,255,255,.07) 0%, transparent 65%);
+      pointer-events: none;
     }
-    .btn-back:hover { background: rgba(255,255,255,.18); color: #fff; }
-    .btn-logout {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 14px; background: rgba(255,255,255,.08);
-      color: #cbd5e1; border: 1px solid rgba(255,255,255,.12);
-      border-radius: 8px; font-size: 12px; font-weight: 600;
-      text-decoration: none; transition: all .15s;
+    .portal-brand { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .portal-logo-img {
+      height: 38px; max-width: 130px; object-fit: contain;
+      filter: brightness(0) invert(1);
     }
-    .btn-logout:hover { background: rgba(255,255,255,.15); color: #fff; }
-    .header-right { display: flex; align-items: center; gap: 10px; }
-
-    /* ── MAIN ── */
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
-
-    /* ── TRACKING HERO ── */
-    .tracking-hero {
-      background: #fff; border-radius: 16px; padding: 28px 32px;
-      margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06);
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
-    }
-    .tracking-number {
-      font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: .5px;
-    }
-    .tracking-ref { font-size: 13px; color: #64748b; margin-top: 4px; }
-
-    /* Estado badge */
-    .estado-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 30px;
-      font-size: 14px; font-weight: 700; letter-spacing: .3px;
-    }
-    .estado-creado       { background: #f1f5f9; color: #475569; }
-    .estado-en-transito  { background: #dbeafe; color: #1d4ed8; }
-    .estado-entregado    { background: #dcfce7; color: #15803d; }
-    .estado-cancelado    { background: #fee2e2; color: #dc2626; }
-    .estado-en-bodega    { background: #fef9c3; color: #854d0e; }
-    .estado-retrasado    { background: #ffedd5; color: #c2410c; }
-
-    /* ── GRID ── */
-    .detail-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-      margin-bottom: 24px;
-    }
-    @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
-
-    .info-card {
-      background: #fff; border-radius: 14px; padding: 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-    }
-    .info-card-title {
-      font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .6px; color: #94a3b8; margin-bottom: 16px;
-      padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .info-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 14px; }
-    .info-row:last-child { margin-bottom: 0; }
-    .info-label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
-    .info-value { font-size: 14px; color: #1e293b; font-weight: 500; }
-    .info-value.mono { font-family: 'Courier New', monospace; font-weight: 700; color: #2563eb; }
-
-    /* ── ITEMS ── */
-    .items-card {
-      background: #fff; border-radius: 14px; padding: 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 24px;
-    }
-    .items-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
-      margin-top: 16px;
-    }
-    .item-chip {
-      background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px;
-      padding: 12px 16px; display: flex; align-items: center; gap: 10px;
-    }
-    .item-chip-icon {
-      width: 36px; height: 36px; background: #dbeafe; border-radius: 8px;
+    .portal-logo-fallback {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .item-chip-name { font-size: 13px; font-weight: 600; color: #1e293b; }
-    .item-chip-qty  { font-size: 12px; color: #64748b; }
+    .portal-brand-name { color: #fff; font-size: 16px; font-weight: 800; letter-spacing: -.2px; }
+    .portal-brand-sub  {
+      color: rgba(255,255,255,0.5); font-size: 10.5px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .8px;
+    }
+    .header-right { display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
+    .btn-back, .btn-logout {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px; font-size: 12px; font-weight: 600;
+      text-decoration: none; transition: all .2s;
+    }
+    .btn-back:hover, .btn-logout:hover {
+      background: rgba(255,255,255,0.2); color: #fff;
+      border-color: rgba(255,255,255,0.3);
+    }
 
-    /* ── HISTORIAL ── */
-    .historial-card {
-      background: #fff; border-radius: 14px; padding: 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    /* ══ MAIN ═════════════════════════════════════════════════════════ */
+    .portal-main { max-width: 1100px; margin: 0 auto; padding: 36px 24px 60px; }
+
+    /* ══ TRACKING HERO ════════════════════════════════════════════════ */
+    .tracking-hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      border-radius: 22px;
+      padding: 32px 36px;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 40px rgba(37,99,235,.28);
+      position: relative; overflow: hidden;
     }
-    .timeline { position: relative; padding-left: 32px; margin-top: 20px; }
-    .timeline::before {
-      content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
-      width: 2px; background: #e2e8f0;
+    .tracking-hero::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 65%);
+      pointer-events: none;
     }
-    .timeline-item { position: relative; margin-bottom: 28px; }
+    .tracking-hero::after {
+      content: ''; position: absolute; bottom: -40px; left: 30%;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(255,255,255,.05) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px; position: relative; z-index: 1;
+      margin-bottom: 28px;
+    }
+    .hero-tracking-label {
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.55);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .hero-tracking-num {
+      font-size: 30px; font-weight: 900; color: #fff; letter-spacing: .5px;
+      font-family: 'Courier New', monospace; margin-bottom: 6px;
+    }
+    .hero-ref { font-size: 13px; color: rgba(255,255,255,0.6); }
+    .hero-ref strong { color: rgba(255,255,255,0.9); }
+    .hero-copy-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-left: 8px; padding: 3px 10px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px; font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.8); cursor: pointer; transition: all .15s;
+      vertical-align: middle;
+    }
+    .hero-copy-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+    .estado-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 50px;
+      font-size: 14px; font-weight: 800; letter-spacing: .3px;
+      white-space: nowrap;
+    }
+    .estado-creado      { background: rgba(241,245,249,.15); color: #fff; border: 1.5px solid rgba(255,255,255,.3); }
+    .estado-pendiente   { background: #fef3c7; color: #92400e; }
+    .estado-en-transito { background: #fff7ed; color: #c2410c; }
+    .estado-entregado   { background: #dcfce7; color: #15803d; }
+    .estado-cancelado   { background: #fee2e2; color: #dc2626; }
+    .estado-en-bodega   { background: #fef9c3; color: #854d0e; }
+    .estado-retrasado   { background: #ffedd5; color: #c2410c; }
+
+    /* ── Stepper de progreso ── */
+    .stepper {
+      display: flex; align-items: center; position: relative; z-index: 1;
+    }
+    .step {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      flex-shrink: 0;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 800; flex-shrink: 0;
+      border: 3px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.5);
+      transition: all .3s;
+    }
+    .step.done .step-circle {
+      background: rgba(255,255,255,0.95);
+      border-color: rgba(255,255,255,0.95);
+      color: #1e3a8a;
+    }
+    .step.current .step-circle {
+      background: rgba(255,255,255,0.2);
+      border-color: #fff;
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.15);
+    }
+    .step.cancelled .step-circle {
+      background: #fee2e2; border-color: #fee2e2; color: #dc2626;
+    }
+    .step-label {
+      font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,0.5); text-align: center; white-space: nowrap;
+    }
+    .step.done .step-label, .step.current .step-label { color: rgba(255,255,255,0.9); }
+    .step-line {
+      flex: 1; height: 3px; border-radius: 2px;
+      background: rgba(255,255,255,0.15); margin: 0 8px; margin-bottom: 22px;
+      transition: background .3s;
+    }
+    .step-line.done { background: rgba(255,255,255,0.8); }
+
+    /* ══ CONTENT GRID ═════════════════════════════════════════════════ */
+    .content-grid {
+      display: grid; grid-template-columns: 1fr 380px; gap: 24px;
+      align-items: start;
+    }
+
+    /* ══ CARD BASE ════════════════════════════════════════════════════ */
+    .card {
+      background: #fff; border-radius: 18px; padding: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.05);
+      border: 1px solid rgba(0,0,0,.04);
+      margin-bottom: 20px;
+    }
+    .card:last-child { margin-bottom: 0; }
+    .card-title {
+      font-size: 12px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .7px; color: #94a3b8; margin-bottom: 18px;
+      padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title i { flex-shrink: 0; }
+
+    /* ══ ROUTE CARD (Origen → Destino) ═══════════════════════════════ */
+    .route-card {
+      background: #fff; border-radius: 18px; padding: 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.05);
+      border: 1px solid rgba(0,0,0,.04);
+      margin-bottom: 20px;
+    }
+    .route-inner {
+      display: flex; align-items: stretch; gap: 0;
+    }
+    .route-point {
+      flex: 1; display: flex; flex-direction: column; gap: 4px;
+    }
+    .route-point-label {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .8px; margin-bottom: 4px;
+    }
+    .route-point-label.origin  { color: #2563eb; }
+    .route-point-label.dest    { color: #dc2626; }
+    .route-point-value { font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.4; }
+    .route-point-city  { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .route-arrow {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 0 20px; flex-shrink: 0; gap: 4px;
+    }
+    .route-arrow-line {
+      width: 60px; height: 2px; background: linear-gradient(90deg, #2563eb, #dc2626);
+      border-radius: 1px; position: relative;
+    }
+    .route-arrow-line::after {
+      content: ''; position: absolute; right: -5px; top: -4px;
+      border: 5px solid transparent; border-left-color: #dc2626;
+    }
+    .route-truck {
+      display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; background: #eff6ff; border-radius: 50%;
+    }
+
+    /* ══ INFO ROWS ════════════════════════════════════════════════════ */
+    .info-row { margin-bottom: 14px; }
+    .info-row:last-child { margin-bottom: 0; }
+    .info-label {
+      font-size: 11px; font-weight: 700; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px;
+    }
+    .info-value { font-size: 14px; font-weight: 500; color: #1e293b; line-height: 1.4; }
+    .info-value.mono { font-family: 'Courier New', monospace; font-weight: 700; color: #2563eb; }
+
+    /* ══ ITEMS (contenido del envío) ══════════════════════════════════ */
+    .items-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;
+      margin-top: 4px;
+    }
+    .item-chip {
+      background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px;
+      padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px;
+      transition: border-color .15s;
+    }
+    .item-chip:hover { border-color: #93c5fd; }
+    .item-chip-icon {
+      width: 38px; height: 38px; background: linear-gradient(135deg, #dbeafe, #eff6ff);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .item-chip-name { font-size: 13px; font-weight: 700; color: #1e293b; }
+    .item-chip-desc { font-size: 12px; color: #64748b; margin-top: 2px; line-height: 1.3; }
+    .item-chip-meta { display: flex; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+    .item-meta-tag {
+      font-size: 11px; font-weight: 600; color: #3b82f6;
+      background: #eff6ff; border-radius: 5px; padding: 2px 7px;
+    }
+
+    /* ══ TIMELINE ═════════════════════════════════════════════════════ */
+    .timeline-wrap { margin-top: 4px; }
+    .timeline-item {
+      display: flex; gap: 16px; margin-bottom: 24px;
+      position: relative;
+    }
     .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-dot {
-      position: absolute; left: -27px; top: 3px;
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 3px solid #fff; box-shadow: 0 0 0 2px #e2e8f0;
-      background: #94a3b8;
+    .timeline-item::before {
+      content: ''; position: absolute; left: 24px; top: 52px;
+      width: 2px; bottom: -24px;
+      background: linear-gradient(180deg, #e2e8f0 0%, transparent 100%);
     }
-    .timeline-dot.creado       { background: #64748b; box-shadow: 0 0 0 2px #64748b33; }
-    .timeline-dot.en-transito  { background: #3b82f6; box-shadow: 0 0 0 2px #3b82f633; }
-    .timeline-dot.entregado    { background: #22c55e; box-shadow: 0 0 0 2px #22c55e33; }
-    .timeline-dot.cancelado    { background: #ef4444; box-shadow: 0 0 0 2px #ef444433; }
-    .timeline-dot.en-bodega    { background: #eab308; box-shadow: 0 0 0 2px #eab30833; }
-    .timeline-dot.retrasado    { background: #f97316; box-shadow: 0 0 0 2px #f9731633; }
-    .timeline-dot.active       { width: 22px; height: 22px; left: -29px; top: 1px; }
+    .timeline-item:last-child::before { display: none; }
 
-    .timeline-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-    .timeline-estado {
-      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-      padding: 3px 10px; border-radius: 20px;
+    .timeline-marker {
+      width: 50px; height: 50px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; border: 2px solid #e2e8f0;
+      background: #fff;
     }
-    .timeline-fecha { font-size: 12px; color: #94a3b8; }
-    .timeline-nota  { font-size: 13px; color: #475569; line-height: 1.5; }
-    .timeline-usuario { font-size: 11px; color: #cbd5e1; margin-top: 4px; }
+    .timeline-marker.creado      { background: #f8fafc; border-color: #94a3b8; }
+    .timeline-marker.pendiente   { background: linear-gradient(135deg,#fef3c7,#fffbeb); border-color: #fbbf24; }
+    .timeline-marker.en-transito { background: linear-gradient(135deg,#dbeafe,#eff6ff); border-color: #3b82f6; }
+    .timeline-marker.en-bodega   { background: linear-gradient(135deg,#fef9c3,#fefce8); border-color: #eab308; }
+    .timeline-marker.entregado   { background: linear-gradient(135deg,#dcfce7,#f0fdf4); border-color: #22c55e; }
+    .timeline-marker.cancelado   { background: linear-gradient(135deg,#fee2e2,#fff1f2); border-color: #ef4444; }
+    .timeline-marker.retrasado   { background: linear-gradient(135deg,#ffedd5,#fff7ed); border-color: #f97316; }
 
-    /* Fotos */
+    .timeline-body { flex: 1; }
+    .timeline-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .timeline-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .tb-creado      { background: #f1f5f9; color: #475569; }
+    .tb-pendiente   { background: #fef3c7; color: #92400e; }
+    .tb-en-transito { background: #fff7ed; color: #c2410c; }
+    .tb-en-bodega   { background: #fef9c3; color: #854d0e; }
+    .tb-entregado   { background: #dcfce7; color: #15803d; }
+    .tb-cancelado   { background: #fee2e2; color: #dc2626; }
+    .tb-retrasado   { background: #ffedd5; color: #c2410c; }
+    .timeline-date { font-size: 12px; color: #94a3b8; font-weight: 600; }
+    .timeline-location {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #3b82f6; font-weight: 600; margin-bottom: 8px;
+    }
+    .timeline-comment {
+      font-size: 13px; color: #475569; line-height: 1.6;
+      background: #f8fafc; border-radius: 10px; padding: 10px 14px;
+      border-left: 3px solid #3b82f6; margin-bottom: 10px;
+    }
+    .timeline-user {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #94a3b8; margin-bottom: 10px;
+    }
+
+    /* Fotos del historial */
     .fotos-grid {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
     }
     .foto-thumb {
-      width: 72px; height: 72px; object-fit: cover;
-      border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer;
-      transition: transform .15s;
+      width: 76px; height: 76px; object-fit: cover;
+      border-radius: 10px; border: 2px solid #e2e8f0;
+      cursor: pointer; transition: all .2s;
     }
-    .foto-thumb:hover { transform: scale(1.05); }
-
-    /* Parcial badge */
-    .badge-parte {
-      display: inline-flex; align-items: center; gap: 3px;
-      background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
-      border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700;
+    .foto-thumb:hover { transform: scale(1.06); border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,.2); }
+    .pdf-link {
+      display: flex; align-items: center; justify-content: center;
+      width: 76px; height: 76px;
+      border-radius: 10px; border: 2px dashed #e2e8f0;
+      background: #fef2f2; text-decoration: none; transition: all .2s;
+      color: #dc2626; flex-direction: column; gap: 4px;
+      font-size: 10px; font-weight: 700;
     }
-    .badge-parte.complemento { background: #f0fdf4; color: #166534; border-color: #86efac; }
+    .pdf-link:hover { border-color: #dc2626; background: #fff1f2; }
 
+    /* ══ SIDEBAR DE ACCIONES ══════════════════════════════════════════ */
+    .sidebar-card {
+      background: #fff; border-radius: 18px; padding: 22px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.05);
+      border: 1px solid rgba(0,0,0,.04);
+      margin-bottom: 18px;
+    }
+    .sidebar-card:last-child { margin-bottom: 0; }
+    .sidebar-title {
+      font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Quick info rows */
+    .quick-info { display: flex; flex-direction: column; gap: 12px; }
+    .quick-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; background: #f8fafc; border-radius: 10px;
+    }
+    .quick-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .quick-row-label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+    .quick-row-value { font-size: 13px; font-weight: 600; color: #0f172a; margin-top: 2px; }
+
+    /* Guías relacionadas */
+    .guia-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: 10px; margin-bottom: 8px; text-decoration: none;
+      transition: all .15s;
+    }
+    .guia-item:last-child { margin-bottom: 0; }
+    .guia-item:hover { border-color: #93c5fd; background: #eff6ff; }
+    .guia-item.current { border-color: #bfdbfe; background: #eff6ff; }
+    .guia-tracking { font-weight: 800; color: #1e3a8a; font-family: 'Courier New', monospace; font-size: 13px; }
+    .guia-small-badge {
+      font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 5px;
+      display: inline-block;
+    }
+    .gsb-raiz { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .gsb-comp { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+
+    /* Action buttons */
+    .btn-action {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 11px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      cursor: pointer; transition: all .2s; margin-bottom: 8px; border: none;
+    }
+    .btn-action:last-child { margin-bottom: 0; }
+    .btn-action.primary {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37,99,235,.28);
+    }
+    .btn-action.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.38); }
+    .btn-action.secondary {
+      background: #f1f5f9; color: #374151;
+      border: 1.5px solid #e2e8f0;
+    }
+    .btn-action.secondary:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* ══ LIGHTBOX ═════════════════════════════════════════════════════ */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.88); z-index: 9999;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw; max-height: 88vh; border-radius: 14px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.6);
+    }
+    .lightbox-close {
+      position: fixed; top: 20px; right: 24px;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; width: 42px; height: 42px; border-radius: 12px;
+      cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,.22); }
+
+    /* Empty historial */
+    .empty-historial {
+      text-align: center; padding: 48px 20px; color: #94a3b8;
+    }
+    .empty-historial p { font-size: 14px; font-weight: 600; margin-top: 14px; }
+
+    /* ══ RESPONSIVE ═══════════════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .content-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 768px) {
       .portal-header { padding: 0 16px; }
-      .main { padding: 20px 16px; }
-      .tracking-hero { padding: 20px 16px; }
-      .tracking-number { font-size: 20px; }
+      .portal-main   { padding: 20px 16px 40px; }
+      .tracking-hero { padding: 24px 20px; }
+      .hero-tracking-num { font-size: 22px; }
+      .stepper { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+      .route-arrow { padding: 0 12px; }
+      .route-arrow-line { width: 40px; }
     }
-
     @media (max-width: 480px) {
       .portal-brand-sub { display: none; }
       .btn-back span, .btn-logout span { display: none; }
-    }
-
-    /* Lightbox */
-    .lightbox {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.85); z-index: 9999;
-      align-items: center; justify-content: center;
-    }
-    .lightbox.open { display: flex; }
-    .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
-    .lightbox-close {
-      position: fixed; top: 20px; right: 24px;
-      background: rgba(255,255,255,.15); border: none; color: #fff;
-      width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
-      font-size: 20px; display: flex; align-items: center; justify-content: center;
     }
   </style>
 </head>
@@ -199,283 +459,389 @@
 <!-- ══ HEADER ══ -->
 <header class="portal-header">
   <div class="portal-brand">
-    <div class="portal-brand-icon">
-      <i data-lucide="truck" style="width:18px;height:18px;color:#1e293b;"></i>
-    </div>
+    <% if (typeof logoUrl !== 'undefined' && logoUrl) { %>
+      <img src="<%= logoUrl %>" alt="Logo" class="portal-logo-img">
+    <% } else { %>
+      <div class="portal-logo-fallback">
+        <i data-lucide="truck" style="width:20px;height:20px;color:#fff;"></i>
+      </div>
+    <% } %>
     <div>
-      <div class="portal-brand-name">Portal de Seguimiento</div>
-      <div class="portal-brand-sub">Transportes AB</div>
+      <div class="portal-brand-name">Transportes AB</div>
+      <div class="portal-brand-sub">Portal de Seguimiento</div>
     </div>
   </div>
 
   <div class="header-right">
     <a href="/portal-cliente" class="btn-back">
       <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
-      Mis Envíos
+      <span>Mis Envíos</span>
     </a>
     <a href="/auth/logout" class="btn-logout">
       <i data-lucide="log-out" style="width:14px;height:14px;"></i>
-      Salir
+      <span>Salir</span>
     </a>
   </div>
 </header>
 
 <!-- ══ MAIN ══ -->
-<main class="main">
+<main class="portal-main">
 
-  <!-- Hero tracking -->
+  <%
+    // Calcular paso actual para el stepper
+    const estadoPaso = { creado:1, pendiente:1, 'en-transito':2, 'en-bodega':2, entregado:3, retrasado:2, cancelado:-1 };
+    const pasoActual = estadoPaso[envio.estado_actual] || 1;
+    const esCancelado = envio.estado_actual === 'cancelado';
+
+    // Iconos según estado en timeline
+    const iconoEstado = {
+      creado: 'package', pendiente: 'clock', 'en-transito': 'truck',
+      'en-bodega': 'warehouse', entregado: 'circle-check-big',
+      cancelado: 'circle-x', retrasado: 'alert-triangle'
+    };
+  %>
+
+  <!-- Tracking Hero -->
   <div class="tracking-hero">
-    <div>
-      <div class="tracking-number">
-        <%= envio.numero_tracking %>
-        <% if (envio.es_parcial) { %>
-          <span class="badge-parte" style="font-size:13px;vertical-align:middle;">PARTE 1</span>
-        <% } else if (envio.es_complemento) { %>
-          <span class="badge-parte complemento" style="font-size:13px;vertical-align:middle;">PARTE <%= envio.numero_parte || '?' %></span>
-        <% } %>
-      </div>
-      <div class="tracking-ref">
-        <% if (envio.referencia_cliente) { %>
-          Ref: <strong><%= envio.referencia_cliente %></strong>
-        <% } else { %>
-          Sin referencia
-        <% } %>
-      </div>
-    </div>
-    <span class="estado-badge estado-<%= envio.estado_actual %>">
-      <i data-lucide="<%= envio.estado_actual === 'entregado' ? 'check-circle' : envio.estado_actual === 'cancelado' ? 'x-circle' : 'truck' %>" style="width:16px;height:16px;"></i>
-      <%= envio.estado_actual.replace(/-/g,' ').toUpperCase() %>
-    </span>
-  </div>
-
-  <!-- Grid de información -->
-  <div class="detail-grid">
-
-    <!-- Origen -->
-    <div class="info-card">
-      <div class="info-card-title">
-        <i data-lucide="map-pin" style="width:14px;height:14px;color:#3b82f6;"></i>
-        Origen
-      </div>
-      <div class="info-row">
-        <span class="info-label">Dirección</span>
-        <span class="info-value"><%= envio.origen_calle || envio.origen || '—' %></span>
-      </div>
-      <% if (envio.origen_colonia) { %>
-      <div class="info-row">
-        <span class="info-label">Colonia</span>
-        <span class="info-value"><%= envio.origen_colonia %></span>
-      </div>
-      <% } %>
-      <div class="info-row">
-        <span class="info-label">Ciudad</span>
-        <span class="info-value"><%= [envio.origen_ciudad, envio.origen_estado, envio.origen_cp].filter(Boolean).join(', ') || '—' %></span>
-      </div>
-    </div>
-
-    <!-- Destino -->
-    <div class="info-card">
-      <div class="info-card-title">
-        <i data-lucide="flag" style="width:14px;height:14px;color:#ef4444;"></i>
-        Destino
-      </div>
-      <div class="info-row">
-        <span class="info-label">Dirección</span>
-        <span class="info-value"><%= envio.destino_calle || envio.destino || '—' %></span>
-      </div>
-      <% if (envio.destino_colonia) { %>
-      <div class="info-row">
-        <span class="info-label">Colonia</span>
-        <span class="info-value"><%= envio.destino_colonia %></span>
-      </div>
-      <% } %>
-      <div class="info-row">
-        <span class="info-label">Ciudad</span>
-        <span class="info-value"><%= [envio.destino_ciudad, envio.destino_estado, envio.destino_cp].filter(Boolean).join(', ') || '—' %></span>
-      </div>
-    </div>
-
-    <!-- Fechas -->
-    <div class="info-card">
-      <div class="info-card-title">
-        <i data-lucide="calendar" style="width:14px;height:14px;color:#8b5cf6;"></i>
-        Fechas
-      </div>
-      <div class="info-row">
-        <span class="info-label">Fecha de creación</span>
-        <span class="info-value">
-          <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %>
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Entrega estimada</span>
-        <span class="info-value">
-          <% if (envio.fecha_estimada_entrega) { %>
-            <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %>
-          <% } else { %>
-            <span style="color:#d1d5db;">No especificada</span>
+    <div class="hero-top">
+      <div>
+        <div class="hero-tracking-label">Número de tracking</div>
+        <div class="hero-tracking-num">
+          <%= envio.numero_tracking %>
+          <% if (envio.es_parcial) { %>
+            <span style="font-size:13px;background:rgba(255,255,255,.15);color:#fff;border-radius:6px;padding:2px 8px;font-weight:700;vertical-align:middle;margin-left:4px;">PARTE 1</span>
+          <% } else if (envio.es_complemento) { %>
+            <span style="font-size:13px;background:rgba(255,255,255,.15);color:#fff;border-radius:6px;padding:2px 8px;font-weight:700;vertical-align:middle;margin-left:4px;">PARTE <%= envio.numero_parte || '?' %></span>
           <% } %>
-        </span>
-      </div>
-    </div>
-
-    <!-- Detalles del envío -->
-    <div class="info-card">
-      <div class="info-card-title">
-        <i data-lucide="package" style="width:14px;height:14px;color:#f59e0b;"></i>
-        Detalles del Envío
-      </div>
-      <% if (envio.descripcion) { %>
-      <div class="info-row">
-        <span class="info-label">Descripción</span>
-        <span class="info-value"><%= envio.descripcion %></span>
-      </div>
-      <% } %>
-      <% if (envio.peso) { %>
-      <div class="info-row">
-        <span class="info-label">Peso</span>
-        <span class="info-value"><%= envio.peso %> kg</span>
-      </div>
-      <% } %>
-      <div class="info-row">
-        <span class="info-label">Número de tracking</span>
-        <span class="info-value mono"><%= envio.numero_tracking %></span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Items del envío -->
-  <% if (items && items.length > 0) { %>
-  <div class="items-card">
-    <div class="info-card-title">
-      <i data-lucide="layers" style="width:14px;height:14px;color:#06b6d4;"></i>
-      Contenido del Envío
-    </div>
-    <div class="items-grid">
-      <% items.forEach(item => { %>
-      <div class="item-chip">
-        <div class="item-chip-icon">
-          <i data-lucide="package" style="width:18px;height:18px;color:#3b82f6;"></i>
         </div>
-        <div style="flex:1;">
-          <div class="item-chip-name"><%= item.tipo || 'Artículo' %></div>
-          <% if (item.descripcion) { %>
-            <div class="item-chip-qty" style="color:#475569;"><%= item.descripcion %></div>
+        <div class="hero-ref">
+          <% if (envio.referencia_cliente) { %>
+            Ref: <strong><%= envio.referencia_cliente %></strong>
+          <% } else { %>
+            Sin referencia
           <% } %>
-          <div style="display:flex;gap:10px;margin-top:3px;flex-wrap:wrap;">
-            <span class="item-chip-qty">Cantidad: <strong><%= item.cantidad %></strong></span>
-            <% if (item.peso) { %>
-              <span class="item-chip-qty">Peso: <strong><%= item.peso %> kg</strong></span>
-            <% } %>
+          <button class="hero-copy-btn" onclick="copiarTracking('<%= envio.numero_tracking %>')">
+            <i data-lucide="copy" style="width:11px;height:11px;"></i>
+            Copiar
+          </button>
+        </div>
+      </div>
+      <span class="estado-pill estado-<%= envio.estado_actual %>">
+        <i data-lucide="<%= iconoEstado[envio.estado_actual] || 'circle' %>" style="width:16px;height:16px;"></i>
+        <%= envio.estado_actual.replace(/-/g,' ').toUpperCase() %>
+      </span>
+    </div>
+
+    <!-- Stepper -->
+    <% if (!esCancelado) { %>
+    <div class="stepper">
+      <div class="step <%= pasoActual >= 1 ? (pasoActual === 1 ? 'current' : 'done') : '' %>">
+        <div class="step-circle">
+          <i data-lucide="package" style="width:16px;height:16px;"></i>
+        </div>
+        <div class="step-label">Creado</div>
+      </div>
+      <div class="step-line <%= pasoActual >= 2 ? 'done' : '' %>"></div>
+      <div class="step <%= pasoActual >= 2 ? (pasoActual === 2 ? 'current' : 'done') : '' %>">
+        <div class="step-circle">
+          <i data-lucide="truck" style="width:16px;height:16px;"></i>
+        </div>
+        <div class="step-label">En Tránsito</div>
+      </div>
+      <div class="step-line <%= pasoActual >= 3 ? 'done' : '' %>"></div>
+      <div class="step <%= pasoActual >= 3 ? 'done' : '' %>">
+        <div class="step-circle">
+          <i data-lucide="circle-check-big" style="width:16px;height:16px;"></i>
+        </div>
+        <div class="step-label">Entregado</div>
+      </div>
+    </div>
+    <% } else { %>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:10px 16px;color:#fca5a5;font-size:13px;font-weight:700;">
+      <i data-lucide="circle-x" style="width:16px;height:16px;"></i>
+      Este envío fue cancelado
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Grid principal -->
+  <div class="content-grid">
+    <!-- COLUMNA IZQUIERDA -->
+    <div>
+
+      <!-- Origen → Destino -->
+      <div class="route-card">
+        <div class="card-title">
+          <i data-lucide="route" style="width:14px;height:14px;color:#3b82f6;"></i>
+          Ruta del Envío
+        </div>
+        <div class="route-inner">
+          <div class="route-point">
+            <div class="route-point-label origin">Origen</div>
+            <div class="route-point-value"><%= envio.origen_calle || envio.origen || '—' %></div>
+            <div class="route-point-city"><%= [envio.origen_ciudad, envio.origen_estado].filter(Boolean).join(', ') || '' %></div>
+          </div>
+          <div class="route-arrow">
+            <div class="route-truck">
+              <i data-lucide="truck" style="width:14px;height:14px;color:#3b82f6;"></i>
+            </div>
+            <div class="route-arrow-line"></div>
+          </div>
+          <div class="route-point" style="text-align:right;">
+            <div class="route-point-label dest" style="text-align:right;">Destino</div>
+            <div class="route-point-value"><%= envio.destino_calle || envio.destino || '—' %></div>
+            <div class="route-point-city"><%= [envio.destino_ciudad, envio.destino_estado].filter(Boolean).join(', ') || '' %></div>
           </div>
         </div>
       </div>
-      <% }); %>
-    </div>
-  </div>
-  <% } %>
 
-  <!-- Guías del pedido parcial -->
-  <% if (typeof guiasRelacionadas !== "undefined" && guiasRelacionadas && guiasRelacionadas.length > 0) { %>
-  <div class="items-card" style="margin-bottom:24px;">
-    <div class="info-card-title">
-      <i data-lucide="git-branch" style="width:14px;height:14px;color:#f59e0b;"></i>
-      Guías del mismo pedido
-    </div>
-
-    <!-- Esta guía -->
-    <div style="margin-top:14px;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:8px;">
-        Esta guía
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:10px;padding:12px 16px;">
-        <% if (envio.es_parcial && !envio.es_complemento) { %>
-          <span style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;">PARTE 1 — RAÍZ</span>
-        <% } else { %>
-          <span style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;">PARTE <%= envio.numero_parte %></span>
-        <% } %>
-        <span style="font-weight:700;color:#1e3a8a;font-family:'Courier New',monospace;"><%= envio.numero_tracking %></span>
-        <span class="estado-badge estado-<%= envio.estado_actual %>" style="padding:2px 10px;font-size:11px;margin-left:auto;">
-          <%= envio.estado_actual.replace(/-/g,' ').toUpperCase() %>
-        </span>
-      </div>
-    </div>
-
-    <!-- Guías relacionadas -->
-    <div>
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:8px;">
-        <%= envio.es_complemento ? 'Raíz y otras partes' : 'Complementos' %>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <% guiasRelacionadas.forEach(g => { %>
-        <a href="/portal-cliente/envio/<%= g.id %>"
-           style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 16px;text-decoration:none;transition:border-color .15s;"
-           onmouseover="this.style.borderColor='#93c5fd'" onmouseout="this.style.borderColor='#e2e8f0'">
-          <% if (g.es_parcial && !g.es_complemento) { %>
-            <span style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;">PARTE 1 — RAÍZ</span>
-          <% } else { %>
-            <span style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;">PARTE <%= g.numero_parte %></span>
-          <% } %>
-          <span style="font-weight:700;color:#2563eb;font-family:'Courier New',monospace;"><%= g.numero_tracking %></span>
-          <span class="estado-badge estado-<%= g.estado_actual %>" style="padding:2px 10px;font-size:11px;margin-left:auto;">
-            <%= g.estado_actual.replace(/-/g,' ').toUpperCase() %>
-          </span>
-          <i data-lucide="chevron-right" style="width:14px;height:14px;color:#94a3b8;flex-shrink:0;"></i>
-        </a>
-        <% }); %>
-      </div>
-    </div>
-  </div>
-  <% } %>
-
-  <!-- Historial de estados -->
-  <div class="historial-card">
-    <div class="info-card-title">
-      <i data-lucide="clock" style="width:14px;height:14px;color:#10b981;"></i>
-      Historial de Seguimiento
-    </div>
-
-    <% if (!historial || historial.length === 0) { %>
-      <div style="text-align:center;padding:40px;color:#94a3b8;">
-        <i data-lucide="inbox" style="width:40px;height:40px;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;"></i>
-        <p>Sin movimientos registrados aún</p>
-      </div>
-    <% } else { %>
-    <div class="timeline">
-      <% historial.slice().reverse().forEach((h, idx) => {
-           const estadoClass = (h.estado || '').toLowerCase().replace(/\s+/g,'-');
-           const esUltimo = idx === 0;
-      %>
-      <div class="timeline-item">
-        <div class="timeline-dot <%= estadoClass %> <%= esUltimo ? 'active' : '' %>"></div>
-        <div class="timeline-header">
-          <span class="timeline-estado estado-badge estado-<%= estadoClass %>" style="padding:2px 10px;font-size:11px;">
-            <%= (h.estado || '').replace(/-/g,' ').toUpperCase() %>
-          </span>
-          <span class="timeline-fecha">
-            <%= new Date(h.fecha_hora).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'}) %>
-            <%= new Date(h.fecha_hora).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) %>
-          </span>
+      <!-- Contenido del envío -->
+      <% if (items && items.length > 0) { %>
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="layers" style="width:14px;height:14px;color:#06b6d4;"></i>
+          Contenido del Envío
         </div>
-        <% if (h.notas) { %>
-          <div class="timeline-nota"><%= h.notas %></div>
-        <% } %>
-        <% if (h.usuario_nombre) { %>
-          <div class="timeline-usuario">Actualizado por <%= h.usuario_nombre %></div>
-        <% } %>
-        <% if (h.fotos && h.fotos.length > 0) { %>
-        <div class="fotos-grid">
-          <% h.fotos.forEach(foto => { %>
-            <img src="/<%= foto.ruta_archivo %>" alt="Evidencia" class="foto-thumb"
-                 onclick="abrirLightbox(this.src)">
+        <div class="items-grid">
+          <% items.forEach(item => { %>
+          <div class="item-chip">
+            <div class="item-chip-icon">
+              <i data-lucide="package" style="width:18px;height:18px;color:#3b82f6;"></i>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="item-chip-name"><%= item.tipo || 'Artículo' %></div>
+              <% if (item.descripcion) { %>
+                <div class="item-chip-desc"><%= item.descripcion %></div>
+              <% } %>
+              <div class="item-chip-meta">
+                <span class="item-meta-tag">x<%= item.cantidad %></span>
+                <% if (item.peso) { %>
+                  <span class="item-meta-tag"><%= item.peso %> kg</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Guías del mismo pedido (si existe) -->
+      <% if (typeof guiasRelacionadas !== 'undefined' && guiasRelacionadas && guiasRelacionadas.length > 0) { %>
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="git-branch" style="width:14px;height:14px;color:#f59e0b;"></i>
+          Guías del mismo pedido
+        </div>
+
+        <!-- Esta guía -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Esta guía</div>
+          <div class="guia-item current" style="pointer-events:none;">
+            <div>
+              <% if (envio.es_parcial && !envio.es_complemento) { %>
+                <span class="guia-small-badge gsb-raiz">PARTE 1 — RAÍZ</span>
+              <% } else { %>
+                <span class="guia-small-badge gsb-comp">PARTE <%= envio.numero_parte %></span>
+              <% } %>
+              <div class="guia-tracking" style="margin-top:4px;"><%= envio.numero_tracking %></div>
+            </div>
+            <span style="font-size:11px;font-weight:700;color:#3b82f6;">← Este envío</span>
+          </div>
+        </div>
+
+        <!-- Guías relacionadas -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">
+            <%= envio.es_complemento ? 'Raíz y otras partes' : 'Complementos' %>
+          </div>
+          <% guiasRelacionadas.forEach(g => { %>
+          <a href="/portal-cliente/envio/<%= g.id %>" class="guia-item">
+            <div>
+              <% if (g.es_parcial && !g.es_complemento) { %>
+                <span class="guia-small-badge gsb-raiz">PARTE 1 — RAÍZ</span>
+              <% } else { %>
+                <span class="guia-small-badge gsb-comp">PARTE <%= g.numero_parte %></span>
+              <% } %>
+              <div class="guia-tracking" style="margin-top:4px;"><%= g.numero_tracking %></div>
+            </div>
+            <i data-lucide="chevron-right" style="width:14px;height:14px;color:#94a3b8;flex-shrink:0;"></i>
+          </a>
+          <% }); %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Historial de estados -->
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="clock" style="width:14px;height:14px;color:#10b981;"></i>
+          Historial de Seguimiento
+        </div>
+
+        <% if (!historial || historial.length === 0) { %>
+          <div class="empty-historial">
+            <i data-lucide="inbox" style="width:44px;height:44px;color:#cbd5e1;display:block;margin:0 auto;"></i>
+            <p>Sin movimientos registrados aún</p>
+          </div>
+        <% } else { %>
+        <div class="timeline-wrap">
+          <% historial.slice().reverse().forEach((h, idx) => {
+               const estadoClass = (h.estado || '').toLowerCase().replace(/\s+/g,'-');
+               const icono = iconoEstado[estadoClass] || 'circle';
+               const iconColor = {
+                 creado:'#64748b', pendiente:'#d97706', 'en-transito':'#2563eb',
+                 'en-bodega':'#ca8a04', entregado:'#16a34a', cancelado:'#dc2626', retrasado:'#ea580c'
+               }[estadoClass] || '#64748b';
+          %>
+          <div class="timeline-item">
+            <div class="timeline-marker <%= estadoClass %>">
+              <i data-lucide="<%= icono %>" style="width:22px;height:22px;color:<%= iconColor %>;"></i>
+            </div>
+            <div class="timeline-body">
+              <div class="timeline-header">
+                <span class="timeline-badge tb-<%= estadoClass %>">
+                  <%= (h.estado || '').replace(/-/g,' ').toUpperCase() %>
+                </span>
+                <span class="timeline-date">
+                  <%= new Date(h.fecha_hora).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'}) %>
+                  · <%= new Date(h.fecha_hora).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) %>
+                </span>
+              </div>
+              <% if (h.ubicacion) { %>
+              <div class="timeline-location">
+                <i data-lucide="map-pin" style="width:13px;height:13px;"></i>
+                <%= h.ubicacion %>
+              </div>
+              <% } %>
+              <% if (h.comentarios) { %>
+              <div class="timeline-comment"><%= h.comentarios %></div>
+              <% } %>
+              <% if (h.usuario_nombre) { %>
+              <div class="timeline-user">
+                <i data-lucide="user" style="width:12px;height:12px;"></i>
+                Actualizado por <%= h.usuario_nombre %>
+              </div>
+              <% } %>
+              <% if (h.fotos && h.fotos.length > 0) { %>
+              <div class="fotos-grid">
+                <% h.fotos.forEach(foto => {
+                     const url = foto.url_foto || ('/' + foto.ruta_archivo);
+                     const esPdf = url.toLowerCase().endsWith('.pdf');
+                %>
+                  <% if (esPdf) { %>
+                    <a href="<%= url %>" target="_blank" class="pdf-link">
+                      <i data-lucide="file-text" style="width:26px;height:26px;"></i>
+                      PDF
+                    </a>
+                  <% } else { %>
+                    <img src="<%= url %>" alt="Evidencia" class="foto-thumb"
+                         onclick="abrirLightbox(this.src)">
+                  <% } %>
+                <% }); %>
+              </div>
+              <% } %>
+            </div>
+          </div>
           <% }); %>
         </div>
         <% } %>
       </div>
-      <% }); %>
+
     </div>
-    <% } %>
+
+    <!-- COLUMNA DERECHA (sidebar) -->
+    <div>
+
+      <!-- Info rápida -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <i data-lucide="info" style="width:16px;height:16px;color:#3b82f6;"></i>
+          Información del Envío
+        </div>
+        <div class="quick-info">
+          <div class="quick-row">
+            <div class="quick-icon" style="background:#eff6ff;">
+              <i data-lucide="hash" style="width:16px;height:16px;color:#2563eb;"></i>
+            </div>
+            <div>
+              <div class="quick-row-label">Tracking</div>
+              <div class="quick-row-value" style="font-family:'Courier New',monospace;color:#2563eb;font-weight:800;"><%= envio.numero_tracking %></div>
+            </div>
+          </div>
+          <% if (envio.referencia_cliente) { %>
+          <div class="quick-row">
+            <div class="quick-icon" style="background:#f8fafc;">
+              <i data-lucide="file-text" style="width:16px;height:16px;color:#64748b;"></i>
+            </div>
+            <div>
+              <div class="quick-row-label">Referencia</div>
+              <div class="quick-row-value"><%= envio.referencia_cliente %></div>
+            </div>
+          </div>
+          <% } %>
+          <div class="quick-row">
+            <div class="quick-icon" style="background:#f0fdf4;">
+              <i data-lucide="calendar" style="width:16px;height:16px;color:#16a34a;"></i>
+            </div>
+            <div>
+              <div class="quick-row-label">Fecha de creación</div>
+              <div class="quick-row-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %></div>
+            </div>
+          </div>
+          <% if (envio.fecha_estimada_entrega) { %>
+          <div class="quick-row">
+            <div class="quick-icon" style="background:#fff7ed;">
+              <i data-lucide="calendar-clock" style="width:16px;height:16px;color:#ea580c;"></i>
+            </div>
+            <div>
+              <div class="quick-row-label">Entrega estimada</div>
+              <div class="quick-row-value"><%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %></div>
+            </div>
+          </div>
+          <% } %>
+          <% if (envio.peso) { %>
+          <div class="quick-row">
+            <div class="quick-icon" style="background:#faf5ff;">
+              <i data-lucide="weight" style="width:16px;height:16px;color:#9333ea;"></i>
+            </div>
+            <div>
+              <div class="quick-row-label">Peso</div>
+              <div class="quick-row-value"><%= envio.peso %> kg</div>
+            </div>
+          </div>
+          <% } %>
+          <% if (envio.descripcion) { %>
+          <div class="quick-row">
+            <div class="quick-icon" style="background:#f8fafc;">
+              <i data-lucide="package" style="width:16px;height:16px;color:#64748b;"></i>
+            </div>
+            <div>
+              <div class="quick-row-label">Descripción</div>
+              <div class="quick-row-value" style="font-size:13px;"><%= envio.descripcion %></div>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <i data-lucide="zap" style="width:16px;height:16px;color:#f59e0b;"></i>
+          Acciones
+        </div>
+        <button class="btn-action primary" onclick="copiarTracking('<%= envio.numero_tracking %>')">
+          <i data-lucide="copy" style="width:15px;height:15px;"></i>
+          Copiar número de tracking
+        </button>
+        <a href="/portal-cliente" class="btn-action secondary">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
+          Ver todos mis envíos
+        </a>
+      </div>
+
+    </div>
   </div>
 
 </main>
@@ -499,6 +865,18 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') cerrarLightbox();
   });
+
+  function copiarTracking(num) {
+    navigator.clipboard.writeText(num).then(() => {
+      const btns = document.querySelectorAll('[onclick*="copiarTracking"]');
+      btns.forEach(btn => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" style="width:15px;height:15px;"></i> ¡Copiado!';
+        lucide.createIcons();
+        setTimeout(() => { btn.innerHTML = orig; lucide.createIcons(); }, 2000);
+      });
+    });
+  }
 </script>
 </body>
 </html>

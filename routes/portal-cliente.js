@@ -15,6 +15,12 @@ router.get('/', soloCliente, async (req, res) => {
       return res.redirect('/auth/logout');
     }
 
+    // Logo de la empresa
+    const [[logoRow]] = await db.query(
+      "SELECT valor FROM configuracion_sistema WHERE clave = 'empresa_logo_url'"
+    );
+    const logoUrl = logoRow?.valor || null;
+
     const { buscar, estado, direccion_id, page } = req.query;
     const porPagina = 20;
     const pagina    = Math.max(1, parseInt(page) || 1);
@@ -117,6 +123,7 @@ router.get('/', soloCliente, async (req, res) => {
       stats,
       filtros: { buscar: buscar || '', estado: estado || 'todos', direccion_id: direccion_id || '' },
       direcciones,
+      logoUrl,
       paginacion: {
         actual:  pagina,
         total:   Math.ceil(total / porPagina),
@@ -135,6 +142,12 @@ router.get('/envio/:id', soloCliente, async (req, res) => {
   try {
     const clienteId = req.session.clienteId;
     const { id }    = req.params;
+
+    // Logo de la empresa
+    const [[logoRowDet]] = await db.query(
+      "SELECT valor FROM configuracion_sistema WHERE clave = 'empresa_logo_url'"
+    );
+    const logoUrl = logoRowDet?.valor || null;
 
     const [rows] = await db.query(
       `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono
@@ -210,7 +223,8 @@ router.get('/envio/:id', soloCliente, async (req, res) => {
       envio,
       historial,
       items,
-      guiasRelacionadas
+      guiasRelacionadas,
+      logoUrl
     });
 
   } catch (err) {
