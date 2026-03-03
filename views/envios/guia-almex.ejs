@@ -114,10 +114,10 @@
       background: #ececec; border-bottom: 1px solid #000;
       padding: 2px 4px; display: block;
     }
-    .footer-content { font-size: 7.5pt; padding: 4px 5px; min-height: 30px; line-height: 1.5; }
-    .footer-content.medium { min-height: 42px; }
-    .footer-content.tall   { min-height: 68px; }
-    .footer-content.xlarge { min-height: 80px; }
+    .footer-content { font-size: 7.5pt; padding: 5px 6px; min-height: 36px; line-height: 1.6; }
+    .footer-content.medium { min-height: 58px; }
+    .footer-content.tall   { min-height: 88px; }
+    .footer-content.xlarge { min-height: 100px; }
     .pago-big { font-size: 14pt; font-weight: bold; margin-top: 8px; display: block; }
 
     .disclaimer {
@@ -189,12 +189,10 @@
       return parts.join(', ') || '';
     }
     const pesoTotal = items.reduce((s, i) => s + parseFloat(i.peso || 0), 0);
-    const fechaEmision = envio.fecha_creacion
-      ? new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'})
-      : '-';
-    const horaEmision = envio.fecha_creacion
-      ? new Date(envio.fecha_creacion).toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'}) + ' Hrs.'
-      : '';
+    // Fecha/hora de generación del documento (momento en que se abre la carta porte)
+    const ahora = new Date();
+    const fechaEmision = ahora.toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'});
+    const horaEmision  = ahora.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'}) + ' Hrs.';
     const fechaEntrega = envio.fecha_estimada_entrega
       ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'})
       : 'Por definir';
