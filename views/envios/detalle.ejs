@@ -1592,10 +1592,19 @@
                   <i data-lucide="package" style="width: 24px; height: 24px; color: #3b82f6;"></i>
                   Información General
                 </h2>
-                <a href="/envios/<%= envio.id %>/editar" class="btn-secondary" style="padding: 8px 16px; width: auto; font-size: 0.85rem;">
-                  <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
-                  Editar
-                </a>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <a href="/envios/<%= envio.id %>/guia-almex" target="_blank"
+                     style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;width:auto;font-size:0.82rem;font-weight:700;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:8px;text-decoration:none;border:none;box-shadow:0 2px 8px rgba(37,99,235,.35);transition:all .2s;"
+                     onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(37,99,235,.5)'"
+                     onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(37,99,235,.35)'">
+                    <i data-lucide="file-text" style="width:15px;height:15px;"></i>
+                    Carta Porte
+                  </a>
+                  <a href="/envios/<%= envio.id %>/editar" class="btn-secondary" style="padding: 8px 16px; width: auto; font-size: 0.85rem;">
+                    <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+                    Editar
+                  </a>
+                </div>
               </div>
               
 <div class="tracking-number">

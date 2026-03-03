@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía <%= envio.numero_tracking %></title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8pt;
+      background: #d1d5db;
+      color: #000;
+    }
+
+    /* ── Barra de acciones (solo pantalla) ─────────────────── */
+    .toolbar {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 10px; }
+    .toolbar-title { color: #fff; font-size: 14px; font-weight: 700; }
+    .toolbar-tracking { color: rgba(255,255,255,0.6); font-size: 12px; margin-left: 4px; }
+    .btn-back {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .btn-print {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37,99,235,.4);
+      transition: all .2s;
+    }
+    .btn-print:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,.5); }
+    .btn-print svg { width: 16px; height: 16px; }
+
+    /* ── Página carta ───────────────────────────────────────── */
+    .page {
+      width: 215.9mm;
+      min-height: 279.4mm;
+      background: white;
+      margin: 20px auto;
+      padding: 6mm 7mm;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.25);
+    }
+
+    /* ── Tabla base ─────────────────────────────────────────── */
+    table { border-collapse: collapse; width: 100%; }
+    td, th { border: 1px solid #000; padding: 2px 4px; vertical-align: top; }
+    td.no-border { border: none; }
+
+    /* ── Header principal ───────────────────────────────────── */
+    .header-table td { vertical-align: middle; }
+    .cell-logo { width: 26%; padding: 4px 6px; }
+    .cell-title { width: 48%; text-align: center; padding: 4px 6px; }
+    .cell-barcode { width: 26%; text-align: center; padding: 4px 6px; }
+
+    .logo-img  { max-height: 44px; max-width: 110px; object-fit: contain; display: block; }
+    .company-name { font-size: 9pt; font-weight: bold; margin-top: 2px; }
+    .company-sub  { font-size: 7pt; color: #333; }
+
+    .guia-main-title { font-size: 8.5pt; font-weight: bold; line-height: 1.3; }
+    .guia-carta-title { font-size: 11pt; font-weight: bold; letter-spacing: .5px; }
+
+    .tracking-number-big { font-size: 13pt; font-weight: bold; letter-spacing: 1px; display: block; margin-top: 2px; }
+    .folio-row { font-size: 7pt; color: #555; margin-top: 2px; }
+
+    /* ── Sub-header (dirección de expedición) ───────────────── */
+    .subheader-table td { border-top: none; font-size: 7.5pt; vertical-align: middle; padding: 3px 5px; }
+
+    /* ── Sección remitente / facturar / destinatario ─────────── */
+    .seccion-label {
+      font-size: 7pt; font-weight: bold; text-transform: uppercase;
+      background: #e8e8e8; border-bottom: 1px solid #000;
+      padding: 2px 4px; display: block;
+    }
+    .seccion-content { font-size: 7.5pt; line-height: 1.45; padding: 3px 4px; min-height: 60px; }
+
+    /* ── Tabla de carga ──────────────────────────────────────── */
+    .cargo-table th {
+      background: #e0e0e0; font-size: 7pt; font-weight: bold;
+      text-align: center; padding: 3px 2px;
+    }
+    .cargo-table td { font-size: 7.5pt; text-align: center; padding: 2px 3px; }
+    .cargo-table td.left { text-align: left; }
+    .cargo-table td.totales { font-weight: bold; }
+
+    /* ── Pie de página ───────────────────────────────────────── */
+    .footer-label {
+      font-size: 6.5pt; font-weight: bold; text-transform: uppercase;
+      background: #ececec; border-bottom: 1px solid #000;
+      padding: 2px 4px; display: block;
+    }
+    .footer-content { font-size: 7.5pt; padding: 4px 5px; min-height: 30px; line-height: 1.5; }
+    .footer-content.medium { min-height: 42px; }
+    .footer-content.tall   { min-height: 68px; }
+    .footer-content.xlarge { min-height: 80px; }
+    .pago-big { font-size: 14pt; font-weight: bold; margin-top: 8px; display: block; }
+
+    .disclaimer {
+      font-size: 6.5pt; border: 1px solid #000; border-top: none;
+      padding: 4px 6px; text-align: center; line-height: 1.4;
+    }
+    .permisos-row {
+      font-size: 6.5pt; border: 1px solid #000; border-top: none;
+      padding: 3px 6px;
+    }
+
+    /* ── @media print ────────────────────────────────────────── */
+    @media print {
+      body { background: white; }
+      .toolbar { display: none !important; }
+      .page {
+        width: 100%; margin: 0; padding: 6mm 7mm;
+        box-shadow: none;
+      }
+      @page { size: letter; margin: 8mm 8mm 8mm 8mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Barra de herramientas (no se imprime) ────────────────── -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <a href="/envios/<%= envio.id %>" class="btn-back">
+      ← Volver al detalle
+    </a>
+    <span class="toolbar-title">Carta Porte</span>
+    <span class="toolbar-tracking"><%= envio.numero_tracking %></span>
+  </div>
+  <button class="btn-print" onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Imprimir / Descargar PDF
+  </button>
+</div>
+
+<!-- ── Página carta ─────────────────────────────────────────── -->
+<div class="page">
+
+  <%
+    // Helper: construir dirección desde campos individuales
+    // envio.origen / envio.destino contienen el alias (ej. "Sucursal 00")
+    // y se muestran como título en negrita, por eso NO se incluyen aquí
+    function dirOrigen() {
+      const parts = [];
+      if (envio.origen_calle)      parts.push(envio.origen_calle);
+      if (envio.origen_colonia)    parts.push(envio.origen_colonia);
+      if (envio.origen_ciudad)     parts.push(envio.origen_ciudad);
+      if (envio.origen_estado)     parts.push(envio.origen_estado);
+      if (envio.origen_cp)         parts.push('CP ' + envio.origen_cp);
+      if (envio.origen_referencia) parts.push(envio.origen_referencia);
+      return parts.join(', ') || '';
+    }
+    function dirDestino() {
+      const parts = [];
+      if (envio.destino_calle)      parts.push(envio.destino_calle);
+      if (envio.destino_colonia)    parts.push(envio.destino_colonia);
+      if (envio.destino_ciudad)     parts.push(envio.destino_ciudad);
+      if (envio.destino_estado)     parts.push(envio.destino_estado);
+      if (envio.destino_cp)         parts.push('CP ' + envio.destino_cp);
+      if (envio.destino_referencia) parts.push(envio.destino_referencia);
+      return parts.join(', ') || '';
+    }
+    const pesoTotal = items.reduce((s, i) => s + parseFloat(i.peso || 0), 0);
+    const fechaEmision = envio.fecha_creacion
+      ? new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'})
+      : '-';
+    const horaEmision = envio.fecha_creacion
+      ? new Date(envio.fecha_creacion).toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'}) + ' Hrs.'
+      : '';
+    const fechaEntrega = envio.fecha_estimada_entrega
+      ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'})
+      : 'Por definir';
+    const estadoLabel = {
+      'creado':'CREADO','pendiente':'PENDIENTE','en-transito':'EN TRÁNSITO',
+      'en-bodega':'EN BODEGA','entregado':'ENTREGADO','retrasado':'RETRASADO','cancelado':'CANCELADO'
+    };
+  %>
+
+  <!-- ═══ ENCABEZADO PRINCIPAL ══════════════════════════════ -->
+  <table class="header-table">
+    <tr>
+      <!-- Logo + nombre empresa -->
+      <td class="cell-logo">
+        <% if (config.empresa_logo_url) { %>
+          <img src="<%= config.empresa_logo_url %>" class="logo-img" alt="Logo">
+        <% } else { %>
+          <div style="font-size:14pt;font-weight:900;color:#1e3a8a;">&#9679;</div>
+        <% } %>
+        <div class="company-name"><%= config.empresa_nombre || 'LOGÍSTICA' %></div>
+        <% if (config.empresa_rfc) { %>
+          <div class="company-sub">RFC: <%= config.empresa_rfc %></div>
+        <% } %>
+      </td>
+
+      <!-- Título central -->
+      <td class="cell-title">
+        <div class="guia-main-title">
+          PAQUETERÍA, MENSAJERÍA Y CARGA CONSOLIDADA<br>
+          NACIONAL E INTERNACIONAL
+        </div>
+        <div class="guia-carta-title" style="margin-top:4px;">CARTA PORTE</div>
+        <% if (config.empresa_direccion) { %>
+          <div style="font-size:6.5pt;color:#333;margin-top:5px;line-height:1.3;">
+            LUGAR DE EXPEDICIÓN: <%= config.empresa_direccion %>
+          </div>
+        <% } %>
+        <% if (config.empresa_telefono) { %>
+          <div style="font-size:7.5pt;font-weight:bold;margin-top:3px;">
+            Tel: <%= config.empresa_telefono %>
+            <% if (config.empresa_telefono_adicional) { %> &nbsp;|&nbsp; <%= config.empresa_telefono_adicional %><% } %>
+          </div>
+        <% } %>
+      </td>
+
+      <!-- Código de barras + número -->
+      <td class="cell-barcode">
+        <svg id="barcode"></svg>
+        <span class="tracking-number-big"><%= envio.numero_tracking %></span>
+        <div class="folio-row">
+          Folio: <%= envio.id %> &nbsp;|&nbsp; Rev.:0
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ SECCIÓN: REMITENTE / FACTURAR A / DESTINATARIO ═════ -->
+  <table style="margin-top:0; border-top:none;">
+    <tr>
+      <!-- REMITENTE -->
+      <td style="width:33%; border-right:1px solid #000; padding:0;">
+        <span class="seccion-label">Remitente: (Origen)</span>
+        <div class="seccion-content">
+          <% /* origenAlias viene del route (lookup en direcciones_empresa) */ %>
+          <strong><%= origenAlias || config.empresa_nombre || '' %></strong><br>
+          <% var addrOrigen = dirOrigen(); %>
+          <% if (addrOrigen) { %><%= addrOrigen %><br><% } %>
+          <% if (config.empresa_telefono) { %>Tel. <%= config.empresa_telefono %><% } %>
+        </div>
+      </td>
+
+      <!-- FACTURAR A (cliente) -->
+      <td style="width:33%; border-right:1px solid #000; padding:0;">
+        <span class="seccion-label">Facturar a:</span>
+        <div class="seccion-content">
+          <strong><%= envio.nombre_empresa || '-' %></strong><br>
+          <% if (envio.cliente_direccion) { %><%= envio.cliente_direccion %><br><% } %>
+          <% if (envio.contacto) { %>Attn: <%= envio.contacto %><br><% } %>
+          <% if (envio.telefono) { %>Tel. <%= envio.telefono %><br><% } %>
+          <% if (envio.cliente_email) { %><%= envio.cliente_email %><% } %>
+        </div>
+      </td>
+
+      <!-- DESTINATARIO -->
+      <td style="width:34%; padding:0;">
+        <span class="seccion-label">Destinatario: (Destino)</span>
+        <div class="seccion-content">
+          <% /* destinoAlias viene del route (lookup en direcciones_cliente) */ %>
+          <strong><%= destinoAlias || envio.destino_ciudad || '' %></strong><br>
+          <% var addrDestino = dirDestino(); %>
+          <% if (addrDestino) { %><%= addrDestino %><% } %>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ TABLA DE CARGA ══════════════════════════════════════ -->
+  <table class="cargo-table" style="border-top:none;">
+    <thead>
+      <tr>
+        <th style="width:5%;">CANT.</th>
+        <th style="width:12%;">EMBALAJE</th>
+        <th style="width:28%;">DESCRIPCIÓN SEGÚN REMITENTE</th>
+        <th style="width:10%;">PESO REAL Kgs.</th>
+        <th style="width:13%;">VOLUMEN Mts.³</th>
+        <th style="width:12%;">PESO FACTURADO Kgs.</th>
+        <th style="width:12%;">SERVICIOS</th>
+        <th style="width:8%;">IMPORTE</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (items && items.length > 0) { %>
+        <% items.forEach(function(item) { %>
+          <tr>
+            <td><%= item.cantidad || 1 %></td>
+            <td class="left"><%= item.tipo || '-' %></td>
+            <td class="left"><%= item.descripcion || '-' %></td>
+            <td><%= item.peso ? parseFloat(item.peso).toFixed(3) : '0.000' %></td>
+            <td></td>
+            <td><%= item.peso ? parseFloat(item.peso).toFixed(3) : '0.000' %></td>
+            <td class="left"></td>
+            <td></td>
+          </tr>
+        <% }); %>
+        <!-- Filas vacías para completar espacio -->
+        <% var filasFaltantes = Math.max(0, 4 - items.length); %>
+        <% for (var i = 0; i < filasFaltantes; i++) { %>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <% } %>
+      <% } else { %>
+        <% if (envio.descripcion) { %>
+          <tr>
+            <td>1</td>
+            <td class="left">PAQUETE</td>
+            <td class="left"><%= envio.descripcion %></td>
+            <td><%= envio.peso ? parseFloat(envio.peso).toFixed(3) : '0.000' %></td>
+            <td></td>
+            <td><%= envio.peso ? parseFloat(envio.peso).toFixed(3) : '0.000' %></td>
+            <td class="left">FLETE</td>
+            <td></td>
+          </tr>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <% } else { %>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <% } %>
+      <% } %>
+      <!-- Fila de totales -->
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="totales" style="text-align:center;">
+          <%= pesoTotal > 0 ? pesoTotal.toFixed(2) : (envio.peso ? parseFloat(envio.peso).toFixed(2) : '') %>
+        </td>
+        <td></td>
+        <td class="totales" style="text-align:center;">
+          <%= pesoTotal > 0 ? pesoTotal.toFixed(2) : (envio.peso ? parseFloat(envio.peso).toFixed(2) : '') %>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══ CLÁUSULA DE SEGURO ══════════════════════════════════ -->
+  <table style="border-top:none;">
+    <tr>
+      <td style="font-size:7pt; padding:4px 6px; text-align:center; border-top:none;">
+        CLIENTE CONTRATA SEGURO QUE CUBRE MERCANCÍA HASTA $7,000.00 PESOS (VER CLÁUSULA 9).<br>
+        <% if (config.empresa_sitio_web) { %>
+          Conoce nuestro aviso de Privacidad en: <strong><%= config.empresa_sitio_web %></strong>
+        <% } %>
+      </td>
+    </tr>
+    <tr>
+      <td style="font-size:8pt; font-weight:bold; padding:3px 6px; border-top:none;">
+        INCLUYE UNA ENTREGA A DOMICILIO.<br>
+        TIPO DE ENVÍO: SERVICIO <%= (config.empresa_nombre || 'ESTÁNDAR').toUpperCase() %> PLATINUM
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ BLOQUE MEDIO: condiciones / fechas ══════════════════ -->
+  <table style="border-top:none;">
+    <tr>
+      <!-- RETORNO DE DOCUMENTOS -->
+      <td style="width:28%; padding:0;">
+        <span class="footer-label">Retorno de documentos:</span>
+        <div class="footer-content">&nbsp;</div>
+      </td>
+      <!-- CONDICIONES DE PAGO -->
+      <td style="width:32%; padding:0; border-left:1px solid #000;">
+        <span class="footer-label">Condiciones de pago:</span>
+        <div class="footer-content">
+          <span class="pago-big">CRÉDITO</span>
+        </div>
+      </td>
+      <!-- FECHA / HORA / DOCUMENTO -->
+      <td style="width:40%; padding:0; border-left:1px solid #000;">
+        <span class="footer-label">Fecha de emisión:</span>
+        <div class="footer-content" style="line-height:1.6;">
+          <strong><%= fechaEmision %></strong><br>
+          Hora: <%= horaEmision %><br>
+          Documento: <%= envio.creador_nombre || '-' %>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <!-- OBSERVACIONES -->
+      <td style="width:28%; padding:0; border-top:1px solid #000;">
+        <span class="footer-label">Observaciones del cliente:</span>
+        <div class="footer-content medium">&nbsp;</div>
+      </td>
+      <!-- FECHA ESTIMADA -->
+      <td style="width:32%; padding:0; border-left:1px solid #000; border-top:1px solid #000;">
+        <span class="footer-label">Fecha estimada de entrega:</span>
+        <div class="footer-content medium">
+          <strong><%= fechaEntrega %></strong>
+        </div>
+      </td>
+      <!-- REFERENCIA CLIENTE -->
+      <td style="width:40%; padding:0; border-left:1px solid #000; border-top:1px solid #000;">
+        <span class="footer-label">Referencia del cliente:</span>
+        <div class="footer-content medium">
+          <%= envio.referencia_cliente || '' %>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ BLOQUE RECIBIDO / INCIDENCIAS ══════════════════════ -->
+  <table style="border-top:none;">
+    <tr>
+      <!-- RECIBIDO POR -->
+      <td style="width:55%; padding:0;">
+        <span class="footer-label">Recibido por:</span>
+        <div class="footer-content tall">
+          Nombre completo: ____________________________________________<br>
+          <br><br>
+          Firma: __________________________ &nbsp;&nbsp;&nbsp; Fecha: _________________
+        </div>
+      </td>
+      <!-- INCIDENCIAS -->
+      <td style="width:45%; padding:0; border-left:1px solid #000;">
+        <span class="footer-label">Incidencias presentadas en la mercancía:</span>
+        <div class="footer-content tall">&nbsp;</div>
+      </td>
+    </tr>
+    <tr>
+      <!-- OPERADOR -->
+      <td style="width:55%; padding:0; border-top:1px solid #000;">
+        <span class="footer-label">Operador que entregó:</span>
+        <div class="footer-content medium">&nbsp;</div>
+      </td>
+      <!-- COMENTARIOS -->
+      <td style="width:45%; padding:0; border-left:1px solid #000; border-top:1px solid #000;">
+        <span class="footer-label">Comentarios:</span>
+        <div class="footer-content medium">&nbsp;</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ FIRMA FINAL ══════════════════════════════════════════ -->
+  <table style="border-top:none;">
+    <tr>
+      <td style="width:40%; padding:5px 6px; border-right:1px solid #000; font-size:7.5pt; min-height:55px;">
+        <strong>Nombre completo:</strong><br><br><br>
+        ___________________________________________
+      </td>
+      <td style="width:30%; padding:5px 6px; text-align:center; border-right:1px solid #000; font-size:6.5pt;">
+        <% if (config.empresa_logo_url) { %>
+          <img src="<%= config.empresa_logo_url %>" style="max-height:28px;max-width:80px;object-fit:contain;" alt="">
+        <% } %>
+        <br>
+        <%= config.empresa_nombre || '' %>
+        <% if (config.empresa_rfc) { %><br>RFC: <%= config.empresa_rfc %><% } %>
+        <% if (config.empresa_direccion) { %><br><%= config.empresa_direccion %><% } %>
+      </td>
+      <td style="width:30%; padding:5px 6px; font-size:7.5pt;">
+        <strong>Firma:</strong><br><br><br>
+        ___________________________________________
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style="border-top:1px solid #000; padding:3px 6px; text-align:center; font-size:7.5pt; font-weight:bold;">
+        REMITENTE ACEPTA CONDICIONES DEL CONTRATO
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ PIE: PERMISOS Y AVISO ═══════════════════════════════ -->
+  <div class="permisos-row">
+    <strong>MERCANCÍA TRANSPORTADA SEGÚN ESTADO:</strong> <%= (estadoLabel[envio.estado_actual] || envio.estado_actual || '-').toUpperCase() %>
+    &nbsp;&nbsp;&nbsp;
+    <strong>TRACKING:</strong> <%= envio.numero_tracking %>
+    &nbsp;&nbsp;&nbsp;
+    <strong>ORIGEN:</strong> <%= origenAlias || envio.origen || '-' %>
+    &nbsp;&nbsp;&nbsp;
+    <strong>DESTINO:</strong> <%= destinoAlias || envio.destino || '-' %>
+  </div>
+  <div class="disclaimer">
+    ESTE DOCUMENTO NO ES UN COMPROBANTE FISCAL.<br>
+    Generado por el sistema de tracking el <%= fechaEmision %>.
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  JsBarcode("#barcode", "<%= envio.numero_tracking %>", {
+    format: "CODE128",
+    width: 1.5,
+    height: 55,
+    displayValue: false,
+    margin: 2
+  });
+</script>
+
+</body>
+</html>

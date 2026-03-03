@@ -228,6 +228,71 @@ router.get('/:id', isAuthenticated, async (req, res) => {
   }
 });
 
+// Guía Almex del envío (carta porte para imprimir/descargar)
+router.get('/:id/guia-almex', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [envios] = await db.query(`
+      SELECT e.*,
+        COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa,
+        c.contacto,
+        c.telefono,
+        c.email as cliente_email,
+        c.direccion as cliente_direccion
+      FROM envios e
+      LEFT JOIN clientes c ON e.cliente_id = c.id
+      WHERE e.id = ?
+    `, [id]);
+
+    if (envios.length === 0) return res.status(404).send('Envío no encontrado');
+
+    const envio = envios[0];
+
+    const [items] = await db.query(
+      'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
+    );
+
+    const [configs] = await db.query(
+      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url')"
+    );
+    const config = {};
+    configs.forEach(c => { config[c.clave] = c.valor; });
+
+    // Buscar alias de la dirección de origen en direcciones_empresa
+    let origenAlias = null;
+    if (envio.origen_calle && envio.origen_ciudad) {
+      const [origenRows] = await db.query(
+        `SELECT alias FROM direcciones_empresa WHERE calle = ? AND ciudad = ? LIMIT 1`,
+        [envio.origen_calle, envio.origen_ciudad]
+      );
+      origenAlias = origenRows[0]?.alias || null;
+    }
+
+    // Buscar alias de la dirección de destino en direcciones_cliente
+    let destinoAlias = null;
+    if (envio.cliente_id && envio.destino_calle && envio.destino_ciudad) {
+      const [destinoRows] = await db.query(
+        `SELECT alias FROM direcciones_cliente WHERE cliente_id = ? AND calle = ? AND ciudad = ? LIMIT 1`,
+        [envio.cliente_id, envio.destino_calle, envio.destino_ciudad]
+      );
+      destinoAlias = destinoRows[0]?.alias || null;
+    }
+
+    res.render('envios/guia-almex', {
+      title: `Guía ${envio.numero_tracking}`,
+      envio,
+      items,
+      config,
+      origenAlias,
+      destinoAlias
+    });
+  } catch (error) {
+    console.error('Error al generar guía Almex:', error);
+    res.status(500).send('Error al generar la guía');
+  }
+});
+
 // Formulario crear nuevo envío
 router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
   try {
