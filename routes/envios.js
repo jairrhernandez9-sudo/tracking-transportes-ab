@@ -254,10 +254,42 @@ router.get('/:id/guia-almex', isAuthenticated, async (req, res) => {
     );
 
     const [configs] = await db.query(
-      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url')"
+      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url','empresa_sitio_web')"
     );
     const config = {};
     configs.forEach(c => { config[c.clave] = c.valor; });
+
+    // Cargar template de guía asignado al cliente
+    const guiaCfgDefaults = {
+      mostrar_logo:1,mostrar_rfc:1,mostrar_telefono:1,mostrar_sitio_web:1,mostrar_barcode:1,
+      mostrar_seccion_remitente:1,mostrar_seccion_facturar:1,mostrar_seccion_destinatario:1,
+      mostrar_clausula_seguro:1,mostrar_retorno_documentos:1,mostrar_condiciones_pago:1,
+      mostrar_fecha_emision:1,mostrar_observaciones:1,mostrar_fecha_entrega:1,
+      mostrar_referencia_cliente:1,mostrar_recibido_por:1,mostrar_operador:1,
+      mostrar_firma_final:1,mostrar_pie_datos:1,mostrar_disclaimer:1,
+      mostrar_col_volumen:1,mostrar_col_peso_facturado:1,mostrar_col_servicios:1,mostrar_col_importe:1,
+      obligatorio_logo:0,obligatorio_rfc:0,obligatorio_telefono:0,obligatorio_sitio_web:0,obligatorio_barcode:0,
+      obligatorio_seccion_remitente:0,obligatorio_seccion_facturar:0,obligatorio_seccion_destinatario:0,
+      obligatorio_clausula_seguro:0,obligatorio_retorno_documentos:0,obligatorio_condiciones_pago:0,
+      obligatorio_fecha_emision:0,obligatorio_observaciones:0,obligatorio_fecha_entrega:0,
+      obligatorio_referencia_cliente:0,obligatorio_recibido_por:0,obligatorio_operador:0,
+      obligatorio_firma_final:0,obligatorio_pie_datos:0,obligatorio_disclaimer:0,
+      obligatorio_col_volumen:0,obligatorio_col_peso_facturado:0,obligatorio_col_servicios:0,obligatorio_col_importe:0
+    };
+    let guiaCfg = { ...guiaCfgDefaults };
+    if (envio.cliente_id) {
+      const [[clienteGuia]] = await db.query('SELECT template_guia_id FROM clientes WHERE id = ?', [envio.cliente_id]);
+      if (clienteGuia && clienteGuia.template_guia_id) {
+        const [[tplGuia]] = await db.query('SELECT * FROM guia_templates WHERE id = ?', [clienteGuia.template_guia_id]);
+        if (tplGuia) {
+          Object.keys(guiaCfgDefaults).forEach(k => { guiaCfg[k] = !!tplGuia[k]; });
+          // Obligatorio fuerza mostrar
+          Object.keys(guiaCfgDefaults).filter(k => k.startsWith('obligatorio_')).forEach(k => {
+            if (guiaCfg[k]) guiaCfg['mostrar_' + k.replace('obligatorio_','')] = true;
+          });
+        }
+      }
+    }
 
     // Buscar alias de la dirección de origen en direcciones_empresa
     let origenAlias = null;
@@ -284,8 +316,10 @@ router.get('/:id/guia-almex', isAuthenticated, async (req, res) => {
       envio,
       items,
       config,
+      guiaCfg,
       origenAlias,
-      destinoAlias
+      destinoAlias,
+      user: { rol: req.session.userRole }
     });
   } catch (error) {
     console.error('Error al generar guía Almex:', error);
@@ -297,17 +331,20 @@ router.get('/:id/guia-almex', isAuthenticated, async (req, res) => {
 router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
   try {
     const [clientes] = await db.query(`
-      SELECT 
+      SELECT
         id,
         nombre_empresa,
         prefijo_tracking,
         ultimo_numero_tracking,
         CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
-      FROM clientes 
-      WHERE activo = 1 AND eliminado_en IS NULL 
+      FROM clientes
+      WHERE activo = 1 AND eliminado_en IS NULL
       ORDER BY nombre_empresa
     `);
-    
+
+    const [[usuarioRow]] = await db.query('SELECT ultimo_cliente_id FROM usuarios WHERE id = ?', [req.session.userId]);
+    const ultimoClienteId = usuarioRow?.ultimo_cliente_id || null;
+
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
       user: {
@@ -317,6 +354,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
         rol: req.session.userRole
       },
       clientes,
+      ultimoClienteId,
       error: null
     });
   } catch (error) {
@@ -387,7 +425,8 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
           rol: req.session.userRole
         },
         clientes,
-error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
+        ultimoClienteId: parseInt(cliente_id) || null,
+        error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
     
@@ -402,11 +441,17 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
     //  GENERAR TRACKING PERSONALIZADO POR CLIENTE
     const numeroTracking = await generarSiguienteTracking(cliente_id);
 
-    // Obtener nombre del cliente para snapshot histórico
+    // Obtener nombre y metodo_pago del cliente para snapshot histórico
     const [clienteRows] = await db.query(
-      'SELECT nombre_empresa FROM clientes WHERE id = ?', [cliente_id]
+      'SELECT nombre_empresa, metodo_pago_defecto FROM clientes WHERE id = ?', [cliente_id]
     );
     const cliente_nombre_snapshot = clienteRows.length > 0 ? clienteRows[0].nombre_empresa : null;
+
+    // Respetar crédito solo si está habilitado globalmente
+    const [[cfgCredito]] = await db.query("SELECT valor FROM configuracion_sistema WHERE clave = 'credito_habilitado'").catch(() => [[null]]);
+    const creditoGlobalHabilitado = !cfgCredito || cfgCredito.valor !== 'false';
+    const metodo_pago_cliente = (clienteRows.length > 0 && clienteRows[0].metodo_pago_defecto) ? clienteRows[0].metodo_pago_defecto : 'PPD';
+    const metodo_pago_envio = creditoGlobalHabilitado ? metodo_pago_cliente : 'PUE';
     
     // Parsear flags de parcial desde form (strings '0'/'1')
     const es_parcial     = req.body.es_parcial     === '1' ? 1 : 0;
@@ -436,8 +481,8 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
           descripcion, peso, fecha_estimada_entrega, origen, destino,
           origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia,
           destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia,
-          usuario_creador_id, es_parcial, es_complemento, envio_relacionado_id, numero_parte
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          usuario_creador_id, es_parcial, es_complemento, envio_relacionado_id, numero_parte, metodo_pago
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           numeroTracking, cliente_id, cliente_nombre_snapshot, referencia_cliente,
           descripcion, peso, fecha_estimada_entrega, origen, destino,
@@ -445,7 +490,7 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
           destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia || null,
           req.session.userId, es_parcial, es_complemento,
           (es_complemento || es_parcial) && envio_relacionado_id ? parseInt(envio_relacionado_id) : null,
-          numeroParte
+          numeroParte, metodo_pago_envio
         ]
       );
 
@@ -476,6 +521,9 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       conn.release();
     }
 
+    // Guardar último cliente usado por este usuario
+    await db.query('UPDATE usuarios SET ultimo_cliente_id = ? WHERE id = ?', [cliente_id, req.session.userId]);
+
     console.log('✅ Envío creado:', numeroTracking);
     res.redirect(`/envios/${envioId}?success=creado`);
 
@@ -501,6 +549,7 @@ error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
         rol: req.session.userRole
       },
       clientes,
+      ultimoClienteId: parseInt(req.body?.cliente_id) || null,
       error: 'Error al crear el envío: ' + error.message
     });
   }
@@ -891,7 +940,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       logo_url: null,
       rfc: '',
       direccion: '',
-      // Toggles individuales (true por defecto)
+      // Toggles individuales — por defecto todos activos
       mostrar_logo:               true,
       mostrar_eslogan:            true,
       mostrar_telefono:           true,
@@ -903,21 +952,30 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       mostrar_barcode:            true,
       mostrar_qr:                 true,
       mostrar_ruta:               true,
-      mostrar_descripcion:        true
+      mostrar_descripcion:        true,
+      // Obligatorio — por defecto ninguno
+      obligatorio_logo:               false,
+      obligatorio_eslogan:            false,
+      obligatorio_telefono:           false,
+      obligatorio_telefono_adicional: false,
+      obligatorio_email:              false,
+      obligatorio_sitio_web:          false,
+      obligatorio_rfc:                false,
+      obligatorio_direccion_fiscal:   false,
+      obligatorio_barcode:            false,
+      obligatorio_qr:                 false,
+      obligatorio_ruta:               false,
+      obligatorio_descripcion:        false
     };
-    
+
     try {
-      // Obtener configuración de la empresa y etiqueta
+      // Obtener configuración de empresa
       const [config] = await db.query(`
-        SELECT clave, valor 
-        FROM configuracion_sistema 
-        WHERE categoria IN ('empresa', 'etiqueta')
+        SELECT clave, valor FROM configuracion_sistema WHERE categoria IN ('empresa', 'etiqueta')
       `);
-      
       if (config && config.length > 0) {
         config.forEach(item => {
           switch(item.clave) {
-            // Datos empresa
             case 'empresa_nombre':              configuracion.nombre_empresa        = item.valor || 'TRANSPORTES AB'; break;
             case 'empresa_eslogan':             configuracion.eslogan               = item.valor || ''; break;
             case 'empresa_telefono':            configuracion.telefono              = item.valor || ''; break;
@@ -927,21 +985,30 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
             case 'empresa_logo_url':            configuracion.logo_url              = item.valor || null; break;
             case 'empresa_rfc':                 configuracion.rfc                   = item.valor || ''; break;
             case 'empresa_direccion':           configuracion.direccion             = item.valor || ''; break;
-            // Toggles individuales
-            case 'etiqueta_mostrar_logo':               configuracion.mostrar_logo               = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_eslogan':            configuracion.mostrar_eslogan            = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_telefono':           configuracion.mostrar_telefono           = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_telefono_adicional': configuracion.mostrar_telefono_adicional = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_email':              configuracion.mostrar_email              = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_sitio_web':          configuracion.mostrar_sitio_web          = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_rfc':                configuracion.mostrar_rfc                = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_direccion_fiscal':   configuracion.mostrar_direccion_fiscal   = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_barcode':            configuracion.mostrar_barcode            = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_qr':                 configuracion.mostrar_qr                 = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_ruta':               configuracion.mostrar_ruta               = item.valor !== 'false'; break;
-            case 'etiqueta_mostrar_descripcion':        configuracion.mostrar_descripcion        = item.valor !== 'false'; break;
           }
         });
+      }
+
+      // Si el cliente tiene un template asignado, usar sus ajustes
+      const envioData0 = envios[0];
+      if (envioData0.cliente_id) {
+        const [[clienteRow]] = await db.query(
+          'SELECT template_etiqueta_id FROM clientes WHERE id = ?', [envioData0.cliente_id]
+        );
+        if (clienteRow && clienteRow.template_etiqueta_id) {
+          const [[tpl]] = await db.query(
+            'SELECT * FROM etiqueta_templates WHERE id = ?', [clienteRow.template_etiqueta_id]
+          );
+          if (tpl) {
+            const keys = ['logo','eslogan','telefono','telefono_adicional','email','sitio_web','rfc','direccion_fiscal','barcode','qr','ruta','descripcion'];
+            keys.forEach(k => {
+              configuracion['mostrar_' + k]    = !!tpl['mostrar_' + k];
+              configuracion['obligatorio_' + k] = !!tpl['obligatorio_' + k];
+              // Obligatorio fuerza mostrar
+              if (configuracion['obligatorio_' + k]) configuracion['mostrar_' + k] = true;
+            });
+          }
+        }
       }
     } catch (error) {
       console.log('Error al obtener configuración, usando valores por defecto:', error.message);
@@ -986,6 +1053,16 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
   }
 });
 
+
+// Marcar que la etiqueta fue impresa con modificaciones de toggles
+router.post('/:id/marcar-etiqueta-modificada', isAuthenticated, async (req, res) => {
+  try {
+    await db.query('UPDATE envios SET etiqueta_modificada = 1 WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ ok: false });
+  }
+});
 
 // Guías de un cliente para selector de guía parcial
 router.get('/parciales-por-cliente/:clienteId', isAuthenticated, async (req, res) => {

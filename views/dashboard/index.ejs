@@ -1367,17 +1367,19 @@
     </ul>
   </div>
   
-  <!-- Navegación Sistema (solo admin) -->
-  <% if (user.rol === 'admin') { %>
+  <!-- Navegación Sistema -->
+  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
     <div class="nav-section">
       <div class="nav-section-title">SISTEMA</div>
       <ul class="nav-menu">
+        <% if (user.rol === 'admin') { %>
         <li class="nav-item">
           <a href="/usuarios" class="nav-link">
             <i data-lucide="user-cog"></i>
             <span>Usuarios</span>
           </a>
         </li>
+        <% } %>
         <li class="nav-item">
           <a href="/configuracion" class="nav-link">
             <i data-lucide="settings"></i>

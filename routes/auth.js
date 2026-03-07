@@ -69,7 +69,17 @@ router.post('/login', async (req, res) => {
     if (user.rol === 'cliente') {
       return res.redirect('/portal-cliente');
     }
-    res.redirect('/dashboard');
+
+    // Usar página de inicio preferida del usuario
+    // Superusuario: por defecto envios-retrasados si nunca cambió su preferencia
+    const rutasValidas = ['/dashboard', '/envios', '/envios-retrasados', '/historial', '/clientes'];
+    let destino = user.pagina_inicio || null;
+    if (!destino || !rutasValidas.includes(destino)) {
+      if (user.rol === 'superusuario') destino = '/envios-retrasados';
+      else if (user.rol === 'operador') destino = '/envios';
+      else destino = '/dashboard';
+    }
+    res.redirect(destino);
     
   } catch (error) {
     console.error('Error en login:', error);

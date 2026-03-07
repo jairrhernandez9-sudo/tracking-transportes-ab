@@ -24,37 +24,41 @@
        BARRA DE PREVIEW (no se imprime)
     ================================================ */
     .preview-bar {
-      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-      border-radius: 14px;
-      padding: 18px 28px;
-      margin-bottom: 24px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+      border-radius: 0;
+      padding: 12px 24px;
+      margin: -24px -24px 24px -24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+      gap: 12px;
+      height: 56px;
+      position: sticky;
+      top: -24px;
+      z-index: 100;
     }
 
-    .preview-bar-info h2 {
-      color: white;
-      font-size: 1.15rem;
-      font-weight: 900;
-      margin-bottom: 3px;
-    }
-
-    .preview-bar-info p {
-      color: rgba(255,255,255,0.75);
-      font-size: 0.82rem;
-    }
-
-    .preview-bar-actions {
+    .preview-bar-left {
       display: flex;
+      align-items: center;
       gap: 10px;
+    }
+
+    .toolbar-title {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .toolbar-tracking {
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
     }
 
     .btn-print {
       padding: 10px 22px;
-      background: white;
-      color: #1e3a8a;
+      background: #2563eb;
+      color: white;
       border: none;
       border-radius: 8px;
       font-weight: 800;
@@ -63,28 +67,29 @@
       display: flex;
       align-items: center;
       gap: 7px;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.4);
       transition: all 0.2s;
     }
 
-    .btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn-print:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,0.5); }
 
     .btn-back {
-      padding: 10px 20px;
-      background: rgba(255,255,255,0.15);
-      color: white;
-      border: 2px solid rgba(255,255,255,0.4);
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.88rem;
+      font-weight: 600;
+      font-size: 12px;
       cursor: pointer;
       text-decoration: none;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       transition: all 0.2s;
     }
 
-    .btn-back:hover { background: rgba(255,255,255,0.25); }
+    .btn-back:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
     /* ================================================
        ETIQUETA 4x6 PULGADAS
@@ -442,10 +447,108 @@
       line-height: 1.5;
     }
 
+    /* ── PANEL DE TOGGLES (no se imprime) ── */
+    .page-layout { display: flex; gap: 28px; align-items: flex-start; }
+    .etiqueta-area { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 0; }
+    .panel-toggles { width: 264px; flex-shrink: 0; position: sticky; top: 56px; }
+    .tpl-panel { background: white; border-radius: 14px; padding: 18px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .tpl-panel-hdr { font-size: 0.78rem; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .tpl-section { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 4px; }
+    .tpl-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; gap: 8px; }
+    .tpl-row-lbl { font-size: 0.8rem; color: #374151; font-weight: 500; line-height: 1.2; }
+    .tpl-row-sub { font-size: 0.67rem; color: #94a3b8; }
+    .tpl-lock { font-size: 0.58rem; background: #fef3c7; color: #b45309; padding: 1px 4px; border-radius: 3px; font-weight: 700; margin-left: 3px; vertical-align: middle; }
+    .tpl-sw { position: relative; width: 38px; height: 20px; flex-shrink: 0; }
+    .tpl-sw input { opacity: 0; width: 0; height: 0; }
+    .tpl-sl { position: absolute; cursor: pointer; inset: 0; background: #cbd5e1; transition: .25s; border-radius: 20px; }
+    .tpl-sl:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; transition: .25s; border-radius: 50%; }
+    .tpl-sw input:checked + .tpl-sl { background: #3b82f6; }
+    .tpl-sw input:checked + .tpl-sl:before { transform: translateX(18px); }
+    .tpl-sw input:disabled + .tpl-sl { opacity: 0.55; cursor: not-allowed; }
+    .tpl-nota { font-size: 0.7rem; color: #94a3b8; line-height: 1.4; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+
+    /* Elemento oculto (funciona en pantalla Y al imprimir) */
+    .etq-hidden { display: none !important; }
+
+    /* ── BARRA DE ZOOM (no se imprime) ── */
+    .zoom-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      border-radius: 50px;
+      padding: 9px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+      z-index: 200;
+      user-select: none;
+    }
+    .zoom-btn {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+    .zoom-btn:hover { background: rgba(255,255,255,0.25); }
+    .zoom-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 120px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.25);
+      outline: none;
+      cursor: pointer;
+    }
+    .zoom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+    .zoom-pct {
+      color: white;
+      font-size: 0.78rem;
+      font-weight: 700;
+      min-width: 36px;
+      text-align: center;
+    }
+    .zoom-reset {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0 2px;
+      transition: color 0.15s;
+    }
+    .zoom-reset:hover { color: white; }
+
+    /* ── PAN (mano) ── */
+    .etiqueta-area { cursor: grab; }
+    .etiqueta-area.panning { cursor: grabbing; }
+
     /* ── PRINT ── */
     @media print {
       body { background: white; padding: 0; }
       .no-print { display: none !important; }
+      #etiqueta-canvas { zoom: 1 !important; }
       .etiqueta { box-shadow: none; margin: 0; border-radius: 0; }
     }
   </style>
@@ -487,18 +590,21 @@
 
   <!-- BARRA DE PREVIEW (no se imprime) -->
   <div class="preview-bar no-print">
-    <div class="preview-bar-info">
-      <h2>🏷️ Etiqueta de Envío</h2>
-      <p><%= envio.numero_tracking %> &nbsp;•&nbsp; <%= totalUnidades %> etiqueta(s) &nbsp;•&nbsp; 4 × 6 pulgadas</p>
+    <div class="preview-bar-left">
+      <a href="/envios/<%= envio.id %>" class="btn-back">← Volver al detalle</a>
+      <span class="toolbar-title">Etiqueta de Envío</span>
+      <span class="toolbar-tracking"><%= envio.numero_tracking %> &nbsp;•&nbsp; <%= totalUnidades %> etiqueta(s) &nbsp;•&nbsp; 4 × 6 pulgadas</span>
     </div>
-    <div class="preview-bar-actions">
-      <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
-      <a href="/envios" class="btn-back">← Volver</a>
-    </div>
+    <button onclick="imprimirEtiqueta()" class="btn-print">🖨️ Imprimir</button>
   </div>
 
+  <!-- ── LAYOUT: etiquetas + panel ── -->
+  <div class="page-layout">
+  <div class="etiqueta-area">
+  <div id="etiqueta-canvas">
+
   <!-- ── LOOP POR UNIDADES ── -->
-  <% for (let i = 1; i <= totalUnidades; i++) { 
+  <% for (let i = 1; i <= totalUnidades; i++) {
      const unidadActual = unidades[i-1] || null;
   %>
 
@@ -509,13 +615,11 @@
 
       <!-- Empresa / logo -->
       <div class="cab-logo">
-        <% if (showLogo) { %>
-          <img src="<%= cfg.logo_url %>" alt="Logo">
+        <% if (cfg.logo_url) { %>
+          <img src="<%= cfg.logo_url %>" alt="Logo" data-elem="logo" class="<%= !showLogo ? 'etq-hidden' : '' %>">
         <% } %>
         <div class="cab-logo-nombre"><%= cfg.nombre_empresa || 'TRANSPORTES AB' %></div>
-        <% if (showEslogan) { %>
-          <div class="cab-logo-eslogan"><%= cfg.eslogan %></div>
-        <% } %>
+        <div class="cab-logo-eslogan" data-elem="eslogan" class="<%= !showEslogan ? 'etq-hidden' : '' %>"><%= cfg.eslogan %></div>
       </div>
 
       <!-- Fecha -->
@@ -535,14 +639,12 @@
     </div>
 
     <!-- ══ CONTACTO (toggles individuales) ══ -->
-    <% if (showContactoBar) { %>
-    <div class="barra-contacto">
-      <% if (showTelefono) { %><span>📞 <%= cfg.telefono %></span><% } %>
-      <% if (showTelefonoAdicional) { %><span>📱 <%= cfg.telefono_adicional %></span><% } %>
-      <% if (showEmail) { %><span>✉️ <%= cfg.email %></span><% } %>
-      <% if (showSitioWeb) { %><span>🌐 <%= cfg.sitio_web.replace(/https?:\/\/(www\.)?/,'') %></span><% } %>
+    <div class="barra-contacto <%= !showContactoBar ? 'etq-hidden' : '' %>" data-elem="contacto-bar">
+      <% if (cfg.telefono) { %><span data-contact="telefono" class="<%= !showTelefono ? 'etq-hidden' : '' %>">📞 <%= cfg.telefono %></span><% } %>
+      <% if (cfg.telefono_adicional) { %><span data-contact="telefono_adicional" class="<%= !showTelefonoAdicional ? 'etq-hidden' : '' %>">📱 <%= cfg.telefono_adicional %></span><% } %>
+      <% if (cfg.email) { %><span data-contact="email" class="<%= !showEmail ? 'etq-hidden' : '' %>">✉️ <%= cfg.email %></span><% } %>
+      <% if (cfg.sitio_web) { %><span data-contact="sitio_web" class="<%= !showSitioWeb ? 'etq-hidden' : '' %>">🌐 <%= cfg.sitio_web.replace(/https?:\/\/(www\.)?/,'') %></span><% } %>
     </div>
-    <% } %>
 
     <!-- ══ TRACKING ══ -->
     <div class="tracking-section">
@@ -562,15 +664,12 @@
     </div>
 
     <!-- ══ CÓDIGO DE BARRAS (toggle) ══ -->
-    <% if (showBarcode) { %>
-    <div class="barcode-wrap">
+    <div class="barcode-wrap <%= !showBarcode ? 'etq-hidden' : '' %>" data-elem="barcode">
       <svg id="barcode-<%= i %>"></svg>
     </div>
-    <% } %>
 
     <!-- ══ RUTA (toggle) ══ -->
-    <% if (showRuta) { %>
-    <div class="ruta">
+    <div class="ruta <%= !showRuta ? 'etq-hidden' : '' %>" data-elem="ruta">
       <div class="ruta-box">
         <div class="ruta-etiqueta">Origen</div>
         <div class="ruta-ciudad"><%= (envio.origen_ciudad || envio.origen.split(',')[0]).toUpperCase() %></div>
@@ -583,7 +682,6 @@
         <% if (envio.destino_estado) { %><div class="ruta-estado"><%= envio.destino_estado %></div><% } %>
       </div>
     </div>
-    <% } %>
 
     <!-- ══ DESTINATARIO ══ -->
     <div class="destinatario">
@@ -629,10 +727,8 @@
     </div>
 
     <!-- ══ DESCRIPCIÓN + QR (toggles) ══ -->
-    <% if (showDesc || showQr) { %>
-    <div class="fila-bottom">
-      <% if (showDesc) { %>
-      <div class="descripcion-box">
+    <div class="fila-bottom <%= (!showDesc && !showQr) ? 'etq-hidden' : '' %>" data-elem="fila-bottom">
+      <div class="descripcion-box <%= !showDesc ? 'etq-hidden' : '' %>" data-elem="descripcion">
         <div class="descripcion-etiqueta">Descripción / Contenido</div>
         <% if (typeof items !== 'undefined' && items && items.length > 0) { %>
           <% let _eTotPeso = 0; %>
@@ -664,24 +760,20 @@
           <div class="descripcion-texto"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
         <% } %>
       </div>
-      <% } %>
-      <% if (showQr) { %>
-      <div class="qr-box">
+      <div class="qr-box <%= !showQr ? 'etq-hidden' : '' %>" data-elem="qr">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=104x104&data=<%= encodeURIComponent(qrBase + '/tracking?numero=' + envio.numero_tracking) %>&color=000000&bgcolor=ffffff&margin=0" alt="QR Tracking">
         <div class="qr-label">Rastrear envío</div>
       </div>
-      <% } %>
     </div>
-    <% } %>
 
     <!-- ══ FOOTER ══ -->
     <div class="footer-etiqueta">
       <div class="footer-izq">
-        <% if (showRfc) { %><strong>RFC:</strong> <%= cfg.rfc %><br><% } %>
-        <% if (showDireccionFiscal) { %><%= cfg.direccion %><% } %>
+        <% if (cfg.rfc) { %><span data-elem="rfc" class="<%= !showRfc ? 'etq-hidden' : '' %>" style="display:block;"><strong>RFC:</strong> <%= cfg.rfc %></span><% } %>
+        <% if (cfg.direccion) { %><span data-elem="direccion_fiscal" class="<%= !showDireccionFiscal ? 'etq-hidden' : '' %>" style="display:block;"><%= cfg.direccion %></span><% } %>
       </div>
       <div class="footer-der">
-        <% if (showEslogan) { %><em><%= cfg.eslogan %></em><br><% } %>
+        <% if (cfg.eslogan) { %><span data-elem="eslogan-footer" class="<%= !showEslogan ? 'etq-hidden' : '' %>" style="display:block;"><em><%= cfg.eslogan %></em></span><% } %>
         <span style="color:#bbb;">transportesab.com</span>
       </div>
     </div>
@@ -690,34 +782,260 @@
 
   <% } %><!-- /loop -->
 
+  </div><!-- /etiqueta-canvas -->
+  </div><!-- /etiqueta-area -->
+
+  <!-- ── PANEL DE TOGGLES (no se imprime) ── -->
+  <div class="panel-toggles no-print">
+    <div class="tpl-panel">
+      <div class="tpl-panel-hdr">🏷️ Elementos de la Etiqueta</div>
+      <p style="font-size:0.72rem;color:#94a3b8;margin-bottom:10px;">Controla qué aparece al imprimir</p>
+
+      <p class="tpl-section">Datos de la empresa</p>
+
+      <% /* Función helper para row del panel */ %>
+      <%
+        const obligatorio = cfg || {};
+        // Helpers para cada fila del panel
+        function panelRow(key, icon, label, showVal, hasData, isObl) {
+          // Si no hay datos en empresa, deshabilitar aunque template diga true
+          const disabled = isObl || !hasData;
+          const checked  = showVal && hasData;
+          return { key, icon, label, disabled, checked, isObl };
+        }
+        const panelRows = [
+          panelRow('logo',               '🖼️', 'Logo',                showLogo,               !!cfg.logo_url,           !!cfg.obligatorio_logo),
+          panelRow('eslogan',            '✍️', 'Eslogan / Tagline',   showEslogan,             !!cfg.eslogan,            !!cfg.obligatorio_eslogan),
+          panelRow('telefono',           '📞', 'Teléfono principal',  showTelefono,            !!cfg.telefono,           !!cfg.obligatorio_telefono),
+          panelRow('telefono_adicional', '📱', 'Teléfono adicional',  showTelefonoAdicional,   !!cfg.telefono_adicional, !!cfg.obligatorio_telefono_adicional),
+          panelRow('email',              '✉️', 'Email corporativo',   showEmail,               !!cfg.email,              !!cfg.obligatorio_email),
+          panelRow('sitio_web',          '🌐', 'Sitio web',           showSitioWeb,            !!cfg.sitio_web,          !!cfg.obligatorio_sitio_web),
+          panelRow('rfc',                '🪪', 'RFC',                  showRfc,                 !!cfg.rfc,                !!cfg.obligatorio_rfc),
+          panelRow('direccion_fiscal',   '📍', 'Dirección fiscal',    showDireccionFiscal,     !!cfg.direccion,          !!cfg.obligatorio_direccion_fiscal),
+        ];
+        const panelRowsEnvio = [
+          panelRow('barcode',     '▤',  'Código de barras',        showBarcode, true, !!cfg.obligatorio_barcode),
+          panelRow('qr',          '◼',  'Código QR',               showQr,      true, !!cfg.obligatorio_qr),
+          panelRow('ruta',        '→',  'Ruta Origen/Destino',     showRuta,    true, !!cfg.obligatorio_ruta),
+          panelRow('descripcion', '📝', 'Descripción del paquete', showDesc,    true, !!cfg.obligatorio_descripcion),
+        ];
+      %>
+
+      <% panelRows.forEach(function(r) { %>
+      <div class="tpl-row">
+        <div>
+          <div class="tpl-row-lbl"><%= r.icon %> <%= r.label %><% if (r.isObl) { %><span class="tpl-lock">FIJO</span><% } %></div>
+        </div>
+        <label class="tpl-sw" title="<%= r.isObl ? 'Obligatorio - no se puede desactivar' : (!r.checked && !r.hasData ? 'Sin datos en Empresa' : '') %>">
+          <input type="checkbox" onchange="toggleElem('<%= r.key %>',this.checked)"
+            <%= r.checked ? 'checked' : '' %>
+            <%= r.disabled ? 'disabled' : '' %>>
+          <span class="tpl-sl"></span>
+        </label>
+      </div>
+      <% }) %>
+
+      <p class="tpl-section" style="margin-top:12px;">Elementos del envío</p>
+
+      <% panelRowsEnvio.forEach(function(r) { %>
+      <div class="tpl-row">
+        <div>
+          <div class="tpl-row-lbl"><%= r.icon %> <%= r.label %><% if (r.isObl) { %><span class="tpl-lock">FIJO</span><% } %></div>
+        </div>
+        <label class="tpl-sw">
+          <input type="checkbox" onchange="toggleElem('<%= r.key %>',this.checked)"
+            <%= r.checked ? 'checked' : '' %>
+            <%= r.disabled ? 'disabled' : '' %>>
+          <span class="tpl-sl"></span>
+        </label>
+      </div>
+      <% }) %>
+
+      <p class="tpl-nota">Los campos vacíos no se imprimen aunque el toggle esté activo. Los marcados como <strong>FIJO</strong> siempre se imprimirán.</p>
+    </div>
+  </div>
+
+  </div><!-- /page-layout -->
+
+  <!-- ── BARRA DE ZOOM (no se imprime) ── -->
+  <div class="zoom-bar no-print">
+    <button class="zoom-btn" onclick="changeZoom(-0.1)" title="Reducir">−</button>
+    <input type="range" id="zoom-slider" class="zoom-slider" min="50" max="250" value="135" step="5" oninput="setZoom(this.value/100)">
+    <button class="zoom-btn" onclick="changeZoom(0.1)" title="Ampliar">+</button>
+    <span class="zoom-pct" id="zoom-pct">135%</span>
+    <button class="zoom-reset" onclick="setZoom(1.35)" title="Restablecer">↺ Reset</button>
+  </div>
+
   <!-- Datos para el script (EJS los renderiza, VS Code no los lintea) -->
   <script id="etiqueta-config" type="application/json">
     {
       "showBarcode": <%= showBarcode ? 'true' : 'false' %>,
       "tracking":    "<%= envio.numero_tracking %>",
-      "total":       <%= totalUnidades %>
+      "total":       <%= totalUnidades %>,
+      "envioId":     <%= envio.id %>,
+      "defaults": {
+        "logo":               <%= (showLogo               && !!cfg.logo_url)           ? 'true' : 'false' %>,
+        "eslogan":            <%= (showEslogan            && !!cfg.eslogan)             ? 'true' : 'false' %>,
+        "telefono":           <%= (showTelefono           && !!cfg.telefono)            ? 'true' : 'false' %>,
+        "telefono_adicional": <%= (showTelefonoAdicional  && !!cfg.telefono_adicional)  ? 'true' : 'false' %>,
+        "email":              <%= (showEmail              && !!cfg.email)               ? 'true' : 'false' %>,
+        "sitio_web":          <%= (showSitioWeb           && !!cfg.sitio_web)           ? 'true' : 'false' %>,
+        "rfc":                <%= (showRfc                && !!cfg.rfc)                 ? 'true' : 'false' %>,
+        "direccion_fiscal":   <%= (showDireccionFiscal    && !!cfg.direccion)           ? 'true' : 'false' %>,
+        "barcode":            <%= showBarcode    ? 'true' : 'false' %>,
+        "qr":                 <%= showQr        ? 'true' : 'false' %>,
+        "ruta":               <%= showRuta      ? 'true' : 'false' %>,
+        "descripcion":        <%= showDesc      ? 'true' : 'false' %>
+      }
     }
   </script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var cfg    = JSON.parse(document.getElementById('etiqueta-config').textContent);
+    // ── ZOOM ──────────────────────────────────────────────
+    var _zoom = 1.35;
 
-      if (cfg.showBarcode) {
-        for (var i = 1; i <= cfg.total; i++) {
-          try {
-            JsBarcode('#barcode-' + i, cfg.tracking, {
-              format: 'CODE128',
-              width: 1.7,
-              height: 42,
-              displayValue: false,
-              margin: 0,
-              background: 'transparent'
-            });
-          } catch(e) { console.warn('Barcode ' + i + ':', e); }
-        }
+    function setZoom(v) {
+      _zoom = Math.min(2.5, Math.max(0.5, Math.round(v * 20) / 20));
+      document.getElementById('etiqueta-canvas').style.zoom = _zoom;
+      document.getElementById('zoom-slider').value = Math.round(_zoom * 100);
+      document.getElementById('zoom-pct').textContent = Math.round(_zoom * 100) + '%';
+    }
+
+    function changeZoom(delta) { setZoom(_zoom + delta); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var etqCfg = JSON.parse(document.getElementById('etiqueta-config').textContent);
+
+      // Aplicar zoom inicial
+      setZoom(1.35);
+
+      if (etqCfg.showBarcode) {
+        renderBarcodes();
       }
+
+      // Scroll en el área de la etiqueta → zoom
+      var etqArea = document.querySelector('.etiqueta-area');
+      etqArea.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        changeZoom(e.deltaY < 0 ? 0.05 : -0.05);
+      }, { passive: false });
+
+      // ── PAN: arrastra la etiqueta con la mano ──────────────
+      var _isPanning = false;
+      var _panStartX, _panStartY, _panScrollX, _panScrollY;
+
+      etqArea.addEventListener('mousedown', function(e) {
+        if (e.button !== 0) return;
+        _isPanning = true;
+        _panStartX  = e.clientX;
+        _panStartY  = e.clientY;
+        _panScrollX = window.scrollX;
+        _panScrollY = window.scrollY;
+        etqArea.classList.add('panning');
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!_isPanning) return;
+        window.scrollTo(
+          _panScrollX - (e.clientX - _panStartX),
+          _panScrollY - (e.clientY - _panStartY)
+        );
+      });
+
+      document.addEventListener('mouseup', function() {
+        if (_isPanning) {
+          _isPanning = false;
+          etqArea.classList.remove('panning');
+        }
+      });
     });
+
+    function renderBarcodes() {
+      var etqCfg = JSON.parse(document.getElementById('etiqueta-config').textContent);
+      for (var i = 1; i <= etqCfg.total; i++) {
+        try {
+          JsBarcode('#barcode-' + i, etqCfg.tracking, {
+            format: 'CODE128', width: 1.7, height: 42,
+            displayValue: false, margin: 0, background: 'transparent'
+          });
+        } catch(e) { console.warn('Barcode ' + i + ':', e); }
+      }
+    }
+
+    var _contactKeys = ['telefono','telefono_adicional','email','sitio_web'];
+
+    // ── DETECCIÓN DE MODIFICACIONES ──────────────────────────
+    var _etqCfgGlobal = JSON.parse(document.getElementById('etiqueta-config').textContent);
+    var _defaults     = _etqCfgGlobal.defaults;
+    var _toggleState  = Object.assign({}, _defaults);
+
+    function imprimirEtiqueta() {
+      var modificada = Object.keys(_defaults).some(function(k) {
+        return _toggleState[k] !== _defaults[k];
+      });
+      if (modificada) {
+        fetch('/envios/' + _etqCfgGlobal.envioId + '/marcar-etiqueta-modificada', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        }).finally(function() { window.print(); });
+      } else {
+        window.print();
+      }
+    }
+
+    function toggleElem(key, visible) {
+      _toggleState[key] = visible;
+      if (_contactKeys.includes(key)) {
+        // Mostrar/ocultar span de contacto individualmente
+        document.querySelectorAll('[data-contact="' + key + '"]').forEach(function(el) {
+          el.classList.toggle('etq-hidden', !visible);
+        });
+        // Actualizar visibilidad de la barra de contacto
+        var anyContact = _contactKeys.some(function(k) {
+          var s = document.querySelector('[data-contact="' + k + '"]');
+          return s && !s.classList.contains('etq-hidden');
+        });
+        document.querySelectorAll('[data-elem="contacto-bar"]').forEach(function(el) {
+          el.classList.toggle('etq-hidden', !anyContact);
+        });
+        return;
+      }
+
+      // Elementos en el footer tienen data-elem-footer pero usamos data-elem genérico
+      // eslogan aparece en cab-logo (data-elem="eslogan") y footer (data-elem="eslogan-footer")
+      if (key === 'eslogan') {
+        document.querySelectorAll('[data-elem="eslogan"],[data-elem="eslogan-footer"]').forEach(function(el) {
+          el.classList.toggle('etq-hidden', !visible);
+        });
+        return;
+      }
+
+      // descripcion y qr controlan también la fila-bottom contenedora
+      if (key === 'descripcion' || key === 'qr') {
+        document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {
+          el.classList.toggle('etq-hidden', !visible);
+        });
+        var anyFila = ['descripcion','qr'].some(function(k) {
+          var s = document.querySelector('[data-elem="' + k + '"]');
+          return s && !s.classList.contains('etq-hidden');
+        });
+        document.querySelectorAll('[data-elem="fila-bottom"]').forEach(function(el) {
+          el.classList.toggle('etq-hidden', !anyFila);
+        });
+        return;
+      }
+
+      // Toggle genérico
+      document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {
+        el.classList.toggle('etq-hidden', !visible);
+      });
+
+      // Si se activa el barcode, re-renderizar
+      if (key === 'barcode' && visible) {
+        renderBarcodes();
+      }
+    }
   </script>
 
 </body>

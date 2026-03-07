@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -727,12 +727,14 @@
       <div class="nav-section">
         <div class="nav-section-title">PRINCIPAL</div>
         <ul class="nav-menu">
+          <% if (!user || user.rol !== 'operador') { %>
           <li class="nav-item">
             <a href="/dashboard" class="nav-link">
               <i data-lucide="layout-dashboard"></i>
               <span>Dashboard</span>
             </a>
           </li>
+          <% } %>
           <li class="nav-item">
             <a href="/envios" class="nav-link">
               <i data-lucide="package"></i>
@@ -766,16 +768,18 @@
         </ul>
       </div>
       
-      <% if (user && user.rol === 'admin') { %>
+      <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
+            <% if (user.rol === 'admin') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
                 <span>Usuarios</span>
               </a>
             </li>
+            <% } %>
             <li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
@@ -1031,6 +1035,47 @@
                 </div>
               </div>
             </div>
+
+          <!-- Diseño de Guías -->
+          <div style="margin: 28px 0 8px; padding-top: 24px; border-top: 2px solid #f1f5f9;">
+            <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 16px;">
+              <i data-lucide="tag" style="width:18px;height:18px;vertical-align:-3px;color:#3b82f6;"></i>
+              Diseño de Guías
+            </h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Template del ticket</label>
+                <select name="template_etiqueta_id" class="form-input">
+                  <option value="">— Sin template —</option>
+                  <% if (typeof etiquetaTemplates !== 'undefined') { etiquetaTemplates.forEach(t => { %>
+                    <option value="<%= t.id %>"><%= t.nombre %></option>
+                  <% }); } %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Template de la Guía Porte</label>
+                <select name="template_guia_id" class="form-input">
+                  <option value="">— Sin template —</option>
+                  <% if (typeof guiaTemplates !== 'undefined') { guiaTemplates.forEach(t => { %>
+                    <option value="<%= t.id %>"><%= t.nombre %></option>
+                  <% }); } %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tipo de pago por defecto</label>
+                <% if (creditoHabilitado) { %>
+                <select name="metodo_pago_defecto" class="form-input">
+                  <option value="PPD">PPD: Pago en Parcialidades o Diferido</option>
+                  <option value="PUE">PUE: Pago en una Sola Exhibición</option>
+                </select>
+                <% } else { %>
+                <input type="hidden" name="metodo_pago_defecto" value="PUE">
+                <input type="text" class="form-input" value="PUE: Pago en una Sola Exhibición" disabled style="background:#f1f5f9;color:#94a3b8;">
+                <p style="font-size:0.75rem;color:#f59e0b;margin-top:4px;">El crédito está desactivado globalmente en Configuración → Tarifas</p>
+                <% } %>
+              </div>
+            </div>
+          </div>
 
           <div class="form-actions">
             <a href="/clientes" class="btn btn-secondary">

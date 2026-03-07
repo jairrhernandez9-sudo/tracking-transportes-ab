@@ -155,7 +155,11 @@ router.get('/', isAuthenticated, async (req, res) => {
 // ============================================
 // FORMULARIO NUEVO CLIENTE
 // ============================================
-router.get('/nuevo', isAuthenticated, requireAdminOrSuper, (req, res) => {
+router.get('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  const [etiquetaTemplates] = await db.query('SELECT id, nombre FROM etiqueta_templates ORDER BY nombre ASC').catch(() => [[]]);
+  const [guiaTemplates] = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
+  const [[cfgCredito]] = await db.query("SELECT valor FROM configuracion_sistema WHERE clave = 'credito_habilitado'").catch(() => [[null]]);
+  const creditoHabilitado = !cfgCredito || cfgCredito.valor !== 'false';
   res.render('clientes/nuevo', {
     title: 'Nuevo Cliente',
     user: {
@@ -163,6 +167,9 @@ router.get('/nuevo', isAuthenticated, requireAdminOrSuper, (req, res) => {
       email: req.session.userEmail,
       rol: req.session.userRole
     },
+    etiquetaTemplates,
+    guiaTemplates,
+    creditoHabilitado,
     error: null
   });
 });
@@ -172,46 +179,49 @@ router.get('/nuevo', isAuthenticated, requireAdminOrSuper, (req, res) => {
 // ============================================
 router.post('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
-    const { 
-      nombre_empresa, 
-      contacto, 
-      telefono, 
-      email, 
+    const {
+      nombre_empresa,
+      contacto,
+      telefono,
+      email,
       direccion,
-      prefijo_tracking_manual  // ⬅️ NUEVO CAMPO
+      prefijo_tracking_manual,
+      template_etiqueta_id,
+      template_guia_id,
+      metodo_pago_defecto
     } = req.body;
-    
+
     // Validar campos requeridos
     if (!nombre_empresa || !email) {
+      const [etiquetaTemplates] = await db.query('SELECT id, nombre FROM etiqueta_templates ORDER BY nombre ASC').catch(() => [[]]);
+      const [guiaTemplates] = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
       return res.render('clientes/nuevo', {
         title: 'Nuevo Cliente',
-        user: {
-          nombre: req.session.userName,
-          email: req.session.userEmail,
-          rol: req.session.userRole
-        },
+        user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+        etiquetaTemplates,
+        guiaTemplates,
         error: 'Nombre de empresa y email son obligatorios'
       });
     }
-    
+
     // Verificar si el email ya existe
     const [existente] = await db.query(
       'SELECT id FROM clientes WHERE email = ? AND eliminado_en IS NULL',
       [email]
     );
-    
+
     if (existente.length > 0) {
+      const [etiquetaTemplates] = await db.query('SELECT id, nombre FROM etiqueta_templates ORDER BY nombre ASC').catch(() => [[]]);
+      const [guiaTemplates] = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
       return res.render('clientes/nuevo', {
         title: 'Nuevo Cliente',
-        user: {
-          nombre: req.session.userName,
-          email: req.session.userEmail,
-          rol: req.session.userRole
-        },
+        user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+        etiquetaTemplates,
+        guiaTemplates,
         error: 'Ya existe un cliente con ese email'
       });
     }
-    
+
     // ⬅️ NUEVO: Determinar el prefijo a usar
     let prefijoFinal;
     
@@ -252,11 +262,14 @@ router.post('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => 
     }
     
     // ⬅️ MODIFICADO: Insertar cliente con prefijo
+    const tplId = parseInt(template_etiqueta_id) || null;
+    const guiaTplId = parseInt(template_guia_id) || null;
+    const metodoPago = ['PUE', 'PPD'].includes(metodo_pago_defecto) ? metodo_pago_defecto : 'PPD';
     await db.query(
-      `INSERT INTO clientes 
-      (nombre_empresa, contacto, telefono, email, direccion, prefijo_tracking, ultimo_numero_tracking)
-       VALUES (?, ?, ?, ?, ?, ?, 0)`,
-      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal]
+      `INSERT INTO clientes
+      (nombre_empresa, contacto, telefono, email, direccion, prefijo_tracking, ultimo_numero_tracking, template_etiqueta_id, template_guia_id, metodo_pago_defecto)
+       VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplId, guiaTplId, metodoPago]
     );
     
     res.redirect('/clientes?success=created');
@@ -392,13 +405,18 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
-    
+
     if (clientes.length === 0) {
       return res.status(404).send('Cliente no encontrado');
     }
-    
+
+    const [etiquetaTemplates] = await db.query('SELECT id, nombre FROM etiqueta_templates ORDER BY nombre ASC').catch(() => [[]]);
+    const [guiaTemplates] = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
+    const [[cfgCredito]] = await db.query("SELECT valor FROM configuracion_sistema WHERE clave = 'credito_habilitado'").catch(() => [[null]]);
+    const creditoHabilitado = !cfgCredito || cfgCredito.valor !== 'false';
+
     res.render('clientes/editar', {
       title: 'Editar Cliente',
       user: {
@@ -407,6 +425,9 @@ router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res)
         rol: req.session.userRole
       },
       cliente: clientes[0],
+      etiquetaTemplates,
+      guiaTemplates,
+      creditoHabilitado,
       error: null
     });
     
@@ -422,13 +443,16 @@ router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res)
 router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      nombre_empresa, 
-      contacto, 
-      telefono, 
-      email, 
+    const {
+      nombre_empresa,
+      contacto,
+      telefono,
+      email,
       direccion,
-      prefijo_tracking_manual  // ⬅️ NUEVO CAMPO
+      prefijo_tracking_manual,
+      template_etiqueta_id,
+      template_guia_id,
+      metodo_pago_defecto
     } = req.body;
     
     // Validar campos requeridos
@@ -524,12 +548,16 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res
       }
     }
     
-    // ⬅️ MODIFICADO: Actualizar cliente con prefijo
+    // ⬅️ MODIFICADO: Actualizar cliente con prefijo y templates
+    const tplIdEdit = parseInt(template_etiqueta_id) || null;
+    const guiaTplIdEdit = parseInt(template_guia_id) || null;
+    const metodoPagoEdit = ['PUE', 'PPD'].includes(metodo_pago_defecto) ? metodo_pago_defecto : 'PPD';
     await db.query(
-      `UPDATE clientes 
-       SET nombre_empresa = ?, contacto = ?, telefono = ?, email = ?, direccion = ?, prefijo_tracking = ?
+      `UPDATE clientes
+       SET nombre_empresa = ?, contacto = ?, telefono = ?, email = ?, direccion = ?, prefijo_tracking = ?,
+           template_etiqueta_id = ?, template_guia_id = ?, metodo_pago_defecto = ?
        WHERE id = ?`,
-      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, id]
+      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplIdEdit, guiaTplIdEdit, metodoPagoEdit, id]
     );
     
     res.redirect(`/clientes/${id}?success=updated`);

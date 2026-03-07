@@ -2,6 +2,48 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
+const db = require('./config/database');
+
+// Migraciones de columnas
+db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS pagina_inicio VARCHAR(50) NOT NULL DEFAULT 'dashboard'`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS ultimo_cliente_id INT NULL`).catch(() => {});
+
+// Migración: tabla etiqueta_templates
+db.query(`
+  CREATE TABLE IF NOT EXISTS etiqueta_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    mostrar_logo TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_eslogan TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_telefono TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_telefono_adicional TINYINT(1) NOT NULL DEFAULT 0,
+    mostrar_email TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_sitio_web TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_rfc TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_direccion_fiscal TINYINT(1) NOT NULL DEFAULT 0,
+    mostrar_barcode TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_qr TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_ruta TINYINT(1) NOT NULL DEFAULT 1,
+    mostrar_descripcion TINYINT(1) NOT NULL DEFAULT 1,
+    obligatorio_logo TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_eslogan TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_telefono TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_telefono_adicional TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_email TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_sitio_web TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_rfc TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_direccion_fiscal TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_barcode TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_qr TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_ruta TINYINT(1) NOT NULL DEFAULT 0,
+    obligatorio_descripcion TINYINT(1) NOT NULL DEFAULT 0,
+    creado_por INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`).catch(() => {});
+
+// Migración: columna template_etiqueta_id en clientes
+db.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS template_etiqueta_id INT NULL`).catch(() => {});
 
 const app = express();
 const PORT = process.env.PORT || 3000;

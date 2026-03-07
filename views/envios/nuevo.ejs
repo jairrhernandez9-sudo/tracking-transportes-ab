@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -657,33 +657,73 @@
     }
     
     /* Quick Date Buttons */
-    .quick-dates {
+    .fecha-row {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
+      align-items: center;
+      width: 100%;
     }
-    
+    .fecha-input-col {
+      flex: 0 0 50%;
+      display: flex;
+      align-items: center;
+    }
+    .fecha-input-col .form-input {
+      width: 100%;
+    }
+    .fecha-divider {
+      width: 1px;
+      background: #e2e8f0;
+      align-self: stretch;
+      margin: 0 16px;
+      flex-shrink: 0;
+    }
+    .quick-dates {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
     .quick-date-btn {
-      padding: 6px 12px;
-      border: 2px solid #e2e8f0;
-      background: white;
-      border-radius: 8px;
-      font-size: 0.8rem;
+      flex: 1;
+      padding: 0 8px;
+      height: 38px;
+      border: none;
+      background: #f1f5f9;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.75rem;
       font-weight: 600;
       color: #64748b;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
     }
-    
+
     .quick-date-btn:hover {
-      border-color: #3b82f6;
-      color: #3b82f6;
-      background: #eff6ff;
+      background: #dbeafe;
+      color: #2563eb;
     }
-    
+
     .quick-date-btn:active {
-      transform: scale(0.95);
+      background: #bfdbfe;
+    }
+    .quick-date-btn.selected {
+      background: #2563eb;
+      color: #fff;
+    }
+    .quick-date-btn.hoy-btn {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .quick-date-btn.hoy-btn:hover {
+      background: #fca5a5;
+      color: #991b1b;
+    }
+    .quick-date-btn.hoy-btn.selected {
+      background: #dc2626;
+      color: #fff;
     }
     
     @media (max-width: 968px) {
@@ -891,12 +931,14 @@
       <div class="nav-section">
         <div class="nav-section-title">PRINCIPAL</div>
         <ul class="nav-menu">
+          <% if (!user || user.rol !== 'operador') { %>
           <li class="nav-item">
             <a href="/dashboard" class="nav-link">
               <i data-lucide="layout-dashboard"></i>
               <span>Dashboard</span>
             </a>
           </li>
+          <% } %>
           <li class="nav-item">
             <a href="/envios" class="nav-link active">
               <i data-lucide="package"></i>
@@ -932,16 +974,18 @@
         </ul>
       </div>
       
-      <% if (user && user.rol === 'admin') { %>
+      <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
+            <% if (user.rol === 'admin') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
                 <span>Usuarios</span>
               </a>
             </li>
+            <% } %>
             <li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
@@ -1002,11 +1046,21 @@
                 <label class="form-label required">Cliente</label>
                 <select name="cliente_id" class="form-select" required>
                   <option value="">Selecciona un cliente...</option>
-                  <% clientes.forEach(cliente => { %>
-                    <option value="<%= cliente.id %>">
-                      <%= cliente.nombre_empresa %>
-                    </option>
-                  <% }); %>
+                  <% if (ultimoClienteId && clientes.find(c => c.id == ultimoClienteId)) { %>
+                  <optgroup label="⭐ Cliente reciente">
+                    <% const clienteReciente = clientes.find(c => c.id == ultimoClienteId); %>
+                    <option value="<%= clienteReciente.id %>" selected><%= clienteReciente.nombre_empresa %></option>
+                  </optgroup>
+                  <optgroup label="Todos los clientes">
+                    <% clientes.forEach(cliente => { %>
+                      <option value="<%= cliente.id %>"><%= cliente.nombre_empresa %></option>
+                    <% }); %>
+                  </optgroup>
+                  <% } else { %>
+                    <% clientes.forEach(cliente => { %>
+                      <option value="<%= cliente.id %>"><%= cliente.nombre_empresa %></option>
+                    <% }); %>
+                  <% } %>
                 </select>
                 <p class="form-help">Selecciona el cliente al que pertenece este envío</p>
               </div>
@@ -1123,17 +1177,23 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Fecha estimada de entrega</label>
-                  <input 
-                    type="date" 
-                    name="fecha_estimada_entrega" 
-                    id="fechaEntrega"
-                    class="form-input"
-                  >
-                  <div class="quick-dates">
-                    <button type="button" class="quick-date-btn" onclick="setQuickDate(1)">Mañana</button>
-                    <button type="button" class="quick-date-btn" onclick="setQuickDate(3)">3 días</button>
-                    <button type="button" class="quick-date-btn" onclick="setQuickDate(7)">1 semana</button>
-                    <button type="button" class="quick-date-btn" onclick="setQuickDate(14)">2 semanas</button>
+                  <div class="fecha-row">
+                    <div class="fecha-input-col">
+                      <input
+                        type="date"
+                        name="fecha_estimada_entrega"
+                        id="fechaEntrega"
+                        class="form-input"
+                      >
+                    </div>
+                    <div class="fecha-divider"></div>
+                    <div class="quick-dates">
+                      <button type="button" class="quick-date-btn" data-days="1" onclick="setQuickDate(1)">Mañana</button>
+                      <button type="button" class="quick-date-btn" data-days="3" onclick="setQuickDate(3)">3 días</button>
+                      <button type="button" class="quick-date-btn" data-days="7" onclick="setQuickDate(7)">1 semana</button>
+                      <button type="button" class="quick-date-btn" data-days="14" onclick="setQuickDate(14)">2 semanas</button>
+                      <button type="button" class="quick-date-btn hoy-btn" data-days="0" onclick="setQuickDate(0)">⚠ HOY</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1702,16 +1762,20 @@
     function setQuickDate(days) {
       const today = new Date();
       today.setDate(today.getDate() + days);
-      
+
       const year = today.getFullYear();
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const day = String(today.getDate()).padStart(2, '0');
-      
-      const dateString = `${year}-${month}-${day}`;
-      document.getElementById('fechaEntrega').value = dateString;
+
+      document.getElementById('fechaEntrega').value = `${year}-${month}-${day}`;
+
+      // Marcar botón activo
+      document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('selected'));
+      const active = document.querySelector(`.quick-date-btn[data-days="${days}"]`);
+      if (active) active.classList.add('selected');
     }
-    
-    // Establecer fecha mínima (hoy)
+
+    // Establecer fecha mínima y pre-seleccionar Mañana
     document.addEventListener('DOMContentLoaded', function() {
       const fechaInput = document.getElementById('fechaEntrega');
       if (fechaInput) {
@@ -1721,6 +1785,7 @@
         const day = String(today.getDate()).padStart(2, '0');
         fechaInput.min = `${year}-${month}-${day}`;
       }
+      setQuickDate(1); // Mañana por defecto
     });
 
 
@@ -1741,6 +1806,7 @@
           cargarDireccionesBodegas('origen');
           const clienteId = document.querySelector('[name="cliente_id"]')?.value;
           if (clienteId) cargarDireccionesClienteModal(clienteId, 'origen');
+          cambiarTabOrigen('clientes');
           lucide.createIcons();
         }
 
@@ -1754,6 +1820,7 @@
           cargarDireccionesBodegas('destino');
           const clienteId = document.querySelector('[name="cliente_id"]')?.value;
           if (clienteId) cargarDireccionesClienteModal(clienteId, 'destino');
+          cambiarTabDestino('clientes');
           lucide.createIcons();
         }
 
@@ -1885,8 +1952,9 @@
 
           // Bodegas
           const bodegas = (direccionesBodegas || []).filter(d =>
-            !query || d.alias.toLowerCase().includes(query) ||
-            d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query)
+            !query || d.alias?.toLowerCase().includes(query) ||
+            d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query) ||
+            d.estado?.toLowerCase().includes(query) || d.colonia?.toLowerCase().includes(query)
           );
           const bodFav  = bodegas.filter(d => favKeys.includes(`bodega-${d.id}`) || d.es_predeterminada);
           const bodRec  = bodegas.filter(d => recKeys.includes(`bodega-${d.id}`) && !bodFav.find(f => f.id === d.id));
@@ -1904,8 +1972,9 @@
 
           // Direcciones cliente
           const clDirs = (direccionesCliente || []).filter(d =>
-            !query || d.alias.toLowerCase().includes(query) ||
-            d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query)
+            !query || d.alias?.toLowerCase().includes(query) ||
+            d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query) ||
+            d.estado?.toLowerCase().includes(query) || d.colonia?.toLowerCase().includes(query)
           );
           const clFav   = clDirs.filter(d => favKeys.includes(`cliente-${d.id}`) || d.es_predeterminada);
           const clRec   = clDirs.filter(d => recKeys.includes(`cliente-${d.id}`) && !clFav.find(f => f.id === d.id));

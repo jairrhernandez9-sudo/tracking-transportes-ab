@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -634,6 +634,7 @@
     }
     
     .switch {
+      display: inline-block;
       position: relative;
       width: 50px;
       height: 26px;
@@ -672,10 +673,14 @@
     input:checked + .slider {
       background-color: #3b82f6;
     }
-    
+
     input:checked + .slider:before {
       transform: translateX(24px);
     }
+
+    /* Toggle rosa (obligatorio) */
+    .switch-pink .slider { background-color: #f1f5f9; }
+    .switch-pink input:checked + .slider { background-color: #ec4899; }
     
     .btn-primary {
       background: #3b82f6;
@@ -774,12 +779,14 @@
       <div class="nav-section">
         <div class="nav-section-title">PRINCIPAL</div>
         <ul class="nav-menu">
+          <% if (!user || user.rol !== 'operador') { %>
           <li class="nav-item">
             <a href="/dashboard" class="nav-link">
               <i data-lucide="layout-dashboard"></i>
               <span>Dashboard</span>
             </a>
           </li>
+          <% } %>
           <li class="nav-item">
             <a href="/envios" class="nav-link">
               <i data-lucide="package"></i>
@@ -804,24 +811,28 @@
               <span>Clientes</span>
             </a>
           </li>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
               <span>Reportes</span>
             </a>
           </li>
+          <% } %>
         </ul>
       </div>
-      
+
       <div class="nav-section">
         <div class="nav-section-title">SISTEMA</div>
         <ul class="nav-menu">
+          <% if (user && user.rol === 'admin') { %>
           <li class="nav-item">
             <a href="/usuarios" class="nav-link">
               <i data-lucide="user-cog"></i>
               <span>Usuarios</span>
             </a>
           </li>
+          <% } %>
           <li class="nav-item">
             <a href="/configuracion" class="nav-link active">
               <i data-lucide="settings"></i>
@@ -954,6 +965,34 @@
             Configuración de etiqueta actualizada
           </div>
         <% } %>
+
+        <% if (success === 'template_creado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Template creado correctamente
+          </div>
+        <% } %>
+
+        <% if (success === 'template_guardado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Template guardado correctamente
+          </div>
+        <% } %>
+
+        <% if (success === 'template_eliminado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Template eliminado correctamente
+          </div>
+        <% } %>
+
+        <% if (success === 'pagina_inicio_guardada') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Página de inicio guardada correctamente
+          </div>
+        <% } %>
         
         <% if (success === 'direccion_creada') { %>
           <div class="alert alert-success">
@@ -991,39 +1030,87 @@
         <% } %>
         
         <!-- Tabs -->
+        <%
+          var esOperador     = user.rol === 'operador';
+          var esSuperusuario = user.rol === 'superusuario';
+          var esAdmin        = user.rol === 'admin';
+          // Tab por defecto según rol
+          var tabPorDefecto = esOperador ? 'pagina-inicio'
+                            : esSuperusuario ? 'direcciones'
+                            : 'empresa';
+          var tabInicial = (typeof query !== 'undefined' && query && query.tab) ? query.tab : tabPorDefecto;
+        %>
         <div class="config-tabs">
-          <button class="tab-btn active" onclick="openTab(event, 'empresa')">
+          <%/* Empresa: solo admin */%>
+          <% if (esAdmin) { %>
+          <button class="tab-btn <%= tabInicial === 'empresa' ? 'active' : '' %>" onclick="openTab(event, 'empresa')">
             <i data-lucide="building-2" style="width: 18px; height: 18px;"></i>
             Empresa
           </button>
-          <button class="tab-btn" onclick="openTab(event, 'direcciones')">
+          <% } %>
+
+          <%/* Direcciones: admin + superusuario */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'direcciones' ? 'active' : '' %>" onclick="openTab(event, 'direcciones')">
             <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
             Direcciones
           </button>
-          <button class="tab-btn" onclick="openTab(event, 'tarifas')">
+          <% } %>
+
+          <%/* Tarifas: admin + superusuario */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'tarifas' ? 'active' : '' %>" onclick="openTab(event, 'tarifas')">
             <i data-lucide="dollar-sign" style="width: 18px; height: 18px;"></i>
             Tarifas
           </button>
-          <button class="tab-btn" onclick="openTab(event, 'notificaciones')">
+          <% } %>
+
+          <%/* Notificaciones: solo admin */%>
+          <% if (esAdmin) { %>
+          <button class="tab-btn <%= tabInicial === 'notificaciones' ? 'active' : '' %>" onclick="openTab(event, 'notificaciones')">
             <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
             Notificaciones
           </button>
-          <button class="tab-btn" onclick="openTab(event, 'alertas')">
+          <% } %>
+
+          <%/* Alertas: admin + superusuario */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'alertas' ? 'active' : '' %>" onclick="openTab(event, 'alertas')">
             <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i>
             Alertas
           </button>
-          <button class="tab-btn" onclick="openTab(event, 'tracking')">
+          <% } %>
+
+          <%/* Tracking: admin + superusuario (superusuario ve solo el switch público) */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'tracking' ? 'active' : '' %>" onclick="openTab(event, 'tracking')">
             <i data-lucide="map-pin" style="width: 18px; height: 18px;"></i>
             Tracking
           </button>
-          <button class="tab-btn" onclick="openTab(event, 'etiqueta')">
+          <% } %>
+
+          <%/* Etiqueta: admin + superusuario */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'etiqueta' ? 'active' : '' %>" onclick="openTab(event, 'etiqueta')">
             <i data-lucide="tag" style="width: 18px; height: 18px;"></i>
             Etiqueta
           </button>
+          <button class="tab-btn <%= tabInicial === 'guia' ? 'active' : '' %>" onclick="openTab(event, 'guia')">
+            <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
+            Guía Expedida
+          </button>
+          <% } %>
+
+          <%/* Página de inicio: todos los roles */%>
+          <button class="tab-btn <%= tabInicial === 'pagina-inicio' ? 'active' : '' %>" onclick="openTab(event, 'pagina-inicio')">
+            <i data-lucide="home" style="width: 18px; height: 18px;"></i>
+            Página de inicio
+          </button>
         </div>
         
-        <!-- TAB: EMPRESA -->
-        <div id="empresa" class="tab-content active">
+        <!-- TAB: EMPRESA (solo admin) -->
+        <% if (esAdmin) { %>
+        <div id="empresa" class="tab-content">
           <form action="/configuracion/empresa" method="POST">
             <div class="config-grid">
               <div class="config-card">
@@ -1207,6 +1294,7 @@
               </div><!-- /grid branding -->
             </div><!-- /config-card Branding -->
         </div><!-- /tab empresa -->
+        <% } /* fin if esAdmin - tab empresa */ %>
 
 
         <!-- TAB: DIRECCIONES -->
@@ -1419,6 +1507,28 @@
               </div>
             </div>
             
+            <!-- Función de crédito -->
+            <div class="config-card" style="max-width: 800px; margin-top: 20px;">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="credit-card" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Función de pago por crédito
+                </h2>
+                <p class="card-description">Controla si el sistema permite asignar crédito a los clientes</p>
+              </div>
+
+              <div class="switch-group">
+                <div class="switch-label">
+                  <div class="switch-title">Crédito</div>
+                  <div class="switch-description">Esta función habilita la opción de Crédito para todos los clientes. Si se desactiva, todos los envíos se registrarán como Pago en una Sola Exhibición (PUE / Contado).</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="credito_habilitado" <%= (config.tarifas.credito_habilitado !== false) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
             <button type="submit" class="btn-primary">
               <i data-lucide="save" style="width: 18px; height: 18px;"></i>
               Guardar tarifas
@@ -1426,7 +1536,8 @@
           </form>
         </div>
         
-        <!-- TAB: NOTIFICACIONES -->
+        <!-- TAB: NOTIFICACIONES (solo admin) -->
+        <% if (esAdmin) { %>
         <div id="notificaciones" class="tab-content">
           <form action="/configuracion/notificaciones" method="POST">
             <div class="config-card" style="max-width: 800px;">
@@ -1504,7 +1615,8 @@
             </button>
           </form>
         </div>
-        
+        <% } /* fin if esAdmin - tab notificaciones */ %>
+
         <!-- TAB: ALERTAS -->
         <div id="alertas" class="tab-content">
           <form action="/configuracion/alertas" method="POST">
@@ -1588,7 +1700,8 @@
         </label>
         </div>
       
-        <!-- EVIDENCIAS -->
+        <% if (esAdmin) { %>
+        <!-- EVIDENCIAS (solo admin) -->
         <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 8px; margin: 24px 0;">
         <strong style="color: #92400e; display: block; margin-bottom: 8px;">📸 Evidencias</strong>
         </div>
@@ -1780,8 +1893,10 @@
         <strong>Privacidad y Control:</strong> Estas opciones te permiten controlar exactamente qué información ven tus clientes en el tracking público. Desactiva las opciones que contengan información sensible o que prefieras mantener privada.
         </div>
         </div>
-        </div>
-    
+
+        <% } /* fin if esAdmin - secciones extra de tracking */ %>
+        </div><!-- /config-card tracking -->
+
         <button type="submit" class="btn-primary">
         <i data-lucide="save" style="width: 18px; height: 18px;"></i>
         Guardar configuración de tracking
@@ -1793,194 +1908,488 @@
         <!-- TAB: ETIQUETA -->
         <!-- ============================================ -->
         <div id="etiqueta" class="tab-content">
-          <form action="/configuracion/etiqueta" method="POST">
+
+          <%
+            // Lista de elementos de la etiqueta con sus claves y etiquetas
+            const etqElementos = [
+              { key: 'logo',                 icon: '🖼️',  label: 'Logo',                   desc: 'Imagen del logo en la cabecera',         grupo: 'empresa' },
+              { key: 'eslogan',              icon: '✍️',  label: 'Eslogan / Tagline',       desc: 'Frase debajo del nombre de empresa',     grupo: 'empresa' },
+              { key: 'telefono',             icon: '📞', label: 'Teléfono principal',       desc: 'Aparece en la barra de contacto',        grupo: 'empresa' },
+              { key: 'telefono_adicional',   icon: '📱', label: 'Teléfono adicional',       desc: 'WhatsApp / número secundario',           grupo: 'empresa' },
+              { key: 'email',                icon: '✉️',  label: 'Email corporativo',        desc: 'Correo en barra de contacto',            grupo: 'empresa' },
+              { key: 'sitio_web',            icon: '🌐', label: 'Sitio web',                desc: 'URL en barra de contacto',               grupo: 'empresa' },
+              { key: 'rfc',                  icon: '🪪', label: 'RFC',                       desc: 'Aparece en el pie de la etiqueta',       grupo: 'empresa' },
+              { key: 'direccion_fiscal',     icon: '📍', label: 'Dirección fiscal',         desc: 'Aparece en el pie de la etiqueta',       grupo: 'empresa' },
+              { key: 'barcode',              icon: '▤',  label: 'Código de barras',         desc: 'Barcode del número de tracking',         grupo: 'envio' },
+              { key: 'qr',                   icon: '◼',  label: 'Código QR',                desc: 'QR para rastreo en línea',               grupo: 'envio' },
+              { key: 'ruta',                 icon: '→',  label: 'Ruta Origen / Destino',   desc: 'Barra con ciudades de salida y llegada', grupo: 'envio' },
+              { key: 'descripcion',          icon: '📝', label: 'Descripción del paquete', desc: 'Contenido declarado en el pie',          grupo: 'envio' }
+            ];
+            // Template seleccionado actualmente (el que venía en ?template_id= o el primero)
+            const tplId = parseInt(query.template_id) || (etiquetaTemplates.length > 0 ? etiquetaTemplates[0].id : null);
+            const tplActivo = etiquetaTemplates.find(t => t.id === tplId) || etiquetaTemplates[0] || null;
+            const isAdmin = user.rol === 'admin';
+            const isAdminOrSuper = user.rol === 'admin' || user.rol === 'superusuario';
+          %>
+
+          <!-- ── Selector de template ── -->
+          <div class="config-card" style="margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <label style="font-size: 0.9rem; font-weight: 700; color: #374151; white-space: nowrap;">
+                <i data-lucide="layers" style="width:16px;height:16px;vertical-align:-3px;color:#3b82f6;"></i>
+                Template de impresión de Cliente:
+              </label>
+
+              <% if (etiquetaTemplates.length > 0) { %>
+              <select id="tpl-selector" onchange="cambiarTemplate(this.value)"
+                style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #374151; background: white; cursor: pointer; min-width: 220px;">
+                <% etiquetaTemplates.forEach(t => { %>
+                  <option value="<%= t.id %>" <%= t.id === tplId ? 'selected' : '' %>><%= t.nombre %></option>
+                <% }) %>
+              </select>
+              <% } else { %>
+              <span style="color:#94a3b8; font-size:0.88rem;">No hay templates creados aún</span>
+              <% } %>
+
+              <% if (isAdminOrSuper) { %>
+              <button type="button" onclick="abrirModalNuevoTemplate()"
+                style="padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="plus" style="width:15px;height:15px;"></i>
+                Crear nuevo Template
+              </button>
+              <% } %>
+
+              <% if (tplActivo) { %>
+                <% if (isAdmin) { %>
+                <form action="/configuracion/etiqueta/templates/<%= tplActivo.id %>/eliminar" method="POST"
+                  onsubmit="return confirm('¿Eliminar el template «<%= tplActivo.nombre %>»? Se desasignará de todos los clientes.')"
+                  style="margin: 0;">
+                  <button type="submit"
+                    style="padding: 8px 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+                    <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                  </button>
+                </form>
+                <% } else if (isAdminOrSuper) { %>
+                <button type="button" disabled title="Solo el administrador puede eliminar templates"
+                  style="padding: 8px 12px; background: #f1f5f9; color: #cbd5e1; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: not-allowed;">
+                  <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                </button>
+                <% } %>
+              <% } %>
+            </div>
+
+            <% if (etiquetaTemplates.length > 0) { %>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">
+              El template se puede asignar o editar en la sección de <a href="/clientes" style="color:#2563eb;">Clientes</a>.
+            </p>
+            <% } %>
+          </div>
+
+          <!-- ── Formulario del template seleccionado ── -->
+          <% if (tplActivo && isAdminOrSuper) { %>
+          <form action="/configuracion/etiqueta/templates/<%= tplActivo.id %>/guardar" method="POST">
             <div class="config-card">
               <div class="card-header">
                 <h2 class="card-title">
                   <i data-lucide="tag" style="width: 24px; height: 24px; color: #3b82f6;"></i>
                   Elementos de la Etiqueta Térmica
                 </h2>
-                <p class="card-description">Controla qué información aparece en cada etiqueta de envío. Si el campo está vacío en la pestaña Empresa, no se mostrará aunque el toggle esté activo.</p>
+                <p class="card-description">
+                  Controla qué información aparece en cada etiqueta de envío.
+                  Si el campo está vacío en la pestaña Empresa, no se mostrará aunque el toggle esté activo.
+                </p>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+              <!-- Nombre del template -->
+              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #374151; white-space: nowrap;">Nombre del template:</label>
+                <input type="text" name="nombre" value="<%= tplActivo.nombre %>"
+                  style="flex: 1; max-width: 320px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600;" required>
+              </div>
 
-                <!-- COLUMNA IZQ: Datos de empresa -->
-                <div style="border-right: 2px solid #f1f5f9; padding-right: 30px;">
-                  <p style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Datos de la empresa</p>
+              <!-- Cabecera de columnas -->
+              <div style="display: grid; grid-template-columns: 1fr 100px 100px; gap: 0; margin-bottom: 8px; padding: 0 0 8px 0; border-bottom: 2px solid #f1f5f9;">
+                <div style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;"></div>
+                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Por defecto</div>
+                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px;">Obligatorio</div>
+              </div>
 
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">🖼️ Logo</div>
-                      <div class="switch-description">Imagen del logo en la cabecera</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_logo" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_logo" <%= (config.etiqueta.etiqueta_mostrar_logo !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
+              <!-- GRUPO EMPRESA -->
+              <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 8px;">Datos de la empresa</p>
+              <% etqElementos.filter(e => e.grupo === 'empresa').forEach(el => { %>
+              <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
+                <div>
+                  <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
+                  <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                </div>
+                <!-- Por defecto (azul) -->
+                <div style="text-align: center;">
+                  <label class="switch">
+                    <input type="checkbox" name="mostrar_<%= el.key %>" <%= tplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <!-- Obligatorio (rosa) -->
+                <div style="text-align: center;">
+                  <label class="switch switch-pink">
+                    <input type="checkbox" name="obligatorio_<%= el.key %>" <%= tplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <% }) %>
 
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">✍️ Eslogan / Tagline</div>
-                      <div class="switch-description">Frase debajo del nombre de empresa</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_eslogan" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_eslogan" <%= (config.etiqueta.etiqueta_mostrar_eslogan !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
+              <!-- GRUPO ENVÍO -->
+              <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 8px;">Elementos del envío</p>
+              <% etqElementos.filter(e => e.grupo === 'envio').forEach(el => { %>
+              <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
+                <div>
+                  <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
+                  <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                </div>
+                <div style="text-align: center;">
+                  <label class="switch">
+                    <input type="checkbox" name="mostrar_<%= el.key %>" <%= tplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div style="text-align: center;">
+                  <label class="switch switch-pink">
+                    <input type="checkbox" name="obligatorio_<%= el.key %>" <%= tplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <% }) %>
 
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">📞 Teléfono principal</div>
-                      <div class="switch-description">Aparece en la barra de contacto</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_telefono" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_telefono" <%= (config.etiqueta.etiqueta_mostrar_telefono !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
+              <!-- Nota + guardar -->
+              <div class="info-box" style="margin-top: 20px;">
+                <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                <div class="info-text">
+                  Los campos vacíos no se imprimen aunque el toggle esté activo.
+                  Cuando el campo <strong>Obligatorio</strong> está activado, esa función siempre podrá ser imprimible;
+                  si está desactivada por defecto siempre estará apagada y no podrá ser visible en la impresión.
+                </div>
+              </div>
 
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">📱 Teléfono adicional</div>
-                      <div class="switch-description">WhatsApp / número secundario</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_telefono_adicional" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_telefono_adicional" <%= (config.etiqueta.etiqueta_mostrar_telefono_adicional !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">✉️ Email corporativo</div>
-                      <div class="switch-description">Correo en barra de contacto</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_email" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_email" <%= (config.etiqueta.etiqueta_mostrar_email !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">🌐 Sitio web</div>
-                      <div class="switch-description">URL en barra de contacto</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_sitio_web" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_sitio_web" <%= (config.etiqueta.etiqueta_mostrar_sitio_web !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">🪪 RFC</div>
-                      <div class="switch-description">Aparece en el pie de la etiqueta</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_rfc" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_rfc" <%= (config.etiqueta.etiqueta_mostrar_rfc !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">📍 Dirección fiscal</div>
-                      <div class="switch-description">Aparece en el pie de la etiqueta</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_direccion_fiscal" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_direccion_fiscal" <%= (config.etiqueta.etiqueta_mostrar_direccion_fiscal !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                </div><!-- /col izquierda -->
-
-                <!-- COLUMNA DER: Elementos del envío -->
-                <div style="padding-left: 30px;">
-                  <p style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Elementos del envío</p>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">||||| Código de barras</div>
-                      <div class="switch-description">Barcode del número de tracking</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_barcode" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_barcode" <%= (config.etiqueta.etiqueta_mostrar_barcode !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">◼ Código QR</div>
-                      <div class="switch-description">QR para rastreo en línea</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_qr" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_qr" <%= (config.etiqueta.etiqueta_mostrar_qr !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">→ Ruta Origen / Destino</div>
-                      <div class="switch-description">Barra con ciudades de salida y llegada</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_ruta" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_ruta" <%= (config.etiqueta.etiqueta_mostrar_ruta !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="switch-group">
-                    <div class="switch-label">
-                      <div class="switch-title">📝 Descripción del paquete</div>
-                      <div class="switch-description">Contenido declarado en el pie</div>
-                    </div>
-                    <label class="switch">
-                      <input type="hidden" name="etiqueta_mostrar_descripcion" value="false">
-                      <input type="checkbox" name="etiqueta_mostrar_descripcion" <%= (config.etiqueta.etiqueta_mostrar_descripcion !== false) ? 'checked' : '' %>>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="info-box" style="margin-top: 24px;">
-                    <i data-lucide="info" style="width: 20px; height: 20px;"></i>
-                    <div class="info-text">
-                      Los campos vacíos no se imprimen aunque el toggle esté activo. Completa los datos en la pestaña <strong>Empresa</strong> para que aparezcan en la etiqueta.
-                    </div>
-                  </div>
-
-                </div><!-- /col derecha -->
-
-              </div><!-- /grid -->
-
-              <div style="margin-top: 24px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
                 <button type="submit" class="btn-primary">
                   <i data-lucide="save" style="width: 18px; height: 18px;"></i>
                   Guardar configuración de etiqueta
                 </button>
               </div>
-
-            </div><!-- /config-card -->
+            </div>
           </form>
+          <% } else if (!tplActivo) { %>
+          <div class="config-card" style="text-align: center; padding: 48px; color: #94a3b8;">
+            <i data-lucide="tag" style="width: 48px; height: 48px; margin-bottom: 12px;"></i>
+            <p style="font-weight: 700; font-size: 1rem;">No hay templates de etiqueta</p>
+            <% if (isAdminOrSuper) { %>
+            <p style="font-size: 0.85rem; margin-top: 6px;">Crea el primer template con el botón de arriba.</p>
+            <% } %>
+          </div>
+          <% } %>
+
+          <!-- ── Modal: Crear nuevo template ── -->
+          <% if (isAdminOrSuper) { %>
+          <div id="modal-nuevo-tpl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:16px; padding:32px; width:520px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b;">Crear nuevo Template</h3>
+                <button type="button" onclick="cerrarModalNuevoTemplate()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:#94a3b8;">&times;</button>
+              </div>
+              <form action="/configuracion/etiqueta/templates/nuevo" method="POST">
+                <div style="margin-bottom: 16px;">
+                  <label style="display:block; font-size:0.85rem; font-weight:700; color:#374151; margin-bottom:6px;">Nombre del template *</label>
+                  <input type="text" name="nombre" required placeholder="Ej: Planta Norte, Almacen 1..."
+                    style="width:100%; padding:10px 12px; border:2px solid #e2e8f0; border-radius:8px; font-size:0.9rem; font-weight:600;">
+                </div>
+                <p style="font-size:0.8rem; color:#64748b; margin-bottom:16px;">El template se creará con todos los elementos activados por defecto. Podrás editarlo después.</p>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                  <button type="button" onclick="cerrarModalNuevoTemplate()"
+                    style="padding:10px 20px; background:#f1f5f9; color:#374151; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+                    Cancelar
+                  </button>
+                  <button type="submit"
+                    style="padding:10px 20px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
+                    Crear Template
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <% } %>
+
         </div><!-- /tab etiqueta -->
-        
+
+        <!-- ============================================ -->
+        <!-- TAB: GUÍA EXPEDIDA                           -->
+        <!-- ============================================ -->
+        <% if (!esOperador) { %>
+        <div id="guia" class="tab-content">
+
+          <%
+            const guiaElementos = [
+              // Encabezado
+              { key: 'logo',                  icon: '🖼️',  label: 'Logo empresa',             desc: 'Imagen del logo en el encabezado',           grupo: 'encabezado' },
+              { key: 'rfc',                   icon: '🪪',  label: 'RFC',                       desc: 'RFC de la empresa en encabezado',            grupo: 'encabezado' },
+              { key: 'telefono',              icon: '📞', label: 'Teléfonos',                  desc: 'Tel. principal y adicional en encabezado',   grupo: 'encabezado' },
+              { key: 'sitio_web',             icon: '🌐', label: 'Sitio web / Privacidad',     desc: 'URL en cláusula de seguro',                  grupo: 'encabezado' },
+              { key: 'barcode',               icon: '▤',  label: 'Código de barras',           desc: 'Barcode del número de tracking',             grupo: 'encabezado' },
+              // Secciones principales
+              { key: 'seccion_remitente',     icon: '📦', label: 'Sección Remitente',          desc: 'Bloque de origen del envío',                 grupo: 'secciones' },
+              { key: 'seccion_facturar',      icon: '🧾', label: 'Sección Facturar a',         desc: 'Bloque del cliente / facturación',           grupo: 'secciones' },
+              { key: 'seccion_destinatario',  icon: '📍', label: 'Sección Destinatario',       desc: 'Bloque de destino del envío',                grupo: 'secciones' },
+              { key: 'clausula_seguro',       icon: '🛡️', label: 'Cláusula de seguro',         desc: 'Texto de seguro y tipo de servicio',         grupo: 'secciones' },
+              // Condiciones / fechas
+              { key: 'retorno_documentos',    icon: '↩️', label: 'Retorno de documentos',      desc: 'Campo para retorno de documentos',           grupo: 'condiciones' },
+              { key: 'condiciones_pago',      icon: '💳', label: 'Condiciones de pago',        desc: 'CRÉDITO / CONTADO, etc.',                   grupo: 'condiciones' },
+              { key: 'fecha_emision',         icon: '📅', label: 'Fecha de emisión',           desc: 'Fecha, hora y nombre del documento',         grupo: 'condiciones' },
+              { key: 'observaciones',         icon: '📝', label: 'Observaciones del cliente',  desc: 'Campo libre de observaciones',               grupo: 'condiciones' },
+              { key: 'fecha_entrega',         icon: '🗓️', label: 'Fecha estimada de entrega',  desc: 'Fecha estimada capturada en el envío',       grupo: 'condiciones' },
+              { key: 'referencia_cliente',    icon: '🔖', label: 'Referencia del cliente',     desc: 'Número de referencia del cliente',           grupo: 'condiciones' },
+              // Entrega
+              { key: 'recibido_por',          icon: '✍️',  label: 'Sección Recibido por',       desc: 'Firma de recibido e incidencias',            grupo: 'entrega' },
+              { key: 'operador',              icon: '🚛', label: 'Operador que entregó',       desc: 'Nombre del operador y comentarios',          grupo: 'entrega' },
+              { key: 'firma_final',           icon: '📋', label: 'Tabla de firma final',       desc: 'Acepta condiciones del contrato',            grupo: 'entrega' },
+              // Pie
+              { key: 'pie_datos',             icon: '📊', label: 'Datos de mercancía / estado', desc: 'Estado, tracking, origen, destino al pie', grupo: 'pie' },
+              { key: 'disclaimer',            icon: '⚠️', label: 'Aviso fiscal',               desc: '"No es comprobante fiscal"',                grupo: 'pie' },
+              // Columnas tabla
+              { key: 'col_volumen',           icon: '📐', label: 'Columna Volumen',            desc: 'Columna Volumen Mts.³ en tabla de carga',    grupo: 'tabla' },
+              { key: 'col_peso_facturado',    icon: '⚖️', label: 'Columna Peso Facturado',     desc: 'Columna Peso Facturado Kgs.',                grupo: 'tabla' },
+              { key: 'col_servicios',         icon: '🔧', label: 'Columna Servicios',          desc: 'Columna Servicios en tabla de carga',        grupo: 'tabla' },
+              { key: 'col_importe',           icon: '💰', label: 'Columna Importe',            desc: 'Columna Importe en tabla de carga',          grupo: 'tabla' },
+            ];
+            const guiaTplId = parseInt(query.guia_template_id) || (guiaTemplates.length > 0 ? guiaTemplates[0].id : null);
+            const guiaTplActivo = guiaTemplates.find(t => t.id === guiaTplId) || guiaTemplates[0] || null;
+          %>
+
+          <!-- Selector de template -->
+          <div class="config-card" style="margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <label style="font-size: 0.9rem; font-weight: 700; color: #374151; white-space: nowrap;">
+                <i data-lucide="file-text" style="width:16px;height:16px;vertical-align:-3px;color:#3b82f6;"></i>
+                Template de Guía Expedida:
+              </label>
+
+              <% if (guiaTemplates.length > 0) { %>
+              <select id="guia-tpl-selector" onchange="cambiarGuiaTemplate(this.value)"
+                style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #374151; background: white; cursor: pointer; min-width: 220px;">
+                <% guiaTemplates.forEach(t => { %>
+                  <option value="<%= t.id %>" <%= t.id === guiaTplId ? 'selected' : '' %>><%= t.nombre %></option>
+                <% }) %>
+              </select>
+              <% } else { %>
+              <span style="color:#94a3b8; font-size:0.88rem;">No hay templates creados aún</span>
+              <% } %>
+
+              <% if (isAdminOrSuper) { %>
+              <button type="button" onclick="abrirModalNuevoGuiaTpl()"
+                style="padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="plus" style="width:15px;height:15px;"></i>
+                Crear nuevo Template
+              </button>
+              <% } %>
+
+              <% if (guiaTplActivo) { %>
+                <% if (isAdmin) { %>
+                <form action="/configuracion/guia/templates/<%= guiaTplActivo.id %>/eliminar" method="POST"
+                  onsubmit="return confirm('¿Eliminar el template «<%= guiaTplActivo.nombre %>»?')"
+                  style="margin: 0;">
+                  <button type="submit"
+                    style="padding: 8px 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+                    <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                  </button>
+                </form>
+                <% } else if (isAdminOrSuper) { %>
+                <button type="button" disabled title="Solo el administrador puede eliminar templates"
+                  style="padding: 8px 12px; background: #f1f5f9; color: #cbd5e1; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: not-allowed;">
+                  <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                </button>
+                <% } %>
+              <% } %>
+            </div>
+            <% if (guiaTemplates.length > 0) { %>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">
+              El template se puede asignar en la sección de <a href="/clientes" style="color:#2563eb;">Clientes</a>.
+            </p>
+            <% } %>
+          </div>
+
+          <!-- Formulario del template seleccionado -->
+          <% if (guiaTplActivo && isAdminOrSuper) { %>
+          <form action="/configuracion/guia/templates/<%= guiaTplActivo.id %>/guardar" method="POST">
+            <div class="config-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="file-text" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Elementos de la Guía Expedida
+                </h2>
+                <p class="card-description">Controla qué secciones y columnas aparecen en la guía de envío.</p>
+              </div>
+
+              <!-- Nombre del template -->
+              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: #374151; white-space: nowrap;">Nombre del template:</label>
+                <input type="text" name="nombre" value="<%= guiaTplActivo.nombre %>"
+                  style="flex: 1; max-width: 320px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600;" required>
+              </div>
+
+              <!-- Cabecera de columnas -->
+              <div style="display: grid; grid-template-columns: 1fr 100px 100px; gap: 0; margin-bottom: 8px; padding: 0 0 8px 0; border-bottom: 2px solid #f1f5f9;">
+                <div></div>
+                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Por defecto</div>
+                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px;">Obligatorio</div>
+              </div>
+
+              <% const guiaGrupos = [
+                { id: 'encabezado', label: 'Encabezado' },
+                { id: 'secciones',  label: 'Secciones principales' },
+                { id: 'condiciones', label: 'Condiciones / Fechas' },
+                { id: 'entrega',    label: 'Entrega / Firma' },
+                { id: 'pie',        label: 'Pie del documento' },
+                { id: 'tabla',      label: 'Columnas de la tabla de carga' },
+              ]; %>
+
+              <% guiaGrupos.forEach(function(gr) { %>
+              <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 8px;"><%= gr.label %></p>
+              <% guiaElementos.filter(e => e.grupo === gr.id).forEach(function(el) { %>
+              <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
+                <div>
+                  <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
+                  <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                </div>
+                <div style="text-align: center;">
+                  <label class="switch">
+                    <input type="checkbox" name="mostrar_<%= el.key %>" <%= guiaTplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div style="text-align: center;">
+                  <label class="switch switch-pink">
+                    <input type="checkbox" name="obligatorio_<%= el.key %>" <%= guiaTplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <% }) %>
+              <% }) %>
+
+              <div class="info-box" style="margin-top: 20px;">
+                <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                <div class="info-text">
+                  <strong>Obligatorio</strong> significa que el toggle en la guía estará fijo y no podrá desactivarse.
+                  <strong>Por defecto</strong> define el estado inicial al abrir la guía.
+                </div>
+              </div>
+
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
+                <button type="submit" class="btn-primary">
+                  <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+                  Guardar configuración de guía
+                </button>
+              </div>
+            </div>
+          </form>
+          <% } else if (!guiaTplActivo) { %>
+          <div class="config-card" style="text-align: center; padding: 48px; color: #94a3b8;">
+            <i data-lucide="file-text" style="width: 48px; height: 48px; margin-bottom: 12px;"></i>
+            <p style="font-weight: 700; font-size: 1rem;">No hay templates de guía</p>
+            <% if (isAdminOrSuper) { %>
+            <p style="font-size: 0.85rem; margin-top: 6px;">Crea el primer template con el botón de arriba.</p>
+            <% } %>
+          </div>
+          <% } %>
+
+          <!-- Modal: Crear nuevo template de guía -->
+          <% if (isAdminOrSuper) { %>
+          <div id="modal-nuevo-guia-tpl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:16px; padding:32px; width:520px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b;">Crear nuevo Template de Guía</h3>
+                <button type="button" onclick="cerrarModalNuevoGuiaTpl()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:#94a3b8;">&times;</button>
+              </div>
+              <form action="/configuracion/guia/templates/nuevo" method="POST">
+                <div style="margin-bottom: 16px;">
+                  <label style="display:block; font-size:0.85rem; font-weight:700; color:#374151; margin-bottom:6px;">Nombre del template *</label>
+                  <input type="text" name="nombre" required placeholder="Ej: Estándar, Exportación..."
+                    style="width:100%; padding:10px 12px; border:2px solid #e2e8f0; border-radius:8px; font-size:0.9rem; font-weight:600;">
+                </div>
+                <p style="font-size:0.8rem; color:#64748b; margin-bottom:16px;">El template se creará con todos los elementos activados. Podrás editarlo después.</p>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                  <button type="button" onclick="cerrarModalNuevoGuiaTpl()"
+                    style="padding:10px 20px; background:#f1f5f9; color:#374151; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+                    Cancelar
+                  </button>
+                  <button type="submit"
+                    style="padding:10px 20px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
+                    Crear Template
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <% } %>
+
+        </div><!-- /tab guia -->
+        <% } %>
+
+        <!-- ============================================ -->
+        <!-- TAB: PÁGINA DE INICIO                        -->
+        <!-- ============================================ -->
+        <div id="pagina-inicio" class="tab-content">
+          <form action="/configuracion/pagina-inicio" method="POST">
+            <div class="config-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i data-lucide="home" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Página de inicio
+                </h2>
+                <p class="card-description">Elige a qué página ir al iniciar sesión</p>
+              </div>
+
+              <div style="max-width: 520px; margin-top: 8px;">
+                <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 20px;">
+                  Selecciona la página que se abrirá automáticamente cada vez que inicies sesión en el sistema.
+                </p>
+
+                <%
+                  const opcionesPagina = [
+                    { valor: '/dashboard',          icono: 'layout-dashboard', label: 'Dashboard',           desc: 'Resumen general del sistema' },
+                    { valor: '/envios',              icono: 'package',          label: 'Envíos',              desc: 'Lista de todos los envíos' },
+                    { valor: '/envios-retrasados',   icono: 'alert-triangle',   label: 'Envíos Retrasados',   desc: 'Envíos con retraso o alertas' },
+                    { valor: '/historial',           icono: 'history',          label: 'Historial',           desc: 'Historial de estados y eventos' },
+                  ];
+                %>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <% opcionesPagina.forEach(function(op) { %>
+                    <label style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 2px solid <%= paginaInicio === op.valor ? '#3b82f6' : '#e2e8f0' %>; border-radius: 12px; cursor: pointer; background: <%= paginaInicio === op.valor ? '#eff6ff' : '#fff' %>; transition: all .15s;"
+                           onmouseover="if('<%= paginaInicio %>'!=='<%= op.valor %>'){this.style.borderColor='#93c5fd';this.style.background='#f8fafc'}"
+                           onmouseout="if('<%= paginaInicio %>'!=='<%= op.valor %>'){this.style.borderColor='#e2e8f0';this.style.background='#fff'}">
+                      <input type="radio" name="pagina_inicio" value="<%= op.valor %>"
+                             <%= paginaInicio === op.valor ? 'checked' : '' %>
+                             style="accent-color: #3b82f6; width: 18px; height: 18px; flex-shrink: 0;">
+                      <i data-lucide="<%= op.icono %>" style="width: 20px; height: 20px; color: <%= paginaInicio === op.valor ? '#3b82f6' : '#94a3b8' %>; flex-shrink: 0;"></i>
+                      <div>
+                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;"><%= op.label %></div>
+                        <div style="font-size: 0.8rem; color: #64748b;"><%= op.desc %></div>
+                      </div>
+                    </label>
+                  <% }); %>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 24px;">
+                  <i data-lucide="save" style="width: 18px; height: 18px;"></i>
+                  Guardar página de inicio
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div><!-- /tab pagina-inicio -->
+
       </div>
     </main>
     
@@ -2040,15 +2449,33 @@
     function openTab(event, tabName) {
       const tabContents = document.querySelectorAll('.tab-content');
       tabContents.forEach(tab => tab.classList.remove('active'));
-      
+
       const tabBtns = document.querySelectorAll('.tab-btn');
       tabBtns.forEach(btn => btn.classList.remove('active'));
-      
+
       document.getElementById(tabName).classList.add('active');
       event.currentTarget.classList.add('active');
-      
+
       lucide.createIcons();
     }
+
+    // Activar el tab correcto al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabInicial = '<%= tabInicial %>';
+      const tabEl = document.getElementById(tabInicial);
+      if (tabEl) {
+        tabEl.classList.add('active');
+        const tabBtn = document.querySelector(`[onclick="openTab(event, '${tabInicial}')"]`);
+        if (tabBtn) tabBtn.classList.add('active');
+      } else {
+        // Fallback: activar el primero visible
+        const primerTab = document.querySelector('.tab-content');
+        const primerBtn = document.querySelector('.tab-btn');
+        if (primerTab) primerTab.classList.add('active');
+        if (primerBtn) primerBtn.classList.add('active');
+      }
+      lucide.createIcons();
+    });
   </script>
 
   <!-- ============================================ -->
@@ -2356,6 +2783,47 @@
     document.getElementById('modalEditarDireccion').addEventListener('click', function(e) {
       if (e.target === this) cerrarModalEditarDireccion();
     });
+  </script>
+  <!-- Templates de etiqueta -->
+  <script>
+    function cambiarTemplate(id) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('template_id', id);
+      url.searchParams.set('tab', 'etiqueta');
+      window.location.href = url.toString();
+    }
+
+    function abrirModalNuevoTemplate() {
+      const m = document.getElementById('modal-nuevo-tpl');
+      if (m) { m.style.display = 'flex'; }
+    }
+    function cerrarModalNuevoTemplate() {
+      const m = document.getElementById('modal-nuevo-tpl');
+      if (m) { m.style.display = 'none'; }
+    }
+
+    // Cerrar modal al clicar fuera
+    document.addEventListener('click', function(e) {
+      const m = document.getElementById('modal-nuevo-tpl');
+      if (m && e.target === m) cerrarModalNuevoTemplate();
+      const mg = document.getElementById('modal-nuevo-guia-tpl');
+      if (mg && e.target === mg) cerrarModalNuevoGuiaTpl();
+    });
+
+    function cambiarGuiaTemplate(id) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('guia_template_id', id);
+      url.searchParams.set('tab', 'guia');
+      window.location.href = url.toString();
+    }
+    function abrirModalNuevoGuiaTpl() {
+      const m = document.getElementById('modal-nuevo-guia-tpl');
+      if (m) { m.style.display = 'flex'; }
+    }
+    function cerrarModalNuevoGuiaTpl() {
+      const m = document.getElementById('modal-nuevo-guia-tpl');
+      if (m) { m.style.display = 'none'; }
+    }
   </script>
   <script src="/js/notifications.js"></script>
   <script src="/js/sidebar.js"></script>

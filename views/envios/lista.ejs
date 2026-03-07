@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -599,6 +599,14 @@
     .table tbody tr:hover {
       background: #f8fafc;
     }
+
+    .table tbody tr.etq-modificada {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+    }
+    .table tbody tr.etq-modificada:hover {
+      background: #fde68a;
+    }
     
     .table td {
       padding: 18px 20px;
@@ -1036,12 +1044,14 @@
       <div class="nav-section">
         <div class="nav-section-title">PRINCIPAL</div>
         <ul class="nav-menu">
+          <% if (!user || user.rol !== 'operador') { %>
           <li class="nav-item">
             <a href="/dashboard" class="nav-link">
               <i data-lucide="layout-dashboard"></i>
               <span>Dashboard</span>
             </a>
           </li>
+          <% } %>
           <li class="nav-item">
             <a href="/envios" class="nav-link active">
               <i data-lucide="package"></i>
@@ -1077,16 +1087,18 @@
         </ul>
       </div>
       
-      <% if (user && user.rol === 'admin') { %>
+      <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
+            <% if (user.rol === 'admin') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
                 <span>Usuarios</span>
               </a>
             </li>
+            <% } %>
             <li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
@@ -1226,7 +1238,7 @@
               </thead>
               <tbody>
                 <% envios.forEach(envio => { %>
-                  <tr>
+                  <tr class="<%= (user && (user.rol === 'admin' || user.rol === 'superusuario') && envio.etiqueta_modificada) ? 'etq-modificada' : '' %>">
                     <td>
                       <span class="tracking-number"><%= envio.numero_tracking %></span>
                       <% if (envio.es_parcial) { %>

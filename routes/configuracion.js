@@ -77,12 +77,35 @@ async function obtenerDireccionesEmpresa() {
   return direcciones;
 }
 
-// Página principal de configuración ⬅️ MODIFICADA
+// ── Helpers templates ──────────────────────────────────────────────────────
+async function obtenerTemplates() {
+  const [rows] = await db.query('SELECT * FROM etiqueta_templates ORDER BY nombre ASC');
+  return rows;
+}
+
+async function obtenerGuiaTemplates() {
+  try {
+    const [rows] = await db.query('SELECT * FROM guia_templates ORDER BY nombre ASC');
+    return rows;
+  } catch (e) {
+    return [];
+  }
+}
+
+// Página principal de configuración
 router.get('/', async (req, res) => {
   try {
     const configuracion = await obtenerConfiguracion();
-    const direccionesEmpresa = await obtenerDireccionesEmpresa(); // ⬅️ AGREGADO
-    
+    const direccionesEmpresa = await obtenerDireccionesEmpresa();
+    const etiquetaTemplates = await obtenerTemplates();
+    const guiaTemplates     = await obtenerGuiaTemplates();
+
+    // Leer pagina_inicio del usuario actual
+    const [[usuarioRow]] = await db.query(
+      'SELECT pagina_inicio FROM usuarios WHERE id = ?', [req.session.userId]
+    );
+    const paginaInicio = usuarioRow?.pagina_inicio || 'dashboard';
+
     res.render('configuracion/index', {
       title: 'Configuración del Sistema',
       user: {
@@ -92,9 +115,13 @@ router.get('/', async (req, res) => {
         rol: req.session.userRole
       },
       config: configuracion,
-      direccionesEmpresa, // ⬅️ AGREGADO
+      direccionesEmpresa,
+      etiquetaTemplates,
+      guiaTemplates,
+      paginaInicio,
       success: req.query.success,
-      error: req.query.error
+      error: req.query.error,
+      query: req.query
     });
   } catch (error) {
     console.error('Error al cargar configuración:', error);
@@ -147,22 +174,29 @@ router.post('/empresa', async (req, res) => {
 // Actualizar tarifas
 router.post('/tarifas', async (req, res) => {
   try {
-    const { tarifa_base, tarifa_por_km, tarifa_seguro, iva_porcentaje } = req.body;
-    
-    const updates = [
+    const { tarifa_base, tarifa_por_km, tarifa_seguro, iva_porcentaje, credito_habilitado } = req.body;
+
+    const numericUpdates = [
       ['tarifa_base', tarifa_base],
       ['tarifa_por_km', tarifa_por_km],
       ['tarifa_seguro', tarifa_seguro],
       ['iva_porcentaje', iva_porcentaje]
     ];
-    
-    for (const [clave, valor] of updates) {
+
+    for (const [clave, valor] of numericUpdates) {
       await db.query(`
         INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
         VALUES (?, ?, 'numero', 'tarifas', ?, ?)
         ON DUPLICATE KEY UPDATE valor = ?, modificado_por = ?
       `, [clave, valor || '0', 'Tarifa ' + clave, req.session.userId, valor || '0', req.session.userId]);
     }
+
+    const creditoVal = credito_habilitado ? 'true' : 'false';
+    await db.query(`
+      INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
+      VALUES ('credito_habilitado', ?, 'boolean', 'tarifas', 'Habilitar pago por crédito', ?)
+      ON DUPLICATE KEY UPDATE valor = ?, modificado_por = ?
+    `, [creditoVal, req.session.userId, creditoVal, req.session.userId]);
     
     res.redirect('/configuracion?success=tarifas_actualizadas');
   } catch (error) {
@@ -528,6 +562,217 @@ router.post('/etiqueta', async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar toggles etiqueta:', error);
     res.redirect('/configuracion?error=error_servidor');
+  }
+});
+
+// Guardar página de inicio del usuario (accesible por cualquier rol interno)
+router.post('/pagina-inicio', async (req, res) => {
+  try {
+    const rutas_validas = ['/dashboard', '/envios', '/envios-retrasados', '/historial', '/clientes'];
+    const { pagina_inicio } = req.body;
+
+    if (!rutas_validas.includes(pagina_inicio)) {
+      return res.redirect('/configuracion?error=pagina_invalida');
+    }
+
+    await db.query(
+      'UPDATE usuarios SET pagina_inicio = ? WHERE id = ?',
+      [pagina_inicio, req.session.userId]
+    );
+
+    res.redirect('/configuracion?success=pagina_inicio_guardada&tab=pagina-inicio');
+  } catch (error) {
+    console.error('Error al guardar página de inicio:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=pagina-inicio');
+  }
+});
+
+// ============================================
+// TEMPLATES DE ETIQUETA
+// ============================================
+
+// Campos que admite un template
+const TEMPLATE_FIELDS = [
+  'mostrar_logo','mostrar_eslogan','mostrar_telefono','mostrar_telefono_adicional',
+  'mostrar_email','mostrar_sitio_web','mostrar_rfc','mostrar_direccion_fiscal',
+  'mostrar_barcode','mostrar_qr','mostrar_ruta','mostrar_descripcion',
+  'obligatorio_logo','obligatorio_eslogan','obligatorio_telefono','obligatorio_telefono_adicional',
+  'obligatorio_email','obligatorio_sitio_web','obligatorio_rfc','obligatorio_direccion_fiscal',
+  'obligatorio_barcode','obligatorio_qr','obligatorio_ruta','obligatorio_descripcion'
+];
+
+// API: listar templates (JSON)
+router.get('/api/etiqueta/templates', isAuthenticated, async (req, res) => {
+  try {
+    const templates = await obtenerTemplates();
+    res.json({ success: true, templates });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error al obtener templates' });
+  }
+});
+
+// Crear nuevo template (admin + superusuario)
+router.post('/etiqueta/templates/nuevo', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=etiqueta');
+  }
+  try {
+    const { nombre } = req.body;
+    if (!nombre || nombre.trim() === '') {
+      return res.redirect('/configuracion?error=nombre_requerido&tab=etiqueta');
+    }
+
+    const values = {};
+    for (const f of TEMPLATE_FIELDS) {
+      values[f] = req.body[f] === 'on' ? 1 : 0;
+    }
+
+    await db.query(`
+      INSERT INTO etiqueta_templates
+        (nombre, mostrar_logo, mostrar_eslogan, mostrar_telefono, mostrar_telefono_adicional,
+         mostrar_email, mostrar_sitio_web, mostrar_rfc, mostrar_direccion_fiscal,
+         mostrar_barcode, mostrar_qr, mostrar_ruta, mostrar_descripcion,
+         obligatorio_logo, obligatorio_eslogan, obligatorio_telefono, obligatorio_telefono_adicional,
+         obligatorio_email, obligatorio_sitio_web, obligatorio_rfc, obligatorio_direccion_fiscal,
+         obligatorio_barcode, obligatorio_qr, obligatorio_ruta, obligatorio_descripcion,
+         creado_por)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      nombre.trim(),
+      values.mostrar_logo, values.mostrar_eslogan, values.mostrar_telefono, values.mostrar_telefono_adicional,
+      values.mostrar_email, values.mostrar_sitio_web, values.mostrar_rfc, values.mostrar_direccion_fiscal,
+      values.mostrar_barcode, values.mostrar_qr, values.mostrar_ruta, values.mostrar_descripcion,
+      values.obligatorio_logo, values.obligatorio_eslogan, values.obligatorio_telefono, values.obligatorio_telefono_adicional,
+      values.obligatorio_email, values.obligatorio_sitio_web, values.obligatorio_rfc, values.obligatorio_direccion_fiscal,
+      values.obligatorio_barcode, values.obligatorio_qr, values.obligatorio_ruta, values.obligatorio_descripcion,
+      req.session.userId
+    ]);
+
+    res.redirect('/configuracion?success=template_creado&tab=etiqueta');
+  } catch (error) {
+    console.error('Error al crear template:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=etiqueta');
+  }
+});
+
+// Guardar template existente (admin + superusuario)
+router.post('/etiqueta/templates/:id/guardar', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=etiqueta');
+  }
+  try {
+    const { id } = req.params;
+    const { nombre } = req.body;
+
+    const sets = TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
+    const vals = TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
+
+    await db.query(
+      `UPDATE etiqueta_templates SET nombre = ?, ${sets} WHERE id = ?`,
+      [nombre || 'Sin nombre', ...vals, id]
+    );
+
+    res.redirect('/configuracion?success=template_guardado&tab=etiqueta');
+  } catch (error) {
+    console.error('Error al guardar template:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=etiqueta');
+  }
+});
+
+// Eliminar template (solo admin)
+router.post('/etiqueta/templates/:id/eliminar', isAuthenticated, async (req, res) => {
+  if (req.session.userRole !== 'admin') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=etiqueta');
+  }
+  try {
+    const { id } = req.params;
+    // Desasignar del template a los clientes que lo usan
+    await db.query('UPDATE clientes SET template_etiqueta_id = NULL WHERE template_etiqueta_id = ?', [id]);
+    await db.query('DELETE FROM etiqueta_templates WHERE id = ?', [id]);
+    res.redirect('/configuracion?success=template_eliminado&tab=etiqueta');
+  } catch (error) {
+    console.error('Error al eliminar template:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=etiqueta');
+  }
+});
+
+// ============================================
+// TEMPLATES DE GUÍA EXPEDIDA
+// ============================================
+
+const GUIA_TEMPLATE_FIELDS = [
+  'mostrar_logo','mostrar_rfc','mostrar_telefono','mostrar_sitio_web','mostrar_barcode',
+  'mostrar_seccion_remitente','mostrar_seccion_facturar','mostrar_seccion_destinatario',
+  'mostrar_clausula_seguro','mostrar_retorno_documentos','mostrar_condiciones_pago',
+  'mostrar_fecha_emision','mostrar_observaciones','mostrar_fecha_entrega',
+  'mostrar_referencia_cliente','mostrar_recibido_por','mostrar_operador',
+  'mostrar_firma_final','mostrar_pie_datos','mostrar_disclaimer',
+  'mostrar_col_volumen','mostrar_col_peso_facturado','mostrar_col_servicios','mostrar_col_importe',
+  'obligatorio_logo','obligatorio_rfc','obligatorio_telefono','obligatorio_sitio_web','obligatorio_barcode',
+  'obligatorio_seccion_remitente','obligatorio_seccion_facturar','obligatorio_seccion_destinatario',
+  'obligatorio_clausula_seguro','obligatorio_retorno_documentos','obligatorio_condiciones_pago',
+  'obligatorio_fecha_emision','obligatorio_observaciones','obligatorio_fecha_entrega',
+  'obligatorio_referencia_cliente','obligatorio_recibido_por','obligatorio_operador',
+  'obligatorio_firma_final','obligatorio_pie_datos','obligatorio_disclaimer',
+  'obligatorio_col_volumen','obligatorio_col_peso_facturado','obligatorio_col_servicios','obligatorio_col_importe'
+];
+
+router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=guia');
+  }
+  try {
+    const { nombre } = req.body;
+    if (!nombre || nombre.trim() === '') {
+      return res.redirect('/configuracion?error=nombre_requerido&tab=guia');
+    }
+    const cols = GUIA_TEMPLATE_FIELDS.join(', ');
+    const placeholders = GUIA_TEMPLATE_FIELDS.map(() => '?').join(', ');
+    const vals = GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 1); // defaults: todos 1
+    await db.query(
+      `INSERT INTO guia_templates (nombre, ${cols}, creado_por) VALUES (?, ${placeholders}, ?)`,
+      [nombre.trim(), ...vals, req.session.userId]
+    );
+    res.redirect('/configuracion?success=guia_template_creado&tab=guia');
+  } catch (error) {
+    console.error('Error al crear template de guía:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=guia');
+  }
+});
+
+router.post('/guia/templates/:id/guardar', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=guia');
+  }
+  try {
+    const { id } = req.params;
+    const { nombre } = req.body;
+    const sets = GUIA_TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
+    const vals = GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
+    await db.query(`UPDATE guia_templates SET nombre = ?, ${sets} WHERE id = ?`, [nombre || 'Sin nombre', ...vals, id]);
+    res.redirect('/configuracion?success=guia_template_guardado&tab=guia');
+  } catch (error) {
+    console.error('Error al guardar template de guía:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=guia');
+  }
+});
+
+router.post('/guia/templates/:id/eliminar', isAuthenticated, async (req, res) => {
+  if (req.session.userRole !== 'admin') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=guia');
+  }
+  try {
+    const { id } = req.params;
+    await db.query('UPDATE clientes SET template_guia_id = NULL WHERE template_guia_id = ?', [id]);
+    await db.query('DELETE FROM guia_templates WHERE id = ?', [id]);
+    res.redirect('/configuracion?success=guia_template_eliminado&tab=guia');
+  } catch (error) {
+    console.error('Error al eliminar template de guía:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=guia');
   }
 });
 
