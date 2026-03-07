@@ -196,7 +196,7 @@ router.get('/envio/:id', soloCliente, async (req, res) => {
 
     // Historial
     const [historial] = await db.query(
-      `SELECT h.*, u.nombre as usuario_nombre
+      `SELECT h.*, COALESCE(u.alias, u.nombre) as usuario_nombre
        FROM historial_estados h
        LEFT JOIN usuarios u ON h.usuario_id = u.id
        WHERE h.envio_id = ?

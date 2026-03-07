@@ -675,4 +675,78 @@ router.post('/:id/eliminar-permanente', isAuthenticated, requireAdmin, async (re
   }
 });
 
+// ============================================
+// DUPLICAR CLIENTE
+// ============================================
+router.post('/:id/duplicar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nuevo_prefijo } = req.body;
+
+    if (!nuevo_prefijo || !nuevo_prefijo.trim()) {
+      return res.status(400).json({ success: false, error: 'El nuevo prefijo es requerido' });
+    }
+
+    const prefijoUpper = nuevo_prefijo.trim().toUpperCase();
+
+    // Validar formato
+    const validacion = validarFormatoPrefijo(prefijoUpper);
+    if (!validacion.valido) {
+      return res.status(400).json({ success: false, error: validacion.error });
+    }
+
+    // Verificar disponibilidad
+    const disponible = await prefijoDisponible(prefijoUpper);
+    if (!disponible) {
+      return res.status(400).json({ success: false, error: 'El prefijo ya está en uso' });
+    }
+
+    // Obtener cliente original
+    const [clientes] = await db.query(
+      'SELECT * FROM clientes WHERE id = ? AND eliminado_en IS NULL',
+      [id]
+    );
+    if (clientes.length === 0) {
+      return res.status(404).json({ success: false, error: 'Cliente no encontrado' });
+    }
+    const original = clientes[0];
+
+    // Insertar nuevo cliente con mismos datos pero nuevo prefijo y contador en 0
+    const [insertResult] = await db.query(
+      `INSERT INTO clientes
+       (nombre_empresa, contacto, telefono, email, direccion, prefijo_tracking, ultimo_numero_tracking, template_etiqueta_id, template_guia_id, metodo_pago_defecto)
+       VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+      [original.nombre_empresa, original.contacto, original.telefono, original.email,
+       original.direccion, prefijoUpper, original.template_etiqueta_id,
+       original.template_guia_id, original.metodo_pago_defecto]
+    );
+    const nuevoClienteId = insertResult.insertId;
+
+    // Duplicar direcciones activas
+    const [direcciones] = await db.query(
+      'SELECT * FROM direcciones_cliente WHERE cliente_id = ? AND activa = 1',
+      [id]
+    );
+    for (const dir of direcciones) {
+      await db.query(
+        `INSERT INTO direcciones_cliente
+         (cliente_id, alias, tipo, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, activa)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+        [nuevoClienteId, dir.alias, dir.tipo, dir.calle, dir.colonia,
+         dir.ciudad, dir.estado, dir.cp, dir.referencia, dir.es_predeterminada]
+      );
+    }
+
+    console.log(`✅ Cliente duplicado: ${original.nombre_empresa} (id:${id}) → nuevo id:${nuevoClienteId}, prefijo: ${prefijoUpper}`);
+    res.json({ success: true, nuevoClienteId });
+
+  } catch (error) {
+    console.error('Error al duplicar cliente:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ success: false, error: 'El prefijo ya está en uso' });
+    }
+    res.status(500).json({ success: false, error: 'Error al duplicar el cliente' });
+  }
+});
+
 module.exports = router;

@@ -1193,6 +1193,13 @@
           ¡Cliente creado correctamente!
         </div>
       <% } %>
+
+      <% if (typeof success !== 'undefined' && success === 'duplicado') { %>
+        <div class="success-message">
+          <i data-lucide="copy-plus"></i>
+          ¡Cliente duplicado correctamente!
+        </div>
+      <% } %>
       
       <!-- LAYOUT GRID -->
       <div class="detalle-grid">
@@ -1404,8 +1411,15 @@
                 Copiar Información
               </button>
               
+              <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+                <button onclick="abrirModalDuplicarCliente()" class="btn-action btn-secondary">
+                  <i data-lucide="copy-plus" style="width: 18px; height: 18px;"></i>
+                  Duplicar y Crear Nuevo Cliente
+                </button>
+              <% } %>
+
               <% if (user && user.rol === 'admin') { %>
-                <button 
+                <button
                   class="btn-action btn-danger btn-eliminar"
                   data-cliente-id="<%= cliente.id %>"
                   data-cliente-nombre="<%= cliente.nombre_empresa %>"
@@ -1464,21 +1478,41 @@
             <!-- ============================================ -->
       <!-- DIRECCIONES DE DESTINO (ANCHO COMPLETO) -->
       <!-- ============================================ -->
-      <div class="info-card" style="margin-top: 24px;">
-        <div class="card-header">
+      <div class="info-card" id="seccion-direcciones" style="margin-top: 24px;">
+        <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
           <h2 class="card-title">
             <i data-lucide="map-pin" style="width: 24px; height: 24px; color: #3b82f6;"></i>
             Direcciones de Destino
           </h2>
-          <button 
-            onclick="modalNuevaDireccionCliente()"
-            style="padding: 8px 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.3s;"
-            onmouseover="this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.transform='translateY(0)'"
-          >
-            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-            Nueva Dirección
-          </button>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <!-- Grupo exportar (neutral) -->
+            <div style="display: flex; align-items: center; background: white; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+              <button onclick="imprimirDirecciones()" title="Imprimir" style="padding: 7px 11px; background: transparent; border: none; border-right: 1px solid #e5e7eb; color: #4b5563; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="printer" style="width: 13px; height: 13px;"></i> Imprimir
+              </button>
+              <button onclick="exportarExcelDirecciones()" title="Exportar Excel" style="padding: 7px 11px; background: transparent; border: none; border-right: 1px solid #e5e7eb; color: #4b5563; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="file-spreadsheet" style="width: 13px; height: 13px;"></i> Excel
+              </button>
+              <button onclick="exportarPDFDirecciones()" title="Exportar PDF" style="padding: 7px 11px; background: transparent; border: none; color: #4b5563; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="file-text" style="width: 13px; height: 13px;"></i> PDF
+              </button>
+            </div>
+            <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+            <!-- Grupo CSV admin (rose) -->
+            <div style="display: flex; align-items: center; background: #fff1f2; border: 1px solid #fda4af; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+              <button onclick="abrirModalImportarCSV()" title="Importar CSV" style="padding: 7px 11px; background: transparent; border: none; border-right: 1px solid #fda4af; color: #be185d; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="upload" style="width: 13px; height: 13px;"></i> Importar CSV
+              </button>
+              <button onclick="exportarCSVDirecciones()" title="Exportar CSV" style="padding: 7px 11px; background: transparent; border: none; color: #be185d; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="download" style="width: 13px; height: 13px;"></i> Exportar CSV
+              </button>
+            </div>
+            <% } %>
+            <!-- Nueva Dirección (primary) -->
+            <button onclick="modalNuevaDireccionCliente()" style="padding: 8px 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.82rem; white-space: nowrap; box-shadow: 0 2px 8px rgba(59,130,246,0.3);" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+              <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Nueva Dirección
+            </button>
+          </div>
         </div>
         
         <% if (direcciones && direcciones.length > 0) { %>
@@ -1580,6 +1614,52 @@
     </main>
     
   </div>
+  <!-- ============================================ -->
+  <!-- MODAL: DUPLICAR CLIENTE -->
+  <!-- ============================================ -->
+  <div id="modalDuplicarCliente" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; padding: 28px; width: 90%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: #1f2937; display: flex; align-items: center; gap: 10px; margin: 0;">
+          <i data-lucide="copy-plus" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+          Duplicar Cliente
+        </h2>
+        <button onclick="cerrarModalDuplicarCliente()" style="background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+          <i data-lucide="x" style="width: 20px; height: 20px; color: #6b7280;"></i>
+        </button>
+      </div>
+
+      <p style="color: #6b7280; font-size: 0.9rem; margin: 0 0 20px 0; line-height: 1.5;">
+        Se creará un nuevo cliente idéntico a <strong style="color: #1f2937;"><%= cliente.nombre_empresa %></strong> con todas sus direcciones de destino.<br>
+        Solo debes asignar un <strong>prefijo de tracking diferente</strong>.
+      </p>
+
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">
+          Nuevo prefijo de tracking <span style="color: #ef4444;">*</span>
+        </label>
+        <input
+          type="text"
+          id="inputNuevoPrefijo"
+          maxlength="10"
+          placeholder="Ej: NVO, EMP2, ABC"
+          oninput="verificarNuevoPrefijo(this.value)"
+          style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; box-sizing: border-box;"
+        >
+        <div id="nuevoPrefijo-status" style="margin-top: 6px; font-size: 0.85rem; min-height: 20px;"></div>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;">
+        <button onclick="cerrarModalDuplicarCliente()" style="padding: 10px 20px; border: 1px solid #d1d5db; border-radius: 8px; background: white; color: #374151; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+          Cancelar
+        </button>
+        <button id="btnConfirmarDuplicar" onclick="ejecutarDuplicarCliente()" disabled style="padding: 10px 22px; border: none; border-radius: 8px; background: #3b82f6; color: white; font-weight: 700; cursor: not-allowed; font-size: 0.9rem; opacity: 0.5; transition: opacity 0.2s;">
+          Duplicar Cliente
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================================ -->
   <!-- MODALES DE DIRECCIONES DEL CLIENTE -->
   <!-- ============================================ -->
@@ -2123,15 +2203,410 @@ const clienteId = parseInt("<%= cliente.id %>");
     document.getElementById('modalNuevaDireccionCliente').addEventListener('click', function(e) {
       if (e.target === this) cerrarModalNuevaDireccionCliente();
     });
-    
+
     document.getElementById('modalEditarDireccionCliente').addEventListener('click', function(e) {
       if (e.target === this) cerrarModalEditarDireccionCliente();
     });
-    
+
+    // ============================================
+    // DATOS PARA EXPORT (inyectados desde servidor)
+    // ============================================
+    const _direccionesData = <%- JSON.stringify(direcciones || []) %>;
+    const _clienteNombre = "<%= (cliente.nombre || '').replace(/"/g, '&quot;') %>";
+
+    // ============================================
+    // FUNCIONES DE EXPORTAR / IMPRIMIR
+    // ============================================
+    function _xmlEsc(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function imprimirDirecciones() {
+      document.body.classList.add('imprimiendo-dir-cliente');
+      window.print();
+      document.body.classList.remove('imprimiendo-dir-cliente');
+    }
+
+    function exportarPDFDirecciones() {
+      imprimirDirecciones();
+    }
+
+    function exportarCSVDirecciones() {
+      const rows = [['Alias','Calle','Colonia','Ciudad','Estado','CP','Referencia','Predeterminada']];
+      _direccionesData.forEach(function(d) {
+        rows.push([d.alias, d.calle, d.colonia, d.ciudad, d.estado, d.cp, d.referencia || '', d.es_predeterminada ? 'Sí' : 'No']);
+      });
+      const csv = rows.map(function(r) {
+        return r.map(function(v) { return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',');
+      }).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'direcciones_' + _clienteNombre.replace(/\s+/g,'_') + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportarExcelDirecciones() {
+      const fecha = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
+      const colDefs = [
+        { label: 'Alias',          width: 130 },
+        { label: 'Calle',          width: 180 },
+        { label: 'Colonia',        width: 150 },
+        { label: 'Ciudad',         width: 120 },
+        { label: 'Estado',         width: 110 },
+        { label: 'C.P.',           width: 65  },
+        { label: 'Referencia',     width: 200 },
+        { label: 'Predeterminada', width: 110 }
+      ];
+      const styles = `
+ <Styles>
+  <Style ss:ID="s_title"><Font ss:Bold="1" ss:Size="13" ss:Color="#1E3A8A"/></Style>
+  <Style ss:ID="s_sub"><Font ss:Size="9" ss:Color="#6B7280"/><Alignment ss:Horizontal="Left"/></Style>
+  <Style ss:ID="s_hdr">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="10"/>
+   <Interior ss:Color="#1E40AF" ss:Pattern="Solid"/>
+   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#1D4ED8"/>
+   <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#1D4ED8"/>
+   <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#1D4ED8"/></Borders>
+  </Style>
+  <Style ss:ID="s_even">
+   <Alignment ss:Vertical="Center"/><Font ss:Size="10" ss:Color="#374151"/>
+   <Interior ss:Color="#F0F9FF" ss:Pattern="Solid"/>
+   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#DBEAFE"/>
+   <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#DBEAFE"/>
+   <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#DBEAFE"/></Borders>
+  </Style>
+  <Style ss:ID="s_odd">
+   <Alignment ss:Vertical="Center"/><Font ss:Size="10" ss:Color="#374151"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+   <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/>
+   <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E5E7EB"/></Borders>
+  </Style>
+  <Style ss:ID="s_pred">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="10" ss:Color="#92400E"/>
+   <Interior ss:Color="#FEF3C7" ss:Pattern="Solid"/>
+   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FDE68A"/>
+   <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FDE68A"/>
+   <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FDE68A"/></Borders>
+  </Style>
+ </Styles>`;
+
+      const cols = colDefs.map(function(c) { return '<Column ss:Width="' + c.width + '"/>'; }).join('');
+      const nc = colDefs.length - 1;
+
+      let bodyRows = '';
+      _direccionesData.forEach(function(d, i) {
+        const sRow = i % 2 === 0 ? 's_even' : 's_odd';
+        const sPred = d.es_predeterminada ? 's_pred' : sRow;
+        const vals = [d.alias, d.calle, d.colonia, d.ciudad, d.estado, d.cp, d.referencia || ''];
+        const cells = vals.map(function(v) {
+          return '<Cell ss:StyleID="' + sRow + '"><Data ss:Type="String">' + _xmlEsc(v) + '</Data></Cell>';
+        }).join('');
+        const predCell = '<Cell ss:StyleID="' + sPred + '"><Data ss:Type="String">' + (d.es_predeterminada ? '★ Sí' : 'No') + '</Data></Cell>';
+        bodyRows += '<Row ss:Height="22">' + cells + predCell + '</Row>\n';
+      });
+
+      const hdrCells = colDefs.map(function(c) {
+        return '<Cell ss:StyleID="s_hdr"><Data ss:Type="String">' + c.label + '</Data></Cell>';
+      }).join('');
+
+      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
+        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' +
+        ' xmlns:o="urn:schemas-microsoft-com:office:office"' +
+        ' xmlns:x="urn:schemas-microsoft-com:office:excel"' +
+        ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+        styles +
+        '<Worksheet ss:Name="Direcciones"><Table>' +
+        cols +
+        '<Row ss:Height="30"><Cell ss:MergeAcross="' + nc + '" ss:StyleID="s_title"><Data ss:Type="String">Direcciones de Destino — ' + _xmlEsc(_clienteNombre) + '</Data></Cell></Row>' +
+        '<Row ss:Height="18"><Cell ss:MergeAcross="' + nc + '" ss:StyleID="s_sub"><Data ss:Type="String">Exportado el ' + fecha + '  •  Total: ' + _direccionesData.length + ' dirección(es)</Data></Cell></Row>' +
+        '<Row ss:Height="8"><Cell><Data ss:Type="String"></Data></Cell></Row>' +
+        '<Row ss:Height="26">' + hdrCells + '</Row>' +
+        bodyRows +
+        '</Table></Worksheet></Workbook>';
+
+      const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'direcciones_' + _clienteNombre.replace(/\s+/g,'_') + '.xls';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ============================================
+    // MODAL IMPORTAR CSV
+    // ============================================
+    function abrirModalImportarCSV() {
+      document.getElementById('modalImportarCSV').style.display = 'flex';
+      lucide.createIcons();
+    }
+    function cerrarModalImportarCSV() {
+      document.getElementById('modalImportarCSV').style.display = 'none';
+      document.getElementById('formImportarCSV').reset();
+      document.getElementById('csvImportResult').style.display = 'none';
+    }
+
+    document.getElementById('formImportarCSV').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      formData.append('cliente_id', clienteId);
+      const btn = this.querySelector('button[type=submit]');
+      btn.disabled = true;
+      btn.textContent = 'Importando...';
+      try {
+        const response = await fetch('/direcciones/importar-csv', { method: 'POST', body: formData });
+        const result = await response.json();
+        const resultDiv = document.getElementById('csvImportResult');
+        resultDiv.style.display = 'block';
+        if (result.success && result.imported > 0) {
+          resultDiv.style.background = '#dcfce7';
+          resultDiv.style.color = '#166534';
+          resultDiv.textContent = '✅ ' + result.imported + ' dirección(es) importada(s)' + (result.errores > 0 ? ' — ' + result.errores + ' filas con error' : '');
+          setTimeout(function() { cerrarModalImportarCSV(); location.reload(); }, 1800);
+        } else if (result.success && result.imported === 0) {
+          resultDiv.style.background = '#fef9c3';
+          resultDiv.style.color = '#854d0e';
+          const hint = result.separador ? ' (separador detectado: "' + result.separador + '", ' + result.totalLineas + ' filas)' : '';
+          resultDiv.textContent = '⚠️ No se importó ninguna fila' + hint + '. Verifica que el archivo use , o ; y tenga los campos: alias, calle, colonia, ciudad, estado, cp';
+        } else {
+          resultDiv.style.background = '#fee2e2';
+          resultDiv.style.color = '#991b1b';
+          resultDiv.textContent = '❌ ' + (result.error || 'Error al importar');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error al importar CSV');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Importar';
+      }
+    });
+
+    document.getElementById('modalImportarCSV').addEventListener('click', function(e) {
+      if (e.target === this) cerrarModalImportarCSV();
+    });
+
     // Inicializar iconos
     lucide.createIcons();
   </script>
+
+  <!-- Modal Importar CSV -->
+  <div id="modalImportarCSV" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:16px; padding:32px; width:480px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 style="margin:0; font-size:1.2rem; font-weight:700; color:#1f2937; display:flex; align-items:center; gap:8px;">
+          <i data-lucide="upload" style="width:20px;height:20px;color:#ec4899;"></i>
+          Importar Direcciones desde CSV
+        </h3>
+        <button onclick="cerrarModalImportarCSV()" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:4px;">
+          <i data-lucide="x" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+      <p style="color:#6b7280; font-size:0.875rem; margin-bottom:16px; line-height:1.5;">
+        El archivo CSV debe tener las columnas:<br>
+        <code style="background:#f3f4f6; padding:2px 6px; border-radius:4px; font-size:0.8rem;">alias, calle, colonia, ciudad, estado, cp, referencia</code>
+      </p>
+      <a href="data:text/csv;charset=utf-8,%EF%BB%BFalias%2Ccalle%2Ccolonia%2Cciudad%2Cestado%2Ccp%2Creferencia%0ACasa+Principal%2CAv+Reforma+100%2CJuarez%2CCDMX%2CCDMX%2C06600%2CPorton+negro" download="plantilla_direcciones.csv" style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; color:#3b82f6; text-decoration:none; margin-bottom:20px; font-weight:600;">
+        <i data-lucide="download" style="width:14px;height:14px;"></i> Descargar plantilla
+      </a>
+      <form id="formImportarCSV" enctype="multipart/form-data">
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-weight:600; color:#374151; margin-bottom:6px; font-size:0.875rem;">Archivo CSV</label>
+          <input type="file" name="csv_file" accept=".csv,.txt" required style="width:100%; padding:10px; border:2px solid #e5e7eb; border-radius:8px; font-size:0.875rem; cursor:pointer;">
+        </div>
+        <div id="csvImportResult" style="display:none; padding:10px 14px; border-radius:8px; margin-bottom:12px; font-weight:600; font-size:0.875rem;"></div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="button" onclick="cerrarModalImportarCSV()" style="padding:10px 20px; background:#f3f4f6; color:#374151; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancelar</button>
+          <button type="submit" style="padding:10px 20px; background:linear-gradient(135deg,#ec4899 0%,#db2777 100%); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">Importar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Print view para direcciones (solo visible al imprimir) -->
+  <div id="print-dir-cliente" style="display:none;">
+    <div style="font-family: 'Inter', Arial, sans-serif; padding: 0; color: #1f2937;">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; padding: 28px 36px; border-radius: 12px 12px 0 0;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px;">Reporte de Direcciones</div>
+            <div style="font-size: 1.6rem; font-weight: 800; margin: 0 0 4px 0; line-height: 1.1;">Direcciones de Destino</div>
+            <div style="font-size: 1rem; font-weight: 400; opacity: 0.85;">Cliente: <strong><%= cliente.nombre %></strong></div>
+          </div>
+          <div style="text-align: right; font-size: 0.8rem; opacity: 0.8; padding-top: 4px;">
+            <div style="margin-bottom: 2px;">Fecha de generación</div>
+            <div style="font-weight: 700; font-size: 0.9rem;"><%= new Date().toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %></div>
+            <div style="margin-top: 8px; font-size: 0.72rem; opacity: 0.7;"><%= direcciones ? direcciones.length : 0 %> dirección(es) registrada(s)</div>
+          </div>
+        </div>
+      </div>
+      <!-- Tabla -->
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="padding: 11px 16px; background: #1e40af; color: white; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; border-right: 1px solid #2563eb;">Alias / Nombre</th>
+            <th style="padding: 11px 16px; background: #1e40af; color: white; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; border-right: 1px solid #2563eb;">Calle y Colonia</th>
+            <th style="padding: 11px 16px; background: #1e40af; color: white; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; border-right: 1px solid #2563eb;">Ciudad · Estado · CP</th>
+            <th style="padding: 11px 16px; background: #1e40af; color: white; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">Referencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (direcciones && direcciones.length > 0) { %>
+            <% direcciones.forEach(function(dir, i) { %>
+              <tr style="background: <%= i % 2 === 0 ? '#ffffff' : '#f0f9ff' %>; border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px 16px; font-size: 0.875rem; font-weight: 700; color: #1e3a8a; border-right: 1px solid #f3f4f6; vertical-align: top;">
+                  <%= dir.alias %>
+                  <% if (dir.es_predeterminada) { %>
+                    <span style="display: inline-block; margin-left: 6px; padding: 1px 7px; background: #fef3c7; color: #92400e; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">★ PRINCIPAL</span>
+                  <% } %>
+                </td>
+                <td style="padding: 12px 16px; font-size: 0.82rem; color: #374151; border-right: 1px solid #f3f4f6; vertical-align: top;"><%= dir.calle %>, <%= dir.colonia %></td>
+                <td style="padding: 12px 16px; font-size: 0.82rem; color: #374151; border-right: 1px solid #f3f4f6; vertical-align: top;"><%= dir.ciudad %>, <%= dir.estado %> &nbsp;<span style="font-weight:600;">CP <%= dir.cp %></span></td>
+                <td style="padding: 12px 16px; font-size: 0.78rem; color: #6b7280; font-style: <%= dir.referencia ? 'normal' : 'italic' %>; vertical-align: top;"><%= dir.referencia || '—' %></td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr><td colspan="4" style="padding: 32px; text-align: center; color: #9ca3af; font-size: 0.875rem;">No hay direcciones registradas</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+      <!-- Footer -->
+      <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-top: 3px solid #1e40af; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 12px 12px;">
+        <span style="font-size: 0.72rem; color: #9ca3af;">Total: <%= direcciones ? direcciones.length : 0 %> dirección(es)</span>
+        <span style="font-size: 0.72rem; color: #9ca3af;">Sistema de Tracking Logística</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print CSS -->
+  <style>
+    @media print {
+      body.imprimiendo-dir-cliente > * { display: none !important; }
+      body.imprimiendo-dir-cliente #print-dir-cliente { display: block !important; }
+      body.imprimiendo-dir-cliente { margin: 0; padding: 20px; background: white; }
+      #print-dir-cliente * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    }
+  </style>
+
   <script src="/js/notifications.js"></script>
   <script src="/js/sidebar.js"></script>
+
+  <script>
+    // ============================================
+    // DUPLICAR CLIENTE
+    // ============================================
+    let _prefijoDuplicarValido = false;
+    let _prefijoDuplicarTimer = null;
+
+    function abrirModalDuplicarCliente() {
+      document.getElementById('modalDuplicarCliente').style.display = 'flex';
+      const input = document.getElementById('inputNuevoPrefijo');
+      input.value = '';
+      input.style.borderColor = '#e5e7eb';
+      document.getElementById('nuevoPrefijo-status').innerHTML = '';
+      const btn = document.getElementById('btnConfirmarDuplicar');
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+      _prefijoDuplicarValido = false;
+      setTimeout(() => input.focus(), 100);
+    }
+
+    function cerrarModalDuplicarCliente() {
+      document.getElementById('modalDuplicarCliente').style.display = 'none';
+    }
+
+    function verificarNuevoPrefijo(val) {
+      clearTimeout(_prefijoDuplicarTimer);
+      _prefijoDuplicarValido = false;
+      const status = document.getElementById('nuevoPrefijo-status');
+      const input = document.getElementById('inputNuevoPrefijo');
+      const btn = document.getElementById('btnConfirmarDuplicar');
+
+      // Forzar mayúsculas visualmente
+      input.value = val.toUpperCase();
+
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+
+      if (!val || val.trim().length < 2) {
+        status.innerHTML = '';
+        input.style.borderColor = '#e5e7eb';
+        return;
+      }
+
+      status.innerHTML = '<span style="color:#6b7280">Verificando...</span>';
+
+      _prefijoDuplicarTimer = setTimeout(async () => {
+        try {
+          const r = await fetch(`/clientes/api/verificar-prefijo?prefijo=${encodeURIComponent(val.trim())}`);
+          const data = await r.json();
+          if (data.disponible) {
+            status.innerHTML = '<span style="color:#059669; font-weight:600;">✓ Prefijo disponible</span>';
+            input.style.borderColor = '#059669';
+            _prefijoDuplicarValido = true;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+          } else {
+            status.innerHTML = `<span style="color:#dc2626; font-weight:600;">✗ ${data.mensaje || 'Prefijo no disponible'}</span>`;
+            input.style.borderColor = '#dc2626';
+            _prefijoDuplicarValido = false;
+          }
+        } catch (e) {
+          status.innerHTML = '<span style="color:#dc2626;">Error al verificar</span>';
+        }
+      }, 400);
+    }
+
+    async function ejecutarDuplicarCliente() {
+      if (!_prefijoDuplicarValido) return;
+      const prefijo = document.getElementById('inputNuevoPrefijo').value.trim().toUpperCase();
+      if (!prefijo) return;
+
+      const btn = document.getElementById('btnConfirmarDuplicar');
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.textContent = 'Duplicando...';
+
+      try {
+        const r = await fetch('/clientes/<%= cliente.id %>/duplicar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nuevo_prefijo: prefijo })
+        });
+        const data = await r.json();
+        if (data.success) {
+          window.location.href = `/clientes/${data.nuevoClienteId}?success=duplicado`;
+        } else {
+          alert('❌ ' + (data.error || 'Error al duplicar'));
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.textContent = 'Duplicar Cliente';
+        }
+      } catch (e) {
+        alert('❌ Error de red al duplicar el cliente');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Duplicar Cliente';
+      }
+    }
+
+    // Cerrar modal con ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') cerrarModalDuplicarCliente();
+    });
+
+    document.getElementById('modalDuplicarCliente').addEventListener('click', function(e) {
+      if (e.target === this) cerrarModalDuplicarCliente();
+    });
+  </script>
 </body>
 </html>

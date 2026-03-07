@@ -6,6 +6,35 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// Helper: parse a CSV line respecting quoted fields and custom separator
+function parseCSVLine(line, sep) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') {
+      inQuotes = !inQuotes;
+    } else if (line[i] === sep && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += line[i];
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+// Helper: detect CSV separator from first line
+function detectSeparator(line) {
+  const commas = (line.match(/,/g) || []).length;
+  const semicolons = (line.match(/;/g) || []).length;
+  return semicolons > commas ? ';' : ',';
+}
+
+// Multer para CSVs en memoria
+const uploadCSV = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } });
+
 // Configuración multer para logo de empresa
 const storageLogo = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -468,6 +497,67 @@ router.post('/direcciones/:id/predeterminada', async (req, res) => {
 });
 
 
+
+// ============================================
+// IMPORTAR BODEGAS DESDE CSV (admin/superusuario)
+// ============================================
+router.post('/direcciones/importar-csv', isAuthenticated, uploadCSV.single('csv_file'), async (req, res) => {
+  try {
+    if (!['admin', 'superusuario'].includes(req.session.userRole)) {
+      return res.status(403).json({ success: false, error: 'Sin permisos' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Archivo no recibido' });
+    }
+
+    // Strip BOM and normalize line endings
+    const content = req.file.buffer.toString('utf8').replace(/^\uFEFF/, '').replace(/\r/g, '');
+    const lines = content.split('\n').map(l => l.trim()).filter(l => l);
+
+    if (lines.length === 0) {
+      return res.status(400).json({ success: false, error: 'El archivo está vacío' });
+    }
+
+    // Auto-detect separator (comma vs semicolon — Excel en español usa ';')
+    const sep = detectSeparator(lines[0]);
+    console.log(`📋 CSV bodegas import: ${lines.length} líneas, separador: '${sep}'`);
+
+    const firstLineLower = lines[0].toLowerCase();
+    const dataLines = (firstLineLower.includes('alias') || firstLineLower.includes('calle') || firstLineLower.includes('nombre')) ? lines.slice(1) : lines;
+
+    let imported = 0;
+    let errores = 0;
+
+    for (const line of dataLines) {
+      const parts = parseCSVLine(line, sep);
+      const [alias, calle, colonia, ciudad, estado, cp, referencia] = parts;
+
+      if (!alias || !calle || !colonia || !ciudad || !estado || !cp) {
+        errores++;
+        continue;
+      }
+
+      try {
+        await db.query(`
+          INSERT INTO direcciones_empresa
+          (alias, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, activa)
+          VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1)
+        `, [alias, calle, colonia, ciudad, estado, cp, referencia || null]);
+        imported++;
+      } catch (err) {
+        errores++;
+        console.error('Error insertando bodega CSV:', err.message, '— alias:', alias);
+      }
+    }
+
+    res.json({ success: true, imported, errores, separador: sep, totalLineas: dataLines.length });
+
+  } catch (error) {
+    console.error('Error al importar CSV bodegas:', error);
+    res.status(500).json({ success: false, error: 'Error al procesar el archivo' });
+  }
+});
 
 // ============================================
 // API: OBTENER DIRECCIONES DE EMPRESA (JSON)

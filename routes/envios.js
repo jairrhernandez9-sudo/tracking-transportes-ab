@@ -115,7 +115,7 @@ router.get('/', isAuthenticated, async (req, res) => {
         e.*,
         COALESCE(c.nombre_empresa, e.cliente_nombre, 'Sin cliente') as nombre_empresa,
         c.contacto,
-        u.nombre as creador_nombre
+        COALESCE(u.alias, u.nombre) as creador_nombre
        FROM envios e
        LEFT JOIN clientes c ON e.cliente_id = c.id
        LEFT JOIN usuarios u ON e.usuario_creador_id = u.id
@@ -157,7 +157,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         c.contacto,
         c.telefono,
         c.email as cliente_email,
-        u.nombre as creador_nombre
+        COALESCE(u.alias, u.nombre) as creador_nombre
       FROM envios e
       LEFT JOIN clientes c ON e.cliente_id = c.id
       LEFT JOIN usuarios u ON e.usuario_creador_id = u.id
@@ -174,7 +174,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     const [historial] = await db.query(`
       SELECT 
         he.*,
-        u.nombre as usuario_nombre
+        COALESCE(u.alias, u.nombre) as usuario_nombre
       FROM historial_estados he
       LEFT JOIN usuarios u ON he.usuario_id = u.id
       WHERE he.envio_id = ?

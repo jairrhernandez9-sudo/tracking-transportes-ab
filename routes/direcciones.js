@@ -1,6 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const multer = require('multer');
+const uploadCSV = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } });
+
+// Helper: parse a CSV line respecting quoted fields and custom separator
+function parseCSVLine(line, sep) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') {
+      inQuotes = !inQuotes;
+    } else if (line[i] === sep && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += line[i];
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+// Helper: detect CSV separator from first line (comma vs semicolon)
+function detectSeparator(line) {
+  const commas = (line.match(/,/g) || []).length;
+  const semicolons = (line.match(/;/g) || []).length;
+  return semicolons > commas ? ';' : ',';
+}
 
 // Middleware de autenticación
 function isAuthenticated(req, res, next) {
@@ -264,6 +292,76 @@ router.post('/:id/predeterminada', async (req, res) => {
       success: false, 
       error: 'Error al marcar predeterminada' 
     });
+  }
+});
+
+// ============================================
+// IMPORTAR DIRECCIONES DESDE CSV (admin/superusuario)
+// ============================================
+router.post('/importar-csv', uploadCSV.single('csv_file'), async (req, res) => {
+  try {
+    if (!['admin', 'superusuario'].includes(req.session.userRole)) {
+      return res.status(403).json({ success: false, error: 'Sin permisos' });
+    }
+
+    const { cliente_id } = req.body;
+    if (!cliente_id || !req.file) {
+      return res.status(400).json({ success: false, error: 'Datos faltantes' });
+    }
+
+    // Strip BOM and normalize line endings
+    const content = req.file.buffer.toString('utf8').replace(/^\uFEFF/, '').replace(/\r/g, '');
+    const lines = content.split('\n').map(l => l.trim()).filter(l => l);
+
+    if (lines.length === 0) {
+      return res.status(400).json({ success: false, error: 'El archivo está vacío' });
+    }
+
+    // Auto-detect separator (comma vs semicolon — Excel en español usa ';')
+    const sep = detectSeparator(lines[0]);
+    console.log(`📋 CSV import: ${lines.length} líneas, separador: '${sep}'`);
+
+    // Skip header if first line looks like headers
+    const firstLineLower = lines[0].toLowerCase();
+    const dataLines = (firstLineLower.includes('alias') || firstLineLower.includes('calle') || firstLineLower.includes('nombre')) ? lines.slice(1) : lines;
+
+    let imported = 0;
+    let errores = 0;
+    const errDetails = [];
+
+    for (const line of dataLines) {
+      const parts = parseCSVLine(line, sep);
+      const [alias, calle, colonia, ciudad, estado, cp, referencia] = parts;
+
+      if (!alias || !calle || !colonia || !ciudad || !estado || !cp) {
+        errores++;
+        errDetails.push(`Campos vacíos: [${parts.join('|')}]`);
+        continue;
+      }
+
+      try {
+        await db.query(`
+          INSERT INTO direcciones_cliente
+          (cliente_id, alias, tipo, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, activa)
+          VALUES (?, ?, 'destino', ?, ?, ?, ?, ?, ?, 0, 1)
+        `, [cliente_id, alias, calle, colonia, ciudad, estado, cp, referencia || null]);
+        imported++;
+      } catch (err) {
+        errores++;
+        errDetails.push(`DB error: ${err.message} — alias: ${alias}`);
+        console.error('Error insertando dirección CSV:', err.message);
+      }
+    }
+
+    if (errDetails.length > 0) {
+      console.log('⚠️ Errores en CSV import:', errDetails);
+    }
+
+    res.json({ success: true, imported, errores, separador: sep, totalLineas: dataLines.length });
+
+  } catch (error) {
+    console.error('Error al importar CSV direcciones cliente:', error);
+    res.status(500).json({ success: false, error: 'Error al procesar el archivo' });
   }
 });
 

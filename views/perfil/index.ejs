@@ -598,22 +598,35 @@
               
               <form action="/mi-perfil/actualizar-datos" method="POST">
                 <div class="form-group">
+                  <label class="form-label">Alias <span style="font-weight:400;color:#94a3b8;">(opcional)</span></label>
+                  <input
+                    type="text"
+                    name="alias"
+                    class="form-input"
+                    value="<%= user.alias %>"
+                    maxlength="80"
+                    placeholder="Ej: Logística, Ventas, Gerente…"
+                  >
+                  <p class="form-help">Nombre público que verá el cliente en los registros del envío. Si lo dejas vacío se usará tu nombre real.</p>
+                </div>
+
+                <div class="form-group">
                   <label class="form-label">Nombre completo</label>
-                  <input 
-                    type="text" 
-                    name="nombre" 
-                    class="form-input" 
+                  <input
+                    type="text"
+                    name="nombre"
+                    class="form-input"
                     value="<%= user.nombre %>"
                     required
                   >
                 </div>
-                
+
                 <div class="form-group">
                   <label class="form-label">Correo electrónico</label>
-                  <input 
-                    type="email" 
-                    name="email" 
-                    class="form-input" 
+                  <input
+                    type="email"
+                    name="email"
+                    class="form-input"
                     value="<%= user.email %>"
                     required
                   >

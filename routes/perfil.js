@@ -8,21 +8,22 @@ const { isAuthenticated } = require('../middleware/auth');
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     const [usuario] = await db.query(
-      'SELECT id, nombre, email, rol FROM usuarios WHERE id = ?',
+      'SELECT id, nombre, email, rol, alias FROM usuarios WHERE id = ?',
       [req.session.userId]
     );
-    
+
     if (usuario.length === 0) {
       return res.redirect('/auth/logout');
     }
-    
+
     res.render('perfil/index', {
       title: 'Mi Perfil',
       user: {
         id: usuario[0].id,
         nombre: usuario[0].nombre,
         email: usuario[0].email,
-        rol: usuario[0].rol
+        rol: usuario[0].rol,
+        alias: usuario[0].alias || ''
       },
       success: req.query.success,
       error: req.query.error
@@ -36,29 +37,31 @@ router.get('/', isAuthenticated, async (req, res) => {
 // Actualizar datos personales
 router.post('/actualizar-datos', isAuthenticated, async (req, res) => {
   try {
-    const { nombre, email } = req.body;
-    
+    const { nombre, email, alias } = req.body;
+
     // Validar
     if (!nombre || !email) {
       return res.redirect('/mi-perfil?error=campos_vacios');
     }
-    
+
     // Verificar si el email ya existe (excepto el propio)
     const [existente] = await db.query(
       'SELECT id FROM usuarios WHERE email = ? AND id != ?',
       [email, req.session.userId]
     );
-    
+
     if (existente.length > 0) {
       return res.redirect('/mi-perfil?error=email_existe');
     }
-    
+
+    const aliasVal = alias && alias.trim() ? alias.trim() : null;
+
     // Actualizar
     await db.query(
-      'UPDATE usuarios SET nombre = ?, email = ? WHERE id = ?',
-      [nombre, email, req.session.userId]
+      'UPDATE usuarios SET nombre = ?, email = ?, alias = ? WHERE id = ?',
+      [nombre, email, aliasVal, req.session.userId]
     );
-    
+
     // Actualizar sesión
     req.session.userName = nombre;
     req.session.userEmail = email;

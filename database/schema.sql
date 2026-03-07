@@ -31,6 +31,7 @@ CREATE TABLE `usuarios` (
   `cliente_id`       INT           DEFAULT NULL,
   `pagina_inicio`    VARCHAR(50)   NOT NULL DEFAULT 'dashboard',
   `ultimo_cliente_id` INT          DEFAULT NULL,
+  `alias`            VARCHAR(80)   DEFAULT NULL COMMENT 'Nombre público / cargo mostrado al cliente. Si NULL se usa el nombre real.',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
