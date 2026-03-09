@@ -477,6 +477,16 @@
     </div>
   </div>
 
+  <% if (typeof portalDeshabilitado !== 'undefined' && portalDeshabilitado) { %>
+  <div style="background:#fff; border-radius:16px; padding:60px 40px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,.06); margin:30px 0;">
+    <div style="width:80px;height:80px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+      <i data-lucide="lock" style="width:36px;height:36px;color:#dc2626;"></i>
+    </div>
+    <h2 style="font-size:1.4rem;font-weight:800;color:#1f2937;margin-bottom:10px;">Portal no disponible</h2>
+    <p style="color:#6b7280;font-size:0.95rem;max-width:400px;margin:0 auto;">Tu cuenta ha sido deshabilitada temporalmente. Contacta a tu ejecutivo para más información.</p>
+  </div>
+  <% } else { %>
+
   <!-- Toolbar de búsqueda -->
   <form method="GET" action="/portal-cliente" class="toolbar-card">
     <div class="search-box">
@@ -628,6 +638,8 @@
     <% } %>
     <% } %>
   </div>
+
+  <% } %><!-- fin else portalDeshabilitado -->
 
 </main>
 

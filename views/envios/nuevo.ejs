@@ -1692,11 +1692,14 @@
       <button class="dir-modal-close" onclick="cerrarModalDestino()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
     </div>
     <div class="dir-modal-tabs">
-      <button class="dir-tab-btn active tab-direccion-destino" data-tab="bodegas" onclick="cambiarTabDestino('bodegas')">
+      <button class="dir-tab-btn tab-direccion-destino" data-tab="bodegas" onclick="cambiarTabDestino('bodegas')">
         <i data-lucide="warehouse" style="width:17px;height:17px;"></i> Bodegas
       </button>
-      <button class="dir-tab-btn tab-direccion-destino" data-tab="clientes" onclick="cambiarTabDestino('clientes')">
+      <button class="dir-tab-btn active tab-direccion-destino" data-tab="clientes" onclick="cambiarTabDestino('clientes')">
         <i data-lucide="users" style="width:17px;height:17px;"></i> Direcciones del Cliente
+      </button>
+      <button class="dir-tab-btn tab-direccion-destino" data-tab="universales" onclick="cambiarTabDestino('universales')">
+        <i data-lucide="globe" style="width:17px;height:17px;"></i> Universales
       </button>
     </div>
     <div class="dir-modal-search" style="position:relative;">
@@ -1720,7 +1723,7 @@
         </div>
       </div>
       <!-- Tab: Clientes -->
-      <div id="tabDestinoClientes" class="tab-content-destino" style="display: none;">
+      <div id="tabDestinoClientes" class="tab-content-destino">
         <div id="destinoClienteFavSection">
           <div class="modal-section-title">⭐ Favoritos</div>
           <div id="destinoClienteFavGrid"></div>
@@ -1732,6 +1735,13 @@
         <div id="destinoClienteTodosSection">
           <div class="modal-section-title">📋 Todos los registrados</div>
           <div id="destinoClienteTodosGrid"></div>
+        </div>
+      </div>
+      <!-- Tab: Universales -->
+      <div id="tabDestinoUniversales" class="tab-content-destino" style="display: none;">
+        <div id="destinoUniversalesTodosSection">
+          <div class="modal-section-title">🌐 Destinos Universales</div>
+          <div id="destinoUniversalesGrid"></div>
         </div>
       </div>
     </div>
@@ -1820,6 +1830,7 @@
           cargarDireccionesBodegas('destino');
           const clienteId = document.querySelector('[name="cliente_id"]')?.value;
           if (clienteId) cargarDireccionesClienteModal(clienteId, 'destino');
+          cargarDireccionesUniversales();
           cambiarTabDestino('clientes');
           lucide.createIcons();
         }
@@ -1871,25 +1882,20 @@
         }
 
         function cambiarTabDestino(tab) {
-          // Actualizar botones de tabs
           document.querySelectorAll('.tab-direccion-destino').forEach(btn => {
             btn.classList.remove('active');
-            if (btn.dataset.tab === tab) {
-              btn.classList.add('active');
-            }
+            if (btn.dataset.tab === tab) btn.classList.add('active');
           });
-          
-          // Mostrar/ocultar contenido
           document.querySelectorAll('.tab-content-destino').forEach(content => {
             content.style.display = 'none';
           });
-          
           if (tab === 'bodegas') {
             document.getElementById('tabDestinoBodegas').style.display = 'grid';
+          } else if (tab === 'universales') {
+            document.getElementById('tabDestinoUniversales').style.display = 'block';
           } else {
             document.getElementById('tabDestinoClientes').style.display = 'block';
           }
-          
           lucide.createIcons();
         }
 
@@ -1986,6 +1992,17 @@
           toggleSection(`${prefix}ClienteFavSection`,   clFav.length > 0);
           toggleSection(`${prefix}ClienteRecSection`,   clRec.length > 0);
           toggleSection(`${prefix}ClienteTodosSection`, clTodos.length > 0);
+
+          // Universales — solo en modal destino
+          if (tipoModal === 'destino') {
+            const univDirs = (direccionesUniversales || []).filter(d =>
+              !query || d.alias?.toLowerCase().includes(query) ||
+              d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query) ||
+              d.estado?.toLowerCase().includes(query) || d.colonia?.toLowerCase().includes(query)
+            );
+            setGrid('destinoUniversalesGrid', univDirs, 'universal', 'destino');
+            toggleSection('destinoUniversalesTodosSection', univDirs.length > 0);
+          }
         }
 
         function setGrid(id, dirs, tipo, tipoModal) {
@@ -2002,6 +2019,23 @@
         function filtrarModal(tipoModal) {
           renderModalSections(tipoModal);
           lucide.createIcons();
+        }
+
+        let direccionesUniversales = [];
+
+        // ============================================
+        // CARGAR DIRECCIONES UNIVERSALES (destino)
+        // ============================================
+        async function cargarDireccionesUniversales() {
+          try {
+            const response = await fetch('/configuracion/api/direcciones?tipo=destino');
+            const data = await response.json();
+            direccionesUniversales = (data.success && data.direcciones) ? data.direcciones : [];
+            renderModalSections('destino');
+            lucide.createIcons();
+          } catch (error) {
+            console.error('Error al cargar direcciones universales:', error);
+          }
         }
 
         // ============================================
@@ -2050,6 +2084,8 @@
           let direccion;
           if (tipoDireccion === 'bodega') {
             direccion = direccionesBodegas.find(d => d.id === direccionId);
+          } else if (tipoDireccion === 'universal') {
+            direccion = direccionesUniversales.find(d => d.id === direccionId);
           } else {
             direccion = direccionesCliente.find(d => d.id === direccionId);
           }

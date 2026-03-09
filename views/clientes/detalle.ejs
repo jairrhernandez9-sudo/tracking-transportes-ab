@@ -1361,20 +1361,47 @@
         
         <!-- COLUMNA DERECHA -->
         <div>
-          <!-- TOGGLE ACTIVAR/DESACTIVAR -->
-          <div class="action-card">
+          <!-- TOGGLE HABILITADO (apaga todo, incluido tracking) -->
+          <div class="action-card" style="border: 2px solid <%= cliente.habilitado === 0 ? '#fecaca' : '#e5e7eb' %>;">
             <h3 class="action-title">
-              <i data-lucide="settings" style="width: 20px; height: 20px; color: #3b82f6;"></i>
-              Estado del Cliente
+              <i data-lucide="shield" style="width: 20px; height: 20px; color: <%= cliente.habilitado === 0 ? '#dc2626' : '#3b82f6' %>;"></i>
+              Cliente Activo
             </h3>
-            
+
             <div class="toggle-container">
               <div class="toggle-label">
                 <i data-lucide="power"></i>
-                <span>Cliente <%= cliente.activo === 1 ? 'Activo' : 'Inactivo' %></span>
+                <span id="labelHabilitado"><%= cliente.habilitado === 0 ? 'Cliente Inactivo (todo deshabilitado)' : 'Cliente Activo' %></span>
               </div>
-              <div 
-                class="toggle-switch <%= cliente.activo === 1 ? 'active' : '' %>" 
+              <div
+                class="toggle-switch <%= cliente.habilitado !== 0 ? 'active' : '' %>"
+                id="toggleHabilitado"
+                data-cliente-id="<%= cliente.id %>"
+                data-habilitado="<%= cliente.habilitado !== 0 ? 1 : 0 %>"
+              >
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+
+            <p style="font-size: 0.8rem; color: #6b7280; margin-top: -8px;">
+              Si se desactiva, el cliente queda completamente inhabilitado: no aparece en nuevos envíos y su portal de tracking se bloquea.
+            </p>
+          </div>
+
+          <!-- TOGGLE ACEPTAR NUEVOS ENVÍOS -->
+          <div class="action-card">
+            <h3 class="action-title">
+              <i data-lucide="settings" style="width: 20px; height: 20px; color: #3b82f6;"></i>
+              Aceptar Nuevos Envíos
+            </h3>
+
+            <div class="toggle-container">
+              <div class="toggle-label">
+                <i data-lucide="package"></i>
+                <span id="labelActivo"><%= cliente.activo === 1 ? 'Acepta nuevos envíos' : 'No acepta nuevos envíos' %></span>
+              </div>
+              <div
+                class="toggle-switch <%= cliente.activo === 1 ? 'active' : '' %>"
                 id="toggleActivo"
                 data-cliente-id="<%= cliente.id %>"
                 data-activo="<%= cliente.activo %>"
@@ -1382,9 +1409,9 @@
                 <div class="toggle-slider"></div>
               </div>
             </div>
-            
+
             <p style="font-size: 0.8rem; color: #6b7280; margin-top: -8px;">
-              Los clientes inactivos no aparecerán en las listas de selección para nuevos envíos.
+              Si se desactiva, el cliente no aparecerá en la lista de selección para crear nuevos envíos. El tracking de envíos existentes sigue funcionando.
             </p>
           </div>
           
@@ -1931,43 +1958,65 @@
       });
     }
     
-    // Toggle Activo/Inactivo
+    // Toggle Habilitado (apaga todo, incluido tracking)
+    const toggleHabilitado = document.getElementById('toggleHabilitado');
+    if (toggleHabilitado) {
+      toggleHabilitado.addEventListener('click', async function() {
+        const clienteId = this.dataset.clienteId;
+        const estadoActual = parseInt(this.dataset.habilitado);
+        const nuevoEstado = estadoActual === 1 ? 0 : 1;
+        try {
+          const response = await fetch(`/clientes/${clienteId}/toggle-habilitado`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ habilitado: nuevoEstado })
+          });
+          const result = await response.json();
+          if (result.success) {
+            this.classList.toggle('active');
+            this.dataset.habilitado = nuevoEstado;
+            document.getElementById('labelHabilitado').textContent =
+              nuevoEstado === 1 ? 'Cliente Activo' : 'Cliente Inactivo (todo deshabilitado)';
+            // Actualizar badge de estado en header
+            const statusBadge = document.querySelector('.status-badge');
+            if (statusBadge) {
+              statusBadge.className = nuevoEstado === 1 ? 'status-badge status-activo' : 'status-badge status-inactivo';
+              statusBadge.textContent = nuevoEstado === 1 ? 'Activo' : 'Inactivo';
+            }
+            // Actualizar borde del card
+            const card = this.closest('.action-card');
+            if (card) card.style.border = nuevoEstado === 1 ? '2px solid #e5e7eb' : '2px solid #fecaca';
+            alert(nuevoEstado === 1 ? 'Cliente habilitado correctamente' : 'Cliente deshabilitado. El portal de tracking ha sido bloqueado.');
+          } else {
+            alert('Error al cambiar el estado del cliente');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al cambiar el estado del cliente');
+        }
+      });
+    }
+
+    // Toggle Aceptar Nuevos Envíos
     const toggleActivo = document.getElementById('toggleActivo');
     if (toggleActivo) {
       toggleActivo.addEventListener('click', async function() {
         const clienteId = this.dataset.clienteId;
         const estadoActual = parseInt(this.dataset.activo);
         const nuevoEstado = estadoActual === 1 ? 0 : 1;
-        
         try {
           const response = await fetch(`/clientes/${clienteId}/toggle-activo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ activo: nuevoEstado })
           });
-          
           const result = await response.json();
-          
           if (result.success) {
-            // Actualizar UI
             this.classList.toggle('active');
             this.dataset.activo = nuevoEstado;
-            
-            // Actualizar badge de estado
-            const statusBadge = document.querySelector('.status-badge');
-            if (statusBadge) {
-              statusBadge.className = nuevoEstado === 1 ? 'status-badge status-activo' : 'status-badge status-inactivo';
-              statusBadge.textContent = nuevoEstado === 1 ? 'ACTIVO' : 'INACTIVO';
-            }
-            
-            // Actualizar texto del toggle
-            const toggleLabel = document.querySelector('.toggle-label span');
-            if (toggleLabel) {
-              toggleLabel.textContent = nuevoEstado === 1 ? 'Cliente Activo' : 'Cliente Inactivo';
-            }
-            
-            // Mostrar mensaje
-            alert(nuevoEstado === 1 ? 'Cliente activado correctamente' : 'Cliente desactivado correctamente');
+            document.getElementById('labelActivo').textContent =
+              nuevoEstado === 1 ? 'Acepta nuevos envíos' : 'No acepta nuevos envíos';
+            alert(nuevoEstado === 1 ? 'Ahora acepta nuevos envíos' : 'Ya no acepta nuevos envíos');
           } else {
             alert('Error al cambiar el estado del cliente');
           }

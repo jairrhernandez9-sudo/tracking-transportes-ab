@@ -32,6 +32,17 @@ router.get('/', soloCliente, async (req, res) => {
     );
     const cliente = clienteRows[0];
 
+    // Si el cliente está deshabilitado, mostrar portal bloqueado
+    if (!cliente || cliente.habilitado === 0) {
+      return res.render('portal-cliente', {
+        cliente: cliente || { nombre_empresa: 'Cliente' },
+        portalDeshabilitado: true,
+        envios: [], totalEnvios: 0, totalPaginas: 0, pagina: 1,
+        resumen: { total: 0, creados: 0, en_transito: 0, entregados: 0 },
+        direcciones: [], filtros: {}, logoUrl: logoUrl || null
+      });
+    }
+
     // Direcciones del cliente para el filtro
     const [direcciones] = await db.query(
       `SELECT id, alias, calle, ciudad, estado, cp, tipo

@@ -676,6 +676,21 @@ router.post('/:id/eliminar-permanente', isAuthenticated, requireAdmin, async (re
 });
 
 // ============================================
+// TOGGLE HABILITADO (apaga todo, incluido tracking)
+// ============================================
+router.post('/:id/toggle-habilitado', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { habilitado } = req.body;
+    await db.query('UPDATE clientes SET habilitado = ? WHERE id = ?', [habilitado, id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al cambiar habilitado:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar el estado' });
+  }
+});
+
+// ============================================
 // DUPLICAR CLIENTE
 // ============================================
 router.post('/:id/duplicar', isAuthenticated, requireAdminOrSuper, async (req, res) => {

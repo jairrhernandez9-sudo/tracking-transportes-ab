@@ -1251,11 +1251,11 @@
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <!-- Logo upload -->
-                <div>
-                  <label class="form-label">Logo de la empresa</label>
 
-                  <!-- Preview del logo actual -->
+                <!-- Logo Branding (color) -->
+                <div>
+                  <label class="form-label">Logo Branding <span style="font-size:0.75rem;color:#6b7280;font-weight:500;">(color — pantalla y web)</span></label>
+
                   <div id="logo-preview-container" style="width: 100%; height: 100px; border: 2px dashed #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: #f8fafc; overflow: hidden;">
                     <% if (config.empresa.empresa_logo_url) { %>
                       <img id="logo-preview-img" src="<%= config.empresa.empresa_logo_url %>" alt="Logo actual" style="max-height: 80px; max-width: 200px; object-fit: contain;">
@@ -1267,18 +1267,15 @@
                     <% } %>
                   </div>
 
-                  <!-- Input URL oculto (se actualiza al subir) -->
-
-                  <!-- Botón de subir logo (form separado) -->
                   <form action="/configuracion/logo/upload" method="POST" enctype="multipart/form-data" id="formLogoUpload">
                     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                       <label for="logo_file_input" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: center;">
                         <i data-lucide="upload-cloud" style="width: 18px; height: 18px;"></i>
-                        Subir nuevo logo
+                        Subir logo
                       </label>
                       <input type="file" id="logo_file_input" name="logo_file" accept="image/*" style="display: none;" onchange="previewLogo(this); document.getElementById('formLogoUpload').submit();">
                       <% if (config.empresa.empresa_logo_url) { %>
-                        <a href="/configuracion/logo/eliminar" 
+                        <a href="/configuracion/logo/eliminar"
                            onclick="return confirm('¿Eliminar el logo actual?')"
                            style="padding: 10px 14px; background: #fee2e2; color: #dc2626; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                           <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
@@ -1288,9 +1285,47 @@
                   </form>
 
                   <small style="color: #6b7280; font-size: 0.8rem; margin-top: 8px; display: block;">
-                    💡 PNG, JPG o SVG. Máx. 2MB. Aparecerá en blanco y negro en etiquetas térmicas.
+                    PNG, JPG o SVG. Máx. 2MB. Se muestra en pantalla y portales web.
                   </small>
                 </div>
+
+                <!-- Logo Etiqueta (B&N) -->
+                <div>
+                  <label class="form-label">Logo Etiqueta <span style="font-size:0.75rem;color:#6b7280;font-weight:500;">(blanco y negro — impresión térmica)</span></label>
+
+                  <div style="width: 100%; height: 100px; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: #f0f0f0; overflow: hidden;">
+                    <% if (config.empresa.empresa_logo_bw_url) { %>
+                      <img src="<%= config.empresa.empresa_logo_bw_url %>" alt="Logo B&N" style="max-height: 80px; max-width: 200px; object-fit: contain; filter: grayscale(100%);">
+                    <% } else { %>
+                      <div style="text-align: center; color: #9ca3af;">
+                        <i data-lucide="image-off" style="width: 32px; height: 32px; display: block; margin: 0 auto 6px;"></i>
+                        <span style="font-size: 0.8rem;">Sin logo B&N</span>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <form action="/configuracion/logo-bw/upload" method="POST" enctype="multipart/form-data" id="formLogoBwUpload">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                      <label for="logo_bw_file_input" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #374151 0%, #111827 100%); color: white; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: center;">
+                        <i data-lucide="upload-cloud" style="width: 18px; height: 18px;"></i>
+                        Subir logo B&N
+                      </label>
+                      <input type="file" id="logo_bw_file_input" name="logo_bw_file" accept="image/*" style="display: none;" onchange="document.getElementById('formLogoBwUpload').submit();">
+                      <% if (config.empresa.empresa_logo_bw_url) { %>
+                        <a href="/configuracion/logo-bw/eliminar"
+                           onclick="return confirm('¿Eliminar el logo B&N?')"
+                           style="padding: 10px 14px; background: #fee2e2; color: #dc2626; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                          <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                        </a>
+                      <% } %>
+                    </div>
+                  </form>
+
+                  <small style="color: #6b7280; font-size: 0.8rem; margin-top: 8px; display: block;">
+                    PNG o JPG en escala de grises. Se usará exclusivamente en la etiqueta térmica.
+                  </small>
+                </div>
+
               </div><!-- /grid branding -->
             </div><!-- /config-card Branding -->
         </div><!-- /tab empresa -->
@@ -1339,9 +1374,9 @@
               </div>
             </div>
 
-            <% if (direccionesEmpresa && direccionesEmpresa.length > 0) { %>
+            <% if (direccionesOrigen && direccionesOrigen.length > 0) { %>
               <div style="display: grid; gap: 16px;">
-                <% direccionesEmpresa.forEach(function(dir) { %>
+                <% direccionesOrigen.forEach(function(dir) { %>
                   <div style="background: white; padding: 24px; border-radius: 12px; border: 2px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); transition: all 0.3s;" 
                        onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 16px rgba(59, 130, 246, 0.1)'"
                        onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.04)'">
@@ -1403,6 +1438,7 @@
                           data-estado="<%= dir.estado %>"
                           data-cp="<%= dir.cp %>"
                           data-referencia="<%= dir.referencia || '' %>"
+                          data-tipo="<%= dir.tipo || 'origen' %>"
                           data-predeterminada="<%= dir.es_predeterminada ? 'true' : 'false' %>"
                           style="padding: 8px 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.875rem;"
                           onmouseover="this.style.background='#2563eb'"
@@ -1446,7 +1482,90 @@
                 </button>
               </div>
             <% } %>
-          </div><!-- /config-card Direcciones -->
+          </div><!-- /config-card Bodegas -->
+
+          <!-- ── DESTINOS UNIVERSALES ── -->
+          <div class="config-card" id="seccion-destinos-universales" style="margin-top: 24px;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h2 class="card-title">
+                  <i data-lucide="map-pin-off" style="width: 24px; height: 24px; color: #8b5cf6;"></i>
+                  Direcciones de Destino Universales
+                </h2>
+                <p class="card-description">Ubicaciones de destino disponibles para todos los clientes</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <button onclick="modalNuevaDireccionDestino()" style="padding: 8px 14px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.82rem; white-space: nowrap; box-shadow: 0 2px 8px rgba(139,92,246,0.3);" onmouseover="this.style.background='#7c3aed'" onmouseout="this.style.background='#8b5cf6'">
+                  <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Nueva Dirección Universal
+                </button>
+              </div>
+            </div>
+
+            <% if (direccionesDestino && direccionesDestino.length > 0) { %>
+              <div style="display: grid; gap: 16px;">
+                <% direccionesDestino.forEach(function(dir) { %>
+                  <div style="background: white; padding: 24px; border-radius: 12px; border: 2px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s;"
+                       onmouseover="this.style.borderColor='#8b5cf6'; this.style.boxShadow='0 4px 16px rgba(139,92,246,0.1)'"
+                       onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                      <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                          <h3 style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin: 0;">
+                            <%= dir.alias %>
+                          </h3>
+                          <span style="padding: 3px 10px; background: #ede9fe; color: #6d28d9; border-radius: 6px; font-size: 0.72rem; font-weight: 700;">UNIVERSAL</span>
+                        </div>
+                        <div style="color: #4b5563; line-height: 1.6;">
+                          <p style="margin: 0 0 4px 0; font-weight: 500;">📍 <%= dir.calle %>, <%= dir.colonia %></p>
+                          <p style="margin: 0 0 4px 0;">🏙️ <%= dir.ciudad %>, <%= dir.estado %>, <%= dir.cp %></p>
+                          <% if (dir.referencia) { %>
+                            <p style="margin: 8px 0 0 0; padding: 8px 12px; background: #f9fafb; border-radius: 6px; font-size: 0.875rem;">
+                              ℹ️ <strong>Ref:</strong> <%= dir.referencia %>
+                            </p>
+                          <% } %>
+                        </div>
+                      </div>
+                      <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                        <button
+                          class="btn-editar-direccion"
+                          data-id="<%= dir.id %>"
+                          data-alias="<%= dir.alias %>"
+                          data-tipo="<%= dir.tipo || 'destino' %>"
+                          data-calle="<%= dir.calle %>"
+                          data-colonia="<%= dir.colonia %>"
+                          data-ciudad="<%= dir.ciudad %>"
+                          data-estado="<%= dir.estado %>"
+                          data-cp="<%= dir.cp %>"
+                          data-referencia="<%= dir.referencia || '' %>"
+                          data-predeterminada="<%= dir.es_predeterminada ? 'true' : 'false' %>"
+                          style="padding: 8px 12px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.875rem;"
+                          onmouseover="this.style.background='#7c3aed'"
+                          onmouseout="this.style.background='#8b5cf6'"
+                        >
+                          <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i> Editar
+                        </button>
+                        <form action="/configuracion/direcciones/<%= dir.id %>/eliminar" method="POST" style="margin: 0;" onsubmit="return confirm('¿Eliminar esta dirección universal?')">
+                          <button type="submit" style="padding: 8px 12px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.875rem;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Eliminar
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <div style="background: #f9fafb; padding: 40px; border-radius: 12px; text-align: center; border: 2px dashed #d1d5db;">
+                <i data-lucide="map-pin-off" style="width: 56px; height: 56px; color: #9ca3af; margin: 0 auto 12px; display: block;"></i>
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: #4b5563; margin-bottom: 6px;">No hay destinos universales</h3>
+                <p style="color: #6b7280; margin-bottom: 20px; font-size: 0.9rem;">Agrega ubicaciones de destino disponibles para todos los clientes</p>
+                <button onclick="modalNuevaDireccionDestino()" style="padding: 10px 22px; background: #8b5cf6; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                  <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Agregar Primer Destino Universal
+                </button>
+              </div>
+            <% } %>
+          </div><!-- /config-card Destinos Universales -->
+
         </div><!-- /tab direcciones -->
         
         <!-- TAB: TARIFAS -->
@@ -2516,8 +2635,9 @@
       </div>
       
       <form action="/configuracion/direcciones/nueva" method="POST">
+        <input type="hidden" name="tipo" id="nuevaDirTipo" value="origen">
         <div style="display: grid; gap: 16px;">
-          
+
           <div>
             <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">
               🏷️ Alias (Nombre descriptivo) *
@@ -2632,8 +2752,9 @@
       </div>
       
       <form id="formEditarDireccion" method="POST">
+        <input type="hidden" name="tipo" id="edit_tipo" value="origen">
         <div style="display: grid; gap: 16px;">
-          
+
           <div>
             <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">🏷️ Alias *</label>
             <input type="text" id="edit_alias" name="alias" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
@@ -2740,18 +2861,28 @@
     }
     // Funciones para modal nueva dirección
     function modalNuevaDireccion() {
+      document.getElementById('nuevaDirTipo').value = 'origen';
+      document.getElementById('modalNuevaDireccion').querySelector('h2').textContent = 'Nueva Dirección de Origen';
       document.getElementById('modalNuevaDireccion').style.display = 'flex';
       lucide.createIcons();
     }
-    
+
+    function modalNuevaDireccionDestino() {
+      document.getElementById('nuevaDirTipo').value = 'destino';
+      document.getElementById('modalNuevaDireccion').querySelector('h2').textContent = 'Nueva Dirección Universal (Destino)';
+      document.getElementById('modalNuevaDireccion').style.display = 'flex';
+      lucide.createIcons();
+    }
+
     function cerrarModalNuevaDireccion() {
       document.getElementById('modalNuevaDireccion').style.display = 'none';
     }
     
     // Funciones para modal editar dirección
-    function modalEditarDireccion(id, alias, calle, colonia, ciudad, estado, cp, referencia, predeterminada) {
+    function modalEditarDireccion(id, alias, tipo, calle, colonia, ciudad, estado, cp, referencia, predeterminada) {
       document.getElementById('formEditarDireccion').action = '/configuracion/direcciones/' + id + '/editar';
       document.getElementById('edit_alias').value = alias;
+      document.getElementById('edit_tipo').value = tipo || 'origen';
       document.getElementById('edit_calle').value = calle;
       document.getElementById('edit_colonia').value = colonia;
       document.getElementById('edit_ciudad').value = ciudad;
@@ -2759,18 +2890,19 @@
       document.getElementById('edit_cp').value = cp;
       document.getElementById('edit_referencia').value = referencia;
       document.getElementById('edit_predeterminada').checked = predeterminada === 'true' || predeterminada === true;
-      
+
       document.getElementById('modalEditarDireccion').style.display = 'flex';
       lucide.createIcons();
     }
 
-        // Event listener para botones de editar
+    // Event listener para botones de editar
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.btn-editar-direccion').forEach(function(btn) {
         btn.addEventListener('click', function() {
           modalEditarDireccion(
             this.dataset.id,
             this.dataset.alias,
+            this.dataset.tipo,
             this.dataset.calle,
             this.dataset.colonia,
             this.dataset.ciudad,
@@ -2850,7 +2982,7 @@
 
   <!-- Datos para export bodegas -->
   <script>
-    const _bodegasData = <%- JSON.stringify(direccionesEmpresa || []) %>;
+    const _bodegasData = <%- JSON.stringify(direccionesOrigen || []) %>;
 
     function _bXmlEsc(str) {
       return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

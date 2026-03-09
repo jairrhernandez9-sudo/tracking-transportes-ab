@@ -228,8 +228,8 @@ router.get('/:id', isAuthenticated, async (req, res) => {
   }
 });
 
-// Guía Almex del envío (carta porte para imprimir/descargar)
-router.get('/:id/guia-almex', isAuthenticated, async (req, res) => {
+// Guía Expedida del envío
+router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -311,7 +311,7 @@ router.get('/:id/guia-almex', isAuthenticated, async (req, res) => {
       destinoAlias = destinoRows[0]?.alias || null;
     }
 
-    res.render('envios/guia-almex', {
+    res.render('envios/guia-expedida', {
       title: `Guía ${envio.numero_tracking}`,
       envio,
       items,
@@ -983,6 +983,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
             case 'empresa_email':               configuracion.email                 = item.valor || ''; break;
             case 'empresa_sitio_web':           configuracion.sitio_web             = item.valor || ''; break;
             case 'empresa_logo_url':            configuracion.logo_url              = item.valor || null; break;
+            case 'empresa_logo_bw_url':         configuracion.logo_bw_url           = item.valor || null; break;
             case 'empresa_rfc':                 configuracion.rfc                   = item.valor || ''; break;
             case 'empresa_direccion':           configuracion.direccion             = item.valor || ''; break;
           }

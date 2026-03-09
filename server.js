@@ -7,6 +7,7 @@ const db = require('./config/database');
 // Migraciones de columnas
 db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS pagina_inicio VARCHAR(50) NOT NULL DEFAULT 'dashboard'`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS ultimo_cliente_id INT NULL`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS alias VARCHAR(80) NULL`).catch(() => {});
 
 // Migración: tabla etiqueta_templates
 db.query(`
@@ -44,6 +45,8 @@ db.query(`
 
 // Migración: columna template_etiqueta_id en clientes
 db.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS template_etiqueta_id INT NULL`).catch(() => {});
+// Migración: columna habilitado en clientes
+db.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS habilitado TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 
 const app = express();
 const PORT = process.env.PORT || 3000;

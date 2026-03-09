@@ -169,6 +169,7 @@ CREATE TABLE `clientes` (
   `direccion`               TEXT,
   `fecha_creacion`          TIMESTAMP     NULL DEFAULT CURRENT_TIMESTAMP,
   `activo`                  TINYINT(1)    DEFAULT '1',
+  `habilitado`              TINYINT(1)    DEFAULT '1',
   `prefijo_tracking`        VARCHAR(10)   NOT NULL DEFAULT 'TRK',
   `ultimo_numero_tracking`  INT UNSIGNED  NOT NULL DEFAULT '0',
   `eliminado_en`            DATETIME      DEFAULT NULL,
@@ -240,6 +241,7 @@ DROP TABLE IF EXISTS `direcciones_empresa`;
 CREATE TABLE `direcciones_empresa` (
   `id`                  INT           NOT NULL AUTO_INCREMENT,
   `alias`               VARCHAR(100)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Bodega Central, Almacén Norte, etc.',
+  `tipo`                ENUM('origen','destino','ambos') NOT NULL DEFAULT 'origen' COMMENT 'origen=bodega, destino=universal, ambos=ambos usos',
   `calle`               VARCHAR(255)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `colonia`             VARCHAR(100)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `ciudad`              VARCHAR(100)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,

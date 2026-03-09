@@ -56,6 +56,27 @@ const uploadLogo = multer({
   }
 });
 
+// Configuración multer para logo B&N de etiqueta
+const storageLogoBw = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'public/images';
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'logo-empresa-bw' + path.extname(file.originalname));
+  }
+});
+const uploadLogoBw = multer({
+  storage: storageLogoBw,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: function (req, file, cb) {
+    const allowed = /jpeg|jpg|png|gif|webp|svg/;
+    if (allowed.test(path.extname(file.originalname).toLowerCase())) cb(null, true);
+    else cb(new Error('Solo imágenes (JPEG, PNG, GIF, WEBP, SVG)'));
+  }
+});
+
 // Middleware para verificar que solo admins accedan
 router.use(isAuthenticated);
 
@@ -125,7 +146,10 @@ async function obtenerGuiaTemplates() {
 router.get('/', async (req, res) => {
   try {
     const configuracion = await obtenerConfiguracion();
-    const direccionesEmpresa = await obtenerDireccionesEmpresa();
+    const todasDirecciones  = await obtenerDireccionesEmpresa();
+    const direccionesEmpresa  = todasDirecciones; // backward compat
+    const direccionesOrigen   = todasDirecciones.filter(d => d.tipo === 'origen' || d.tipo === 'ambos');
+    const direccionesDestino  = todasDirecciones.filter(d => d.tipo === 'destino' || d.tipo === 'ambos');
     const etiquetaTemplates = await obtenerTemplates();
     const guiaTemplates     = await obtenerGuiaTemplates();
 
@@ -145,6 +169,8 @@ router.get('/', async (req, res) => {
       },
       config: configuracion,
       direccionesEmpresa,
+      direccionesOrigen,
+      direccionesDestino,
       etiquetaTemplates,
       guiaTemplates,
       paginaInicio,
@@ -354,25 +380,28 @@ router.post('/tracking', async (req, res) => {
 // Crear nueva dirección de empresa
 router.post('/direcciones/nueva', async (req, res) => {
   try {
-    const { alias, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada } = req.body;
-    
+    const { alias, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, tipo } = req.body;
+
     // Validar campos obligatorios
     if (!alias || !calle || !colonia || !ciudad || !estado || !cp) {
       return res.redirect('/configuracion?error=campos_faltantes');
     }
-    
-    // Si se marca como predeterminada, quitar predeterminada de las demás
+
+    const tipoFinal = ['origen','destino','ambos'].includes(tipo) ? tipo : 'origen';
+
+    // Si se marca como predeterminada, quitar predeterminada de las demás del mismo tipo
     if (es_predeterminada === 'on') {
       await db.query('UPDATE direcciones_empresa SET es_predeterminada = 0');
     }
-    
+
     // Insertar nueva dirección
     await db.query(`
-      INSERT INTO direcciones_empresa 
-      (alias, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, activa)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+      INSERT INTO direcciones_empresa
+      (alias, tipo, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, activa)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `, [
       alias,
+      tipoFinal,
       calle,
       colonia,
       ciudad,
@@ -400,25 +429,28 @@ router.post('/direcciones/nueva', async (req, res) => {
 router.post('/direcciones/:id/editar', async (req, res) => {
   try {
     const { id } = req.params;
-    const { alias, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada } = req.body;
-    
+    const { alias, calle, colonia, ciudad, estado, cp, referencia, es_predeterminada, tipo } = req.body;
+
     // Validar campos obligatorios
     if (!alias || !calle || !colonia || !ciudad || !estado || !cp) {
       return res.redirect('/configuracion?error=campos_faltantes');
     }
-    
+
+    const tipoFinal = ['origen','destino','ambos'].includes(tipo) ? tipo : 'origen';
+
     // Si se marca como predeterminada, quitar predeterminada de las demás
     if (es_predeterminada === 'on') {
       await db.query('UPDATE direcciones_empresa SET es_predeterminada = 0');
     }
-    
+
     // Actualizar dirección
     await db.query(`
-      UPDATE direcciones_empresa 
-      SET alias = ?, calle = ?, colonia = ?, ciudad = ?, estado = ?, cp = ?, referencia = ?, es_predeterminada = ?
+      UPDATE direcciones_empresa
+      SET alias = ?, tipo = ?, calle = ?, colonia = ?, ciudad = ?, estado = ?, cp = ?, referencia = ?, es_predeterminada = ?
       WHERE id = ?
     `, [
       alias,
+      tipoFinal,
       calle,
       colonia,
       ciudad,
@@ -564,11 +596,15 @@ router.post('/direcciones/importar-csv', isAuthenticated, uploadCSV.single('csv_
 // ============================================
 router.get('/api/direcciones', isAuthenticated, async (req, res) => {
   try {
-    const [direcciones] = await db.query(`
-      SELECT * FROM direcciones_empresa 
-      WHERE activa = 1 
-      ORDER BY es_predeterminada DESC, alias ASC
-    `);
+    const { tipo } = req.query;
+    let query = 'SELECT * FROM direcciones_empresa WHERE activa = 1';
+    if (tipo === 'origen') {
+      query += " AND tipo IN ('origen','ambos')";
+    } else if (tipo === 'destino') {
+      query += " AND tipo IN ('destino','ambos')";
+    }
+    query += ' ORDER BY es_predeterminada DESC, alias ASC';
+    const [direcciones] = await db.query(query);
     res.json({ success: true, direcciones });
   } catch (error) {
     console.error('Error al obtener direcciones empresa:', error);
@@ -596,6 +632,42 @@ router.post('/logo/upload', uploadLogo.single('logo_file'), async (req, res) => 
     res.redirect('/configuracion?success=logo_actualizado');
   } catch (error) {
     console.error('Error al subir logo:', error);
+    res.redirect('/configuracion?error=error_servidor');
+  }
+});
+
+// ============================================
+// SUBIR LOGO B&N (para etiqueta)
+// ============================================
+router.post('/logo-bw/upload', uploadLogoBw.single('logo_bw_file'), async (req, res) => {
+  try {
+    if (!req.file) return res.redirect('/configuracion?error=archivo_requerido');
+    const logoUrl = '/images/' + req.file.filename;
+    await db.query(
+      `INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
+       VALUES ('empresa_logo_bw_url', ?, 'texto', 'empresa', 'Logo blanco/negro para etiqueta térmica', ?)
+       ON DUPLICATE KEY UPDATE valor = VALUES(valor), modificado_por = VALUES(modificado_por)`,
+      [logoUrl, req.session.userId]
+    );
+    res.redirect('/configuracion?success=logo_bw_actualizado');
+  } catch (error) {
+    console.error('Error al subir logo B&N:', error);
+    res.redirect('/configuracion?error=error_servidor');
+  }
+});
+
+// GET /logo-bw/eliminar
+router.get('/logo-bw/eliminar', async (req, res) => {
+  try {
+    await db.query(
+      `INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
+       VALUES ('empresa_logo_bw_url', '', 'texto', 'empresa', 'Logo blanco/negro para etiqueta térmica', ?)
+       ON DUPLICATE KEY UPDATE valor = '', modificado_por = VALUES(modificado_por)`,
+      [req.session.userId]
+    );
+    res.redirect('/configuracion?success=logo_bw_eliminado');
+  } catch (error) {
+    console.error('Error al eliminar logo B&N:', error);
     res.redirect('/configuracion?error=error_servidor');
   }
 });

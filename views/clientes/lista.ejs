@@ -1177,6 +1177,12 @@
                     <div class="cliente-contacto"><%= cliente.contacto %></div>
                   <% } %>
                 </div>
+                <% if (cliente.habilitado === 0) { %>
+                  <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#fee2e2;color:#dc2626;border-radius:6px;font-size:0.7rem;font-weight:700;white-space:nowrap;flex-shrink:0;">
+                    <i data-lucide="lock" style="width:11px;height:11px;"></i>
+                    Inactivo
+                  </span>
+                <% } %>
               </div>
               
               <div class="cliente-info">
