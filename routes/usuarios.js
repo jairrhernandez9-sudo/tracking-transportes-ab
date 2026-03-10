@@ -458,6 +458,11 @@ router.post('/:id/eliminar', isAuthenticated, requireAdmin, async (req, res) => 
       return res.redirect('/usuarios?error=notfound');
     }
     
+    // Nullificar FKs antes de eliminar (evita constraint errors)
+    await db.query('UPDATE configuracion_sistema SET modificado_por = NULL WHERE modificado_por = ?', [userId]);
+    await db.query('UPDATE envios SET usuario_creador_id = NULL WHERE usuario_creador_id = ?', [userId]);
+    await db.query('UPDATE historial_estados SET usuario_id = NULL WHERE usuario_id = ?', [userId]);
+
     // Eliminar usuario
     await db.query('DELETE FROM usuarios WHERE id = ?', [userId]);
     
