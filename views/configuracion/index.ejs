@@ -1206,14 +1206,30 @@
                 
                 <div class="form-group">
                   <label class="form-label">Sitio web</label>
-                  <input 
-                    type="url" 
-                    name="empresa_sitio_web" 
-                    class="form-input" 
+                  <input
+                    type="url"
+                    name="empresa_sitio_web"
+                    class="form-input"
                     value="<%= config.empresa.empresa_sitio_web || '' %>"
                     placeholder="https://transportesab.com"
                   >
                 </div>
+
+                <% if (user.rol === 'admin' || user.rol === 'superusuario') { %>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label class="form-label">URL o correo de aviso de privacidad</label>
+                  <input
+                    type="text"
+                    name="empresa_aviso_privacidad"
+                    class="form-input"
+                    value="<%= config.empresa.empresa_aviso_privacidad || '' %>"
+                    placeholder="https://transportesab.com/aviso-privacidad o privacidad@empresa.com"
+                  >
+                  <small style="color: #6b7280; font-size: 0.85rem; margin-top: 4px; display: block;">
+                    Se puede usar en documentos como la guía expedida.
+                  </small>
+                </div>
+                <% } %>
                 
                 <div class="form-group">
                   <label class="form-label">Dirección fiscal</label>
@@ -2276,10 +2292,21 @@
               { key: 'sitio_web',             icon: '🌐', label: 'Sitio web / Privacidad',     desc: 'URL en cláusula de seguro',                  grupo: 'encabezado' },
               { key: 'barcode',               icon: '▤',  label: 'Código de barras',           desc: 'Barcode del número de tracking',             grupo: 'encabezado' },
               // Secciones principales
-              { key: 'seccion_remitente',     icon: '📦', label: 'Sección Remitente',          desc: 'Bloque de origen del envío',                 grupo: 'secciones' },
-              { key: 'seccion_facturar',      icon: '🧾', label: 'Sección Facturar a',         desc: 'Bloque del cliente / facturación',           grupo: 'secciones' },
-              { key: 'seccion_destinatario',  icon: '📍', label: 'Sección Destinatario',       desc: 'Bloque de destino del envío',                grupo: 'secciones' },
-              { key: 'clausula_seguro',       icon: '🛡️', label: 'Cláusula de seguro',         desc: 'Texto de seguro y tipo de servicio',         grupo: 'secciones' },
+              { key: 'seccion_remitente',       icon: '📦', label: 'Sección Remitente',          desc: 'Bloque de origen del envío',                 grupo: 'secciones' },
+              { key: 'remitente_nombre',         icon: ' ↳', label: 'Nombre',                     desc: 'Nombre/empresa del remitente',               grupo: 'secciones', sub: true },
+              { key: 'remitente_direccion',      icon: ' ↳', label: 'Dirección',                  desc: 'Dirección completa del remitente',           grupo: 'secciones', sub: true },
+              { key: 'remitente_telefono',       icon: ' ↳', label: 'Teléfono',                   desc: 'Teléfono del remitente',                     grupo: 'secciones', sub: true },
+              { key: 'seccion_facturar',         icon: '🧾', label: 'Sección Facturar a',         desc: 'Bloque del cliente / facturación',           grupo: 'secciones' },
+              { key: 'facturar_nombre',          icon: ' ↳', label: 'Nombre/Empresa',             desc: 'Nombre o razón social del cliente',          grupo: 'secciones', sub: true },
+              { key: 'facturar_direccion',       icon: ' ↳', label: 'Dirección',                  desc: 'Dirección del cliente',                      grupo: 'secciones', sub: true },
+              { key: 'facturar_contacto',        icon: ' ↳', label: 'Contacto (Attn)',            desc: 'Nombre del contacto',                        grupo: 'secciones', sub: true },
+              { key: 'facturar_telefono',        icon: ' ↳', label: 'Teléfono',                   desc: 'Teléfono del cliente',                       grupo: 'secciones', sub: true },
+              { key: 'facturar_email',           icon: ' ↳', label: 'Email',                      desc: 'Correo electrónico del cliente',             grupo: 'secciones', sub: true },
+              { key: 'facturar_rfc',             icon: ' ↳', label: 'RFC',                        desc: 'RFC del cliente',                            grupo: 'secciones', sub: true },
+              { key: 'seccion_destinatario',     icon: '📍', label: 'Sección Destinatario',       desc: 'Bloque de destino del envío',                grupo: 'secciones' },
+              { key: 'destinatario_nombre',      icon: ' ↳', label: 'Nombre',                     desc: 'Nombre/ciudad destino',                      grupo: 'secciones', sub: true },
+              { key: 'destinatario_direccion',   icon: ' ↳', label: 'Dirección',                  desc: 'Dirección completa del destino',             grupo: 'secciones', sub: true },
+              { key: 'clausula_seguro',          icon: '🛡️', label: 'Cláusula de seguro',         desc: 'Texto de seguro y tipo de servicio',         grupo: 'secciones' },
               // Condiciones / fechas
               { key: 'retorno_documentos',    icon: '↩️', label: 'Retorno de documentos',      desc: 'Campo para retorno de documentos',           grupo: 'condiciones' },
               { key: 'condiciones_pago',      icon: '💳', label: 'Condiciones de pago',        desc: 'CRÉDITO / CONTADO, etc.',                   grupo: 'condiciones' },
@@ -2303,6 +2330,7 @@
             const guiaTplId = parseInt(query.guia_template_id) || (guiaTemplates.length > 0 ? guiaTemplates[0].id : null);
             const guiaTplActivo = guiaTemplates.find(t => t.id === guiaTplId) || guiaTemplates[0] || null;
           %>
+
 
           <!-- Selector de template -->
           <div class="config-card" style="margin-bottom: 20px;">
@@ -2375,55 +2403,279 @@
                   style="flex: 1; max-width: 320px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600;" required>
               </div>
 
-              <!-- Cabecera de columnas -->
-              <div style="display: grid; grid-template-columns: 1fr 100px 100px; gap: 0; margin-bottom: 8px; padding: 0 0 8px 0; border-bottom: 2px solid #f1f5f9;">
-                <div></div>
-                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Por defecto</div>
-                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px;">Obligatorio</div>
+              <!-- Sub-tabs -->
+              <div style="display: flex; gap: 4px; margin-bottom: 20px; background: #f1f5f9; border-radius: 10px; padding: 4px; width: fit-content;">
+                <button type="button" id="guia-subtab-btn-elementos" onclick="switchGuiaSubtab('elementos')"
+                  style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: #2563eb; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25);">
+                  Secciones y columnas
+                </button>
+                <button type="button" id="guia-subtab-btn-textos" onclick="switchGuiaSubtab('textos')"
+                  style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: transparent; color: #64748b;">
+                  Textos editables
+                </button>
               </div>
 
-              <% const guiaGrupos = [
-                { id: 'encabezado', label: 'Encabezado' },
-                { id: 'secciones',  label: 'Secciones principales' },
-                { id: 'condiciones', label: 'Condiciones / Fechas' },
-                { id: 'entrega',    label: 'Entrega / Firma' },
-                { id: 'pie',        label: 'Pie del documento' },
-                { id: 'tabla',      label: 'Columnas de la tabla de carga' },
-              ]; %>
+              <!-- Sub-tab: Secciones y columnas (toggles) -->
+              <div id="guia-subtab-elementos">
+                <!-- Cabecera de columnas -->
+                <div style="display: grid; grid-template-columns: 1fr 100px 100px; gap: 0; margin-bottom: 8px; padding: 0 0 8px 0; border-bottom: 2px solid #f1f5f9;">
+                  <div></div>
+                  <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Por defecto</div>
+                  <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px;">Obligatorio</div>
+                </div>
 
-              <% guiaGrupos.forEach(function(gr) { %>
-              <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 8px;"><%= gr.label %></p>
-              <% guiaElementos.filter(e => e.grupo === gr.id).forEach(function(el) { %>
-              <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
-                <div>
-                  <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
-                  <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                <% const guiaGrupos = [
+                  { id: 'encabezado', label: 'Encabezado' },
+                  { id: 'secciones',  label: 'Secciones principales' },
+                  { id: 'condiciones', label: 'Condiciones / Fechas' },
+                  { id: 'entrega',    label: 'Entrega / Firma' },
+                  { id: 'pie',        label: 'Pie del documento' },
+                  { id: 'tabla',      label: 'Columnas de la tabla de carga' },
+                ]; %>
+
+                <% guiaGrupos.forEach(function(gr) { %>
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 8px;"><%= gr.label %></p>
+                <% guiaElementos.filter(e => e.grupo === gr.id).forEach(function(el) { %>
+                <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;<%= el.sub ? ' padding-left: 24px; background: #fafbfc;' : '' %>">
+                  <div>
+                    <div style="font-size: <%= el.sub ? '0.82rem' : '0.9rem' %>; font-weight: <%= el.sub ? '500' : '600' %>; color: <%= el.sub ? '#475569' : '#1e293b' %>;"><%= el.icon %> <%= el.label %></div>
+                    <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                  </div>
+                  <div style="text-align: center;">
+                    <label class="switch">
+                      <input type="checkbox" name="mostrar_<%= el.key %>" <%= guiaTplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="text-align: center;">
+                    <label class="switch switch-pink">
+                      <input type="checkbox" name="obligatorio_<%= el.key %>" <%= guiaTplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                 </div>
-                <div style="text-align: center;">
-                  <label class="switch">
-                    <input type="checkbox" name="mostrar_<%= el.key %>" <%= guiaTplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <div style="text-align: center;">
-                  <label class="switch switch-pink">
-                    <input type="checkbox" name="obligatorio_<%= el.key %>" <%= guiaTplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
-                    <span class="slider"></span>
-                  </label>
+                <% }) %>
+                <% }) %>
+
+                <div class="info-box" style="margin-top: 20px;">
+                  <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                  <div class="info-text">
+                    <strong>Obligatorio</strong> significa que el toggle en la guía estará fijo y no podrá desactivarse.
+                    <strong>Por defecto</strong> define el estado inicial al abrir la guía.
+                  </div>
                 </div>
               </div>
-              <% }) %>
-              <% }) %>
 
-              <div class="info-box" style="margin-top: 20px;">
-                <i data-lucide="info" style="width: 20px; height: 20px;"></i>
-                <div class="info-text">
-                  <strong>Obligatorio</strong> significa que el toggle en la guía estará fijo y no podrá desactivarse.
-                  <strong>Por defecto</strong> define el estado inicial al abrir la guía.
+              <!-- Sub-tab: Textos editables -->
+              <div id="guia-subtab-textos" style="display: none;">
+
+                <!-- Inputs: 2 columnas compactas arriba -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 2px solid #f1f5f9;">
+                  <div>
+                    <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Título y descripción</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Descripción del servicio <span style="color:#94a3b8;font-weight:400;">(subtítulo)</span></label>
+                        <input type="text" name="descripcion_servicio"
+                          value="<%= guiaTplActivo.descripcion_servicio || '' %>"
+                          placeholder="PAQUETERÍA, MENSAJERÍA Y CARGA CONSOLIDADA NACIONAL"
+                          oninput="document.getElementById('gprev-descripcion').textContent = this.value || 'PAQUETERÍA, MENSAJERÍA Y CARGA CONSOLIDADA NACIONAL'"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Título principal <span style="color:#94a3b8;font-weight:400;">(ej: GUÍA EXPEDIDA, ENVÍO FORÁNEO)</span></label>
+                        <input type="text" name="titulo_guia"
+                          value="<%= guiaTplActivo.titulo_guia || '' %>"
+                          placeholder="GUÍA EXPEDIDA"
+                          oninput="document.getElementById('gprev-titulo').textContent = this.value || 'GUÍA EXPEDIDA'"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Mensajes personalizables</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Mensaje cláusula 1 <span style="color:#94a3b8;font-weight:400;">(después de tabla de carga)</span></label>
+                        <input type="text" name="mensaje_1" value="<%= guiaTplActivo.mensaje_1 || '' %>" placeholder="[ MENSAJE PERSONALIZABLE ]"
+                          oninput="gprevUpdateMsg1(this.value)"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Mensaje cláusula 2 <span style="color:#94a3b8;font-weight:400;">(después de Mensaje cláusula 1)</span></label>
+                        <input type="text" name="mensaje_2" value="<%= guiaTplActivo.mensaje_2 || '' %>" placeholder="[ MENSAJE PERSONALIZABLE ]"
+                          oninput="gprevUpdateMsg('gprev-msg2', this.value)"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Condiciones <span style="color:#94a3b8;font-weight:400;">(antes del pie de página)</span></label>
+                        <input type="text" name="mensaje_3" value="<%= guiaTplActivo.mensaje_3 || '' %>" placeholder="[ MENSAJE PERSONALIZABLE ]"
+                          oninput="gprevUpdateMsg('gprev-msg3', this.value)"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Mensaje al final del documento <span style="color:#94a3b8;font-weight:400;">(después del disclaimer)</span></label>
+                        <input type="text" name="mensaje_4" value="<%= guiaTplActivo.mensaje_4 || '' %>" placeholder="[ MENSAJE AL FINAL ]"
+                          oninput="gprevUpdateMsg('gprev-msg4', this.value)"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- Preview: ancho completo abajo -->
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Vista previa de la guía</p>
+                <div style="background: #c8cdd4; border-radius: 8px; padding: 16px; overflow-x: auto;">
+                  <div style="zoom: 1; width: 810px; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; font-size: 8pt; color: #000; background: white; padding: 5mm 6mm; box-shadow: 0 4px 20px rgba(0,0,0,.25);">
+
+                        <%
+                          const gpEmpresa  = (config.empresa && config.empresa.empresa_nombre) || 'TRANSPORTES';
+                          const gpRfc      = (config.empresa && config.empresa.empresa_rfc) || '';
+                          const gpTel      = (config.empresa && config.empresa.empresa_telefono) || '';
+                          const gpTelAd    = (config.empresa && config.empresa.empresa_telefono_adicional) || '';
+                          const gpDir      = (config.empresa && config.empresa.empresa_direccion) || '';
+                          const gpLogo     = (config.empresa && config.empresa.empresa_logo_url) || '';
+                          const gpAviso    = (config.empresa && config.empresa.empresa_aviso_privacidad) || '';
+                          const gpDesc     = guiaTplActivo.descripcion_servicio || 'PAQUETERÍA, MENSAJERÍA Y CARGA CONSOLIDADA NACIONAL';
+                          const gpTitulo   = guiaTplActivo.titulo_guia || 'GUÍA EXPEDIDA';
+                          const gpMsg1     = guiaTplActivo.mensaje_1 || '';
+                          const gpMsg2     = guiaTplActivo.mensaje_2 || '';
+                          const gpMsg3     = guiaTplActivo.mensaje_3 || '';
+                          const gpMsg4     = guiaTplActivo.mensaje_4 || '';
+                        %>
+
+                        <!-- Encabezado -->
+                        <table style="border-collapse:collapse;width:100%;">
+                          <tr>
+                            <td style="width:24%;border:1px solid #000;padding:4px 6px;vertical-align:middle;">
+                              <% if (gpLogo) { %><img src="<%= gpLogo %>" style="max-height:40px;max-width:100px;object-fit:contain;display:block;margin-bottom:2px;" alt=""><% } %>
+                              <div style="font-size:9pt;font-weight:bold;"><%= gpEmpresa %></div>
+                              <% if (gpRfc) { %><div style="font-size:7pt;color:#333;">RFC: <%= gpRfc %></div><% } %>
+                            </td>
+                            <td style="width:50%;border:1px solid #000;padding:4px 6px;text-align:center;vertical-align:middle;">
+                              <div id="gprev-descripcion" style="font-size:8pt;color:#333;"><%= gpDesc %></div>
+                              <div id="gprev-titulo" style="font-size:13pt;font-weight:bold;letter-spacing:.5px;margin:2px 0;"><%= gpTitulo %></div>
+                              <% if (gpDir) { %><div style="font-size:6.5pt;color:#333;margin-top:3px;">LUGAR DE EXPEDICIÓN: <%= gpDir.toUpperCase() %></div><% } %>
+                              <% if (gpTel) { %><div style="font-size:7.5pt;font-weight:bold;margin-top:2px;">Tel: +<%= gpTel.replace(/\D/g,'') %><% if(gpTelAd){ %> &nbsp;|&nbsp; +<%= gpTelAd.replace(/\D/g,'') %><% } %></div><% } %>
+                            </td>
+                            <td style="width:26%;border:1px solid #000;padding:4px;text-align:center;vertical-align:middle;">
+                              <div style="font-size:13pt;font-weight:bold;letter-spacing:1px;display:block;margin-top:3px;">ABC-000001</div>
+                              <div style="font-size:7pt;color:#444;margin-top:2px;">Folio: 1 &nbsp;|&nbsp; Rev.:0</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Secciones -->
+                        <table style="border-collapse:collapse;width:100%;border-top:none;">
+                          <tr>
+                            <td style="width:33%;border:1px solid #000;border-top:none;padding:0;">
+                              <span style="font-size:7pt;font-weight:bold;text-transform:uppercase;background:#e8e8e8;border-bottom:1px solid #000;padding:2px 4px;display:block;">Remitente: (Origen)</span>
+                              <div style="font-size:7.5pt;line-height:1.45;padding:4px 5px;min-height:48px;"><strong><%= gpEmpresa %></strong><br><%= gpDir || 'Dirección de origen' %></div>
+                            </td>
+                            <td style="width:34%;border:1px solid #000;border-top:none;border-left:none;padding:0;">
+                              <span style="font-size:7pt;font-weight:bold;text-transform:uppercase;background:#e8e8e8;border-bottom:1px solid #000;padding:2px 4px;display:block;">Facturar a:</span>
+                              <div style="font-size:7.5pt;line-height:1.45;padding:4px 5px;min-height:48px;"><strong>Cliente Ejemplo S.A.</strong><br>RFC: CLIE000101ABC<br>Tel. 55 0000 0000</div>
+                            </td>
+                            <td style="width:33%;border:1px solid #000;border-top:none;border-left:none;padding:0;">
+                              <span style="font-size:7pt;font-weight:bold;text-transform:uppercase;background:#e8e8e8;border-bottom:1px solid #000;padding:2px 4px;display:block;">Destinatario: (Destino)</span>
+                              <div style="font-size:7.5pt;line-height:1.45;padding:4px 5px;min-height:48px;"><strong>Ciudad Destino</strong><br>Calle y número, Col. Centro<br>Ciudad, Estado CP 00000</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Tabla de carga -->
+                        <table style="border-collapse:collapse;width:100%;border-top:none;">
+                          <thead>
+                            <tr>
+                              <th style="background:#e0e0e0;font-size:7pt;font-weight:bold;text-align:center;padding:4px 3px;border:1px solid #000;width:5%;">CANT.</th>
+                              <th style="background:#e0e0e0;font-size:7pt;font-weight:bold;text-align:center;padding:4px 3px;border:1px solid #000;width:12%;">EMBALAJE</th>
+                              <th style="background:#e0e0e0;font-size:7pt;font-weight:bold;text-align:center;padding:4px 3px;border:1px solid #000;">DESCRIPCIÓN SEGÚN REMITENTE</th>
+                              <th style="background:#e0e0e0;font-size:7pt;font-weight:bold;text-align:center;padding:4px 3px;border:1px solid #000;width:11%;">PESO Kgs.</th>
+                              <th style="background:#e0e0e0;font-size:7pt;font-weight:bold;text-align:center;padding:4px 3px;border:1px solid #000;width:13%;">VOLUMEN Mts.³</th>
+                              <th style="background:#e0e0e0;font-size:7pt;font-weight:bold;text-align:center;padding:4px 3px;border:1px solid #000;width:12%;">SERVICIOS</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr><td style="border:1px solid #000;padding:5px 4px;font-size:7.5pt;text-align:center;min-height:26px;">1</td><td style="border:1px solid #000;padding:5px 4px;font-size:7.5pt;">CAJA</td><td style="border:1px solid #000;padding:5px 4px;font-size:7.5pt;">Mercancía de ejemplo</td><td style="border:1px solid #000;padding:5px 4px;font-size:7.5pt;text-align:center;">5.000</td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td></tr>
+                            <tr><td style="border:1px solid #000;padding:5px 4px;min-height:26px;">&nbsp;</td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td></tr>
+                            <tr><td style="border:1px solid #000;padding:5px 4px;font-size:7.5pt;text-align:center;min-height:26px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;font-size:7.5pt;text-align:center;font-weight:bold;">5.00</td><td style="border:1px solid #000;padding:5px 4px;"></td><td style="border:1px solid #000;padding:5px 4px;"></td></tr>
+                          </tbody>
+                        </table>
+
+                        <!-- dato oculto para JS -->
+                        <span id="gprev-aviso-text" data-aviso="<%= gpAviso %>" style="display:none;"></span>
+
+                        <!-- Mensaje cláusula 1 + aviso privacidad -->
+                        <%
+                          const gpMsg1Completo = [gpMsg1, gpAviso ? 'Conoce nuestro aviso de Privacidad en: ' + gpAviso : ''].filter(Boolean).join(' ');
+                        %>
+                        <div id="gprev-msg1-row" style="border:1px solid #000;border-top:none;padding:5px 7px;font-size:7.5pt;min-height:22px;color:#222;font-style:italic;text-align:center;<%= gpMsg1Completo ? '' : 'display:none;' %>"><span id="gprev-msg1"><%= gpMsg1Completo %></span></div>
+                        <!-- Mensaje cláusula 2 -->
+                        <div id="gprev-msg2" style="border:1px solid #000;border-top:none;padding:5px 7px;font-size:7.5pt;min-height:22px;color:#222;font-style:italic;text-align:center;<%= gpMsg2 ? '' : 'display:none;' %>"><%= gpMsg2 %></div>
+
+                        <!-- Bloque inferior -->
+                        <table style="border-collapse:collapse;width:100%;border-top:none;">
+                          <tr>
+                            <td style="width:28%;border:1px solid #000;border-top:none;padding:0;" rowspan="2">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Observaciones del cliente:</span>
+                              <div style="padding:4px 5px;min-height:52px;">&nbsp;</div>
+                            </td>
+                            <td style="width:36%;border:1px solid #000;border-top:none;border-left:none;padding:0;">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Condiciones de pago:</span>
+                              <div style="padding:4px 5px;"><span style="font-size:14pt;font-weight:bold;">CRÉDITO</span></div>
+                            </td>
+                            <td style="width:36%;border:1px solid #000;border-top:none;border-left:none;padding:0;">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Fecha de emisión:</span>
+                              <div style="font-size:7.5pt;padding:4px 5px;">01/01/2025<br>Hora: 10:00 Hrs.<br>Documento: -</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="border:1px solid #000;border-top:1px solid #000;border-left:none;padding:0;">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Fecha estimada de entrega:</span>
+                              <div style="padding:4px 5px;"><span style="font-size:14pt;font-weight:bold;">15/01/2025</span></div>
+                            </td>
+                            <td style="border:1px solid #000;border-top:1px solid #000;border-left:none;padding:0;">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Referencia del cliente:</span>
+                              <div style="font-size:7.5pt;padding:4px 5px;">REF-001</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Operador -->
+                        <table style="border-collapse:collapse;width:100%;border-top:none;">
+                          <tr>
+                            <td style="border:1px solid #000;border-top:none;padding:0;">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Operador que entregó:</span>
+                              <div style="padding:4px 5px;min-height:36px;">&nbsp;</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Recibido por -->
+                        <table style="border-collapse:collapse;width:100%;border-top:none;">
+                          <tr>
+                            <td style="border:1px solid #000;border-top:none;padding:0;">
+                              <span style="font-size:6.5pt;font-weight:bold;text-transform:uppercase;background:#ececec;border-bottom:1px solid #000;padding:2px 4px;display:block;">Recibido por: (Nombre, firma y sello)</span>
+                              <div style="padding:4px 5px;min-height:48px;">&nbsp;</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Condiciones -->
+                        <div id="gprev-msg3" style="border:1px solid #000;border-top:none;padding:5px 7px;font-size:7.5pt;min-height:22px;color:#222;font-style:italic;text-align:center;<%= gpMsg3 ? '' : 'display:none;' %>"><%= gpMsg3 %></div>
+
+                        <!-- Pie -->
+                        <div style="font-size:6.5pt;border:1px solid #000;border-top:none;padding:3px 6px;line-height:1.5;">
+                          <strong>TRACKING:</strong> ABC-000001 &nbsp;&nbsp; <strong>ORIGEN:</strong> <%= gpDir || 'Origen' %> &nbsp;&nbsp; <strong>DESTINO:</strong> Ciudad Destino
+                        </div>
+                        <!-- Mensaje final del documento -->
+                        <div id="gprev-msg4" style="border:1px solid #000;border-top:none;padding:5px 7px;font-size:7.5pt;min-height:22px;color:#222;font-style:italic;text-align:center;<%= gpMsg4 ? '' : 'display:none;' %>"><%= gpMsg4 %></div>
+
+                      </div><!-- /mini-guía -->
+                    </div><!-- /preview bg -->
               </div>
 
-              <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
+              <div style="margin-top: 24px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
                 <button type="submit" class="btn-primary">
                   <i data-lucide="save" style="width: 18px; height: 18px;"></i>
                   Guardar configuración de guía
@@ -2495,7 +2747,7 @@
 
                 <%
                   const opcionesPagina = [
-                    { valor: '/dashboard',          icono: 'layout-dashboard', label: 'Dashboard',           desc: 'Resumen general del sistema' },
+                    ...(user.rol !== 'operador' ? [{ valor: '/dashboard', icono: 'layout-dashboard', label: 'Dashboard', desc: 'Resumen general del sistema' }] : []),
                     { valor: '/envios',              icono: 'package',          label: 'Envíos',              desc: 'Lista de todos los envíos' },
                     { valor: '/envios-retrasados',   icono: 'alert-triangle',   label: 'Envíos Retrasados',   desc: 'Envíos con retraso o alertas' },
                     { valor: '/historial',           icono: 'history',          label: 'Historial',           desc: 'Historial de estados y eventos' },
@@ -2967,6 +3219,44 @@
       url.searchParams.set('guia_template_id', id);
       url.searchParams.set('tab', 'guia');
       window.location.href = url.toString();
+    }
+    function gprevUpdateMsg1(val) {
+      const span = document.getElementById('gprev-msg1');
+      const row  = document.getElementById('gprev-msg1-row');
+      if (!span) return;
+      const avisoEl = document.getElementById('gprev-aviso-text');
+      const aviso = avisoEl ? avisoEl.dataset.aviso : '';
+      const parts = [val, aviso ? 'Conoce nuestro aviso de Privacidad en: ' + aviso : ''].filter(Boolean);
+      const full = parts.join(' ');
+      span.textContent = full;
+      if (row) row.style.display = full ? '' : 'none';
+    }
+    function gprevUpdateMsg(id, val) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (val) {
+        el.textContent = val;
+        el.style.display = '';
+      } else {
+        el.textContent = '';
+        el.style.display = 'none';
+      }
+    }
+    function switchGuiaSubtab(tab) {
+      const elemEl  = document.getElementById('guia-subtab-elementos');
+      const textEl  = document.getElementById('guia-subtab-textos');
+      const btnElem = document.getElementById('guia-subtab-btn-elementos');
+      const btnText = document.getElementById('guia-subtab-btn-textos');
+      if (!elemEl) return;
+      const isElem = tab === 'elementos';
+      elemEl.style.display = isElem ? '' : 'none';
+      textEl.style.display = isElem ? 'none' : '';
+      [btnElem, btnText].forEach((btn, i) => {
+        const isActive = isElem ? i === 0 : i === 1;
+        btn.style.background   = isActive ? '#2563eb' : 'transparent';
+        btn.style.color        = isActive ? 'white'   : '#64748b';
+        btn.style.boxShadow    = isActive ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
+      });
     }
     function abrirModalNuevoGuiaTpl() {
       const m = document.getElementById('modal-nuevo-guia-tpl');

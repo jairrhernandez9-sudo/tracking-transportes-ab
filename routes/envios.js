@@ -254,7 +254,7 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
     );
 
     const [configs] = await db.query(
-      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url','empresa_sitio_web')"
+      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url','empresa_sitio_web','empresa_aviso_privacidad')"
     );
     const config = {};
     configs.forEach(c => { config[c.clave] = c.valor; });
@@ -274,7 +274,14 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       obligatorio_fecha_emision:0,obligatorio_observaciones:0,obligatorio_fecha_entrega:0,
       obligatorio_referencia_cliente:0,obligatorio_recibido_por:0,obligatorio_operador:0,
       obligatorio_firma_final:0,obligatorio_pie_datos:0,obligatorio_disclaimer:0,
-      obligatorio_col_volumen:0,obligatorio_col_peso_facturado:0,obligatorio_col_servicios:0,obligatorio_col_importe:0
+      obligatorio_col_volumen:0,obligatorio_col_peso_facturado:0,obligatorio_col_servicios:0,obligatorio_col_importe:0,
+      // Textos editables por template
+      descripcion_servicio: null,
+      titulo_guia: null,
+      mensaje_1: null,
+      mensaje_2: null,
+      mensaje_3: null,
+      mensaje_4: null
     };
     let guiaCfg = { ...guiaCfgDefaults };
     if (envio.cliente_id) {
@@ -282,7 +289,13 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       if (clienteGuia && clienteGuia.template_guia_id) {
         const [[tplGuia]] = await db.query('SELECT * FROM guia_templates WHERE id = ?', [clienteGuia.template_guia_id]);
         if (tplGuia) {
-          Object.keys(guiaCfgDefaults).forEach(k => { guiaCfg[k] = !!tplGuia[k]; });
+          Object.keys(guiaCfgDefaults).forEach(k => {
+            if (k === 'descripcion_servicio' || k === 'titulo_guia' || k.startsWith('mensaje_')) {
+              guiaCfg[k] = tplGuia[k] || null;
+            } else {
+              guiaCfg[k] = !!tplGuia[k];
+            }
+          });
           // Obligatorio fuerza mostrar
           Object.keys(guiaCfgDefaults).filter(k => k.startsWith('obligatorio_')).forEach(k => {
             if (guiaCfg[k]) guiaCfg['mostrar_' + k.replace('obligatorio_','')] = true;

@@ -90,7 +90,8 @@ async function obtenerConfiguracion() {
     notificaciones: {},
     alertas: {},
     tracking: {},
-    etiqueta: {}
+    etiqueta: {},
+    guia: {}
   };
   
   configs.forEach(config => {
@@ -194,11 +195,12 @@ router.post('/empresa', async (req, res) => {
       empresa_email, 
       empresa_direccion, 
       empresa_sitio_web,
-      empresa_eslogan,              // ✅ NUEVO
-      empresa_telefono_adicional,   // ✅ NUEVO
-      empresa_logo_url              // ✅ NUEVO
+      empresa_eslogan,
+      empresa_telefono_adicional,
+      empresa_logo_url,
+      empresa_aviso_privacidad
     } = req.body;
-    
+
     const updates = [
       ['empresa_nombre', empresa_nombre],
       ['empresa_rfc', empresa_rfc],
@@ -206,9 +208,10 @@ router.post('/empresa', async (req, res) => {
       ['empresa_email', empresa_email],
       ['empresa_direccion', empresa_direccion],
       ['empresa_sitio_web', empresa_sitio_web],
-      ['empresa_eslogan', empresa_eslogan],                      // ✅ NUEVO
-      ['empresa_telefono_adicional', empresa_telefono_adicional], // ✅ NUEVO
-      ['empresa_logo_url', empresa_logo_url]                      // ✅ NUEVO
+      ['empresa_eslogan', empresa_eslogan],
+      ['empresa_telefono_adicional', empresa_telefono_adicional],
+      ['empresa_logo_url', empresa_logo_url],
+      ['empresa_aviso_privacidad', empresa_aviso_privacidad]
     ];
     
     for (const [clave, valor] of updates) {
@@ -878,7 +881,13 @@ const GUIA_TEMPLATE_FIELDS = [
   'obligatorio_fecha_emision','obligatorio_observaciones','obligatorio_fecha_entrega',
   'obligatorio_referencia_cliente','obligatorio_recibido_por','obligatorio_operador',
   'obligatorio_firma_final','obligatorio_pie_datos','obligatorio_disclaimer',
-  'obligatorio_col_volumen','obligatorio_col_peso_facturado','obligatorio_col_servicios','obligatorio_col_importe'
+  'obligatorio_col_volumen','obligatorio_col_peso_facturado','obligatorio_col_servicios','obligatorio_col_importe',
+  'mostrar_remitente_nombre','mostrar_remitente_direccion','mostrar_remitente_telefono',
+  'mostrar_facturar_nombre','mostrar_facturar_direccion','mostrar_facturar_contacto','mostrar_facturar_telefono','mostrar_facturar_email','mostrar_facturar_rfc',
+  'mostrar_destinatario_nombre','mostrar_destinatario_direccion',
+  'obligatorio_remitente_nombre','obligatorio_remitente_direccion','obligatorio_remitente_telefono',
+  'obligatorio_facturar_nombre','obligatorio_facturar_direccion','obligatorio_facturar_contacto','obligatorio_facturar_telefono','obligatorio_facturar_email','obligatorio_facturar_rfc',
+  'obligatorio_destinatario_nombre','obligatorio_destinatario_direccion'
 ];
 
 router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
@@ -887,16 +896,20 @@ router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
     return res.redirect('/configuracion?error=sin_permiso&tab=guia');
   }
   try {
-    const { nombre } = req.body;
+    const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4 } = req.body;
     if (!nombre || nombre.trim() === '') {
       return res.redirect('/configuracion?error=nombre_requerido&tab=guia');
     }
     const cols = GUIA_TEMPLATE_FIELDS.join(', ');
     const placeholders = GUIA_TEMPLATE_FIELDS.map(() => '?').join(', ');
-    const vals = GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 1); // defaults: todos 1
+    const vals = GUIA_TEMPLATE_FIELDS.map(() => 1); // defaults: todos 1
     await db.query(
-      `INSERT INTO guia_templates (nombre, ${cols}, creado_por) VALUES (?, ${placeholders}, ?)`,
-      [nombre.trim(), ...vals, req.session.userId]
+      `INSERT INTO guia_templates (nombre, ${cols}, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4, creado_por)
+       VALUES (?, ${placeholders}, ?, ?, ?, ?, ?, ?, ?)`,
+      [nombre.trim(), ...vals,
+        descripcion_servicio || null, titulo_guia || null,
+        mensaje_1 || null, mensaje_2 || null, mensaje_3 || null, mensaje_4 || null,
+        req.session.userId]
     );
     res.redirect('/configuracion?success=guia_template_creado&tab=guia');
   } catch (error) {
@@ -912,10 +925,19 @@ router.post('/guia/templates/:id/guardar', isAuthenticated, async (req, res) => 
   }
   try {
     const { id } = req.params;
-    const { nombre } = req.body;
+    const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4 } = req.body;
     const sets = GUIA_TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
     const vals = GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
-    await db.query(`UPDATE guia_templates SET nombre = ?, ${sets} WHERE id = ?`, [nombre || 'Sin nombre', ...vals, id]);
+    await db.query(
+      `UPDATE guia_templates SET nombre = ?, ${sets},
+        descripcion_servicio = ?, titulo_guia = ?,
+        mensaje_1 = ?, mensaje_2 = ?, mensaje_3 = ?, mensaje_4 = ?
+       WHERE id = ?`,
+      [nombre || 'Sin nombre', ...vals,
+        descripcion_servicio || null, titulo_guia || null,
+        mensaje_1 || null, mensaje_2 || null, mensaje_3 || null, mensaje_4 || null,
+        id]
+    );
     res.redirect('/configuracion?success=guia_template_guardado&tab=guia');
   } catch (error) {
     console.error('Error al guardar template de guía:', error);

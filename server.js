@@ -4,10 +4,42 @@ const session = require('express-session');
 require('dotenv').config();
 const db = require('./config/database');
 
-// Migraciones de columnas
-db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS pagina_inicio VARCHAR(50) NOT NULL DEFAULT 'dashboard'`).catch(() => {});
-db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS ultimo_cliente_id INT NULL`).catch(() => {});
-db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS alias VARCHAR(80) NULL`).catch(() => {});
+// Migraciones de columnas — .catch() silencia "duplicate column" (ER_DUP_FIELDNAME)
+db.query(`ALTER TABLE usuarios ADD COLUMN pagina_inicio VARCHAR(50) NOT NULL DEFAULT 'dashboard'`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_cliente_id INT NULL`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN alias VARCHAR(80) NULL`).catch(() => {});
+
+// Migración: textos editables en guia_templates
+db.query(`ALTER TABLE guia_templates ADD COLUMN descripcion_servicio VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN titulo_guia VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mensaje_1 TEXT NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mensaje_2 TEXT NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mensaje_3 TEXT NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mensaje_4 TEXT NULL`).catch(() => {});
+
+// Migración: sub-campos de secciones en guia_templates
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_remitente_nombre TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_remitente_direccion TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_remitente_telefono TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_facturar_nombre TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_facturar_direccion TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_facturar_contacto TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_facturar_telefono TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_facturar_email TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_facturar_rfc TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_destinatario_nombre TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_destinatario_direccion TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_remitente_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_remitente_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_remitente_telefono TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_contacto TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_telefono TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_email TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_rfc TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
 
 // Migración: tabla etiqueta_templates
 db.query(`

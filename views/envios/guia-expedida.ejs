@@ -16,7 +16,7 @@
       overflow: hidden;
     }
 
-    /* ── Barra de acciones (solo pantalla) ─────────────────── */
+    /* ── Barra de acciones (solo pantalla) ── */
     .toolbar {
       background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
       padding: 12px 24px;
@@ -56,14 +56,12 @@
       transition: all .2s;
     }
     .btn-print:hover { background: #1d4ed8; transform: translateY(-1px); }
-    .btn-print svg { width: 16px; height: 16px; }
 
-    /* ── Layout principal ────────────────────────────────────── */
+    /* ── Layout ── */
     .page-layout {
       display: flex;
       height: calc(100vh - 56px);
     }
-
     .guia-area {
       flex: 1;
       overflow: auto;
@@ -76,177 +74,146 @@
     }
     .guia-area.panning { cursor: grabbing; }
 
-    /* ── Página carta ───────────────────────────────────────── */
-    #guia-canvas {
-      display: inline-block;
-      flex-shrink: 0;
-    }
+    #guia-canvas { display: inline-block; flex-shrink: 0; }
+
+    /* ── Página carta ── */
     .page {
       width: 215.9mm;
       min-height: 279.4mm;
       background: white;
       margin: 20px auto;
-      padding: 6mm 7mm;
+      padding: 5mm 6mm;
       box-shadow: 0 4px 30px rgba(0,0,0,0.25);
     }
 
-    /* ── Tabla base ─────────────────────────────────────────── */
+    /* ── Tabla base ── */
     table { border-collapse: collapse; width: 100%; }
     td, th { border: 1px solid #000; padding: 2px 4px; vertical-align: top; }
-    td.no-border { border: none; }
 
-    /* ── Header principal ───────────────────────────────────── */
-    .header-table td { vertical-align: middle; }
-    .cell-logo { width: 26%; padding: 4px 6px; }
-    .cell-title { width: 48%; text-align: center; padding: 4px 6px; }
-    .cell-barcode { width: 26%; text-align: center; padding: 4px 6px; }
+    /* ── Cabecera ── */
+    .cell-logo  { width: 24%; vertical-align: middle; padding: 4px 6px; }
+    .cell-title { width: 50%; text-align: center; vertical-align: middle; padding: 4px 6px; }
+    .cell-barcode { width: 26%; text-align: center; vertical-align: middle; padding: 4px 6px; }
 
-    .logo-img  { max-height: 44px; max-width: 110px; object-fit: contain; display: block; }
+    .logo-img { max-height: 44px; max-width: 110px; object-fit: contain; display: block; }
     .company-name { font-size: 9pt; font-weight: bold; margin-top: 2px; }
-    .company-sub  { font-size: 7pt; color: #333; }
+    .company-rfc  { font-size: 7pt; color: #333; margin-top: 1px; }
 
-    .guia-main-title { font-size: 8.5pt; font-weight: bold; line-height: 1.3; }
-    .guia-carta-title { font-size: 11pt; font-weight: bold; letter-spacing: .5px; }
+    .guia-servicio { font-size: 8pt; color: #333; }
+    .guia-titulo   { font-size: 13pt; font-weight: bold; letter-spacing: .5px; margin: 2px 0; }
+    .guia-lugar    { font-size: 6.5pt; color: #333; margin-top: 3px; }
+    .guia-tel      { font-size: 7.5pt; font-weight: bold; margin-top: 2px; }
 
-    .tracking-number-big { font-size: 13pt; font-weight: bold; letter-spacing: 1px; display: block; margin-top: 2px; }
-    .folio-row { font-size: 7pt; color: #555; margin-top: 2px; }
+    .tracking-big  { font-size: 13pt; font-weight: bold; letter-spacing: 1px; display: block; margin-top: 3px; }
+    .folio-row     { font-size: 7pt; color: #444; margin-top: 2px; }
 
-    /* ── Sub-header (dirección de expedición) ───────────────── */
-    .subheader-table td { border-top: none; font-size: 7.5pt; vertical-align: middle; padding: 3px 5px; }
-
-    /* ── Sección remitente / facturar / destinatario ─────────── */
+    /* ── Secciones (remitente / facturar / destinatario) ── */
     .seccion-label {
       font-size: 7pt; font-weight: bold; text-transform: uppercase;
       background: #e8e8e8; border-bottom: 1px solid #000;
       padding: 2px 4px; display: block;
     }
-    .seccion-content { font-size: 7.5pt; line-height: 1.45; padding: 3px 4px; min-height: 60px; }
+    .seccion-content { font-size: 7.5pt; line-height: 1.45; padding: 4px 5px; min-height: 58px; }
 
-    /* ── Tabla de carga ──────────────────────────────────────── */
-    .cargo-table th {
+    /* ── Tabla de carga ── */
+    .cargo-th {
       background: #e0e0e0; font-size: 7pt; font-weight: bold;
-      text-align: center; padding: 3px 2px;
+      text-align: center; padding: 4px 3px; border: 1px solid #000;
     }
-    .cargo-table td { font-size: 7.5pt; text-align: center; padding: 2px 3px; }
-    .cargo-table td.left { text-align: left; }
-    .cargo-table td.totales { font-weight: bold; }
+    .cargo-td { font-size: 7.5pt; text-align: center; padding: 5px 4px; min-height: 26px; }
+    .cargo-td.left { text-align: left; }
+    .cargo-td.bold { font-weight: bold; }
 
-    /* ── Pie de página ───────────────────────────────────────── */
+    /* ── Mensaje personalizable ── */
+    .msg-row {
+      border: 1px solid #000;
+      border-top: none;
+      padding: 5px 7px;
+      font-size: 7.5pt;
+      min-height: 22px;
+      color: #444;
+      font-style: italic;
+      text-align: center;
+    }
+    .msg-row.empty { display: none; }
+
+    /* ── Bloque inferior ── */
     .footer-label {
       font-size: 6.5pt; font-weight: bold; text-transform: uppercase;
       background: #ececec; border-bottom: 1px solid #000;
-      padding: 2px 4px; display: block;
+      padding: 3px 5px; display: block;
     }
-    .footer-content { font-size: 7.5pt; padding: 5px 6px; min-height: 36px; line-height: 1.6; }
-    .footer-content.medium { min-height: 58px; }
-    .footer-content.tall   { min-height: 88px; }
-    .footer-content.xlarge { min-height: 100px; }
-    .pago-big { font-size: 14pt; font-weight: bold; margin-top: 8px; display: block; }
+    .footer-content { font-size: 8pt; padding: 6px 6px; min-height: 48px; line-height: 1.6; }
+    .footer-content.tall { min-height: 80px; }
+    .pago-big  { font-size: 16pt; font-weight: bold; display: block; margin-top: 4px; }
+    .fecha-big { font-size: 16pt; font-weight: bold; display: block; margin-top: 4px; }
 
+    /* ── Pie ── */
+    .pie-datos {
+      font-size: 6.5pt; border: 1px solid #000; border-top: none;
+      padding: 3px 6px; line-height: 1.5;
+    }
     .disclaimer {
       font-size: 6.5pt; border: 1px solid #000; border-top: none;
       padding: 4px 6px; text-align: center; line-height: 1.4;
     }
-    .permisos-row {
-      font-size: 6.5pt; border: 1px solid #000; border-top: none;
-      padding: 3px 6px;
-    }
 
-    /* ── Elemento oculto ─────────────────────────────────────── */
+    /* ── Elemento oculto ── */
     .guia-hidden { display: none !important; }
 
-    /* ── Panel de toggles (mismo estilo que etiqueta) ────────── */
+    /* ── Panel de toggles ── */
     .panel-guia {
-      width: 264px;
+      width: 248px;
       flex-shrink: 0;
       overflow-y: auto;
-      padding: 20px 16px 80px;
+      padding: 20px 14px 80px;
       background: #f1f5f9;
     }
-    .tpl-panel { background: white; border-radius: 14px; padding: 18px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .tpl-panel-hdr { font-size: 0.78rem; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-    .tpl-section { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 4px; }
-    .tpl-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; gap: 8px; }
-    .tpl-row-lbl { font-size: 0.8rem; color: #374151; font-weight: 500; line-height: 1.2; }
-    .tpl-lock { font-size: 0.58rem; background: #fef3c7; color: #b45309; padding: 1px 4px; border-radius: 3px; font-weight: 700; margin-left: 3px; vertical-align: middle; }
-    .tpl-sw { position: relative; width: 38px; height: 20px; flex-shrink: 0; }
+    .tpl-panel { background: white; border-radius: 14px; padding: 16px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .tpl-panel-hdr { font-size: 0.78rem; font-weight: 800; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .tpl-section { font-size: 0.63rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin: 10px 0 3px; }
+    .tpl-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; gap: 8px; }
+    .tpl-row-lbl { font-size: 0.78rem; color: #374151; font-weight: 500; line-height: 1.2; }
+    .tpl-lock { font-size: 0.56rem; background: #fef3c7; color: #b45309; padding: 1px 4px; border-radius: 3px; font-weight: 700; margin-left: 3px; }
+    .tpl-sw { position: relative; width: 36px; height: 19px; flex-shrink: 0; }
     .tpl-sw input { opacity: 0; width: 0; height: 0; }
     .tpl-sl { position: absolute; cursor: pointer; inset: 0; background: #cbd5e1; transition: .25s; border-radius: 20px; }
-    .tpl-sl:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; transition: .25s; border-radius: 50%; }
+    .tpl-sl:before { position: absolute; content: ""; height: 13px; width: 13px; left: 3px; bottom: 3px; background: white; transition: .25s; border-radius: 50%; }
     .tpl-sw input:checked + .tpl-sl { background: #3b82f6; }
-    .tpl-sw input:checked + .tpl-sl:before { transform: translateX(18px); }
+    .tpl-sw input:checked + .tpl-sl:before { transform: translateX(17px); }
     .tpl-sw input:disabled + .tpl-sl { opacity: 0.55; cursor: not-allowed; }
-    .tpl-nota { font-size: 0.7rem; color: #94a3b8; line-height: 1.4; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+    .tpl-nota { font-size: 0.68rem; color: #94a3b8; line-height: 1.4; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
 
-    /* ── Barra de zoom (mismo estilo que etiqueta) ────────────── */
+    /* ── Barra de zoom ── */
     .zoom-bar {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.88);
-      backdrop-filter: blur(10px);
-      border-radius: 50px;
-      padding: 9px 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-      z-index: 300;
-      user-select: none;
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: rgba(15,23,42,0.88); backdrop-filter: blur(10px);
+      border-radius: 50px; padding: 9px 18px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35); z-index: 300; user-select: none;
     }
-    .zoom-btn {
-      background: rgba(255,255,255,0.12);
-      border: none;
-      color: white;
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      font-size: 1.1rem; font-weight: 700;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-      line-height: 1;
-    }
+    .zoom-btn { background: rgba(255,255,255,0.12); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
     .zoom-btn:hover { background: rgba(255,255,255,0.25); }
-    .zoom-slider {
-      -webkit-appearance: none; appearance: none;
-      width: 120px; height: 4px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.25);
-      outline: none; cursor: pointer;
-    }
-    .zoom-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: white; cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-    }
+    .zoom-slider { -webkit-appearance: none; appearance: none; width: 120px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.25); outline: none; cursor: pointer; }
+    .zoom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: white; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
     .zoom-pct { color: white; font-size: 0.78rem; font-weight: 700; min-width: 36px; text-align: center; }
     .zoom-reset { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 0.75rem; cursor: pointer; padding: 0 2px; transition: color 0.15s; }
     .zoom-reset:hover { color: white; }
 
-    /* ── @media print ────────────────────────────────────────── */
+    /* ── Print ── */
     @media print {
       body { background: white; overflow: auto; }
-      .toolbar { display: none !important; }
-      .panel-guia { display: none !important; }
-      .zoom-bar { display: none !important; }
+      .toolbar, .panel-guia, .zoom-bar { display: none !important; }
       .page-layout { display: block; height: auto; }
       .guia-area { overflow: visible; cursor: default; }
       #guia-canvas { zoom: 1 !important; }
-      .page {
-        width: 100%; margin: 0; padding: 6mm 7mm;
-        box-shadow: none; min-height: 0;
-      }
-      .guia-hidden { display: none !important; }
+      .page { width: 100%; margin: 0; padding: 5mm 6mm; box-shadow: none; min-height: 0; }
       @page { size: letter; margin: 8mm 8mm 8mm 8mm; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── Barra de herramientas ─────────────────────────────── -->
 <div class="toolbar">
   <div class="toolbar-left">
     <a href="/envios/<%= envio.id %>" class="btn-back">← Volver al detalle</a>
@@ -254,337 +221,306 @@
     <span class="toolbar-tracking"><%= envio.numero_tracking %></span>
   </div>
   <button class="btn-print" onclick="window.print()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-      <rect x="6" y="14" width="12" height="8"/>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
     </svg>
     Imprimir / Descargar PDF
   </button>
 </div>
 
-<!-- ── Layout ────────────────────────────────────────────── -->
 <div class="page-layout">
-
-  <!-- ── Área de la guía (scrollable + pan) ────────────── -->
   <div class="guia-area" id="guia-area">
     <div id="guia-canvas">
       <div class="page">
 
         <%
+          const g = guiaCfg;
+          function gc(key) { return g['mostrar_' + key] ? '' : 'guia-hidden'; }
+
           function dirOrigen() {
-            const parts = [];
-            if (envio.origen_calle)      parts.push(envio.origen_calle);
-            if (envio.origen_colonia)    parts.push(envio.origen_colonia);
-            if (envio.origen_ciudad)     parts.push(envio.origen_ciudad);
-            if (envio.origen_estado)     parts.push(envio.origen_estado);
-            if (envio.origen_cp)         parts.push('CP ' + envio.origen_cp);
-            if (envio.origen_referencia) parts.push(envio.origen_referencia);
-            return parts.join(', ') || '';
+            const p = [];
+            if (envio.origen_calle)      p.push(envio.origen_calle);
+            if (envio.origen_colonia)    p.push(envio.origen_colonia);
+            if (envio.origen_ciudad && envio.origen_estado) p.push(envio.origen_ciudad + ', ' + envio.origen_estado);
+            else if (envio.origen_ciudad) p.push(envio.origen_ciudad);
+            if (envio.origen_cp)         p.push('CP ' + envio.origen_cp);
+            if (envio.origen_referencia) p.push(envio.origen_referencia);
+            return p.join(', ') || (envio.origen || '');
           }
           function dirDestino() {
-            const parts = [];
-            if (envio.destino_calle)      parts.push(envio.destino_calle);
-            if (envio.destino_colonia)    parts.push(envio.destino_colonia);
-            if (envio.destino_ciudad)     parts.push(envio.destino_ciudad);
-            if (envio.destino_estado)     parts.push(envio.destino_estado);
-            if (envio.destino_cp)         parts.push('CP ' + envio.destino_cp);
-            if (envio.destino_referencia) parts.push(envio.destino_referencia);
-            return parts.join(', ') || '';
+            const p = [];
+            if (envio.destino_calle)      p.push(envio.destino_calle);
+            if (envio.destino_colonia)    p.push(envio.destino_colonia);
+            if (envio.destino_ciudad && envio.destino_estado) p.push(envio.destino_ciudad + ', ' + envio.destino_estado);
+            else if (envio.destino_ciudad) p.push(envio.destino_ciudad);
+            if (envio.destino_cp)         p.push('CP ' + envio.destino_cp);
+            if (envio.destino_referencia) p.push(envio.destino_referencia);
+            return p.join(', ') || (envio.destino || '');
           }
-          const pesoTotal = items.reduce((s, i) => s + parseFloat(i.peso || 0), 0);
+
+          const pesoTotal = items.reduce((s, it) => s + parseFloat(it.peso || 0), 0);
+
           const ahora = new Date();
           const fechaEmision = ahora.toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'});
           const horaEmision  = ahora.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'}) + ' Hrs.';
           const fechaEntrega = envio.fecha_estimada_entrega
             ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'})
             : 'Por definir';
+
           const estadoLabel = {
             'creado':'CREADO','pendiente':'PENDIENTE','en-transito':'EN TRÁNSITO',
             'en-bodega':'EN BODEGA','entregado':'ENTREGADO','retrasado':'RETRASADO','cancelado':'CANCELADO'
           };
-          const g = guiaCfg;
-          function gc(key) { return g['mostrar_' + key] ? '' : 'guia-hidden'; }
+
+          const msg1 = guiaCfg.mensaje_1 || '';
+          const msg2 = guiaCfg.mensaje_2 || '';
+          const msg3 = guiaCfg.mensaje_3 || '';
+          const msg4 = guiaCfg.mensaje_4 || '';
+
+          const descripcionServicio = guiaCfg.descripcion_servicio || 'Servicio de transportes de Carga';
+          const tituloGuia = guiaCfg.titulo_guia || 'GUÍA EXPEDIDA';
+
+          const nombreEmpresa = config.empresa_nombre || 'TRANSPORTES';
         %>
 
-        <!-- ═══ ENCABEZADO PRINCIPAL ══════════════════════════ -->
-        <table class="header-table">
+        <!-- ══ ENCABEZADO ══ -->
+        <table>
           <tr>
-            <td class="cell-logo">
+            <!-- Logo + empresa -->
+            <td class="cell-logo <%= gc('logo') %>" data-elem="logo">
               <% if (config.empresa_logo_url) { %>
-                <img src="<%= config.empresa_logo_url %>" class="logo-img" data-elem="logo" alt="Logo">
-              <% } else { %>
-                <div data-elem="logo" style="font-size:14pt;font-weight:900;color:#1e3a8a;">&#9679;</div>
+                <img src="<%= config.empresa_logo_url %>" class="logo-img" alt="Logo">
               <% } %>
-              <div class="company-name"><%= config.empresa_nombre || 'LOGÍSTICA' %></div>
-              <div class="company-sub <%= gc('rfc') %>" data-elem="rfc"><% if (config.empresa_rfc) { %>RFC: <%= config.empresa_rfc %><% } %></div>
+              <div class="company-name"><%= nombreEmpresa %></div>
+              <div class="company-rfc <%= gc('rfc') %>" data-elem="rfc"><% if (config.empresa_rfc) { %>RFC: <%= config.empresa_rfc %><% } %></div>
             </td>
 
+            <!-- Título central -->
             <td class="cell-title">
-              <div class="guia-main-title">
-                PAQUETERÍA, MENSAJERÍA Y CARGA CONSOLIDADA<br>
-                NACIONAL E INTERNACIONAL
-              </div>
-              <div class="guia-carta-title" style="margin-top:4px;">GUÍA EXPEDIDA</div>
+              <div class="guia-servicio"><%= descripcionServicio %></div>
+              <div class="guia-titulo"><%= tituloGuia %></div>
               <% if (config.empresa_direccion) { %>
-                <div style="font-size:6.5pt;color:#333;margin-top:5px;line-height:1.3;">
-                  LUGAR DE EXPEDICIÓN: <%= config.empresa_direccion %>
-                </div>
+                <div class="guia-lugar">LUGAR DE EXPEDICIÓN: <%= config.empresa_direccion.toUpperCase() %></div>
               <% } %>
-              <div class="<%= gc('telefono') %>" data-elem="telefono">
+              <div class="guia-tel <%= gc('telefono') %>" data-elem="telefono">
                 <% if (config.empresa_telefono) { %>
-                  <div style="font-size:7.5pt;font-weight:bold;margin-top:3px;">
-                    Tel: <%= config.empresa_telefono %>
-                    <% if (config.empresa_telefono_adicional) { %> &nbsp;|&nbsp; <%= config.empresa_telefono_adicional %><% } %>
-                  </div>
+                  Tel: +<%= config.empresa_telefono.replace(/\D/g,'') %><% if (config.empresa_telefono_adicional) { %> &nbsp;|&nbsp; +<%= config.empresa_telefono_adicional.replace(/\D/g,'') %><% } %>
                 <% } %>
               </div>
             </td>
 
+            <!-- Barcode + tracking -->
             <td class="cell-barcode <%= gc('barcode') %>" data-elem="barcode">
               <svg id="barcode"></svg>
-              <span class="tracking-number-big"><%= envio.numero_tracking %></span>
+              <span class="tracking-big"><%= envio.numero_tracking %></span>
               <div class="folio-row">Folio: <%= envio.id %> &nbsp;|&nbsp; Rev.:0</div>
             </td>
           </tr>
         </table>
 
-        <!-- ═══ REMITENTE / FACTURAR / DESTINATARIO ══════════ -->
-        <table style="margin-top:0; border-top:none;">
+        <!-- ══ REMITENTE / FACTURAR / DESTINATARIO ══ -->
+        <table style="border-top:none;">
           <tr>
-            <td style="width:33%; border-right:1px solid #000; padding:0;" class="<%= gc('seccion_remitente') %>" data-elem="seccion_remitente">
+            <td style="width:33%;padding:0;" class="<%= gc('seccion_remitente') %>" data-elem="seccion_remitente">
               <span class="seccion-label">Remitente: (Origen)</span>
               <div class="seccion-content">
-                <strong><%= origenAlias || config.empresa_nombre || '' %></strong><br>
-                <% var addrOrigen = dirOrigen(); %>
-                <% if (addrOrigen) { %><%= addrOrigen %><br><% } %>
-                <% if (config.empresa_telefono) { %>Tel. <%= config.empresa_telefono %><% } %>
+                <div class="<%= gc('remitente_nombre') %>" data-elem="remitente_nombre"><strong><%= origenAlias || nombreEmpresa %></strong></div>
+                <div class="<%= gc('remitente_direccion') %>" data-elem="remitente_direccion"><%= dirOrigen() %></div>
+                <% if (config.empresa_telefono) { %><div class="<%= gc('remitente_telefono') %>" data-elem="remitente_telefono">Tel. <%= config.empresa_telefono %></div><% } %>
               </div>
             </td>
-            <td style="width:33%; border-right:1px solid #000; padding:0;" class="<%= gc('seccion_facturar') %>" data-elem="seccion_facturar">
+            <td style="width:34%;padding:0;border-left:1px solid #000;" class="<%= gc('seccion_facturar') %>" data-elem="seccion_facturar">
               <span class="seccion-label">Facturar a:</span>
               <div class="seccion-content">
-                <strong><%= envio.nombre_empresa || '-' %></strong><br>
-                <% if (envio.cliente_direccion) { %><%= envio.cliente_direccion %><br><% } %>
-                <% if (envio.contacto) { %>Attn: <%= envio.contacto %><br><% } %>
-                <% if (envio.telefono) { %>Tel. <%= envio.telefono %><br><% } %>
-                <% if (envio.cliente_email) { %><%= envio.cliente_email %><% } %>
+                <div class="<%= gc('facturar_nombre') %>" data-elem="facturar_nombre"><strong><%= envio.nombre_empresa || '-' %></strong></div>
+                <% if (envio.cliente_direccion) { %><div class="<%= gc('facturar_direccion') %>" data-elem="facturar_direccion"><%= envio.cliente_direccion %></div><% } %>
+                <% if (envio.contacto) { %><div class="<%= gc('facturar_contacto') %>" data-elem="facturar_contacto">Attn: <%= envio.contacto %></div><% } %>
+                <% if (envio.telefono) { %><div class="<%= gc('facturar_telefono') %>" data-elem="facturar_telefono">Tel. <%= envio.telefono %></div><% } %>
+                <% if (envio.cliente_email) { %><div class="<%= gc('facturar_email') %>" data-elem="facturar_email"><%= envio.cliente_email %></div><% } %>
+                <% if (envio.cliente_rfc) { %><div class="<%= gc('facturar_rfc') %>" data-elem="facturar_rfc">RFC: <%= envio.cliente_rfc %></div><% } %>
               </div>
             </td>
-            <td style="width:34%; padding:0;" class="<%= gc('seccion_destinatario') %>" data-elem="seccion_destinatario">
+            <td style="width:33%;padding:0;border-left:1px solid #000;" class="<%= gc('seccion_destinatario') %>" data-elem="seccion_destinatario">
               <span class="seccion-label">Destinatario: (Destino)</span>
               <div class="seccion-content">
-                <strong><%= destinoAlias || envio.destino_ciudad || '' %></strong><br>
-                <% var addrDestino = dirDestino(); %>
-                <% if (addrDestino) { %><%= addrDestino %><% } %>
+                <div class="<%= gc('destinatario_nombre') %>" data-elem="destinatario_nombre"><strong><%= destinoAlias || envio.destino_ciudad || '' %></strong></div>
+                <div class="<%= gc('destinatario_direccion') %>" data-elem="destinatario_direccion"><%= dirDestino() %></div>
               </div>
             </td>
           </tr>
         </table>
 
-        <!-- ═══ TABLA DE CARGA ═══════════════════════════════ -->
-        <table class="cargo-table" style="border-top:none;">
+        <!-- ══ TABLA DE CARGA ══ -->
+        <table style="border-top:none;">
           <thead>
             <tr>
-              <th style="width:5%;">CANT.</th>
-              <th style="width:12%;">EMBALAJE</th>
-              <th>DESCRIPCIÓN SEGÚN REMITENTE</th>
-              <th style="width:10%;">PESO REAL Kgs.</th>
-              <th style="width:13%;" data-elem="col_volumen" class="<%= gc('col_volumen') %>">VOLUMEN Mts.³</th>
-              <th style="width:12%;" data-elem="col_peso_facturado" class="<%= gc('col_peso_facturado') %>">PESO FACTURADO Kgs.</th>
-              <th style="width:12%;" data-elem="col_servicios" class="<%= gc('col_servicios') %>">SERVICIOS</th>
-              <th style="width:8%;" data-elem="col_importe" class="<%= gc('col_importe') %>">IMPORTE</th>
+              <th class="cargo-th" style="width:5%;">CANT.</th>
+              <th class="cargo-th" style="width:12%;">EMBALAJE</th>
+              <th class="cargo-th">DESCRIPCIÓN SEGÚN REMITENTE</th>
+              <th class="cargo-th" style="width:11%;">PESO ESTIMADO Kgs.</th>
+              <th class="cargo-th <%= gc('col_peso_facturado') %>" style="width:11%;" data-elem="col_peso_facturado">PESO FACT. Kgs.</th>
+              <th class="cargo-th <%= gc('col_volumen') %>" style="width:10%;" data-elem="col_volumen">VOLUMEN Mts.³</th>
+              <th class="cargo-th <%= gc('col_servicios') %>" style="width:10%;" data-elem="col_servicios">SERVICIOS</th>
+              <th class="cargo-th <%= gc('col_importe') %>" style="width:10%;" data-elem="col_importe">IMPORTE</th>
             </tr>
           </thead>
           <tbody>
-            <% if (items && items.length > 0) { %>
-              <% items.forEach(function(item) { %>
-                <tr>
-                  <td><%= item.cantidad || 1 %></td>
-                  <td class="left"><%= item.tipo || '-' %></td>
-                  <td class="left"><%= item.descripcion || '-' %></td>
-                  <td><%= item.peso ? parseFloat(item.peso).toFixed(3) : '0.000' %></td>
-                  <td data-elem="col_volumen" class="<%= gc('col_volumen') %>"></td>
-                  <td data-elem="col_peso_facturado" class="<%= gc('col_peso_facturado') %>"><%= item.peso ? parseFloat(item.peso).toFixed(3) : '0.000' %></td>
-                  <td class="left <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
-                  <td class="<%= gc('col_importe') %>" data-elem="col_importe"></td>
-                </tr>
-              <% }); %>
-              <% var filasFaltantes = Math.max(0, 4 - items.length); %>
-              <% for (var i = 0; i < filasFaltantes; i++) { %>
-                <tr>
-                  <td>&nbsp;</td><td></td><td></td><td></td>
-                  <td data-elem="col_volumen" class="<%= gc('col_volumen') %>"></td>
-                  <td data-elem="col_peso_facturado" class="<%= gc('col_peso_facturado') %>"></td>
-                  <td data-elem="col_servicios" class="<%= gc('col_servicios') %>"></td>
-                  <td data-elem="col_importe" class="<%= gc('col_importe') %>"></td>
-                </tr>
-              <% } %>
+            <% if (items && items.length > 0) {
+              items.forEach(function(item) { %>
+              <tr>
+                <td class="cargo-td"><%= item.cantidad || 1 %></td>
+                <td class="cargo-td left"><%= item.tipo || '-' %></td>
+                <td class="cargo-td left"><%= item.descripcion || '-' %></td>
+                <td class="cargo-td"><%= item.peso ? parseFloat(item.peso).toFixed(3) : '0.000' %></td>
+                <td class="cargo-td <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado"></td>
+                <td class="cargo-td <%= gc('col_volumen') %>" data-elem="col_volumen"></td>
+                <td class="cargo-td left <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
+                <td class="cargo-td <%= gc('col_importe') %>" data-elem="col_importe"></td>
+              </tr>
+            <% }); %>
+            <%
+              var filasFaltantes = Math.max(0, 4 - items.length);
+              for (var i = 0; i < filasFaltantes; i++) { %>
+              <tr>
+                <td class="cargo-td">&nbsp;</td><td class="cargo-td"></td><td class="cargo-td"></td><td class="cargo-td"></td>
+                <td class="cargo-td <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado"></td>
+                <td class="cargo-td <%= gc('col_volumen') %>" data-elem="col_volumen"></td>
+                <td class="cargo-td <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
+                <td class="cargo-td <%= gc('col_importe') %>" data-elem="col_importe"></td>
+              </tr>
+            <% } %>
             <% } else { %>
               <% if (envio.descripcion) { %>
-                <tr>
-                  <td>1</td>
-                  <td class="left">PAQUETE</td>
-                  <td class="left"><%= envio.descripcion %></td>
-                  <td><%= envio.peso ? parseFloat(envio.peso).toFixed(3) : '0.000' %></td>
-                  <td data-elem="col_volumen" class="<%= gc('col_volumen') %>"></td>
-                  <td data-elem="col_peso_facturado" class="<%= gc('col_peso_facturado') %>"><%= envio.peso ? parseFloat(envio.peso).toFixed(3) : '0.000' %></td>
-                  <td class="left <%= gc('col_servicios') %>" data-elem="col_servicios">FLETE</td>
-                  <td data-elem="col_importe" class="<%= gc('col_importe') %>"></td>
-                </tr>
-                <% for (var j = 0; j < 3; j++) { %>
-                  <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td>
-                    <td data-elem="col_volumen" class="<%= gc('col_volumen') %>"></td>
-                    <td data-elem="col_peso_facturado" class="<%= gc('col_peso_facturado') %>"></td>
-                    <td data-elem="col_servicios" class="<%= gc('col_servicios') %>"></td>
-                    <td data-elem="col_importe" class="<%= gc('col_importe') %>"></td>
-                  </tr>
-                <% } %>
+              <tr>
+                <td class="cargo-td">1</td>
+                <td class="cargo-td left">PAQUETE</td>
+                <td class="cargo-td left"><%= envio.descripcion %></td>
+                <td class="cargo-td"><%= envio.peso ? parseFloat(envio.peso).toFixed(3) : '0.000' %></td>
+                <td class="cargo-td <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado"></td>
+                <td class="cargo-td <%= gc('col_volumen') %>" data-elem="col_volumen"></td>
+                <td class="cargo-td <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
+                <td class="cargo-td <%= gc('col_importe') %>" data-elem="col_importe"></td>
+              </tr>
+              <% for (var j = 0; j < 3; j++) { %>
+              <tr>
+                <td class="cargo-td">&nbsp;</td><td class="cargo-td"></td><td class="cargo-td"></td><td class="cargo-td"></td>
+                <td class="cargo-td <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado"></td>
+                <td class="cargo-td <%= gc('col_volumen') %>" data-elem="col_volumen"></td>
+                <td class="cargo-td <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
+                <td class="cargo-td <%= gc('col_importe') %>" data-elem="col_importe"></td>
+              </tr>
+              <% } %>
               <% } else { %>
-                <% for (var k = 0; k < 4; k++) { %>
-                  <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td>
-                    <td data-elem="col_volumen" class="<%= gc('col_volumen') %>"></td>
-                    <td data-elem="col_peso_facturado" class="<%= gc('col_peso_facturado') %>"></td>
-                    <td data-elem="col_servicios" class="<%= gc('col_servicios') %>"></td>
-                    <td data-elem="col_importe" class="<%= gc('col_importe') %>"></td>
-                  </tr>
-                <% } %>
+              <% for (var k = 0; k < 4; k++) { %>
+              <tr>
+                <td class="cargo-td">&nbsp;</td><td class="cargo-td"></td><td class="cargo-td"></td><td class="cargo-td"></td>
+                <td class="cargo-td <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado"></td>
+                <td class="cargo-td <%= gc('col_volumen') %>" data-elem="col_volumen"></td>
+                <td class="cargo-td <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
+                <td class="cargo-td <%= gc('col_importe') %>" data-elem="col_importe"></td>
+              </tr>
+              <% } %>
               <% } %>
             <% } %>
-            <!-- Fila de totales -->
+            <!-- Totales -->
             <tr>
-              <td></td><td></td><td></td>
-              <td class="totales" style="text-align:center;">
-                <%= pesoTotal > 0 ? pesoTotal.toFixed(2) : (envio.peso ? parseFloat(envio.peso).toFixed(2) : '') %>
-              </td>
-              <td data-elem="col_volumen" class="<%= gc('col_volumen') %>"></td>
-              <td class="totales <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado" style="text-align:center;">
-                <%= pesoTotal > 0 ? pesoTotal.toFixed(2) : (envio.peso ? parseFloat(envio.peso).toFixed(2) : '') %>
-              </td>
-              <td data-elem="col_servicios" class="<%= gc('col_servicios') %>"></td>
-              <td data-elem="col_importe" class="<%= gc('col_importe') %>"></td>
+              <td class="cargo-td"></td><td class="cargo-td"></td><td class="cargo-td"></td>
+              <td class="cargo-td bold"><%= pesoTotal > 0 ? pesoTotal.toFixed(2) : (envio.peso ? parseFloat(envio.peso).toFixed(2) : '') %></td>
+              <td class="cargo-td <%= gc('col_peso_facturado') %>" data-elem="col_peso_facturado"></td>
+              <td class="cargo-td <%= gc('col_volumen') %>" data-elem="col_volumen"></td>
+              <td class="cargo-td <%= gc('col_servicios') %>" data-elem="col_servicios"></td>
+              <td class="cargo-td <%= gc('col_importe') %>" data-elem="col_importe"></td>
             </tr>
           </tbody>
         </table>
 
-        <!-- ═══ CLÁUSULA DE SEGURO ═════════════════════════════ -->
-        <table style="border-top:none;" class="<%= gc('clausula_seguro') %>" data-elem="clausula_seguro">
-          <tr>
-            <td style="font-size:7pt; padding:4px 6px; text-align:center; border-top:none;">
-              CLIENTE CONTRATA SEGURO QUE CUBRE MERCANCÍA HASTA $7,000.00 PESOS (VER CLÁUSULA 9).<br>
-              <% if (config.empresa_sitio_web) { %>
-                <span class="<%= gc('sitio_web') %>" data-elem="sitio_web">Conoce nuestro aviso de Privacidad en: <strong><%= config.empresa_sitio_web %></strong></span>
-              <% } %>
-            </td>
-          </tr>
-          <tr>
-            <td style="font-size:8pt; font-weight:bold; padding:3px 6px; border-top:none;">
-              INCLUYE UNA ENTREGA A DOMICILIO.<br>
-              TIPO DE ENVÍO: SERVICIO <%= (config.empresa_nombre || 'ESTÁNDAR').toUpperCase() %> PLATINUM
-            </td>
-          </tr>
-        </table>
+        <!-- ══ MENSAJE 1 + AVISO PRIVACIDAD ══ -->
+        <%
+          const avisoPrivacidad = config.empresa_aviso_privacidad || '';
+          const avisoVisible = avisoPrivacidad && !!guiaCfg.mostrar_sitio_web;
+          const msg1Completo = [msg1, avisoVisible ? 'Conoce nuestro aviso de Privacidad en: ' + avisoPrivacidad : ''].filter(Boolean).join(' ');
+        %>
+        <div class="msg-row <%= gc('clausula_seguro') %> <%= msg1Completo ? '' : 'empty' %>"><%= msg1Completo %></div>
 
-        <!-- ═══ BLOQUE CONDICIONES / FECHAS ═══════════════════ -->
+        <!-- ══ MENSAJE 2 ══ -->
+        <div class="msg-row <%= gc('clausula_seguro') %> <%= msg2 ? '' : 'empty' %>"><%= msg2 %></div>
+
+        <!-- ══ OBSERVACIONES / CONDICIONES / FECHAS ══ -->
         <table style="border-top:none;">
           <tr>
-            <td style="width:28%; padding:0;" class="<%= gc('retorno_documentos') %>" data-elem="retorno_documentos">
-              <span class="footer-label">Retorno de documentos:</span>
-              <div class="footer-content">&nbsp;</div>
+            <!-- Observaciones (2 filas de altura) -->
+            <td style="width:28%;padding:0;border-right:1px solid #000;" rowspan="2" class="<%= gc('observaciones') %>" data-elem="observaciones">
+              <span class="footer-label">Observaciones del cliente:</span>
+              <div class="footer-content tall">&nbsp;</div>
             </td>
-            <td style="width:32%; padding:0; border-left:1px solid #000;" class="<%= gc('condiciones_pago') %>" data-elem="condiciones_pago">
+            <!-- Condiciones de pago -->
+            <td style="width:36%;padding:0;border-right:1px solid #000;" class="<%= gc('condiciones_pago') %>" data-elem="condiciones_pago">
               <span class="footer-label">Condiciones de pago:</span>
               <div class="footer-content">
                 <span class="pago-big"><%= envio.metodo_pago === 'PUE' ? 'CONTADO' : 'CRÉDITO' %></span>
-                <div style="font-size:6pt;color:#555;margin-top:1px;"><%= envio.metodo_pago || 'PPD' %> – <%= envio.metodo_pago === 'PUE' ? 'Pago en una Sola Exhibición' : 'Pago en Parcialidades o Diferido' %></div>
               </div>
             </td>
-            <td style="width:40%; padding:0; border-left:1px solid #000;" class="<%= gc('fecha_emision') %>" data-elem="fecha_emision">
+            <!-- Fecha de emisión -->
+            <td style="width:36%;padding:0;" class="<%= gc('fecha_emision') %>" data-elem="fecha_emision">
               <span class="footer-label">Fecha de emisión:</span>
-              <div class="footer-content" style="line-height:1.6;">
+              <div class="footer-content">
                 <strong><%= fechaEmision %></strong><br>
                 Hora: <%= horaEmision %><br>
-                Documento: <%= envio.creador_nombre || '-' %>
+                Documento: -
               </div>
             </td>
           </tr>
           <tr>
-            <td style="width:28%; padding:0; border-top:1px solid #000;" class="<%= gc('observaciones') %>" data-elem="observaciones">
-              <span class="footer-label">Observaciones del cliente:</span>
-              <div class="footer-content medium">&nbsp;</div>
-            </td>
-            <td style="width:32%; padding:0; border-left:1px solid #000; border-top:1px solid #000;" class="<%= gc('fecha_entrega') %>" data-elem="fecha_entrega">
+            <!-- Fecha estimada de entrega -->
+            <td style="width:36%;padding:0;border-top:1px solid #000;border-right:1px solid #000;" class="<%= gc('fecha_entrega') %>" data-elem="fecha_entrega">
               <span class="footer-label">Fecha estimada de entrega:</span>
-              <div class="footer-content medium">
-                <strong><%= fechaEntrega %></strong>
+              <div class="footer-content">
+                <span class="fecha-big"><%= fechaEntrega %></span>
               </div>
             </td>
-            <td style="width:40%; padding:0; border-left:1px solid #000; border-top:1px solid #000;" class="<%= gc('referencia_cliente') %>" data-elem="referencia_cliente">
+            <!-- Referencia del cliente -->
+            <td style="width:36%;padding:0;border-top:1px solid #000;" class="<%= gc('referencia_cliente') %>" data-elem="referencia_cliente">
               <span class="footer-label">Referencia del cliente:</span>
-              <div class="footer-content medium"><%= envio.referencia_cliente || '' %></div>
+              <div class="footer-content"><%= envio.referencia_cliente || '' %></div>
             </td>
           </tr>
         </table>
 
-        <!-- ═══ RECIBIDO / INCIDENCIAS ════════════════════════ -->
-        <table style="border-top:none;">
-          <tr class="<%= gc('recibido_por') %>" data-elem="recibido_por">
-            <td style="width:55%; padding:0;">
-              <span class="footer-label">Recibido por:</span>
-              <div class="footer-content tall">
-                Nombre completo: ____________________________________________<br>
-                <br><br>
-                Firma: __________________________ &nbsp;&nbsp;&nbsp; Fecha: _________________
-              </div>
+        <!-- ══ RETORNO DE DOCUMENTOS ══ -->
+        <table style="border-top:none;" class="<%= gc('retorno_documentos') %>" data-elem="retorno_documentos">
+          <tr>
+            <td style="padding:0;">
+              <span class="footer-label">Retorno de documentos:</span>
+              <div class="footer-content">&nbsp;</div>
             </td>
-            <td style="width:45%; padding:0; border-left:1px solid #000;">
-              <span class="footer-label">Incidencias presentadas en la mercancía:</span>
+          </tr>
+        </table>
+
+        <!-- ══ OPERADOR QUE ENTREGÓ ══ -->
+        <table style="border-top:none;" class="<%= gc('operador') %>" data-elem="operador">
+          <tr>
+            <td style="padding:0;">
+              <span class="footer-label">Operador que entregó:</span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
           </tr>
-          <tr class="<%= gc('operador') %>" data-elem="operador">
-            <td style="width:55%; padding:0; border-top:1px solid #000;">
-              <span class="footer-label">Operador que entregó:</span>
-              <div class="footer-content medium">&nbsp;</div>
-            </td>
-            <td style="width:45%; padding:0; border-left:1px solid #000; border-top:1px solid #000;">
-              <span class="footer-label">Comentarios:</span>
-              <div class="footer-content medium">&nbsp;</div>
+        </table>
+
+        <!-- ══ RECIBIDO POR ══ -->
+        <table style="border-top:none;" class="<%= gc('recibido_por') %>" data-elem="recibido_por">
+          <tr>
+            <td style="padding:0;">
+              <span class="footer-label">Recibido por: (Nombre, firma y sello)</span>
+              <div class="footer-content tall">&nbsp;</div>
             </td>
           </tr>
         </table>
 
-        <!-- ═══ FIRMA FINAL ════════════════════════════════════ -->
-        <table style="border-top:none;" class="<%= gc('firma_final') %>" data-elem="firma_final">
-          <tr>
-            <td style="width:40%; padding:5px 6px; border-right:1px solid #000; font-size:7.5pt; min-height:55px;">
-              <strong>Nombre completo:</strong><br><br><br>
-              ___________________________________________
-            </td>
-            <td style="width:30%; padding:5px 6px; text-align:center; border-right:1px solid #000; font-size:6.5pt;">
-              <% if (config.empresa_logo_url) { %>
-                <img src="<%= config.empresa_logo_url %>" style="max-height:28px;max-width:80px;object-fit:contain;" alt="">
-              <% } %>
-              <br>
-              <%= config.empresa_nombre || '' %>
-              <% if (config.empresa_rfc) { %><br>RFC: <%= config.empresa_rfc %><% } %>
-              <% if (config.empresa_direccion) { %><br><%= config.empresa_direccion %><% } %>
-            </td>
-            <td style="width:30%; padding:5px 6px; font-size:7.5pt;">
-              <strong>Firma:</strong><br><br><br>
-              ___________________________________________
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3" style="border-top:1px solid #000; padding:3px 6px; text-align:center; font-size:7.5pt; font-weight:bold;">
-              REMITENTE ACEPTA CONDICIONES DEL CONTRATO
-            </td>
-          </tr>
-        </table>
+        <!-- ══ MENSAJE 3 ══ -->
+        <div class="msg-row <%= gc('firma_final') %> <%= msg3 ? '' : 'empty' %>"><%= msg3 %></div>
 
-        <!-- ═══ PIE ═══════════════════════════════════════════ -->
-        <div class="permisos-row <%= gc('pie_datos') %>" data-elem="pie_datos">
+        <!-- ══ PIE ══ -->
+        <div class="pie-datos <%= gc('pie_datos') %>" data-elem="pie_datos">
           <strong>MERCANCÍA TRANSPORTADA SEGÚN ESTADO:</strong> <%= (estadoLabel[envio.estado_actual] || envio.estado_actual || '-').toUpperCase() %>
           &nbsp;&nbsp;&nbsp;
           <strong>TRACKING:</strong> <%= envio.numero_tracking %>
@@ -593,172 +529,158 @@
           &nbsp;&nbsp;&nbsp;
           <strong>DESTINO:</strong> <%= destinoAlias || envio.destino || '-' %>
         </div>
-        <div class="disclaimer <%= gc('disclaimer') %>" data-elem="disclaimer">
-          ESTE DOCUMENTO NO ES UN COMPROBANTE FISCAL.<br>
-          Generado por el sistema de tracking el <%= fechaEmision %>.
-        </div>
+        <!-- ══ MENSAJE 4 (al final del documento, editable desde template) ══ -->
+        <div class="msg-row <%= gc('disclaimer') %> <%= msg4 ? '' : 'empty' %>"><%= msg4 %></div>
 
       </div><!-- /page -->
     </div><!-- /guia-canvas -->
   </div><!-- /guia-area -->
 
-  <!-- ── Panel de toggles ──────────────────────────────────── -->
+  <!-- ── Panel de toggles ── -->
   <div class="panel-guia">
     <div class="tpl-panel">
-    <div class="tpl-panel-hdr">📄 Elementos de la Guía</div>
+      <div class="tpl-panel-hdr">Elementos de la Guía</div>
 
-    <%
-      function panelGuiaRow(key, icon, label, showVal, isObl) {
-        return { key, icon, label, checked: showVal, disabled: isObl, isObl };
-      }
-      const panelEncabezado = [
-        panelGuiaRow('logo',       '🖼️', 'Logo',             g.mostrar_logo,       g.obligatorio_logo),
-        panelGuiaRow('rfc',        '🪪', 'RFC',               g.mostrar_rfc,        g.obligatorio_rfc),
-        panelGuiaRow('telefono',   '📞', 'Teléfonos',        g.mostrar_telefono,   g.obligatorio_telefono),
-        panelGuiaRow('sitio_web',  '🌐', 'Sitio web',        g.mostrar_sitio_web,  g.obligatorio_sitio_web),
-        panelGuiaRow('barcode',    '▤',  'Código de barras', g.mostrar_barcode,    g.obligatorio_barcode),
-      ];
-      const panelSecciones = [
-        panelGuiaRow('seccion_remitente',    '📦', 'Remitente',     g.mostrar_seccion_remitente,    g.obligatorio_seccion_remitente),
-        panelGuiaRow('seccion_facturar',     '🧾', 'Facturar a',   g.mostrar_seccion_facturar,     g.obligatorio_seccion_facturar),
-        panelGuiaRow('seccion_destinatario', '📍', 'Destinatario', g.mostrar_seccion_destinatario, g.obligatorio_seccion_destinatario),
-        panelGuiaRow('clausula_seguro',      '🛡️', 'Cláusula',     g.mostrar_clausula_seguro,      g.obligatorio_clausula_seguro),
-      ];
-      const panelCondiciones = [
-        panelGuiaRow('retorno_documentos', '↩️', 'Retorno docs.',  g.mostrar_retorno_documentos, g.obligatorio_retorno_documentos),
-        panelGuiaRow('condiciones_pago',   '💳', 'Cond. de pago', g.mostrar_condiciones_pago,   g.obligatorio_condiciones_pago),
-        panelGuiaRow('fecha_emision',      '📅', 'Fecha emisión', g.mostrar_fecha_emision,      g.obligatorio_fecha_emision),
-        panelGuiaRow('observaciones',      '📝', 'Observaciones', g.mostrar_observaciones,      g.obligatorio_observaciones),
-        panelGuiaRow('fecha_entrega',      '🗓️', 'Fecha entrega', g.mostrar_fecha_entrega,      g.obligatorio_fecha_entrega),
-        panelGuiaRow('referencia_cliente', '🔖', 'Referencia',    g.mostrar_referencia_cliente, g.obligatorio_referencia_cliente),
-      ];
-      const panelEntrega = [
-        panelGuiaRow('recibido_por', '✍️', 'Recibido por', g.mostrar_recibido_por, g.obligatorio_recibido_por),
-        panelGuiaRow('operador',     '🚛', 'Operador',     g.mostrar_operador,     g.obligatorio_operador),
-        panelGuiaRow('firma_final',  '📋', 'Firma final',  g.mostrar_firma_final,  g.obligatorio_firma_final),
-      ];
-      const panelPie = [
-        panelGuiaRow('pie_datos',  '📊', 'Datos/Estado', g.mostrar_pie_datos,  g.obligatorio_pie_datos),
-        panelGuiaRow('disclaimer', '⚠️', 'Aviso fiscal', g.mostrar_disclaimer, g.obligatorio_disclaimer),
-      ];
-      const panelColumnas = [
-        panelGuiaRow('col_volumen',        '📐', 'Volumen',        g.mostrar_col_volumen,        g.obligatorio_col_volumen),
-        panelGuiaRow('col_peso_facturado', '⚖️', 'Peso facturado', g.mostrar_col_peso_facturado, g.obligatorio_col_peso_facturado),
-        panelGuiaRow('col_servicios',      '🔧', 'Servicios',      g.mostrar_col_servicios,      g.obligatorio_col_servicios),
-        panelGuiaRow('col_importe',        '💰', 'Importe',        g.mostrar_col_importe,        g.obligatorio_col_importe),
-      ];
+      <%
+        function panelGuiaRow(key, icon, label, showVal, isObl) {
+          return { key, icon, label, checked: !!showVal, disabled: !!isObl, isObl: !!isObl };
+        }
+        const panelEncabezado = [
+          panelGuiaRow('logo',      '🖼️', 'Logo',              g.mostrar_logo,     g.obligatorio_logo),
+          panelGuiaRow('rfc',       '🪪',  'RFC',               g.mostrar_rfc,      g.obligatorio_rfc),
+          panelGuiaRow('telefono',  '📞', 'Teléfonos',         g.mostrar_telefono, g.obligatorio_telefono),
+          panelGuiaRow('sitio_web', '🌐', 'Aviso de Privacidad',g.mostrar_sitio_web,g.obligatorio_sitio_web),
+          panelGuiaRow('barcode',   '▤',  'Código de barras',  g.mostrar_barcode,  g.obligatorio_barcode),
+        ];
+        const panelSecciones = [
+          panelGuiaRow('seccion_remitente',    '📦', 'Remitente',          g.mostrar_seccion_remitente,    g.obligatorio_seccion_remitente),
+          panelGuiaRow('remitente_nombre',     ' ↳', '  Nombre',           g.mostrar_remitente_nombre,     g.obligatorio_remitente_nombre),
+          panelGuiaRow('remitente_direccion',  ' ↳', '  Dirección',        g.mostrar_remitente_direccion,  g.obligatorio_remitente_direccion),
+          panelGuiaRow('remitente_telefono',   ' ↳', '  Teléfono',         g.mostrar_remitente_telefono,   g.obligatorio_remitente_telefono),
+          panelGuiaRow('seccion_facturar',     '🧾', 'Facturar a',         g.mostrar_seccion_facturar,     g.obligatorio_seccion_facturar),
+          panelGuiaRow('facturar_nombre',      ' ↳', '  Nombre',           g.mostrar_facturar_nombre,      g.obligatorio_facturar_nombre),
+          panelGuiaRow('facturar_direccion',   ' ↳', '  Dirección',        g.mostrar_facturar_direccion,   g.obligatorio_facturar_direccion),
+          panelGuiaRow('facturar_contacto',    ' ↳', '  Contacto (Attn)',  g.mostrar_facturar_contacto,    g.obligatorio_facturar_contacto),
+          panelGuiaRow('facturar_telefono',    ' ↳', '  Teléfono',         g.mostrar_facturar_telefono,    g.obligatorio_facturar_telefono),
+          panelGuiaRow('facturar_email',       ' ↳', '  Email',            g.mostrar_facturar_email,       g.obligatorio_facturar_email),
+          panelGuiaRow('facturar_rfc',         ' ↳', '  RFC',              g.mostrar_facturar_rfc,         g.obligatorio_facturar_rfc),
+          panelGuiaRow('seccion_destinatario', '📍', 'Destinatario',       g.mostrar_seccion_destinatario, g.obligatorio_seccion_destinatario),
+          panelGuiaRow('destinatario_nombre',  ' ↳', '  Nombre',           g.mostrar_destinatario_nombre,  g.obligatorio_destinatario_nombre),
+          panelGuiaRow('destinatario_direccion',' ↳','  Dirección',         g.mostrar_destinatario_direccion,g.obligatorio_destinatario_direccion),
+          panelGuiaRow('clausula_seguro',      '🛡️', 'Cláusula seguro',    g.mostrar_clausula_seguro,      g.obligatorio_clausula_seguro),
+        ];
+        const panelCondiciones = [
+          panelGuiaRow('observaciones',      '📝', 'Observaciones',    g.mostrar_observaciones,      g.obligatorio_observaciones),
+          panelGuiaRow('condiciones_pago',   '💳', 'Cond. de pago',   g.mostrar_condiciones_pago,   g.obligatorio_condiciones_pago),
+          panelGuiaRow('fecha_emision',      '📅', 'Fecha emisión',   g.mostrar_fecha_emision,      g.obligatorio_fecha_emision),
+          panelGuiaRow('fecha_entrega',      '🗓️', 'Fecha entrega',    g.mostrar_fecha_entrega,      g.obligatorio_fecha_entrega),
+          panelGuiaRow('referencia_cliente', '🔖', 'Referencia',      g.mostrar_referencia_cliente, g.obligatorio_referencia_cliente),
+          panelGuiaRow('retorno_documentos', '↩️', 'Retorno docs.',    g.mostrar_retorno_documentos, g.obligatorio_retorno_documentos),
+          panelGuiaRow('operador',           '🚛', 'Operador',        g.mostrar_operador,           g.obligatorio_operador),
+          panelGuiaRow('recibido_por',       '✍️',  'Recibido por',    g.mostrar_recibido_por,       g.obligatorio_recibido_por),
+          panelGuiaRow('firma_final',        '📋', 'Condiciones',     g.mostrar_firma_final,        g.obligatorio_firma_final),
+        ];
+        const panelColumnas = [
+          panelGuiaRow('col_volumen',        '📐', 'Volumen',          g.mostrar_col_volumen,        g.obligatorio_col_volumen),
+          panelGuiaRow('col_peso_facturado', '⚖️', 'Peso Facturado',   g.mostrar_col_peso_facturado, g.obligatorio_col_peso_facturado),
+          panelGuiaRow('col_servicios',      '🔧', 'Servicios',        g.mostrar_col_servicios,      g.obligatorio_col_servicios),
+          panelGuiaRow('col_importe',        '💰', 'Importe',          g.mostrar_col_importe,        g.obligatorio_col_importe),
+        ];
+        const panelPie = [
+          panelGuiaRow('pie_datos',  '📊', 'Datos/Estado', g.mostrar_pie_datos,  g.obligatorio_pie_datos),
+          panelGuiaRow('disclaimer', '⚠️', 'Aviso fiscal', g.mostrar_disclaimer, g.obligatorio_disclaimer),
+        ];
 
-      function renderPanelSection(rows) {
-        let html = '';
-        rows.forEach(function(r) {
-          html += '<div class="tpl-row">';
-          html += '<span class="tpl-row-lbl">' + r.icon + ' ' + r.label;
-          if (r.isObl) html += '<span class="tpl-lock">FIJO</span>';
-          html += '</span>';
-          html += '<label class="tpl-sw">';
-          html += '<input type="checkbox" onchange="toggleElem(\'' + r.key + '\',this.checked)"';
-          if (r.checked) html += ' checked';
-          if (r.disabled) html += ' disabled';
-          html += '><span class="tpl-sl"></span></label>';
-          html += '</div>';
-        });
-        return html;
-      }
-    %>
+        function renderPanelSection(rows) {
+          let html = '';
+          rows.forEach(function(r) {
+            html += '<div class="tpl-row">';
+            html += '<span class="tpl-row-lbl">' + r.icon + ' ' + r.label;
+            if (r.isObl) html += '<span class="tpl-lock">FIJO</span>';
+            html += '</span>';
+            html += '<label class="tpl-sw"><input type="checkbox" onchange="toggleElem(\'' + r.key + '\',this.checked)"';
+            if (r.checked) html += ' checked';
+            if (r.disabled) html += ' disabled';
+            html += '><span class="tpl-sl"></span></label></div>';
+          });
+          return html;
+        }
+      %>
 
-    <p class="tpl-section">Encabezado</p>
-    <%- renderPanelSection(panelEncabezado) %>
+      <p class="tpl-section">Encabezado</p>
+      <%- renderPanelSection(panelEncabezado) %>
 
-    <p class="tpl-section">Secciones</p>
-    <%- renderPanelSection(panelSecciones) %>
+      <p class="tpl-section">Secciones</p>
+      <%- renderPanelSection(panelSecciones) %>
 
-    <p class="tpl-section">Condiciones / Fechas</p>
-    <%- renderPanelSection(panelCondiciones) %>
+      <p class="tpl-section">Condiciones / Fechas</p>
+      <%- renderPanelSection(panelCondiciones) %>
 
-    <p class="tpl-section">Entrega / Firma</p>
-    <%- renderPanelSection(panelEntrega) %>
+      <p class="tpl-section">Columnas tabla</p>
+      <%- renderPanelSection(panelColumnas) %>
 
-    <p class="tpl-section">Pie del documento</p>
-    <%- renderPanelSection(panelPie) %>
+      <p class="tpl-section">Pie del documento</p>
+      <%- renderPanelSection(panelPie) %>
 
-    <p class="tpl-section">Columnas tabla</p>
-    <%- renderPanelSection(panelColumnas) %>
-
-    <p class="tpl-nota">Los campos marcados como <strong>FIJO</strong> siempre se imprimirán.</p>
-    </div><!-- /tpl-panel -->
-  </div><!-- /panel-guia -->
+      <p class="tpl-nota">El título, descripción y mensajes se configuran en <strong>Configuración → Guía Expedida</strong>, dentro de cada template.</p>
+    </div>
+  </div>
 
 </div><!-- /page-layout -->
 
-<!-- ── Barra de zoom ──────────────────────────────────────── -->
+<!-- ── Barra de zoom ── -->
 <div class="zoom-bar">
-  <button class="zoom-btn" onclick="changeZoom(-0.1)" title="Reducir">−</button>
+  <button class="zoom-btn" onclick="changeZoom(-0.1)">−</button>
   <input type="range" id="zoom-slider" class="zoom-slider" min="30" max="200" value="75" step="5" oninput="setZoom(this.value/100)">
-  <button class="zoom-btn" onclick="changeZoom(0.1)" title="Ampliar">+</button>
+  <button class="zoom-btn" onclick="changeZoom(0.1)">+</button>
   <span class="zoom-pct" id="zoom-pct">75%</span>
-  <button class="zoom-reset" onclick="setZoom(0.75)" title="Restablecer">↺ Reset</button>
+  <button class="zoom-reset" onclick="setZoom(0.75)">↺</button>
 </div>
 
 <script>
   JsBarcode("#barcode", "<%= envio.numero_tracking %>", {
-    format: "CODE128",
-    width: 1.5,
-    height: 55,
-    displayValue: false,
-    margin: 2
+    format: "CODE128", width: 1.5, height: 50, displayValue: false, margin: 2
   });
 
-  // ── ZOOM ──────────────────────────────────────────────────
   var _zoom = 0.75;
-
   function setZoom(v) {
     _zoom = Math.min(2.0, Math.max(0.3, Math.round(v * 20) / 20));
     document.getElementById('guia-canvas').style.zoom = _zoom;
     document.getElementById('zoom-slider').value = Math.round(_zoom * 100);
     document.getElementById('zoom-pct').textContent = Math.round(_zoom * 100) + '%';
   }
-  function changeZoom(delta) { setZoom(_zoom + delta); }
+  function changeZoom(d) { setZoom(_zoom + d); }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    setZoom(0.75);
-
-    // Scroll → zoom
-    var guiaArea = document.getElementById('guia-area');
-    guiaArea.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      changeZoom(e.deltaY < 0 ? 0.05 : -0.05);
-    }, { passive: false });
-
-    // Pan (drag)
-    var _isPanning = false;
-    var _panStartX, _panStartY, _panScrollX, _panScrollY;
-
-    guiaArea.addEventListener('mousedown', function(e) {
-      if (e.button !== 0) return;
-      _isPanning = true;
-      _panStartX  = e.clientX;
-      _panStartY  = e.clientY;
-      _panScrollX = guiaArea.scrollLeft;
-      _panScrollY = guiaArea.scrollTop;
-      guiaArea.classList.add('panning');
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', function(e) {
-      if (!_isPanning) return;
-      guiaArea.scrollLeft = _panScrollX - (e.clientX - _panStartX);
-      guiaArea.scrollTop  = _panScrollY - (e.clientY - _panStartY);
-    });
-    document.addEventListener('mouseup', function() {
-      if (_isPanning) { _isPanning = false; guiaArea.classList.remove('panning'); }
-    });
-  });
-
-  // ── TOGGLE ELEMENTOS ──────────────────────────────────────
   function toggleElem(key, visible) {
     document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {
       el.classList.toggle('guia-hidden', !visible);
     });
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setZoom(0.75);
+    var area = document.getElementById('guia-area');
+    area.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      changeZoom(e.deltaY < 0 ? 0.05 : -0.05);
+    }, { passive: false });
+
+    var _pan = false, _px, _py, _sx, _sy;
+    area.addEventListener('mousedown', function(e) {
+      if (e.button !== 0) return;
+      _pan = true; _px = e.clientX; _py = e.clientY;
+      _sx = area.scrollLeft; _sy = area.scrollTop;
+      area.classList.add('panning'); e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!_pan) return;
+      area.scrollLeft = _sx - (e.clientX - _px);
+      area.scrollTop  = _sy - (e.clientY - _py);
+    });
+    document.addEventListener('mouseup', function() {
+      if (_pan) { _pan = false; area.classList.remove('panning'); }
+    });
+  });
 </script>
 
 </body>

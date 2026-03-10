@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-03-06
+-- Última actualización: 2026-03-10
 -- Motor: MySQL 8+ / MariaDB 10.5+
 -- ============================================================
 
@@ -148,6 +148,41 @@ CREATE TABLE `guia_templates` (
   `obligatorio_col_peso_facturado`  TINYINT(1)   DEFAULT 0,
   `obligatorio_col_servicios`       TINYINT(1)   DEFAULT 0,
   `obligatorio_col_importe`         TINYINT(1)   DEFAULT 0,
+  -- Visibilidad — sub-campos Remitente
+  `mostrar_remitente_nombre`        TINYINT(1)   DEFAULT 1,
+  `mostrar_remitente_direccion`     TINYINT(1)   DEFAULT 1,
+  `mostrar_remitente_telefono`      TINYINT(1)   DEFAULT 1,
+  -- Visibilidad — sub-campos Facturar a
+  `mostrar_facturar_nombre`         TINYINT(1)   DEFAULT 1,
+  `mostrar_facturar_direccion`      TINYINT(1)   DEFAULT 1,
+  `mostrar_facturar_contacto`       TINYINT(1)   DEFAULT 1,
+  `mostrar_facturar_telefono`       TINYINT(1)   DEFAULT 1,
+  `mostrar_facturar_email`          TINYINT(1)   DEFAULT 1,
+  `mostrar_facturar_rfc`            TINYINT(1)   DEFAULT 1,
+  -- Visibilidad — sub-campos Destinatario
+  `mostrar_destinatario_nombre`     TINYINT(1)   DEFAULT 1,
+  `mostrar_destinatario_direccion`  TINYINT(1)   DEFAULT 1,
+  -- Obligatorio — sub-campos Remitente
+  `obligatorio_remitente_nombre`    TINYINT(1)   DEFAULT 0,
+  `obligatorio_remitente_direccion` TINYINT(1)   DEFAULT 0,
+  `obligatorio_remitente_telefono`  TINYINT(1)   DEFAULT 0,
+  -- Obligatorio — sub-campos Facturar a
+  `obligatorio_facturar_nombre`     TINYINT(1)   DEFAULT 0,
+  `obligatorio_facturar_direccion`  TINYINT(1)   DEFAULT 0,
+  `obligatorio_facturar_contacto`   TINYINT(1)   DEFAULT 0,
+  `obligatorio_facturar_telefono`   TINYINT(1)   DEFAULT 0,
+  `obligatorio_facturar_email`      TINYINT(1)   DEFAULT 0,
+  `obligatorio_facturar_rfc`        TINYINT(1)   DEFAULT 0,
+  -- Obligatorio — sub-campos Destinatario
+  `obligatorio_destinatario_nombre`    TINYINT(1) DEFAULT 0,
+  `obligatorio_destinatario_direccion` TINYINT(1) DEFAULT 0,
+  -- Textos editables por template
+  `descripcion_servicio`            VARCHAR(200) NULL COMMENT 'Subtítulo en encabezado (ej: Servicio de transportes de Carga)',
+  `titulo_guia`                     VARCHAR(100) NULL COMMENT 'Título principal (ej: GUÍA EXPEDIDA, ENVÍO FORÁNEO, ENVÍO NACIONAL)',
+  `mensaje_1`                       TEXT         NULL COMMENT 'Mensaje cláusula 1 (después de tabla de carga)',
+  `mensaje_2`                       TEXT         NULL COMMENT 'Mensaje cláusula 2 (después de cláusula 1)',
+  `mensaje_3`                       TEXT         NULL COMMENT 'Condiciones (antes del pie de página)',
+  `mensaje_4`                       TEXT         NULL COMMENT 'Mensaje al final del documento (después del disclaimer)',
   `creado_por`                      INT          NULL,
   `creado_en`                       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -384,4 +419,4 @@ ALTER TABLE `usuarios`
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-03-06
+-- Schema actualizado: 2026-03-10
