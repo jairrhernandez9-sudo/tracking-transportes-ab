@@ -32,6 +32,7 @@ CREATE TABLE `usuarios` (
   `pagina_inicio`    VARCHAR(50)   NOT NULL DEFAULT 'dashboard',
   `ultimo_cliente_id` INT          DEFAULT NULL,
   `alias`            VARCHAR(80)   DEFAULT NULL COMMENT 'Nombre público / cargo mostrado al cliente. Si NULL se usa el nombre real.',
+  `ultimo_lugar_expedicion` VARCHAR(200) DEFAULT NULL COMMENT 'Último lugar de expedición usado al imprimir la Guía Expedida',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -72,6 +73,17 @@ CREATE TABLE `etiqueta_templates` (
   `obligatorio_qr`                  TINYINT(1)   NOT NULL DEFAULT 0,
   `obligatorio_ruta`                TINYINT(1)   NOT NULL DEFAULT 0,
   `obligatorio_descripcion`         TINYINT(1)   NOT NULL DEFAULT 0,
+  -- Visibilidad / Obligatorio — campos Destinatario en etiqueta
+  `mostrar_dest_nombre`             TINYINT(1)   NOT NULL DEFAULT 1,
+  `mostrar_dest_direccion`          TINYINT(1)   NOT NULL DEFAULT 1,
+  `mostrar_dest_referencia`         TINYINT(1)   NOT NULL DEFAULT 1,
+  `mostrar_dest_contacto`           TINYINT(1)   NOT NULL DEFAULT 1,
+  `mostrar_dest_telefono`           TINYINT(1)   NOT NULL DEFAULT 1,
+  `obligatorio_dest_nombre`         TINYINT(1)   NOT NULL DEFAULT 0,
+  `obligatorio_dest_direccion`      TINYINT(1)   NOT NULL DEFAULT 0,
+  `obligatorio_dest_referencia`     TINYINT(1)   NOT NULL DEFAULT 0,
+  `obligatorio_dest_contacto`       TINYINT(1)   NOT NULL DEFAULT 0,
+  `obligatorio_dest_telefono`       TINYINT(1)   NOT NULL DEFAULT 0,
   `creado_por`                      INT          NULL,
   `created_at`                      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -421,4 +433,4 @@ ALTER TABLE `usuarios`
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-03-10
+-- Schema actualizado: 2026-03-11

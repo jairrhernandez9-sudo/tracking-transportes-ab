@@ -254,10 +254,22 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
     );
 
     const [configs] = await db.query(
-      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url','empresa_sitio_web','empresa_aviso_privacidad')"
+      "SELECT clave, valor FROM configuracion_sistema WHERE clave IN ('empresa_nombre','empresa_rfc','empresa_telefono','empresa_telefono_adicional','empresa_direccion','empresa_logo_url','empresa_sitio_web','empresa_aviso_privacidad','lugares_expedicion')"
     );
     const config = {};
     configs.forEach(c => { config[c.clave] = c.valor; });
+
+    // Lugares de expedición y último usado por el usuario
+    const lugaresExpedicion = (config.lugares_expedicion || '')
+      .split('\n').map(l => l.trim()).filter(Boolean);
+    const [[usuarioRow]] = await db.query(
+      'SELECT ultimo_lugar_expedicion FROM usuarios WHERE id = ?', [req.session.userId]
+    );
+    const lugarGuardado = usuarioRow?.ultimo_lugar_expedicion || '';
+    // Usar guardado si sigue en la lista; si solo hay 1 opción, auto-seleccionar; si no, vacío
+    const lugarExpedicion = lugaresExpedicion.includes(lugarGuardado)
+      ? lugarGuardado
+      : (lugaresExpedicion.length === 1 ? lugaresExpedicion[0] : '');
 
     // Cargar template de guía asignado al cliente
     const guiaCfgDefaults = {
@@ -281,7 +293,9 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       mensaje_1: null,
       mensaje_2: null,
       mensaje_3: null,
-      mensaje_4: null
+      mensaje_4: null,
+      etiqueta_col_descripcion: null,
+      etiqueta_operador: null
     };
     let guiaCfg = { ...guiaCfgDefaults };
     if (envio.cliente_id) {
@@ -290,7 +304,7 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
         const [[tplGuia]] = await db.query('SELECT * FROM guia_templates WHERE id = ?', [clienteGuia.template_guia_id]);
         if (tplGuia) {
           Object.keys(guiaCfgDefaults).forEach(k => {
-            if (k === 'descripcion_servicio' || k === 'titulo_guia' || k.startsWith('mensaje_')) {
+            if (k === 'descripcion_servicio' || k === 'titulo_guia' || k.startsWith('mensaje_') || k === 'etiqueta_col_descripcion' || k === 'etiqueta_operador') {
               guiaCfg[k] = tplGuia[k] || null;
             } else {
               guiaCfg[k] = !!tplGuia[k];
@@ -332,11 +346,24 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       guiaCfg,
       origenAlias,
       destinoAlias,
-      user: { rol: req.session.userRole }
+      lugaresExpedicion,
+      lugarExpedicion,
+      user: { rol: req.session.userRole, id: req.session.userId }
     });
   } catch (error) {
     console.error('Error al generar guía Almex:', error);
     res.status(500).send('Error al generar la guía');
+  }
+});
+
+// Guardar último lugar de expedición del usuario
+router.post('/api/lugar-expedicion', isAuthenticated, async (req, res) => {
+  try {
+    const { lugar } = req.body;
+    await db.query('UPDATE usuarios SET ultimo_lugar_expedicion = ? WHERE id = ?', [lugar || null, req.session.userId]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false });
   }
 });
 

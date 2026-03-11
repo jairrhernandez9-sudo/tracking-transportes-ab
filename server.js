@@ -41,6 +41,9 @@ db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_rfc TINYINT
 db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
 db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
 
+// Migración: último lugar de expedición por usuario
+db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_lugar_expedicion VARCHAR(200) NULL`).catch(() => {});
+
 // Migración: etiquetas personalizables en guia_templates
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_col_descripcion VARCHAR(200) NULL`).catch(() => {});
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_operador VARCHAR(200) NULL`).catch(() => {});

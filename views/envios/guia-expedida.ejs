@@ -228,12 +228,48 @@
     <span class="toolbar-title">Guía Expedida</span>
     <span class="toolbar-tracking"><%= envio.numero_tracking %></span>
   </div>
-  <button class="btn-print" onclick="window.print()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
-      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
-    </svg>
-    Imprimir / Descargar PDF
-  </button>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <% const hayLugares    = lugaresExpedicion && lugaresExpedicion.length >= 1; %>
+    <% const sinSeleccion  = hayLugares && !lugarExpedicion; %>
+    <% const sinLugares    = !hayLugares; %>
+    <% const esAdmin       = user && (user.rol === 'admin' || user.rol === 'superusuario'); %>
+    <% if (sinLugares) { %>
+      <!-- No hay lugares configurados -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <% if (esAdmin) { %>
+          <span style="color:#fbbf24;font-size:12px;font-weight:500;">⚠️ No hay lugares de expedición configurados.</span>
+          <a href="/configuracion?tab=empresa#seccion-lugares-expedicion"
+            style="padding:6px 14px;border-radius:7px;background:#fbbf24;color:#1e3a8a;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">
+            Ir a Configuración →
+          </a>
+        <% } else { %>
+          <span style="color:#fca5a5;font-size:12px;font-weight:500;">⚠️ Contacta al administrador para configurar los lugares de expedición.</span>
+        <% } %>
+      </div>
+    <% } else { %>
+    <div style="display:flex;align-items:center;gap:7px;">
+      <span style="color:rgba(255,255,255,0.65);font-size:11px;white-space:nowrap;">📍 Expedido en:</span>
+      <select id="lugar-select" onchange="cambiarLugar(this.value)"
+        style="padding:6px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);color:#fff;font-size:12px;font-weight:600;cursor:pointer;outline:none;">
+        <% if (!lugarExpedicion) { %>
+          <option value="" disabled selected style="background:#1e3a8a;color:#94a3b8;">— Selecciona un lugar —</option>
+        <% } %>
+        <% lugaresExpedicion.forEach(function(l) { %>
+          <option value="<%= l %>" <%= l === lugarExpedicion ? 'selected' : '' %> style="background:#1e3a8a;color:#fff;"><%= l %></option>
+        <% }) %>
+      </select>
+    </div>
+    <% } %>
+    <button id="btn-print" class="btn-print"
+      onclick="window.print()"
+      <%= (sinSeleccion || sinLugares) ? 'disabled' : '' %>
+      style="<%= (sinSeleccion || sinLugares) ? 'opacity:0.45;cursor:not-allowed;pointer-events:none;' : '' %>">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
+        <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      Imprimir / Descargar PDF
+    </button>
+  </div>
 </div>
 
 <div class="page-layout">
@@ -309,8 +345,8 @@
             <td class="cell-title">
               <div class="guia-servicio"><%= descripcionServicio %></div>
               <div class="guia-titulo"><%= tituloGuia %></div>
-              <% if (config.empresa_direccion) { %>
-                <div class="guia-lugar">LUGAR DE EXPEDICIÓN: <%= config.empresa_direccion.toUpperCase() %></div>
+              <% if (lugarExpedicion) { %>
+                <div class="guia-lugar" id="guia-lugar-texto">LUGAR DE EXPEDICIÓN: <%= lugarExpedicion.toUpperCase() %></div>
               <% } %>
               <div class="guia-tel <%= gc('telefono') %>" data-elem="telefono">
                 <% if (config.empresa_telefono) { %>
@@ -667,6 +703,34 @@
     document.getElementById('zoom-pct').textContent = Math.round(_zoom * 100) + '%';
   }
   function changeZoom(d) { setZoom(_zoom + d); }
+
+  function cambiarLugar(valor) {
+    if (!valor) return;
+    // Actualizar texto en el documento
+    var el = document.getElementById('guia-lugar-texto');
+    if (el) {
+      el.textContent = 'LUGAR DE EXPEDICIÓN: ' + valor.toUpperCase();
+    } else {
+      // Si no existía el elemento, crearlo en la celda del título
+      var cell = document.querySelector('.guia-titulo');
+      if (cell) {
+        var div = document.createElement('div');
+        div.id = 'guia-lugar-texto';
+        div.className = 'guia-lugar';
+        div.textContent = 'LUGAR DE EXPEDICIÓN: ' + valor.toUpperCase();
+        cell.parentNode.insertBefore(div, cell.nextSibling);
+      }
+    }
+    // Habilitar botón de imprimir
+    var btn = document.getElementById('btn-print');
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = ''; btn.style.pointerEvents = ''; }
+    // Guardar preferencia silenciosamente
+    fetch('/envios/api/lugar-expedicion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lugar: valor })
+    }).catch(function() {});
+  }
 
   function toggleElem(key, visible) {
     document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {

@@ -1233,21 +1233,53 @@
                 
                 <div class="form-group">
                   <label class="form-label">Dirección fiscal</label>
-                  <input 
-                    type="text" 
-                    name="empresa_direccion" 
-                    class="form-input" 
+                  <input
+                    type="text"
+                    name="empresa_direccion"
+                    class="form-input"
                     value="<%= config.empresa.empresa_direccion || '' %>"
                     placeholder="Calle, Número, Colonia, CP, Ciudad"
                   >
                 </div>
               </div><!-- /config-card Contacto y Ubicación -->
+
             </div><!-- /config-grid -->
+
+            <!-- ── Lugares de Expedición (full-width, fuera del grid) ── -->
+            <div class="config-card" id="seccion-lugares-expedicion" style="margin-top:20px;">
+              <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;margin-bottom:16px;">
+                <div>
+                  <h2 class="card-title">
+                    <i data-lucide="map-pin" style="width:24px;height:24px;color:#3b82f6;"></i>
+                    Lugares de Expedición
+                  </h2>
+                  <p class="card-description">Aparecen como selector al imprimir la Guía Expedida. El último usado se recuerda por usuario.</p>
+                </div>
+                <button type="button" onclick="lexp_agregar()"
+                  style="padding:8px 14px;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:0.82rem;white-space:nowrap;box-shadow:0 2px 8px rgba(59,130,246,0.3);"
+                  onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                  <i data-lucide="plus" style="width:14px;height:14px;"></i> Agregar Lugar
+                </button>
+              </div>
+
+              <!-- Lista de cards -->
+              <div id="lexp-lista" style="display:grid;gap:12px;"></div>
+
+              <!-- Estado vacío -->
+              <div id="lexp-vacio" style="display:none;padding:32px;text-align:center;color:#9ca3af;border:2px dashed #e5e7eb;border-radius:10px;">
+                <i data-lucide="map-off" style="width:32px;height:32px;margin-bottom:8px;opacity:0.5;"></i>
+                <p style="margin:0;font-size:0.9rem;">No hay lugares configurados todavía.</p>
+                <p style="margin:4px 0 0 0;font-size:0.8rem;">Agrega uno con el botón de arriba.</p>
+              </div>
+
+              <!-- Input oculto que va en el form principal -->
+              <textarea id="lugares-expedicion" name="lugares_expedicion" style="display:none;"><%= config.empresa.lugares_expedicion || '' %></textarea>
+            </div>
 
             <!-- Hidden para logo URL (actualizado por el logo upload) -->
             <input type="hidden" name="empresa_logo_url" id="empresa_logo_url_form" value="<%= config.empresa.empresa_logo_url || '' %>">
 
-            <button type="submit" class="btn-primary" style="margin-bottom: 20px;">
+            <button type="submit" class="btn-primary" style="margin-top: 24px; margin-bottom: 20px;">
               <i data-lucide="save" style="width: 18px; height: 18px;"></i>
               Guardar cambios
             </button>
@@ -2769,7 +2801,6 @@
                     ...(user.rol !== 'operador' ? [{ valor: '/dashboard', icono: 'layout-dashboard', label: 'Dashboard', desc: 'Resumen general del sistema' }] : []),
                     { valor: '/envios',              icono: 'package',          label: 'Envíos',              desc: 'Lista de todos los envíos' },
                     { valor: '/envios-retrasados',   icono: 'alert-triangle',   label: 'Envíos Retrasados',   desc: 'Envíos con retraso o alertas' },
-                    { valor: '/historial',           icono: 'history',          label: 'Historial',           desc: 'Historial de estados y eventos' },
                   ];
                 %>
 
@@ -2885,7 +2916,162 @@
         if (primerBtn) primerBtn.classList.add('active');
       }
       lucide.createIcons();
+
+      // Si hay un hash en la URL, hacer scroll al elemento después de que el tab esté activo
+      if (window.location.hash) {
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+          setTimeout(function() {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.style.outline = '2px solid #3b82f6';
+            setTimeout(function() { target.style.outline = ''; }, 2000);
+          }, 100);
+        }
+      }
     });
+  </script>
+
+  <!-- ── Lugares de Expedición Manager ── -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var _lexp = [];
+    var _textarea = document.getElementById('lugares-expedicion');
+    var _lista    = document.getElementById('lexp-lista');
+    var _vacio    = document.getElementById('lexp-vacio');
+
+    // Botón agregar del header
+    var _btnAgregar = document.querySelector('[onclick="lexp_agregar()"]');
+    if (_btnAgregar) {
+      _btnAgregar.removeAttribute('onclick');
+      _btnAgregar.addEventListener('click', function() { _modal(-1, ''); });
+    }
+
+    // Cargar valores iniciales
+    if (_textarea) {
+      _lexp = _textarea.value.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    }
+
+    function _sync() {
+      if (_textarea) _textarea.value = _lexp.join('\n');
+    }
+
+    function _render() {
+      if (!_lista) return;
+      _lista.innerHTML = '';
+
+      if (_lexp.length === 0) {
+        if (_vacio) _vacio.style.display = 'block';
+        return;
+      }
+      if (_vacio) _vacio.style.display = 'none';
+
+      _lexp.forEach(function(lugar, idx) {
+        var card = document.createElement('div');
+        card.style.cssText = 'background:white;padding:18px 20px;border-radius:12px;border:2px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;gap:12px;';
+        card.addEventListener('mouseover', function(){ card.style.borderColor='#3b82f6'; card.style.boxShadow='0 4px 16px rgba(59,130,246,0.1)'; });
+        card.addEventListener('mouseout',  function(){ card.style.borderColor='#e5e7eb'; card.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'; });
+
+        // Texto
+        var info = document.createElement('div');
+        info.style.cssText = 'display:flex;align-items:center;gap:10px;flex:1;';
+        info.innerHTML = '<span style="font-size:1.1rem;">📍</span><span style="font-size:1rem;font-weight:600;color:#1f2937;">' + _esc(lugar) + '</span>';
+
+        // Botones
+        var btns = document.createElement('div');
+        btns.style.cssText = 'display:flex;gap:8px;';
+
+        var btnEdit = document.createElement('button');
+        btnEdit.type = 'button';
+        btnEdit.innerHTML = '✏️ Editar';
+        btnEdit.style.cssText = 'padding:7px 14px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:8px;font-weight:600;font-size:0.8rem;cursor:pointer;';
+        btnEdit.addEventListener('mouseover', function(){ btnEdit.style.background='#dbeafe'; });
+        btnEdit.addEventListener('mouseout',  function(){ btnEdit.style.background='#eff6ff'; });
+        btnEdit.addEventListener('click', function() { _modal(idx, _lexp[idx]); });
+
+        var btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.innerHTML = '🗑️ Eliminar';
+        btnDel.style.cssText = 'padding:7px 14px;background:#fff1f2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;font-weight:600;font-size:0.8rem;cursor:pointer;';
+        btnDel.addEventListener('mouseover', function(){ btnDel.style.background='#fee2e2'; });
+        btnDel.addEventListener('mouseout',  function(){ btnDel.style.background='#fff1f2'; });
+        btnDel.addEventListener('click', function() {
+          if (!confirm('¿Eliminar "' + _lexp[idx] + '"?')) return;
+          _lexp.splice(idx, 1);
+          _sync();
+          _render();
+        });
+
+        btns.appendChild(btnEdit);
+        btns.appendChild(btnDel);
+        card.appendChild(info);
+        card.appendChild(btns);
+        _lista.appendChild(card);
+      });
+    }
+
+    function _esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function _modal(idx, valorActual) {
+      var esNuevo = idx === -1;
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+      var box = document.createElement('div');
+      box.style.cssText = 'background:white;border-radius:16px;padding:28px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.25);';
+      box.innerHTML = '<h3 style="margin:0 0 16px 0;font-size:1.1rem;font-weight:700;color:#111827;">' +
+        (esNuevo ? '📍 Agregar lugar de expedición' : '✏️ Editar lugar de expedición') + '</h3>';
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.value = valorActual || '';
+      input.placeholder = 'Ej: Tlalnepantla, Estado de México';
+      input.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.95rem;box-sizing:border-box;outline:none;';
+
+      var rowBtns = document.createElement('div');
+      rowBtns.style.cssText = 'display:flex;gap:10px;margin-top:20px;justify-content:flex-end;';
+
+      var btnCancelar = document.createElement('button');
+      btnCancelar.type = 'button';
+      btnCancelar.textContent = 'Cancelar';
+      btnCancelar.style.cssText = 'padding:8px 18px;border:1px solid #e5e7eb;border-radius:8px;background:white;color:#6b7280;font-weight:600;cursor:pointer;';
+
+      var btnOk = document.createElement('button');
+      btnOk.type = 'button';
+      btnOk.textContent = esNuevo ? 'Agregar' : 'Guardar';
+      btnOk.style.cssText = 'padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;';
+
+      function _cerrar() { document.body.removeChild(overlay); }
+      function _guardar() {
+        var val = input.value.trim();
+        if (!val) { input.style.borderColor='#ef4444'; input.focus(); return; }
+        if (esNuevo) { _lexp.push(val); } else { _lexp[idx] = val; }
+        _sync();
+        _cerrar();
+        _render();
+      }
+
+      btnCancelar.addEventListener('click', _cerrar);
+      btnOk.addEventListener('click', _guardar);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') _guardar();
+        if (e.key === 'Escape') _cerrar();
+      });
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) _cerrar(); });
+
+      rowBtns.appendChild(btnCancelar);
+      rowBtns.appendChild(btnOk);
+      box.appendChild(input);
+      box.appendChild(rowBtns);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      setTimeout(function() { input.focus(); input.select(); }, 50);
+    }
+
+    // Render inicial
+    _render();
+  });
   </script>
 
   <!-- ============================================ -->

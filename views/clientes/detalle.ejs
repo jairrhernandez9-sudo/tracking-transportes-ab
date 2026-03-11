@@ -1361,6 +1361,7 @@
         
         <!-- COLUMNA DERECHA -->
         <div>
+          <% if (!user || user.rol !== 'operador') { %>
           <!-- TOGGLE HABILITADO (apaga todo, incluido tracking) -->
           <div class="action-card" style="border: 2px solid <%= cliente.habilitado === 0 ? '#fecaca' : '#e5e7eb' %>;">
             <h3 class="action-title">
@@ -1414,7 +1415,8 @@
               Si se desactiva, el cliente no aparecerá en la lista de selección para crear nuevos envíos. El tracking de envíos existentes sigue funcionando.
             </p>
           </div>
-          
+          <% } %>
+
           <!-- ACCIONES RÁPIDAS -->
           <div class="action-card">
             <h3 class="action-title">

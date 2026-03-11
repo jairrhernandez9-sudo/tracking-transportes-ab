@@ -188,17 +188,18 @@ router.get('/', async (req, res) => {
 // Actualizar configuración de empresa
 router.post('/empresa', async (req, res) => {
   try {
-    const { 
-      empresa_nombre, 
-      empresa_rfc, 
-      empresa_telefono, 
-      empresa_email, 
-      empresa_direccion, 
+    const {
+      empresa_nombre,
+      empresa_rfc,
+      empresa_telefono,
+      empresa_email,
+      empresa_direccion,
       empresa_sitio_web,
       empresa_eslogan,
       empresa_telefono_adicional,
       empresa_logo_url,
-      empresa_aviso_privacidad
+      empresa_aviso_privacidad,
+      lugares_expedicion
     } = req.body;
 
     const updates = [
@@ -211,7 +212,8 @@ router.post('/empresa', async (req, res) => {
       ['empresa_eslogan', empresa_eslogan],
       ['empresa_telefono_adicional', empresa_telefono_adicional],
       ['empresa_logo_url', empresa_logo_url],
-      ['empresa_aviso_privacidad', empresa_aviso_privacidad]
+      ['empresa_aviso_privacidad', empresa_aviso_privacidad],
+      ['lugares_expedicion', lugares_expedicion]
     ];
     
     for (const [clave, valor] of updates) {
