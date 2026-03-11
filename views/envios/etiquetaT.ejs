@@ -127,8 +127,8 @@
     }
 
     .cab-logo img {
-      max-width: 90px;
-      max-height: 32px;
+      max-width: 110px;
+      max-height: 44px;
       object-fit: contain;
       filter: grayscale(100%) contrast(1.3);
       margin-bottom: 2px;
@@ -233,9 +233,22 @@
       margin-bottom: 2px;
     }
 
+    .tipo-badge {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: #111;
+      color: #fff;
+      border-radius: 20px;
+      padding: 2px 10px;
+      margin-bottom: 4px;
+    }
+
     .tracking-numero {
       font-family: 'Courier New', monospace;
-      font-size: 22px;
+      font-size: 26px;
       font-weight: 900;
       color: #000;
       letter-spacing: 2px;
@@ -299,7 +312,8 @@
       border: 2.5px solid #000;
       border-radius: 3px;
       padding: 6px 9px;
-      flex-shrink: 0;
+      flex: 1;
+      min-height: 80px;
     }
 
     .dest-label {
@@ -571,6 +585,11 @@
     const showQr                = cfg.mostrar_qr                 !== false;
     const showRuta              = cfg.mostrar_ruta               !== false;
     const showDesc              = cfg.mostrar_descripcion        !== false;
+    const showDestContacto      = cfg.mostrar_dest_contacto      !== false;
+    const showDestTelefono      = cfg.mostrar_dest_telefono      !== false;
+    const showDestNombre        = cfg.mostrar_dest_nombre        !== false;
+    const showDestDireccion     = cfg.mostrar_dest_direccion     !== false;
+    const showDestReferencia    = cfg.mostrar_dest_referencia    !== false;
     // Barra de contacto visible si al menos un dato de contacto está activo
     const showContactoBar       = showTelefono || showTelefonoAdicional || showEmail || showSitioWeb;
     const cantidadEtiquetas     = typeof cantidad !== 'undefined' ? parseInt(cantidad) : 1;
@@ -652,8 +671,8 @@
     <!-- ══ TRACKING ══ -->
     <div class="tracking-section">
       <% if (unidadActual) { %>
-        <div style="text-align:center;margin-bottom:2px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#000;">
-          <%= unidadActual.tipo %><% if (unidadActual.descripcion) { %> — <%= unidadActual.descripcion %><% } %>
+        <div style="text-align:center;margin-bottom:4px;">
+          <span class="tipo-badge"><%= unidadActual.tipo %><% if (unidadActual.descripcion) { %> — <%= unidadActual.descripcion %><% } %></span>
         </div>
       <% } %>
       <% if (envio.es_parcial || envio.es_complemento) { %>
@@ -689,8 +708,8 @@
     <!-- ══ DESTINATARIO ══ -->
     <div class="destinatario">
       <div class="dest-label">Entregar a:</div>
-      <div class="dest-empresa"><%= envio.nombre_empresa || 'Cliente Final' %></div>
-      <div class="dest-direccion">
+      <div class="dest-empresa <%= !showDestNombre ? 'etq-hidden' : '' %>" data-elem="dest-nombre"><%= envio.nombre_empresa || 'Cliente Final' %></div>
+      <div class="dest-direccion <%= !showDestDireccion ? 'etq-hidden' : '' %>" data-elem="dest-direccion">
         <% if (envio.destino_calle) { %>
           <%= envio.destino_calle %><% if (envio.destino_colonia) { %>, Col. <%= envio.destino_colonia %><% } %><br>
           CP <%= envio.destino_cp || '' %>&nbsp; <%= envio.destino_ciudad || '' %>, <%= envio.destino_estado || '' %>
@@ -698,13 +717,13 @@
           <%= envio.destino %>
         <% } %>
         <% if (envio.destino_referencia) { %>
-          <br><em style="font-size:7.5px;color:#000;">Ref: <%= envio.destino_referencia %></em>
+          <span data-elem="dest-referencia" class="<%= !showDestReferencia ? 'etq-hidden' : '' %>" style="display:block;font-size:7.5px;color:#000;">Ref: <%= envio.destino_referencia %></span>
         <% } %>
       </div>
       <% if (envio.contacto || envio.telefono) { %>
       <div class="dest-contacto">
-        <% if (envio.contacto) { %><span><%= envio.contacto %></span><% } %>
-        <% if (envio.telefono) { %><span>Tel: <%= envio.telefono %></span><% } %>
+        <% if (envio.contacto) { %><span data-elem="dest-contacto" class="<%= !showDestContacto ? 'etq-hidden' : '' %>"><%= envio.contacto %></span><% } %>
+        <% if (envio.telefono) { %><span data-elem="dest-telefono" class="<%= !showDestTelefono ? 'etq-hidden' : '' %>">Tel: <%= envio.telefono %></span><% } %>
       </div>
       <% } %>
     </div>
@@ -725,7 +744,7 @@
       </div>
       <div class="detalle-item">
         <div class="detalle-etiqueta">Ref. cliente</div>
-        <div class="detalle-valor" style="font-size:9px;"><%= envio.referencia_cliente || '—' %></div>
+        <div class="detalle-valor" style="font-size:11px;font-weight:900;line-height:1.2;"><%= envio.referencia_cliente || '—' %></div>
       </div>
     </div>
 
@@ -763,7 +782,7 @@
           <div class="descripcion-texto"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
         <% } %>
       </div>
-      <div class="qr-box <%= !showQr ? 'etq-hidden' : '' %>" data-elem="qr">
+      <div class="qr-box <%= !showQr ? 'etq-hidden' : '' %>" data-elem="qr" style="<%= !showDesc && showQr ? 'flex:1;' : '' %>">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=104x104&data=<%= encodeURIComponent(qrBase + '/tracking?numero=' + envio.numero_tracking) %>&color=000000&bgcolor=ffffff&margin=0" alt="QR Tracking">
         <div class="qr-label">Rastrear envío</div>
       </div>
@@ -820,7 +839,12 @@
           panelRow('barcode',     '▤',  'Código de barras',        showBarcode, true, !!cfg.obligatorio_barcode),
           panelRow('qr',          '◼',  'Código QR',               showQr,      true, !!cfg.obligatorio_qr),
           panelRow('ruta',        '→',  'Ruta Origen/Destino',     showRuta,    true, !!cfg.obligatorio_ruta),
-          panelRow('descripcion', '📝', 'Descripción del paquete', showDesc,    true, !!cfg.obligatorio_descripcion),
+          panelRow('descripcion',    '📝', 'Descripción del paquete',    showDesc,           true, !!cfg.obligatorio_descripcion),
+          panelRow('dest-nombre',     '🏢', 'Nombre destinatario',        showDestNombre,     true,                 !!cfg.obligatorio_dest_nombre),
+          panelRow('dest-direccion', '📍', 'Dirección destinatario',     showDestDireccion,  true,                 !!cfg.obligatorio_dest_direccion),
+          panelRow('dest-referencia','🔖', 'Referencia destino',         showDestReferencia, !!(envio.destino_referencia), !!cfg.obligatorio_dest_referencia),
+          panelRow('dest-contacto',  '👤', 'Contacto destinatario',      showDestContacto,   !!(envio.contacto),   !!cfg.obligatorio_dest_contacto),
+          panelRow('dest-telefono',  '📞', 'Teléfono destinatario',      showDestTelefono,   !!(envio.telefono),   !!cfg.obligatorio_dest_telefono),
         ];
       %>
 
@@ -888,7 +912,12 @@
         "barcode":            <%= showBarcode    ? 'true' : 'false' %>,
         "qr":                 <%= showQr        ? 'true' : 'false' %>,
         "ruta":               <%= showRuta      ? 'true' : 'false' %>,
-        "descripcion":        <%= showDesc      ? 'true' : 'false' %>
+        "descripcion":        <%= showDesc         ? 'true' : 'false' %>,
+        "dest_nombre":        <%= showDestNombre     ? 'true' : 'false' %>,
+        "dest_direccion":     <%= showDestDireccion  ? 'true' : 'false' %>,
+        "dest_referencia":    <%= showDestReferencia ? 'true' : 'false' %>,
+        "dest_contacto":      <%= showDestContacto   ? 'true' : 'false' %>,
+        "dest_telefono":      <%= showDestTelefono   ? 'true' : 'false' %>
       }
     }
   </script>
@@ -1019,10 +1048,19 @@
         document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {
           el.classList.toggle('etq-hidden', !visible);
         });
-        var anyFila = ['descripcion','qr'].some(function(k) {
-          var s = document.querySelector('[data-elem="' + k + '"]');
+        // Si desc oculta y QR visible → QR ocupa todo el ancho (centrado)
+        var descVisible = (function() {
+          var s = document.querySelector('[data-elem="descripcion"]');
           return s && !s.classList.contains('etq-hidden');
+        })();
+        var qrVisible = (function() {
+          var s = document.querySelector('[data-elem="qr"]');
+          return s && !s.classList.contains('etq-hidden');
+        })();
+        document.querySelectorAll('[data-elem="qr"]').forEach(function(el) {
+          el.style.flex = (!descVisible && qrVisible) ? '1' : '';
         });
+        var anyFila = descVisible || qrVisible;
         document.querySelectorAll('[data-elem="fila-bottom"]').forEach(function(el) {
           el.classList.toggle('etq-hidden', !anyFila);
         });

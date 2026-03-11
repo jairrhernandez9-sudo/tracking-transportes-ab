@@ -1046,19 +1046,27 @@
                 <label class="form-label required">Cliente</label>
                 <select name="cliente_id" class="form-select" required>
                   <option value="">Selecciona un cliente...</option>
+                  <%
+                    // Mostrar prefijo solo cuando hay nombres duplicados
+                    const _nombreCount = {};
+                    clientes.forEach(c => { _nombreCount[c.nombre_empresa] = (_nombreCount[c.nombre_empresa] || 0) + 1; });
+                    const clienteLabel = c => _nombreCount[c.nombre_empresa] > 1
+                      ? c.nombre_empresa + ' (' + c.prefijo_tracking + ')'
+                      : c.nombre_empresa;
+                  %>
                   <% if (ultimoClienteId && clientes.find(c => c.id == ultimoClienteId)) { %>
                   <optgroup label="⭐ Cliente reciente">
                     <% const clienteReciente = clientes.find(c => c.id == ultimoClienteId); %>
-                    <option value="<%= clienteReciente.id %>" selected><%= clienteReciente.nombre_empresa %></option>
+                    <option value="<%= clienteReciente.id %>" selected><%= clienteLabel(clienteReciente) %></option>
                   </optgroup>
                   <optgroup label="Todos los clientes">
                     <% clientes.forEach(cliente => { %>
-                      <option value="<%= cliente.id %>"><%= cliente.nombre_empresa %></option>
+                      <option value="<%= cliente.id %>"><%= clienteLabel(cliente) %></option>
                     <% }); %>
                   </optgroup>
                   <% } else { %>
                     <% clientes.forEach(cliente => { %>
-                      <option value="<%= cliente.id %>"><%= cliente.nombre_empresa %></option>
+                      <option value="<%= cliente.id %>"><%= clienteLabel(cliente) %></option>
                     <% }); %>
                   <% } %>
                 </select>

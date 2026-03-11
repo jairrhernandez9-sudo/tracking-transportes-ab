@@ -2078,7 +2078,12 @@
               { key: 'barcode',              icon: '▤',  label: 'Código de barras',         desc: 'Barcode del número de tracking',         grupo: 'envio' },
               { key: 'qr',                   icon: '◼',  label: 'Código QR',                desc: 'QR para rastreo en línea',               grupo: 'envio' },
               { key: 'ruta',                 icon: '→',  label: 'Ruta Origen / Destino',   desc: 'Barra con ciudades de salida y llegada', grupo: 'envio' },
-              { key: 'descripcion',          icon: '📝', label: 'Descripción del paquete', desc: 'Contenido declarado en el pie',          grupo: 'envio' }
+              { key: 'descripcion',          icon: '📝', label: 'Descripción del paquete', desc: 'Contenido declarado en el pie',          grupo: 'envio' },
+              { key: 'dest_nombre',          icon: '🏢', label: 'Nombre destinatario',     desc: 'Nombre/empresa en ENTREGAR A',           grupo: 'envio' },
+              { key: 'dest_direccion',       icon: '📍', label: 'Dirección destinatario',  desc: 'Dirección completa en ENTREGAR A',        grupo: 'envio' },
+              { key: 'dest_referencia',      icon: '🔖', label: 'Referencia destino',      desc: 'Ref. de entrega en ENTREGAR A',           grupo: 'envio' },
+              { key: 'dest_contacto',        icon: '👤', label: 'Contacto destinatario',   desc: 'Nombre del contacto en ENTREGAR A',      grupo: 'envio' },
+              { key: 'dest_telefono',        icon: '📞', label: 'Teléfono destinatario',   desc: 'Tel. del destinatario en ENTREGAR A',    grupo: 'envio' }
             ];
             // Template seleccionado actualmente (el que venía en ?template_id= o el primero)
             const tplId = parseInt(query.template_id) || (etiquetaTemplates.length > 0 ? etiquetaTemplates[0].id : null);
@@ -2488,6 +2493,20 @@
                           value="<%= guiaTplActivo.titulo_guia || '' %>"
                           placeholder="GUÍA EXPEDIDA"
                           oninput="document.getElementById('gprev-titulo').textContent = this.value || 'GUÍA EXPEDIDA'"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Encabezado columna descripción <span style="color:#94a3b8;font-weight:400;">(tabla de carga)</span></label>
+                        <input type="text" name="etiqueta_col_descripcion"
+                          value="<%= guiaTplActivo.etiqueta_col_descripcion || '' %>"
+                          placeholder="DESCRIPCIÓN SEGÚN REMITENTE"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Etiqueta "Operador" <span style="color:#94a3b8;font-weight:400;">(sección de firma)</span></label>
+                        <input type="text" name="etiqueta_operador"
+                          value="<%= guiaTplActivo.etiqueta_operador || '' %>"
+                          placeholder="Operador que entregó:"
                           style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
                       </div>
                     </div>

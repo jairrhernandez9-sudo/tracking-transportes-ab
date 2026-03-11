@@ -454,96 +454,65 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res
       template_guia_id,
       metodo_pago_defecto
     } = req.body;
-    
+
+    // Cargar vars necesarias para cualquier render de error
+    const [etiquetaTemplates] = await db.query('SELECT id, nombre FROM etiqueta_templates ORDER BY nombre ASC').catch(() => [[]]);
+    const [guiaTemplates]     = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
+    const [[cfgCredito]]      = await db.query("SELECT valor FROM configuracion_sistema WHERE clave = 'credito_habilitado'").catch(() => [[null]]);
+    const creditoHabilitado   = !cfgCredito || cfgCredito.valor !== 'false';
+
+    const renderError = async (errorMsg) => {
+      const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
+      return res.render('clientes/editar', {
+        title: 'Editar Cliente',
+        user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+        cliente: clientes[0],
+        etiquetaTemplates,
+        guiaTemplates,
+        creditoHabilitado,
+        error: errorMsg
+      });
+    };
+
     // Validar campos requeridos
     if (!nombre_empresa || !email) {
-      const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
-      return res.render('clientes/editar', {
-        title: 'Editar Cliente',
-        user: {
-          nombre: req.session.userName,
-          email: req.session.userEmail,
-          rol: req.session.userRole
-        },
-        cliente: clientes[0],
-        error: 'Nombre de empresa y email son obligatorios'
-      });
+      return renderError('Nombre de empresa y email son obligatorios');
     }
-    
-    // Verificar si el email ya existe (excluyendo el cliente actual)
-    const [existente] = await db.query(
-      'SELECT id FROM clientes WHERE email = ? AND id != ? AND eliminado_en IS NULL',
-      [email, id]
-    );
-    
-    if (existente.length > 0) {
-      const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
-      return res.render('clientes/editar', {
-        title: 'Editar Cliente',
-        user: {
-          nombre: req.session.userName,
-          email: req.session.userEmail,
-          rol: req.session.userRole
-        },
-        cliente: clientes[0],
-        error: 'Ya existe otro cliente con ese email'
-      });
-    }
-    
-    // ⬅️ NUEVO: Obtener cliente actual para verificar prefijo
+
+    // Obtener cliente actual para verificar prefijo
     const [clienteActual] = await db.query(
       'SELECT prefijo_tracking, ultimo_numero_tracking FROM clientes WHERE id = ?',
       [id]
     );
-    
+
     if (clienteActual.length === 0) {
       return res.redirect('/clientes?error=cliente_no_encontrado');
     }
-    
+
     let prefijoFinal = clienteActual[0].prefijo_tracking;
-    
+
     // Si se proporcionó un nuevo prefijo
     if (prefijo_tracking_manual && prefijo_tracking_manual.trim() !== '') {
       const nuevoPrefijoUpper = prefijo_tracking_manual.toUpperCase();
-      
+
       // Solo validar si cambió
       if (nuevoPrefijoUpper !== clienteActual[0].prefijo_tracking) {
         const validacion = validarFormatoPrefijo(nuevoPrefijoUpper);
-        
+
         if (!validacion.valido) {
-          const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
-          return res.render('clientes/editar', {
-            title: 'Editar Cliente',
-            user: {
-              nombre: req.session.userName,
-              email: req.session.userEmail,
-              rol: req.session.userRole
-            },
-            cliente: clientes[0],
-            error: validacion.error
-          });
+          return renderError(validacion.error);
         }
-        
+
         // Verificar disponibilidad (excluyendo el cliente actual)
         const [result] = await db.query(
           'SELECT COUNT(*) as count FROM clientes WHERE prefijo_tracking = ? AND id != ? AND eliminado_en IS NULL',
           [nuevoPrefijoUpper, id]
         );
-        
+
         if (result[0].count > 0) {
-          const [clientes] = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
-          return res.render('clientes/editar', {
-            title: 'Editar Cliente',
-            user: {
-              nombre: req.session.userName,
-              email: req.session.userEmail,
-              rol: req.session.userRole
-            },
-            cliente: clientes[0],
-            error: 'El prefijo ya está en uso'
-          });
+          return renderError('El prefijo ya está en uso');
         }
-        
+
         prefijoFinal = nuevoPrefijoUpper;
       }
     }
@@ -696,13 +665,17 @@ router.post('/:id/toggle-habilitado', isAuthenticated, requireAdminOrSuper, asyn
 router.post('/:id/duplicar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   try {
     const { id } = req.params;
-    const { nuevo_prefijo } = req.body;
+    const { nuevo_prefijo, nuevo_nombre } = req.body;
 
     if (!nuevo_prefijo || !nuevo_prefijo.trim()) {
       return res.status(400).json({ success: false, error: 'El nuevo prefijo es requerido' });
     }
+    if (!nuevo_nombre || !nuevo_nombre.trim()) {
+      return res.status(400).json({ success: false, error: 'El nombre del nuevo cliente es requerido' });
+    }
 
     const prefijoUpper = nuevo_prefijo.trim().toUpperCase();
+    const nombreNuevo  = nuevo_nombre.trim();
 
     // Validar formato
     const validacion = validarFormatoPrefijo(prefijoUpper);
@@ -726,12 +699,12 @@ router.post('/:id/duplicar', isAuthenticated, requireAdminOrSuper, async (req, r
     }
     const original = clientes[0];
 
-    // Insertar nuevo cliente con mismos datos pero nuevo prefijo y contador en 0
+    // Insertar nuevo cliente con nuevo nombre, prefijo y contador en 0
     const [insertResult] = await db.query(
       `INSERT INTO clientes
        (nombre_empresa, contacto, telefono, email, direccion, prefijo_tracking, ultimo_numero_tracking, template_etiqueta_id, template_guia_id, metodo_pago_defecto)
        VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
-      [original.nombre_empresa, original.contacto, original.telefono, original.email,
+      [nombreNuevo, original.contacto, original.telefono, original.email,
        original.direccion, prefijoUpper, original.template_etiqueta_id,
        original.template_guia_id, original.metodo_pago_defecto]
     );
@@ -752,7 +725,7 @@ router.post('/:id/duplicar', isAuthenticated, requireAdminOrSuper, async (req, r
       );
     }
 
-    console.log(`✅ Cliente duplicado: ${original.nombre_empresa} (id:${id}) → nuevo id:${nuevoClienteId}, prefijo: ${prefijoUpper}`);
+    console.log(`✅ Cliente duplicado: ${original.nombre_empresa} (id:${id}) → "${nombreNuevo}" id:${nuevoClienteId}, prefijo: ${prefijoUpper}`);
     res.json({ success: true, nuevoClienteId });
 
   } catch (error) {

@@ -761,9 +761,13 @@ const TEMPLATE_FIELDS = [
   'mostrar_logo','mostrar_eslogan','mostrar_telefono','mostrar_telefono_adicional',
   'mostrar_email','mostrar_sitio_web','mostrar_rfc','mostrar_direccion_fiscal',
   'mostrar_barcode','mostrar_qr','mostrar_ruta','mostrar_descripcion',
+  'mostrar_dest_contacto','mostrar_dest_telefono',
+  'mostrar_dest_nombre','mostrar_dest_direccion','mostrar_dest_referencia',
   'obligatorio_logo','obligatorio_eslogan','obligatorio_telefono','obligatorio_telefono_adicional',
   'obligatorio_email','obligatorio_sitio_web','obligatorio_rfc','obligatorio_direccion_fiscal',
-  'obligatorio_barcode','obligatorio_qr','obligatorio_ruta','obligatorio_descripcion'
+  'obligatorio_barcode','obligatorio_qr','obligatorio_ruta','obligatorio_descripcion',
+  'obligatorio_dest_contacto','obligatorio_dest_telefono',
+  'obligatorio_dest_nombre','obligatorio_dest_direccion','obligatorio_dest_referencia'
 ];
 
 // API: listar templates (JSON)
@@ -798,19 +802,27 @@ router.post('/etiqueta/templates/nuevo', isAuthenticated, async (req, res) => {
         (nombre, mostrar_logo, mostrar_eslogan, mostrar_telefono, mostrar_telefono_adicional,
          mostrar_email, mostrar_sitio_web, mostrar_rfc, mostrar_direccion_fiscal,
          mostrar_barcode, mostrar_qr, mostrar_ruta, mostrar_descripcion,
+         mostrar_dest_contacto, mostrar_dest_telefono,
+         mostrar_dest_nombre, mostrar_dest_direccion, mostrar_dest_referencia,
          obligatorio_logo, obligatorio_eslogan, obligatorio_telefono, obligatorio_telefono_adicional,
          obligatorio_email, obligatorio_sitio_web, obligatorio_rfc, obligatorio_direccion_fiscal,
          obligatorio_barcode, obligatorio_qr, obligatorio_ruta, obligatorio_descripcion,
+         obligatorio_dest_contacto, obligatorio_dest_telefono,
+         obligatorio_dest_nombre, obligatorio_dest_direccion, obligatorio_dest_referencia,
          creado_por)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       nombre.trim(),
       values.mostrar_logo, values.mostrar_eslogan, values.mostrar_telefono, values.mostrar_telefono_adicional,
       values.mostrar_email, values.mostrar_sitio_web, values.mostrar_rfc, values.mostrar_direccion_fiscal,
       values.mostrar_barcode, values.mostrar_qr, values.mostrar_ruta, values.mostrar_descripcion,
+      values.mostrar_dest_contacto, values.mostrar_dest_telefono,
+      values.mostrar_dest_nombre, values.mostrar_dest_direccion, values.mostrar_dest_referencia,
       values.obligatorio_logo, values.obligatorio_eslogan, values.obligatorio_telefono, values.obligatorio_telefono_adicional,
       values.obligatorio_email, values.obligatorio_sitio_web, values.obligatorio_rfc, values.obligatorio_direccion_fiscal,
       values.obligatorio_barcode, values.obligatorio_qr, values.obligatorio_ruta, values.obligatorio_descripcion,
+      values.obligatorio_dest_contacto, values.obligatorio_dest_telefono,
+      values.obligatorio_dest_nombre, values.obligatorio_dest_direccion, values.obligatorio_dest_referencia,
       req.session.userId
     ]);
 
@@ -896,7 +908,8 @@ router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
     return res.redirect('/configuracion?error=sin_permiso&tab=guia');
   }
   try {
-    const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4 } = req.body;
+    const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4,
+            etiqueta_col_descripcion, etiqueta_operador } = req.body;
     if (!nombre || nombre.trim() === '') {
       return res.redirect('/configuracion?error=nombre_requerido&tab=guia');
     }
@@ -904,11 +917,12 @@ router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
     const placeholders = GUIA_TEMPLATE_FIELDS.map(() => '?').join(', ');
     const vals = GUIA_TEMPLATE_FIELDS.map(() => 1); // defaults: todos 1
     await db.query(
-      `INSERT INTO guia_templates (nombre, ${cols}, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4, creado_por)
-       VALUES (?, ${placeholders}, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO guia_templates (nombre, ${cols}, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4, etiqueta_col_descripcion, etiqueta_operador, creado_por)
+       VALUES (?, ${placeholders}, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nombre.trim(), ...vals,
         descripcion_servicio || null, titulo_guia || null,
         mensaje_1 || null, mensaje_2 || null, mensaje_3 || null, mensaje_4 || null,
+        etiqueta_col_descripcion || null, etiqueta_operador || null,
         req.session.userId]
     );
     res.redirect('/configuracion?success=guia_template_creado&tab=guia');
@@ -925,17 +939,20 @@ router.post('/guia/templates/:id/guardar', isAuthenticated, async (req, res) => 
   }
   try {
     const { id } = req.params;
-    const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4 } = req.body;
+    const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4,
+            etiqueta_col_descripcion, etiqueta_operador } = req.body;
     const sets = GUIA_TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
     const vals = GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
     await db.query(
       `UPDATE guia_templates SET nombre = ?, ${sets},
         descripcion_servicio = ?, titulo_guia = ?,
-        mensaje_1 = ?, mensaje_2 = ?, mensaje_3 = ?, mensaje_4 = ?
+        mensaje_1 = ?, mensaje_2 = ?, mensaje_3 = ?, mensaje_4 = ?,
+        etiqueta_col_descripcion = ?, etiqueta_operador = ?
        WHERE id = ?`,
       [nombre || 'Sin nombre', ...vals,
         descripcion_servicio || null, titulo_guia || null,
         mensaje_1 || null, mensaje_2 || null, mensaje_3 || null, mensaje_4 || null,
+        etiqueta_col_descripcion || null, etiqueta_operador || null,
         id]
     );
     res.redirect('/configuracion?success=guia_template_guardado&tab=guia');

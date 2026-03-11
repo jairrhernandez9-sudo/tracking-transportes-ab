@@ -91,11 +91,11 @@
     td, th { border: 1px solid #000; padding: 2px 4px; vertical-align: top; }
 
     /* ── Cabecera ── */
-    .cell-logo  { width: 24%; vertical-align: middle; padding: 4px 6px; }
+    .cell-logo  { width: 24%; vertical-align: middle; padding: 4px 6px; text-align: center; }
     .cell-title { width: 50%; text-align: center; vertical-align: middle; padding: 4px 6px; }
     .cell-barcode { width: 26%; text-align: center; vertical-align: middle; padding: 4px 6px; }
 
-    .logo-img { max-height: 44px; max-width: 110px; object-fit: contain; display: block; }
+    .logo-img { max-height: 44px; max-width: 110px; object-fit: contain; display: block; margin: 0 auto; }
     .company-name { font-size: 9pt; font-weight: bold; margin-top: 2px; }
     .company-rfc  { font-size: 7pt; color: #333; margin-top: 1px; }
 
@@ -145,6 +145,14 @@
     }
     .footer-content { font-size: 8pt; padding: 6px 6px; min-height: 48px; line-height: 1.6; }
     .footer-content.tall { min-height: 80px; }
+    .referencia-val { font-size: 12pt; font-weight: bold; }
+
+    /* ── Expand footer sections to fill remaining page ── */
+    .page { display: flex; flex-direction: column; }
+    .footer-grow { flex: 1; }
+    .footer-grow tr { height: 100%; }
+    .footer-grow td { height: 100%; }
+    .footer-grow .footer-content { height: 100%; min-height: 80px; }
     .pago-big  { font-size: 16pt; font-weight: bold; display: block; margin-top: 4px; }
     .fecha-big { font-size: 16pt; font-weight: bold; display: block; margin-top: 4px; }
 
@@ -279,6 +287,8 @@
 
           const descripcionServicio = guiaCfg.descripcion_servicio || 'Servicio de transportes de Carga';
           const tituloGuia = guiaCfg.titulo_guia || 'GUÍA EXPEDIDA';
+          const etiquetaColDesc = guiaCfg.etiqueta_col_descripcion || 'DESCRIPCIÓN SEGÚN REMITENTE';
+          const etiquetaOperador = guiaCfg.etiqueta_operador || 'Operador que entregó:';
 
           const nombreEmpresa = config.empresa_nombre || 'TRANSPORTES';
         %>
@@ -356,7 +366,7 @@
             <tr>
               <th class="cargo-th" style="width:5%;">CANT.</th>
               <th class="cargo-th" style="width:12%;">EMBALAJE</th>
-              <th class="cargo-th">DESCRIPCIÓN SEGÚN REMITENTE</th>
+              <th class="cargo-th"><%= etiquetaColDesc %></th>
               <th class="cargo-th" style="width:11%;">PESO ESTIMADO Kgs.</th>
               <th class="cargo-th <%= gc('col_peso_facturado') %>" style="width:11%;" data-elem="col_peso_facturado">PESO FACT. Kgs.</th>
               <th class="cargo-th <%= gc('col_volumen') %>" style="width:10%;" data-elem="col_volumen">VOLUMEN Mts.³</th>
@@ -438,12 +448,11 @@
         <%
           const avisoPrivacidad = config.empresa_aviso_privacidad || '';
           const avisoVisible = avisoPrivacidad && !!guiaCfg.mostrar_sitio_web;
-          const msg1Completo = [msg1, avisoVisible ? 'Conoce nuestro aviso de Privacidad en: ' + avisoPrivacidad : ''].filter(Boolean).join(' ');
         %>
-        <div class="msg-row <%= gc('clausula_seguro') %> <%= msg1Completo ? '' : 'empty' %>"><%= msg1Completo %></div>
+        <div class="msg-row <%= gc('clausula_seguro') %> <%= (msg1 || avisoVisible) ? '' : 'empty' %>" data-elem="clausula_seguro"><%= msg1 %><% if (avisoPrivacidad) { %><span data-elem="sitio_web" class="<%= avisoVisible ? '' : 'guia-hidden' %>"><%= msg1 ? ' ' : '' %>Conoce nuestro aviso de Privacidad en: <%= avisoPrivacidad %></span><% } %></div>
 
         <!-- ══ MENSAJE 2 ══ -->
-        <div class="msg-row <%= gc('clausula_seguro') %> <%= msg2 ? '' : 'empty' %>"><%= msg2 %></div>
+        <div class="msg-row <%= gc('clausula_seguro') %> <%= msg2 ? '' : 'empty' %>" data-elem="clausula_seguro"><%= msg2 %></div>
 
         <!-- ══ OBSERVACIONES / CONDICIONES / FECHAS ══ -->
         <table style="border-top:none;">
@@ -481,13 +490,13 @@
             <!-- Referencia del cliente -->
             <td style="width:36%;padding:0;border-top:1px solid #000;" class="<%= gc('referencia_cliente') %>" data-elem="referencia_cliente">
               <span class="footer-label">Referencia del cliente:</span>
-              <div class="footer-content"><%= envio.referencia_cliente || '' %></div>
+              <div class="footer-content"><span class="referencia-val"><%= envio.referencia_cliente || '' %></span></div>
             </td>
           </tr>
         </table>
 
         <!-- ══ RETORNO DE DOCUMENTOS ══ -->
-        <table style="border-top:none;" class="<%= gc('retorno_documentos') %>" data-elem="retorno_documentos">
+        <table style="border-top:none;width:100%;" class="footer-grow <%= gc('retorno_documentos') %>" data-elem="retorno_documentos">
           <tr>
             <td style="padding:0;">
               <span class="footer-label">Retorno de documentos:</span>
@@ -497,27 +506,35 @@
         </table>
 
         <!-- ══ OPERADOR QUE ENTREGÓ ══ -->
-        <table style="border-top:none;" class="<%= gc('operador') %>" data-elem="operador">
+        <table style="border-top:none;width:100%;" class="footer-grow <%= gc('operador') %>" data-elem="operador">
           <tr>
-            <td style="padding:0;">
-              <span class="footer-label">Operador que entregó:</span>
+            <td style="padding:0;width:65%;">
+              <span class="footer-label"><%= etiquetaOperador %></span>
+              <div class="footer-content tall">&nbsp;</div>
+            </td>
+            <td style="padding:0;width:35%;border-left:1px solid #000;">
+              <span class="footer-label">Observaciones:</span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
           </tr>
         </table>
 
         <!-- ══ RECIBIDO POR ══ -->
-        <table style="border-top:none;" class="<%= gc('recibido_por') %>" data-elem="recibido_por">
+        <table style="border-top:none;width:100%;" class="footer-grow <%= gc('recibido_por') %>" data-elem="recibido_por">
           <tr>
-            <td style="padding:0;">
+            <td style="padding:0;width:65%;">
               <span class="footer-label">Recibido por: (Nombre, firma y sello)</span>
+              <div class="footer-content tall">&nbsp;</div>
+            </td>
+            <td style="padding:0;width:35%;border-left:1px solid #000;">
+              <span class="footer-label">Observaciones:</span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
           </tr>
         </table>
 
         <!-- ══ MENSAJE 3 ══ -->
-        <div class="msg-row <%= gc('firma_final') %> <%= msg3 ? '' : 'empty' %>"><%= msg3 %></div>
+        <div class="msg-row <%= gc('firma_final') %> <%= msg3 ? '' : 'empty' %>" data-elem="firma_final"><%= msg3 %></div>
 
         <!-- ══ PIE ══ -->
         <div class="pie-datos <%= gc('pie_datos') %>" data-elem="pie_datos">
@@ -530,7 +547,7 @@
           <strong>DESTINO:</strong> <%= destinoAlias || envio.destino || '-' %>
         </div>
         <!-- ══ MENSAJE 4 (al final del documento, editable desde template) ══ -->
-        <div class="msg-row <%= gc('disclaimer') %> <%= msg4 ? '' : 'empty' %>"><%= msg4 %></div>
+        <div class="msg-row <%= gc('disclaimer') %> <%= msg4 ? '' : 'empty' %>" data-elem="disclaimer"><%= msg4 %></div>
 
       </div><!-- /page -->
     </div><!-- /guia-canvas -->

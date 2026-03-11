@@ -1014,7 +1014,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
             'SELECT * FROM etiqueta_templates WHERE id = ?', [clienteRow.template_etiqueta_id]
           );
           if (tpl) {
-            const keys = ['logo','eslogan','telefono','telefono_adicional','email','sitio_web','rfc','direccion_fiscal','barcode','qr','ruta','descripcion'];
+            const keys = ['logo','eslogan','telefono','telefono_adicional','email','sitio_web','rfc','direccion_fiscal','barcode','qr','ruta','descripcion','dest_contacto','dest_telefono','dest_nombre','dest_direccion','dest_referencia'];
             keys.forEach(k => {
               configuracion['mostrar_' + k]    = !!tpl['mostrar_' + k];
               configuracion['obligatorio_' + k] = !!tpl['obligatorio_' + k];

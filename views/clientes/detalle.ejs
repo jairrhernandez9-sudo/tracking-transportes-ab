@@ -1657,9 +1657,23 @@
       </div>
 
       <p style="color: #6b7280; font-size: 0.9rem; margin: 0 0 20px 0; line-height: 1.5;">
-        Se creará un nuevo cliente idéntico a <strong style="color: #1f2937;"><%= cliente.nombre_empresa %></strong> con todas sus direcciones de destino.<br>
-        Solo debes asignar un <strong>prefijo de tracking diferente</strong>.
+        Se creará un nuevo cliente basado en <strong style="color: #1f2937;"><%= cliente.nombre_empresa %></strong> con todas sus direcciones de destino.
       </p>
+
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">
+          Nombre del nuevo cliente <span style="color: #ef4444;">*</span>
+        </label>
+        <input
+          type="text"
+          id="inputNuevoNombre"
+          maxlength="120"
+          placeholder="Nombre diferente al original"
+          oninput="verificarNuevoNombre(this.value)"
+          style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; font-weight: 600; box-sizing: border-box;"
+        >
+        <div id="nuevoNombre-status" style="margin-top: 6px; font-size: 0.85rem; min-height: 20px;"></div>
+      </div>
 
       <div style="margin-bottom: 16px;">
         <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 0.9rem;">
@@ -2555,20 +2569,56 @@ const clienteId = parseInt("<%= cliente.id %>");
 
     function abrirModalDuplicarCliente() {
       document.getElementById('modalDuplicarCliente').style.display = 'flex';
-      const input = document.getElementById('inputNuevoPrefijo');
-      input.value = '';
-      input.style.borderColor = '#e5e7eb';
+      const inputPrefijo = document.getElementById('inputNuevoPrefijo');
+      inputPrefijo.value = '';
+      inputPrefijo.style.borderColor = '#e5e7eb';
       document.getElementById('nuevoPrefijo-status').innerHTML = '';
+      const inputNombre = document.getElementById('inputNuevoNombre');
+      inputNombre.value = '';
+      inputNombre.style.borderColor = '#e5e7eb';
+      document.getElementById('nuevoNombre-status').innerHTML = '';
       const btn = document.getElementById('btnConfirmarDuplicar');
       btn.disabled = true;
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
       _prefijoDuplicarValido = false;
-      setTimeout(() => input.focus(), 100);
+      _nombreDuplicarValido = false;
+      setTimeout(() => inputNombre.focus(), 100);
     }
 
     function cerrarModalDuplicarCliente() {
       document.getElementById('modalDuplicarCliente').style.display = 'none';
+    }
+
+    var _nombreDuplicarValido = false;
+
+    function _actualizarBtnDuplicar() {
+      const btn = document.getElementById('btnConfirmarDuplicar');
+      const ok = _prefijoDuplicarValido && _nombreDuplicarValido;
+      btn.disabled = !ok;
+      btn.style.opacity = ok ? '1' : '0.5';
+      btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+    }
+
+    function verificarNuevoNombre(val) {
+      const status = document.getElementById('nuevoNombre-status');
+      const input = document.getElementById('inputNuevoNombre');
+      const nombreOriginal = '<%= cliente.nombre_empresa.replace(/'/g, "\\'") %>';
+
+      if (!val || !val.trim()) {
+        status.innerHTML = '<span style="color:#dc2626; font-weight:600;">✗ El nombre no puede estar vacío</span>';
+        input.style.borderColor = '#dc2626';
+        _nombreDuplicarValido = false;
+      } else if (val.trim().toLowerCase() === nombreOriginal.toLowerCase()) {
+        status.innerHTML = '<span style="color:#dc2626; font-weight:600;">✗ El nombre debe ser diferente al original</span>';
+        input.style.borderColor = '#dc2626';
+        _nombreDuplicarValido = false;
+      } else {
+        status.innerHTML = '<span style="color:#059669; font-weight:600;">✓ Nombre válido</span>';
+        input.style.borderColor = '#059669';
+        _nombreDuplicarValido = true;
+      }
+      _actualizarBtnDuplicar();
     }
 
     function verificarNuevoPrefijo(val) {
@@ -2576,14 +2626,9 @@ const clienteId = parseInt("<%= cliente.id %>");
       _prefijoDuplicarValido = false;
       const status = document.getElementById('nuevoPrefijo-status');
       const input = document.getElementById('inputNuevoPrefijo');
-      const btn = document.getElementById('btnConfirmarDuplicar');
 
-      // Forzar mayúsculas visualmente
       input.value = val.toUpperCase();
-
-      btn.disabled = true;
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
+      _actualizarBtnDuplicar();
 
       if (!val || val.trim().length < 2) {
         status.innerHTML = '';
@@ -2601,14 +2646,12 @@ const clienteId = parseInt("<%= cliente.id %>");
             status.innerHTML = '<span style="color:#059669; font-weight:600;">✓ Prefijo disponible</span>';
             input.style.borderColor = '#059669';
             _prefijoDuplicarValido = true;
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.style.cursor = 'pointer';
           } else {
             status.innerHTML = `<span style="color:#dc2626; font-weight:600;">✗ ${data.mensaje || 'Prefijo no disponible'}</span>`;
             input.style.borderColor = '#dc2626';
             _prefijoDuplicarValido = false;
           }
+          _actualizarBtnDuplicar();
         } catch (e) {
           status.innerHTML = '<span style="color:#dc2626;">Error al verificar</span>';
         }
@@ -2616,9 +2659,10 @@ const clienteId = parseInt("<%= cliente.id %>");
     }
 
     async function ejecutarDuplicarCliente() {
-      if (!_prefijoDuplicarValido) return;
+      if (!_prefijoDuplicarValido || !_nombreDuplicarValido) return;
       const prefijo = document.getElementById('inputNuevoPrefijo').value.trim().toUpperCase();
-      if (!prefijo) return;
+      const nombre  = document.getElementById('inputNuevoNombre').value.trim();
+      if (!prefijo || !nombre) return;
 
       const btn = document.getElementById('btnConfirmarDuplicar');
       btn.disabled = true;
@@ -2629,7 +2673,7 @@ const clienteId = parseInt("<%= cliente.id %>");
         const r = await fetch('/clientes/<%= cliente.id %>/duplicar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nuevo_prefijo: prefijo })
+          body: JSON.stringify({ nuevo_prefijo: prefijo, nuevo_nombre: nombre })
         });
         const data = await r.json();
         if (data.success) {

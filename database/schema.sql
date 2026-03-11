@@ -183,6 +183,8 @@ CREATE TABLE `guia_templates` (
   `mensaje_2`                       TEXT         NULL COMMENT 'Mensaje cláusula 2 (después de cláusula 1)',
   `mensaje_3`                       TEXT         NULL COMMENT 'Condiciones (antes del pie de página)',
   `mensaje_4`                       TEXT         NULL COMMENT 'Mensaje al final del documento (después del disclaimer)',
+  `etiqueta_col_descripcion`        VARCHAR(200) NULL COMMENT 'Encabezado columna descripción en tabla de carga',
+  `etiqueta_operador`               VARCHAR(200) NULL COMMENT 'Etiqueta de la sección Operador que entregó',
   `creado_por`                      INT          NULL,
   `creado_en`                       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

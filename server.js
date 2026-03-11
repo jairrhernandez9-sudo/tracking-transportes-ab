@@ -41,6 +41,22 @@ db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_rfc TINYINT
 db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
 db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
 
+// Migración: etiquetas personalizables en guia_templates
+db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_col_descripcion VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_operador VARCHAR(200) NULL`).catch(() => {});
+
+// Migración: dest_contacto, dest_telefono, dest_nombre, dest_direccion, dest_referencia en etiqueta_templates
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_dest_contacto TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_dest_telefono TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_contacto TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_telefono TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_dest_nombre TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_dest_direccion TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_dest_referencia TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_referencia TINYINT(1) DEFAULT 0`).catch(() => {});
+
 // Migración: tabla etiqueta_templates
 db.query(`
   CREATE TABLE IF NOT EXISTS etiqueta_templates (
