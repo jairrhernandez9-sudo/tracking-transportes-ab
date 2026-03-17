@@ -2077,6 +2077,13 @@
                   <i data-lucide="copy" style="width: 18px; height: 18px;"></i>
                   Copiar Tracking
                 </button>
+
+                <% if (tienePictogramas) { %>
+                <a href="/envios/<%= envio.id %>/pictograma-carta" target="_blank" class="btn btn-secondary" style="background:#f0fdf4;color:#16a34a;border-color:#86efac;">
+                  <i data-lucide="image" style="width: 18px; height: 18px;"></i>
+                  Imprimir Pictograma
+                </a>
+                <% } %>
               </div>
             </div>
           </div>

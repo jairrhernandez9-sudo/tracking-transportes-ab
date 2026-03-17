@@ -4,6 +4,15 @@ const session = require('express-session');
 require('dotenv').config();
 const db = require('./config/database');
 
+// Tabla de asignación operador → cliente
+db.query(`
+  CREATE TABLE IF NOT EXISTS cliente_operadores (
+    cliente_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    PRIMARY KEY (cliente_id, usuario_id)
+  )
+`).catch(() => {});
+
 // Migraciones de columnas — .catch() silencia "duplicate column" (ER_DUP_FIELDNAME)
 db.query(`ALTER TABLE usuarios ADD COLUMN pagina_inicio VARCHAR(50) NOT NULL DEFAULT 'dashboard'`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_cliente_id INT NULL`).catch(() => {});
@@ -47,6 +56,84 @@ db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_lugar_expedicion VARCHAR(200) N
 // Migración: etiquetas personalizables en guia_templates
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_col_descripcion VARCHAR(200) NULL`).catch(() => {});
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_operador VARCHAR(200) NULL`).catch(() => {});
+
+// Migración: pictogramas
+db.query(`
+  CREATE TABLE IF NOT EXISTS pictogramas (
+    id          INT NOT NULL AUTO_INCREMENT,
+    nombre      VARCHAR(100) NOT NULL,
+    imagen_url  VARCHAR(500) NOT NULL,
+    activo      TINYINT(1) DEFAULT 1,
+    orden       INT DEFAULT 0,
+    creado_por  INT NULL,
+    creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY fk_picto_creador (creado_por),
+    CONSTRAINT picto_ibfk_1 FOREIGN KEY (creado_por) REFERENCES usuarios (id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`).catch(() => {});
+db.query(`
+  CREATE TABLE IF NOT EXISTS envio_pictogramas (
+    id             INT NOT NULL AUTO_INCREMENT,
+    envio_id       INT NOT NULL,
+    pictograma_id  INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_envio_picto (envio_id, pictograma_id),
+    KEY fk_ep_envio (envio_id),
+    KEY fk_ep_picto (pictograma_id),
+    CONSTRAINT ep_ibfk_1 FOREIGN KEY (envio_id)      REFERENCES envios (id) ON DELETE CASCADE,
+    CONSTRAINT ep_ibfk_2 FOREIGN KEY (pictograma_id) REFERENCES pictogramas (id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`).catch(() => {});
+
+// Migración: textos editables en etiqueta_templates
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_entregar_a VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_peso VARCHAR(50) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_entrega_estimada VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_ref_cliente VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_descripcion VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_fecha_emision VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_etiqueta VARCHAR(50) NULL`).catch(() => {});
+
+// Migración: tamaños de texto en etiqueta_templates (TINYINT, NULL = usar default)
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_tracking TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_ruta_ciudad TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_dest_nombre TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_dest_direccion TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_empresa_nombre TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_eslogan TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_tipo_servicio TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_detalle_valor TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_descripcion TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_dest_contacto TINYINT UNSIGNED NULL`).catch(() => {});
+
+// Migración: tamaños de texto en guia_templates
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_guia_titulo TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_tracking_big TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_company_name TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_seccion_content TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_cargo_td TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_guia_servicio TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_seccion_label TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_cargo_th TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_footer_content TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_pago_big TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN size_msg_row TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN height_obs_tall SMALLINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_obs_operador TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_obs_operador TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN mostrar_obs_recibido TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_obs_recibido TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_obs_operador VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_recibido_por VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_obs_recibido VARCHAR(200) NULL`).catch(() => {});
+
+// Migración: más tamaños en etiqueta_templates
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_barra_contacto TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_ruta_etiqueta TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_detalle_etiqueta TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_cab_fecha TINYINT UNSIGNED NULL`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN size_cab_num TINYINT UNSIGNED NULL`).catch(() => {});
 
 // Migración: dest_contacto, dest_telefono, dest_nombre, dest_direccion, dest_referencia en etiqueta_templates
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_dest_contacto TINYINT(1) DEFAULT 1`).catch(() => {});
@@ -153,8 +240,9 @@ const enviosRetrasadosRoutes = require('./routes/envios-retrasados');
 const usuariosRoutes = require('./routes/usuarios');
 const perfilRoutes = require('./routes/perfil');
 const direccionesRoutes = require('./routes/direcciones');
-const historialRoutes    = require('./routes/historial');
-const portalClienteRoutes = require('./routes/portal-cliente');
+const historialRoutes      = require('./routes/historial');
+const portalClienteRoutes  = require('./routes/portal-cliente');
+const pictogramasRoutes    = require('./routes/pictogramas');
 
 
 app.use('/tracking', trackingRoutes);
@@ -170,6 +258,7 @@ app.use('/mi-perfil', perfilRoutes);
 app.use('/direcciones', direccionesRoutes);
 app.use('/historial', historialRoutes);
 app.use('/portal-cliente', portalClienteRoutes);
+app.use('/pictogramas', pictogramasRoutes);
 
 
 

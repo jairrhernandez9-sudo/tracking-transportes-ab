@@ -853,6 +853,40 @@
             
           </div>
           
+          <% if (typeof pictogramas !== 'undefined' && pictogramas.length > 0) { %>
+          <!-- Pictogramas -->
+          <div class="form-section" style="margin-top:20px;">
+            <h3 class="section-title" style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="image" style="width:18px;height:18px;color:#3b82f6;"></i>
+              Pictogramas de manejo
+            </h3>
+            <p style="font-size:0.83rem;color:#64748b;margin-bottom:14px;">Selecciona los símbolos que aplican a este envío (opcional).</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">
+              <% pictogramas.forEach(p => { %>
+              <% const seleccionado = (typeof pictoIdsEnvio !== 'undefined') && pictoIdsEnvio.includes(p.id); %>
+              <label style="border:2px solid <%= seleccionado ? '#2563eb' : '#e2e8f0' %>;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;background:<%= seleccionado ? '#eff6ff' : 'white' %>;"
+                onmouseover="this.style.borderColor='#3b82f6'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='#e2e8f0'"
+                id="picto-label-<%= p.id %>">
+                <input type="checkbox" name="pictogramas[]" value="<%= p.id %>"
+                  style="position:absolute;opacity:0;"
+                  <%= seleccionado ? 'checked' : '' %>
+                  onchange="togglePictoLabel(this, <%= p.id %>)">
+                <img src="<%= p.imagen_url %>" alt="<%= p.nombre %>"
+                  style="width:60px;height:60px;object-fit:contain;filter:grayscale(100%) contrast(1.3);">
+                <span style="font-size:0.78rem;font-weight:700;color:#374151;line-height:1.2;"><%= p.nombre %></span>
+              </label>
+              <% }) %>
+            </div>
+          </div>
+          <script>
+            function togglePictoLabel(cb, id) {
+              var lbl = document.getElementById('picto-label-' + id);
+              lbl.style.borderColor = cb.checked ? '#2563eb' : '#e2e8f0';
+              lbl.style.background  = cb.checked ? '#eff6ff' : 'white';
+            }
+          </script>
+          <% } %>
+
           <!-- Botones de acción -->
           <div class="form-actions">
             <a href="/envios/<%= envio.id %>" class="btn btn-secondary">

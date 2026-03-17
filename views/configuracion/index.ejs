@@ -1099,6 +1099,10 @@
             <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
             Guía Expedida
           </button>
+          <button class="tab-btn <%= tabInicial === 'pictogramas' ? 'active' : '' %>" onclick="openTab(event, 'pictogramas')">
+            <i data-lucide="image" style="width: 18px; height: 18px;"></i>
+            Pictogramas
+          </button>
           <% } %>
 
           <%/* Página de inicio: todos los roles */%>
@@ -2199,70 +2203,232 @@
                   style="flex: 1; max-width: 320px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600;" required>
               </div>
 
-              <!-- Cabecera de columnas -->
-              <div style="display: grid; grid-template-columns: 1fr 100px 100px; gap: 0; margin-bottom: 8px; padding: 0 0 8px 0; border-bottom: 2px solid #f1f5f9;">
-                <div style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;"></div>
-                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Por defecto</div>
-                <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px;">Obligatorio</div>
+              <!-- Sub-tabs -->
+              <div style="display: flex; gap: 4px; margin-bottom: 20px; background: #f1f5f9; border-radius: 10px; padding: 4px; width: fit-content;">
+                <button type="button" id="etq-subtab-btn-elementos" onclick="switchEtqSubtab('elementos')"
+                  style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: #2563eb; color: white; box-shadow: 0 1px 4px rgba(37,99,235,.25);">
+                  Elementos
+                </button>
+                <button type="button" id="etq-subtab-btn-textos" onclick="switchEtqSubtab('textos')"
+                  style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: transparent; color: #64748b;">
+                  Textos editables
+                </button>
+                <button type="button" id="etq-subtab-btn-tamanos" onclick="switchEtqSubtab('tamanos')"
+                  style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: transparent; color: #64748b;">
+                  Tamaño de Textos
+                </button>
               </div>
 
-              <!-- GRUPO EMPRESA -->
-              <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 8px;">Datos de la empresa</p>
-              <% etqElementos.filter(e => e.grupo === 'empresa').forEach(el => { %>
-              <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
-                <div>
-                  <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
-                  <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
-                </div>
-                <!-- Por defecto (azul) -->
-                <div style="text-align: center;">
-                  <label class="switch">
-                    <input type="checkbox" name="mostrar_<%= el.key %>" <%= tplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <!-- Obligatorio (rosa) -->
-                <div style="text-align: center;">
-                  <label class="switch switch-pink">
-                    <input type="checkbox" name="obligatorio_<%= el.key %>" <%= tplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </div>
-              <% }) %>
+              <!-- Sub-tab: Elementos (toggles) -->
+              <div id="etq-subtab-elementos">
 
-              <!-- GRUPO ENVÍO -->
-              <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 8px;">Elementos del envío</p>
-              <% etqElementos.filter(e => e.grupo === 'envio').forEach(el => { %>
-              <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
-                <div>
-                  <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
-                  <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                <!-- Cabecera de columnas -->
+                <div style="display: grid; grid-template-columns: 1fr 100px 100px; gap: 0; margin-bottom: 8px; padding: 0 0 8px 0; border-bottom: 2px solid #f1f5f9;">
+                  <div style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;"></div>
+                  <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Por defecto</div>
+                  <div style="text-align: center; font-size: 0.75rem; font-weight: 800; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px;">Obligatorio</div>
                 </div>
-                <div style="text-align: center;">
-                  <label class="switch">
-                    <input type="checkbox" name="mostrar_<%= el.key %>" <%= tplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <div style="text-align: center;">
-                  <label class="switch switch-pink">
-                    <input type="checkbox" name="obligatorio_<%= el.key %>" <%= tplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </div>
-              <% }) %>
 
-              <!-- Nota + guardar -->
-              <div class="info-box" style="margin-top: 20px;">
-                <i data-lucide="info" style="width: 20px; height: 20px;"></i>
-                <div class="info-text">
-                  Los campos vacíos no se imprimen aunque el toggle esté activo.
-                  Cuando el campo <strong>Obligatorio</strong> está activado, esa función siempre podrá ser imprimible;
-                  si está desactivada por defecto siempre estará apagada y no podrá ser visible en la impresión.
+                <!-- GRUPO EMPRESA -->
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 8px;">Datos de la empresa</p>
+                <% etqElementos.filter(e => e.grupo === 'empresa').forEach(el => { %>
+                <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
+                  <div>
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
+                    <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                  </div>
+                  <div style="text-align: center;">
+                    <label class="switch">
+                      <input type="checkbox" name="mostrar_<%= el.key %>" <%= tplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="text-align: center;">
+                    <label class="switch switch-pink">
+                      <input type="checkbox" name="obligatorio_<%= el.key %>" <%= tplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                 </div>
-              </div>
+                <% }) %>
+
+                <!-- GRUPO ENVÍO -->
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 8px;">Elementos del envío</p>
+                <% etqElementos.filter(e => e.grupo === 'envio').forEach(el => { %>
+                <div style="display: grid; grid-template-columns: 1fr 100px 100px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8fafc;">
+                  <div>
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #1e293b;"><%= el.icon %> <%= el.label %></div>
+                    <div style="font-size: 0.78rem; color: #64748b;"><%= el.desc %></div>
+                  </div>
+                  <div style="text-align: center;">
+                    <label class="switch">
+                      <input type="checkbox" name="mostrar_<%= el.key %>" <%= tplActivo['mostrar_' + el.key] ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="text-align: center;">
+                    <label class="switch switch-pink">
+                      <input type="checkbox" name="obligatorio_<%= el.key %>" <%= tplActivo['obligatorio_' + el.key] ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <% }) %>
+
+                <div class="info-box" style="margin-top: 20px;">
+                  <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                  <div class="info-text">
+                    Los campos vacíos no se imprimen aunque el toggle esté activo.
+                    <strong>Obligatorio</strong> significa que el toggle en la etiqueta estará fijo y no podrá desactivarse.
+                    <strong>Por defecto</strong> define el estado inicial al abrir la etiqueta.
+                  </div>
+                </div>
+              </div><!-- /etq-subtab-elementos -->
+
+              <!-- Sub-tab: Textos editables -->
+              <div id="etq-subtab-textos" style="display: none;">
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Etiquetas de sección</p>
+                <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 20px;">
+                  Personaliza los textos que aparecen como título en cada sección de la etiqueta. Si se deja vacío, se usa el texto por defecto.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Fecha emisión" <span style="color:#94a3b8;font-weight:400;">(header superior derecho)</span>
+                    </label>
+                    <input type="text" name="texto_fecha_emision"
+                      value="<%= tplActivo.texto_fecha_emision || '' %>"
+                      placeholder="Fecha emisión"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Etiqueta" <span style="color:#94a3b8;font-weight:400;">(contador X/Y en header)</span>
+                    </label>
+                    <input type="text" name="texto_etiqueta"
+                      value="<%= tplActivo.texto_etiqueta || '' %>"
+                      placeholder="Etiqueta"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Entregar a:" <span style="color:#94a3b8;font-weight:400;">(título sección destino)</span>
+                    </label>
+                    <input type="text" name="texto_entregar_a"
+                      value="<%= tplActivo.texto_entregar_a || '' %>"
+                      placeholder="Entregar a:"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Peso" <span style="color:#94a3b8;font-weight:400;">(pie de etiqueta)</span>
+                    </label>
+                    <input type="text" name="texto_peso"
+                      value="<%= tplActivo.texto_peso || '' %>"
+                      placeholder="Peso"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Entrega estimada" <span style="color:#94a3b8;font-weight:400;">(pie de etiqueta)</span>
+                    </label>
+                    <input type="text" name="texto_entrega_estimada"
+                      value="<%= tplActivo.texto_entrega_estimada || '' %>"
+                      placeholder="Entrega estimada"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Ref. cliente" <span style="color:#94a3b8;font-weight:400;">(pie de etiqueta)</span>
+                    </label>
+                    <input type="text" name="texto_ref_cliente"
+                      value="<%= tplActivo.texto_ref_cliente || '' %>"
+                      placeholder="Ref. cliente"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                  <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+                      Etiqueta "Descripción / Contenido" <span style="color:#94a3b8;font-weight:400;">(sección de descripción)</span>
+                    </label>
+                    <input type="text" name="texto_descripcion"
+                      value="<%= tplActivo.texto_descripcion || '' %>"
+                      placeholder="Descripción / Contenido"
+                      style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                  </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 20px;">
+                  <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                  <div class="info-text">
+                    Los cambios aplican solo a este template. Si el campo está vacío se usa el texto por defecto del sistema.
+                  </div>
+                </div>
+              </div><!-- /etq-subtab-textos -->
+
+              <!-- Sub-tab: Tamaño de Textos -->
+              <div id="etq-subtab-tamanos" style="display: none;">
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Tamaño de fuente (px)</p>
+                <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 20px;">
+                  Ajusta el tamaño de los textos principales de la etiqueta. Deja en blanco para usar el tamaño por defecto del sistema.
+                </p>
+
+                <% const tplSizes = tplActivo || {};
+                   const sizeItems = [
+                     { key: 'size_tracking',       label: 'Número de tracking',         def: 26, min: 16, max: 40 },
+                     { key: 'size_ruta_ciudad',    label: 'Ciudad origen / destino',    def: 17, min: 10, max: 28 },
+                     { key: 'size_empresa_nombre', label: 'Nombre empresa (header)',    def: 13, min:  8, max: 22 },
+                     { key: 'size_eslogan',        label: 'Eslogan de empresa',         def:  7, min:  4, max: 12 },
+                     { key: 'size_tipo_servicio',  label: 'Tipo de servicio (badge)',   def: 12, min:  8, max: 18 },
+                     { key: 'size_dest_nombre',    label: 'Nombre destinatario',        def: 13, min:  8, max: 22 },
+                     { key: 'size_dest_direccion', label: 'Dirección destinatario',     def:  8, min:  6, max: 14 },
+                     { key: 'size_dest_contacto',  label: 'Contacto / teléfono dest.',  def:  8, min:  6, max: 12 },
+                     { key: 'size_detalle_valor',  label: 'Valores de detalles (peso, ref, fecha)', def: 10, min:  7, max: 16 },
+                     { key: 'size_descripcion',    label: 'Texto de descripción',           def:  8, min:  6, max: 14 },
+                     { key: 'size_barra_contacto', label: 'Barra de contacto (tel/email)',   def:  7, min:  5, max: 11 },
+                     { key: 'size_ruta_etiqueta',  label: 'Etiquetas "Origen" / "Destino"', def:  8, min:  5, max: 11 },
+                     { key: 'size_detalle_etiqueta',label: 'Etiquetas de detalles (Peso, Ref, Fecha)', def: 8, min: 5, max: 11 },
+                     { key: 'size_cab_fecha',      label: 'Fecha en cabecera',               def: 13, min:  8, max: 18 },
+                     { key: 'size_cab_num',        label: 'Número de etiqueta (1/3)',         def: 17, min: 10, max: 24 },
+                   ];
+                %>
+
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                  <% sizeItems.forEach(function(s) {
+                       const val = tplSizes[s.key] ? parseInt(tplSizes[s.key]) : s.def;
+                  %>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label style="font-size: 0.85rem; font-weight: 700; color: #374151;"><%= s.label %></label>
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span id="lbl-<%= s.key %>" style="font-size: 0.9rem; font-weight: 800; color: #2563eb; min-width: 28px; text-align: right;"><%= val %></span>
+                        <span style="font-size: 0.75rem; color: #94a3b8;">px</span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="font-size: 0.7rem; color: #94a3b8;"><%= s.min %></span>
+                      <input type="range" name="<%= s.key %>" id="range-<%= s.key %>"
+                        min="<%= s.min %>" max="<%= s.max %>" step="1"
+                        value="<%= val %>"
+                        oninput="document.getElementById('lbl-<%= s.key %>').textContent=this.value; document.getElementById('num-<%= s.key %>').value=this.value;"
+                        style="flex: 1; accent-color: #2563eb; height: 4px; cursor: pointer;">
+                      <span style="font-size: 0.7rem; color: #94a3b8;"><%= s.max %></span>
+                      <input type="number" id="num-<%= s.key %>"
+                        min="<%= s.min %>" max="<%= s.max %>"
+                        value="<%= val %>"
+                        oninput="var v=Math.min(<%= s.max %>,Math.max(<%= s.min %>,parseInt(this.value)||<%= s.def %>)); document.getElementById('range-<%= s.key %>').value=v; document.getElementById('lbl-<%= s.key %>').textContent=v;"
+                        onchange="document.getElementById('range-<%= s.key %>').value=this.value;"
+                        style="width: 52px; padding: 4px 6px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 0.85rem; text-align: center;">
+                    </div>
+                    <div style="margin-top: 4px; font-size: 0.72rem; color: #94a3b8;">Default del sistema: <strong><%= s.def %>px</strong></div>
+                  </div>
+                  <% }); %>
+                </div>
+
+                <div style="margin-top: 20px; padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 0.78rem; color: #1e40af;">
+                  💡 Los cambios aplican a todos los envíos que usen este template. Si restauras el tamaño al valor default, borra el campo y guarda.
+                </div>
+              </div><!-- /etq-subtab-tamanos -->
 
               <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
                 <button type="submit" class="btn-primary">
@@ -2353,7 +2519,9 @@
               { key: 'referencia_cliente',    icon: '🔖', label: 'Referencia del cliente',     desc: 'Número de referencia del cliente',           grupo: 'condiciones' },
               // Entrega
               { key: 'recibido_por',          icon: '✍️',  label: 'Sección Recibido por',       desc: 'Firma de recibido e incidencias',            grupo: 'entrega' },
+              { key: 'obs_recibido',          icon: '📝', label: ' ↳ Columna Observaciones',   desc: 'Columna lateral de obs. en Recibido por',    grupo: 'entrega', sub: true },
               { key: 'operador',              icon: '🚛', label: 'Operador que entregó',       desc: 'Nombre del operador y comentarios',          grupo: 'entrega' },
+              { key: 'obs_operador',          icon: '📝', label: ' ↳ Columna Observaciones',   desc: 'Columna lateral de obs. en Operador',        grupo: 'entrega', sub: true },
               { key: 'firma_final',           icon: '📋', label: 'Tabla de firma final',       desc: 'Acepta condiciones del contrato',            grupo: 'entrega' },
               // Pie
               { key: 'pie_datos',             icon: '📊', label: 'Datos de mercancía / estado', desc: 'Estado, tracking, origen, destino al pie', grupo: 'pie' },
@@ -2450,6 +2618,10 @@
                   style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: transparent; color: #64748b;">
                   Textos editables
                 </button>
+                <button type="button" id="guia-subtab-btn-tamanos" onclick="switchGuiaSubtab('tamanos')"
+                  style="padding: 7px 18px; border: none; border-radius: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all .15s; background: transparent; color: #64748b;">
+                  Tamaño de Textos
+                </button>
               </div>
 
               <!-- Sub-tab: Secciones y columnas (toggles) -->
@@ -2539,6 +2711,27 @@
                         <input type="text" name="etiqueta_operador"
                           value="<%= guiaTplActivo.etiqueta_operador || '' %>"
                           placeholder="Operador que entregó:"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Etiqueta "Observaciones" <span style="color:#94a3b8;font-weight:400;">(col. derecha del Operador)</span></label>
+                        <input type="text" name="etiqueta_obs_operador"
+                          value="<%= guiaTplActivo.etiqueta_obs_operador || '' %>"
+                          placeholder="Observaciones:"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Etiqueta "Recibido por" <span style="color:#94a3b8;font-weight:400;">(título de sección)</span></label>
+                        <input type="text" name="etiqueta_recibido_por"
+                          value="<%= guiaTplActivo.etiqueta_recibido_por || '' %>"
+                          placeholder="Recibido por: (Nombre, firma y sello)"
+                          style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
+                      </div>
+                      <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Etiqueta "Observaciones" <span style="color:#94a3b8;font-weight:400;">(col. derecha de Recibido por)</span></label>
+                        <input type="text" name="etiqueta_obs_recibido"
+                          value="<%= guiaTplActivo.etiqueta_obs_recibido || '' %>"
+                          placeholder="Observaciones:"
                           style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.88rem;">
                       </div>
                     </div>
@@ -2724,7 +2917,67 @@
 
                       </div><!-- /mini-guía -->
                     </div><!-- /preview bg -->
-              </div>
+              </div><!-- /guia-subtab-textos -->
+
+              <!-- Sub-tab: Tamaño de Textos -->
+              <div id="guia-subtab-tamanos" style="display: none;">
+                <p style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Tamaño de fuente (pt)</p>
+                <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 20px;">
+                  Ajusta el tamaño de los textos principales de la guía. Deja en blanco para usar el tamaño por defecto del sistema.
+                </p>
+
+                <% const guiaSizes = guiaTplActivo || {};
+                   const guiaSizeItems = [
+                     { key: 'size_guia_titulo',     label: 'Título principal (GUÍA EXPEDIDA)',   def: 13, min:  9, max: 18 },
+                     { key: 'size_guia_servicio',   label: 'Subtítulo / descripción servicio',   def:  8, min:  6, max: 12 },
+                     { key: 'size_tracking_big',    label: 'Número de tracking (header)',        def: 13, min:  9, max: 18 },
+                     { key: 'size_company_name',    label: 'Nombre de empresa (header)',         def:  9, min:  7, max: 14 },
+                     { key: 'size_seccion_label',   label: 'Etiquetas de sección (Remitente, Facturar…)', def: 7, min: 5, max: 10 },
+                     { key: 'size_seccion_content', label: 'Contenido de secciones (texto)',     def:  8, min:  6, max: 12 },
+                     { key: 'size_cargo_th',        label: 'Encabezados de tabla de carga',      def:  7, min:  5, max: 10 },
+                     { key: 'size_cargo_td',        label: 'Filas / celdas de tabla de carga',   def:  8, min:  6, max: 11 },
+                     { key: 'size_msg_row',         label: 'Mensajes / cláusulas personalizables', def: 8, min: 6, max: 12 },
+                     { key: 'size_footer_content',  label: 'Contenido footer (condiciones, fechas)', def: 8, min: 6, max: 12 },
+                     { key: 'size_pago_big',        label: 'Valores grandes (pago / fecha entrega)', def: 16, min: 10, max: 24 },
+                                        ];
+                %>
+
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                  <% guiaSizeItems.forEach(function(s) {
+                       const val = guiaSizes[s.key] ? parseInt(guiaSizes[s.key]) : s.def;
+                  %>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label style="font-size: 0.85rem; font-weight: 700; color: #374151;"><%= s.label %></label>
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span id="glbl-<%= s.key %>" style="font-size: 0.9rem; font-weight: 800; color: #2563eb; min-width: 28px; text-align: right;"><%= val %></span>
+                        <span style="font-size: 0.75rem; color: #94a3b8;"><%= s.unit || 'pt' %></span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="font-size: 0.7rem; color: #94a3b8;"><%= s.min %></span>
+                      <input type="range" name="<%= s.key %>" id="grange-<%= s.key %>"
+                        min="<%= s.min %>" max="<%= s.max %>" step="1"
+                        value="<%= val %>"
+                        oninput="document.getElementById('glbl-<%= s.key %>').textContent=this.value; document.getElementById('gnum-<%= s.key %>').value=this.value;"
+                        style="flex: 1; accent-color: #2563eb; height: 4px; cursor: pointer;">
+                      <span style="font-size: 0.7rem; color: #94a3b8;"><%= s.max %></span>
+                      <input type="number" id="gnum-<%= s.key %>"
+                        min="<%= s.min %>" max="<%= s.max %>"
+                        value="<%= val %>"
+                        oninput="var v=Math.min(<%= s.max %>,Math.max(<%= s.min %>,parseInt(this.value)||<%= s.def %>)); document.getElementById('grange-<%= s.key %>').value=v; document.getElementById('glbl-<%= s.key %>').textContent=v;"
+                        onchange="document.getElementById('grange-<%= s.key %>').value=this.value;"
+                        style="width: 52px; padding: 4px 6px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 0.85rem; text-align: center;">
+                    </div>
+                    <div style="margin-top: 4px; font-size: 0.72rem; color: #94a3b8;">Default del sistema: <strong><%= s.def %><%= s.unit || 'pt' %></strong></div>
+                  </div>
+                  <% }); %>
+                </div>
+
+                <div style="margin-top: 20px; padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 0.78rem; color: #1e40af;">
+                  💡 Los cambios aplican a todos los envíos que usen este template. Si restauras el tamaño al valor default, borra el campo y guarda.
+                </div>
+              </div><!-- /guia-subtab-tamanos -->
 
               <div style="margin-top: 24px; padding-top: 20px; border-top: 2px solid #f1f5f9;">
                 <button type="submit" class="btn-primary">
@@ -2775,6 +3028,113 @@
           <% } %>
 
         </div><!-- /tab guia -->
+
+        <!-- ============================================ -->
+        <!-- TAB: PICTOGRAMAS                             -->
+        <!-- ============================================ -->
+        <div id="pictogramas" class="tab-content">
+
+          <div class="config-card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">
+                  <i data-lucide="image" style="width:24px;height:24px;color:#3b82f6;"></i>
+                  Pictogramas
+                </h2>
+                <p class="card-description">Símbolos de manejo de carga. Se asignan a cada envío al crearlo y se muestran en la etiqueta e impresión carta.</p>
+              </div>
+              <% if (isAdminOrSuper) { %>
+              <button type="button" onclick="document.getElementById('modal-subir-picto').style.display='flex'"
+                style="padding:8px 18px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                <i data-lucide="upload" style="width:15px;height:15px;"></i>
+                + Subir Pictograma
+              </button>
+              <% } %>
+            </div>
+
+            <% if (pictogramas.length === 0) { %>
+            <div style="border:2px dashed #e2e8f0;border-radius:10px;padding:48px;text-align:center;color:#94a3b8;">
+              <i data-lucide="image-off" style="width:40px;height:40px;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;"></i>
+              <p style="font-weight:700;font-size:1rem;margin-bottom:4px;">No hay pictogramas todavía</p>
+              <% if (isAdminOrSuper) { %>
+              <p style="font-size:0.85rem;">Sube el primer pictograma con el botón de arriba.</p>
+              <% } %>
+            </div>
+            <% } else { %>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-top:8px;">
+              <% pictogramas.forEach(p => { %>
+              <div style="border:2px solid <%= p.activo ? '#e2e8f0' : '#fecaca' %>;border-radius:12px;padding:16px;text-align:center;background:<%= p.activo ? 'white' : '#fff5f5' %>;">
+                <img src="<%= p.imagen_url %>" alt="<%= p.nombre %>"
+                  style="width:80px;height:80px;object-fit:contain;margin-bottom:10px;filter:grayscale(100%) contrast(1.3);">
+                <p style="font-size:0.85rem;font-weight:700;color:#1e293b;margin-bottom:4px;line-height:1.2;"><%= p.nombre %></p>
+                <% if (!p.activo) { %>
+                <span style="font-size:0.72rem;color:#dc2626;font-weight:700;display:block;margin-bottom:8px;">INACTIVO</span>
+                <% } %>
+                <% if (isAdminOrSuper) { %>
+                <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;">
+                  <form action="/pictogramas/<%= p.id %>/toggle-activo" method="POST" style="margin:0;">
+                    <button type="submit"
+                      style="padding:5px 10px;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;background:<%= p.activo ? '#f1f5f9' : '#dcfce7' %>;color:<%= p.activo ? '#64748b' : '#166534' %>;">
+                      <%= p.activo ? 'Desactivar' : 'Activar' %>
+                    </button>
+                  </form>
+                  <% if (isAdmin) { %>
+                  <form action="/pictogramas/<%= p.id %>/eliminar" method="POST" style="margin:0;"
+                    onsubmit="return confirm('¿Eliminar «<%= p.nombre %>»? Se desasignará de todos los envíos.')">
+                    <button type="submit"
+                      style="padding:5px 10px;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;background:#fee2e2;color:#dc2626;">
+                      Eliminar
+                    </button>
+                  </form>
+                  <% } %>
+                </div>
+                <% } %>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Modal: Subir pictograma -->
+          <% if (isAdminOrSuper) { %>
+          <div id="modal-subir-picto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+            <div style="background:white;border-radius:16px;padding:32px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:1.1rem;font-weight:800;color:#1e293b;">Subir Pictograma</h3>
+                <button type="button" onclick="document.getElementById('modal-subir-picto').style.display='none'"
+                  style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:#94a3b8;">&times;</button>
+              </div>
+              <form action="/pictogramas/subir" method="POST" enctype="multipart/form-data">
+                <div style="margin-bottom:16px;">
+                  <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:6px;">Nombre *</label>
+                  <input type="text" name="nombre" required placeholder="Ej: Frágil, Este lado arriba, Mantener seco..."
+                    style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.9rem;">
+                </div>
+                <div style="margin-bottom:20px;">
+                  <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:6px;">Imagen *</label>
+                  <input type="file" name="imagen" accept="image/*" required
+                    style="width:100%;padding:8px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.85rem;">
+                  <p style="font-size:0.78rem;color:#94a3b8;margin-top:4px;">PNG, JPG, SVG, WEBP — máx. 5 MB.</p>
+                  <div style="margin-top:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;font-size:0.78rem;color:#92400e;line-height:1.5;">
+                    💡 <strong>Recomendación:</strong> Usa imágenes cuadradas de <strong>200 × 200 px</strong> mínimo (idealmente 400 × 400 px) en fondo transparente o blanco, en blanco y negro para mejor contraste al imprimir. Formatos vectoriales (SVG) o PNG con alta resolución dan mejores resultados en la etiqueta térmica.
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                  <button type="button" onclick="document.getElementById('modal-subir-picto').style.display='none'"
+                    style="padding:10px 20px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                    Cancelar
+                  </button>
+                  <button type="submit"
+                    style="padding:10px 20px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">
+                    Subir
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <% } %>
+
+        </div><!-- /tab pictogramas -->
         <% } %>
 
         <!-- ============================================ -->
@@ -3447,20 +3807,30 @@
         el.style.display = 'none';
       }
     }
+    function switchEtqSubtab(tab) {
+      const tabs = ['elementos', 'textos', 'tamanos'];
+      tabs.forEach(function(t) {
+        const el  = document.getElementById('etq-subtab-' + t);
+        const btn = document.getElementById('etq-subtab-btn-' + t);
+        if (!el || !btn) return;
+        const active = t === tab;
+        el.style.display     = active ? '' : 'none';
+        btn.style.background = active ? '#2563eb' : 'transparent';
+        btn.style.color      = active ? 'white'   : '#64748b';
+        btn.style.boxShadow  = active ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
+      });
+    }
     function switchGuiaSubtab(tab) {
-      const elemEl  = document.getElementById('guia-subtab-elementos');
-      const textEl  = document.getElementById('guia-subtab-textos');
-      const btnElem = document.getElementById('guia-subtab-btn-elementos');
-      const btnText = document.getElementById('guia-subtab-btn-textos');
-      if (!elemEl) return;
-      const isElem = tab === 'elementos';
-      elemEl.style.display = isElem ? '' : 'none';
-      textEl.style.display = isElem ? 'none' : '';
-      [btnElem, btnText].forEach((btn, i) => {
-        const isActive = isElem ? i === 0 : i === 1;
-        btn.style.background   = isActive ? '#2563eb' : 'transparent';
-        btn.style.color        = isActive ? 'white'   : '#64748b';
-        btn.style.boxShadow    = isActive ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
+      const tabs = ['elementos', 'textos', 'tamanos'];
+      tabs.forEach(function(t) {
+        const el  = document.getElementById('guia-subtab-' + t);
+        const btn = document.getElementById('guia-subtab-btn-' + t);
+        if (!el || !btn) return;
+        const active = t === tab;
+        el.style.display     = active ? '' : 'none';
+        btn.style.background = active ? '#2563eb' : 'transparent';
+        btn.style.color      = active ? 'white'   : '#64748b';
+        btn.style.boxShadow  = active ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
       });
     }
     function abrirModalNuevoGuiaTpl() {

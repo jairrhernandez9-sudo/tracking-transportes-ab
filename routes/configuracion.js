@@ -153,6 +153,9 @@ router.get('/', async (req, res) => {
     const direccionesDestino  = todasDirecciones.filter(d => d.tipo === 'destino' || d.tipo === 'ambos');
     const etiquetaTemplates = await obtenerTemplates();
     const guiaTemplates     = await obtenerGuiaTemplates();
+    const [pictogramas] = await db.query(
+      'SELECT * FROM pictogramas ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
 
     // Leer pagina_inicio del usuario actual
     const [[usuarioRow]] = await db.query(
@@ -174,6 +177,7 @@ router.get('/', async (req, res) => {
       direccionesDestino,
       etiquetaTemplates,
       guiaTemplates,
+      pictogramas: pictogramas || [],
       paginaInicio,
       success: req.query.success,
       error: req.query.error,
@@ -771,6 +775,17 @@ const TEMPLATE_FIELDS = [
   'obligatorio_dest_contacto','obligatorio_dest_telefono',
   'obligatorio_dest_nombre','obligatorio_dest_direccion','obligatorio_dest_referencia'
 ];
+// Campos de texto editables del template de etiqueta (no son boolean)
+const TEMPLATE_TEXT_FIELDS = [
+  'texto_entregar_a','texto_peso','texto_entrega_estimada','texto_ref_cliente','texto_descripcion',
+  'texto_fecha_emision','texto_etiqueta'
+];
+// Campos de tamaño (TINYINT, NULL = usar default CSS)
+const TEMPLATE_SIZE_FIELDS = [
+  'size_tracking','size_ruta_ciudad','size_dest_nombre','size_dest_direccion','size_empresa_nombre',
+  'size_eslogan','size_tipo_servicio','size_detalle_valor','size_descripcion','size_dest_contacto',
+  'size_barra_contacto','size_ruta_etiqueta','size_detalle_etiqueta','size_cab_fecha','size_cab_num'
+];
 
 // API: listar templates (JSON)
 router.get('/api/etiqueta/templates', isAuthenticated, async (req, res) => {
@@ -799,34 +814,18 @@ router.post('/etiqueta/templates/nuevo', isAuthenticated, async (req, res) => {
       values[f] = req.body[f] === 'on' ? 1 : 0;
     }
 
+    const boolCols  = TEMPLATE_FIELDS.join(', ');
+    const textCols  = TEMPLATE_TEXT_FIELDS.join(', ');
+    const sizeCols  = TEMPLATE_SIZE_FIELDS.join(', ');
+    const boolVals  = TEMPLATE_FIELDS.map(f => values[f]);
+    const textVals  = TEMPLATE_TEXT_FIELDS.map(f => req.body[f] || null);
+    const sizeVals  = TEMPLATE_SIZE_FIELDS.map(f => parseInt(req.body[f]) || null);
+    const placeholders = [...TEMPLATE_FIELDS, ...TEMPLATE_TEXT_FIELDS, ...TEMPLATE_SIZE_FIELDS].map(() => '?').join(', ');
+
     await db.query(`
-      INSERT INTO etiqueta_templates
-        (nombre, mostrar_logo, mostrar_eslogan, mostrar_telefono, mostrar_telefono_adicional,
-         mostrar_email, mostrar_sitio_web, mostrar_rfc, mostrar_direccion_fiscal,
-         mostrar_barcode, mostrar_qr, mostrar_ruta, mostrar_descripcion,
-         mostrar_dest_contacto, mostrar_dest_telefono,
-         mostrar_dest_nombre, mostrar_dest_direccion, mostrar_dest_referencia,
-         obligatorio_logo, obligatorio_eslogan, obligatorio_telefono, obligatorio_telefono_adicional,
-         obligatorio_email, obligatorio_sitio_web, obligatorio_rfc, obligatorio_direccion_fiscal,
-         obligatorio_barcode, obligatorio_qr, obligatorio_ruta, obligatorio_descripcion,
-         obligatorio_dest_contacto, obligatorio_dest_telefono,
-         obligatorio_dest_nombre, obligatorio_dest_direccion, obligatorio_dest_referencia,
-         creado_por)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      nombre.trim(),
-      values.mostrar_logo, values.mostrar_eslogan, values.mostrar_telefono, values.mostrar_telefono_adicional,
-      values.mostrar_email, values.mostrar_sitio_web, values.mostrar_rfc, values.mostrar_direccion_fiscal,
-      values.mostrar_barcode, values.mostrar_qr, values.mostrar_ruta, values.mostrar_descripcion,
-      values.mostrar_dest_contacto, values.mostrar_dest_telefono,
-      values.mostrar_dest_nombre, values.mostrar_dest_direccion, values.mostrar_dest_referencia,
-      values.obligatorio_logo, values.obligatorio_eslogan, values.obligatorio_telefono, values.obligatorio_telefono_adicional,
-      values.obligatorio_email, values.obligatorio_sitio_web, values.obligatorio_rfc, values.obligatorio_direccion_fiscal,
-      values.obligatorio_barcode, values.obligatorio_qr, values.obligatorio_ruta, values.obligatorio_descripcion,
-      values.obligatorio_dest_contacto, values.obligatorio_dest_telefono,
-      values.obligatorio_dest_nombre, values.obligatorio_dest_direccion, values.obligatorio_dest_referencia,
-      req.session.userId
-    ]);
+      INSERT INTO etiqueta_templates (nombre, ${boolCols}, ${textCols}, ${sizeCols}, creado_por)
+      VALUES (?, ${placeholders}, ?)
+    `, [nombre.trim(), ...boolVals, ...textVals, ...sizeVals, req.session.userId]);
 
     res.redirect('/configuracion?success=template_creado&tab=etiqueta');
   } catch (error) {
@@ -845,12 +844,16 @@ router.post('/etiqueta/templates/:id/guardar', isAuthenticated, async (req, res)
     const { id } = req.params;
     const { nombre } = req.body;
 
-    const sets = TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
-    const vals = TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
+    const boolSets = TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
+    const textSets = TEMPLATE_TEXT_FIELDS.map(f => `${f} = ?`).join(', ');
+    const sizeSets = TEMPLATE_SIZE_FIELDS.map(f => `${f} = ?`).join(', ');
+    const boolVals = TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
+    const textVals = TEMPLATE_TEXT_FIELDS.map(f => req.body[f] || null);
+    const sizeVals = TEMPLATE_SIZE_FIELDS.map(f => parseInt(req.body[f]) || null);
 
     await db.query(
-      `UPDATE etiqueta_templates SET nombre = ?, ${sets} WHERE id = ?`,
-      [nombre || 'Sin nombre', ...vals, id]
+      `UPDATE etiqueta_templates SET nombre = ?, ${boolSets}, ${textSets}, ${sizeSets} WHERE id = ?`,
+      [nombre || 'Sin nombre', ...boolVals, ...textVals, ...sizeVals, id]
     );
 
     res.redirect('/configuracion?success=template_guardado&tab=etiqueta');
@@ -889,6 +892,7 @@ const GUIA_TEMPLATE_FIELDS = [
   'mostrar_referencia_cliente','mostrar_recibido_por','mostrar_operador',
   'mostrar_firma_final','mostrar_pie_datos','mostrar_disclaimer',
   'mostrar_col_volumen','mostrar_col_peso_facturado','mostrar_col_servicios','mostrar_col_importe',
+  'mostrar_obs_operador','mostrar_obs_recibido',
   'obligatorio_logo','obligatorio_rfc','obligatorio_telefono','obligatorio_sitio_web','obligatorio_barcode',
   'obligatorio_seccion_remitente','obligatorio_seccion_facturar','obligatorio_seccion_destinatario',
   'obligatorio_clausula_seguro','obligatorio_retorno_documentos','obligatorio_condiciones_pago',
@@ -896,12 +900,18 @@ const GUIA_TEMPLATE_FIELDS = [
   'obligatorio_referencia_cliente','obligatorio_recibido_por','obligatorio_operador',
   'obligatorio_firma_final','obligatorio_pie_datos','obligatorio_disclaimer',
   'obligatorio_col_volumen','obligatorio_col_peso_facturado','obligatorio_col_servicios','obligatorio_col_importe',
+  'obligatorio_obs_operador','obligatorio_obs_recibido',
   'mostrar_remitente_nombre','mostrar_remitente_direccion','mostrar_remitente_telefono',
   'mostrar_facturar_nombre','mostrar_facturar_direccion','mostrar_facturar_contacto','mostrar_facturar_telefono','mostrar_facturar_email','mostrar_facturar_rfc',
   'mostrar_destinatario_nombre','mostrar_destinatario_direccion',
   'obligatorio_remitente_nombre','obligatorio_remitente_direccion','obligatorio_remitente_telefono',
   'obligatorio_facturar_nombre','obligatorio_facturar_direccion','obligatorio_facturar_contacto','obligatorio_facturar_telefono','obligatorio_facturar_email','obligatorio_facturar_rfc',
   'obligatorio_destinatario_nombre','obligatorio_destinatario_direccion'
+];
+
+const GUIA_SIZE_FIELDS = [
+  'size_guia_titulo','size_tracking_big','size_company_name','size_seccion_content','size_cargo_td',
+  'size_guia_servicio','size_seccion_label','size_cargo_th','size_footer_content','size_pago_big','size_msg_row'
 ];
 
 router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
@@ -911,20 +921,25 @@ router.post('/guia/templates/nuevo', isAuthenticated, async (req, res) => {
   }
   try {
     const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4,
-            etiqueta_col_descripcion, etiqueta_operador } = req.body;
+            etiqueta_col_descripcion, etiqueta_operador,
+            etiqueta_obs_operador, etiqueta_recibido_por, etiqueta_obs_recibido } = req.body;
     if (!nombre || nombre.trim() === '') {
       return res.redirect('/configuracion?error=nombre_requerido&tab=guia');
     }
-    const cols = GUIA_TEMPLATE_FIELDS.join(', ');
-    const placeholders = GUIA_TEMPLATE_FIELDS.map(() => '?').join(', ');
-    const vals = GUIA_TEMPLATE_FIELDS.map(() => 1); // defaults: todos 1
+    const cols = [...GUIA_TEMPLATE_FIELDS, ...GUIA_SIZE_FIELDS].join(', ');
+    const placeholders = [...GUIA_TEMPLATE_FIELDS, ...GUIA_SIZE_FIELDS].map(() => '?').join(', ');
+    const vals = [
+      ...GUIA_TEMPLATE_FIELDS.map(() => 1),
+      ...GUIA_SIZE_FIELDS.map(() => null)
+    ];
     await db.query(
-      `INSERT INTO guia_templates (nombre, ${cols}, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4, etiqueta_col_descripcion, etiqueta_operador, creado_por)
-       VALUES (?, ${placeholders}, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO guia_templates (nombre, ${cols}, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4, etiqueta_col_descripcion, etiqueta_operador, etiqueta_obs_operador, etiqueta_recibido_por, etiqueta_obs_recibido, creado_por)
+       VALUES (?, ${placeholders}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nombre.trim(), ...vals,
         descripcion_servicio || null, titulo_guia || null,
         mensaje_1 || null, mensaje_2 || null, mensaje_3 || null, mensaje_4 || null,
         etiqueta_col_descripcion || null, etiqueta_operador || null,
+        etiqueta_obs_operador || null, etiqueta_recibido_por || null, etiqueta_obs_recibido || null,
         req.session.userId]
     );
     res.redirect('/configuracion?success=guia_template_creado&tab=guia');
@@ -942,19 +957,28 @@ router.post('/guia/templates/:id/guardar', isAuthenticated, async (req, res) => 
   try {
     const { id } = req.params;
     const { nombre, descripcion_servicio, titulo_guia, mensaje_1, mensaje_2, mensaje_3, mensaje_4,
-            etiqueta_col_descripcion, etiqueta_operador } = req.body;
-    const sets = GUIA_TEMPLATE_FIELDS.map(f => `${f} = ?`).join(', ');
-    const vals = GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0);
+            etiqueta_col_descripcion, etiqueta_operador,
+            etiqueta_obs_operador, etiqueta_recibido_por, etiqueta_obs_recibido } = req.body;
+    const sets = [
+      ...GUIA_TEMPLATE_FIELDS.map(f => `${f} = ?`),
+      ...GUIA_SIZE_FIELDS.map(f => `${f} = ?`)
+    ].join(', ');
+    const vals = [
+      ...GUIA_TEMPLATE_FIELDS.map(f => req.body[f] === 'on' ? 1 : 0),
+      ...GUIA_SIZE_FIELDS.map(f => parseInt(req.body[f]) || null)
+    ];
     await db.query(
       `UPDATE guia_templates SET nombre = ?, ${sets},
         descripcion_servicio = ?, titulo_guia = ?,
         mensaje_1 = ?, mensaje_2 = ?, mensaje_3 = ?, mensaje_4 = ?,
-        etiqueta_col_descripcion = ?, etiqueta_operador = ?
+        etiqueta_col_descripcion = ?, etiqueta_operador = ?,
+        etiqueta_obs_operador = ?, etiqueta_recibido_por = ?, etiqueta_obs_recibido = ?
        WHERE id = ?`,
       [nombre || 'Sin nombre', ...vals,
         descripcion_servicio || null, titulo_guia || null,
         mensaje_1 || null, mensaje_2 || null, mensaje_3 || null, mensaje_4 || null,
         etiqueta_col_descripcion || null, etiqueta_operador || null,
+        etiqueta_obs_operador || null, etiqueta_recibido_por || null, etiqueta_obs_recibido || null,
         id]
     );
     res.redirect('/configuracion?success=guia_template_guardado&tab=guia');

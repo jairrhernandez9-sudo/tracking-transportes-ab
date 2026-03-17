@@ -76,8 +76,14 @@ router.get('/', isAuthenticated, async (req, res) => {
     const page  = Math.max(1, parseInt(req.query.page) || 1);
     const limit = 25;
 
+    const esOperador = req.session.userRole === 'operador';
     let whereClause = ' WHERE 1=1';
     const params = [];
+
+    if (esOperador) {
+      whereClause += ` AND e.cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ?)`;
+      params.push(req.session.userId);
+    }
 
     if (buscar) {
       whereClause += ` AND (
@@ -207,6 +213,13 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     );
     guiasRelacionadas = relacionadas;
 
+    const [pictogramasEnvio] = await db.query(
+      `SELECT p.id FROM envio_pictogramas ep
+       JOIN pictogramas p ON p.id = ep.pictograma_id
+       WHERE ep.envio_id = ? AND p.activo = 1 LIMIT 1`, [id]
+    ).catch(() => [[]]);
+    const tienePictogramas = pictogramasEnvio.length > 0;
+
     res.render('envios/detalle', {
       title: 'Detalle del Envío',
       user: {
@@ -220,6 +233,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       items,
       guiaOrigen,
       guiasRelacionadas,
+      tienePictogramas,
       success
     });
   } catch (error) {
@@ -274,14 +288,18 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
     // Cargar template de guía asignado al cliente
     const guiaCfgDefaults = {
       mostrar_logo:1,mostrar_rfc:1,mostrar_telefono:1,mostrar_sitio_web:1,mostrar_barcode:1,
-      mostrar_seccion_remitente:1,mostrar_seccion_facturar:1,mostrar_seccion_destinatario:1,
+      mostrar_seccion_remitente:1,mostrar_remitente_nombre:1,mostrar_remitente_direccion:1,mostrar_remitente_telefono:1,
+      mostrar_seccion_facturar:1,mostrar_facturar_nombre:1,mostrar_facturar_direccion:1,mostrar_facturar_contacto:1,mostrar_facturar_telefono:1,mostrar_facturar_email:1,mostrar_facturar_rfc:1,
+      mostrar_seccion_destinatario:1,mostrar_destinatario_nombre:1,mostrar_destinatario_direccion:1,
       mostrar_clausula_seguro:1,mostrar_retorno_documentos:1,mostrar_condiciones_pago:1,
       mostrar_fecha_emision:1,mostrar_observaciones:1,mostrar_fecha_entrega:1,
       mostrar_referencia_cliente:1,mostrar_recibido_por:1,mostrar_operador:1,
       mostrar_firma_final:1,mostrar_pie_datos:1,mostrar_disclaimer:1,
       mostrar_col_volumen:1,mostrar_col_peso_facturado:1,mostrar_col_servicios:1,mostrar_col_importe:1,
       obligatorio_logo:0,obligatorio_rfc:0,obligatorio_telefono:0,obligatorio_sitio_web:0,obligatorio_barcode:0,
-      obligatorio_seccion_remitente:0,obligatorio_seccion_facturar:0,obligatorio_seccion_destinatario:0,
+      obligatorio_seccion_remitente:0,obligatorio_remitente_nombre:0,obligatorio_remitente_direccion:0,obligatorio_remitente_telefono:0,
+      obligatorio_seccion_facturar:0,obligatorio_facturar_nombre:0,obligatorio_facturar_direccion:0,obligatorio_facturar_contacto:0,obligatorio_facturar_telefono:0,obligatorio_facturar_email:0,obligatorio_facturar_rfc:0,
+      obligatorio_seccion_destinatario:0,obligatorio_destinatario_nombre:0,obligatorio_destinatario_direccion:0,
       obligatorio_clausula_seguro:0,obligatorio_retorno_documentos:0,obligatorio_condiciones_pago:0,
       obligatorio_fecha_emision:0,obligatorio_observaciones:0,obligatorio_fecha_entrega:0,
       obligatorio_referencia_cliente:0,obligatorio_recibido_por:0,obligatorio_operador:0,
@@ -295,7 +313,25 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       mensaje_3: null,
       mensaje_4: null,
       etiqueta_col_descripcion: null,
-      etiqueta_operador: null
+      etiqueta_operador: null,
+      etiqueta_obs_operador: null,
+      etiqueta_recibido_por: null,
+      etiqueta_obs_recibido: null,
+      // Toggles adicionales
+      mostrar_obs_operador: 1, obligatorio_obs_operador: 0,
+      mostrar_obs_recibido: 1, obligatorio_obs_recibido: 0,
+      // Tamaños de texto (null = usar CSS default)
+      size_guia_titulo: null,
+      size_tracking_big: null,
+      size_company_name: null,
+      size_seccion_content: null,
+      size_cargo_td: null,
+      size_guia_servicio: null,
+      size_seccion_label: null,
+      size_cargo_th: null,
+      size_footer_content: null,
+      size_pago_big: null,
+      size_msg_row: null
     };
     let guiaCfg = { ...guiaCfgDefaults };
     if (envio.cliente_id) {
@@ -304,8 +340,10 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
         const [[tplGuia]] = await db.query('SELECT * FROM guia_templates WHERE id = ?', [clienteGuia.template_guia_id]);
         if (tplGuia) {
           Object.keys(guiaCfgDefaults).forEach(k => {
-            if (k === 'descripcion_servicio' || k === 'titulo_guia' || k.startsWith('mensaje_') || k === 'etiqueta_col_descripcion' || k === 'etiqueta_operador') {
+            if (k === 'descripcion_servicio' || k === 'titulo_guia' || k.startsWith('mensaje_') || k.startsWith('etiqueta_')) {
               guiaCfg[k] = tplGuia[k] || null;
+            } else if (k.startsWith('size_')) {
+              guiaCfg[k] = tplGuia[k] ? parseInt(tplGuia[k]) : null;
             } else {
               guiaCfg[k] = !!tplGuia[k];
             }
@@ -367,23 +405,34 @@ router.post('/api/lugar-expedicion', isAuthenticated, async (req, res) => {
   }
 });
 
+// Alias /nuevo → /nuevo/formulario (preserva query string)
+router.get('/nuevo', isAuthenticated, (req, res) => {
+  const qs = new URLSearchParams(req.query).toString();
+  res.redirect('/envios/nuevo/formulario' + (qs ? '?' + qs : ''));
+});
+
 // Formulario crear nuevo envío
 router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
   try {
-    const [clientes] = await db.query(`
-      SELECT
-        id,
-        nombre_empresa,
-        prefijo_tracking,
-        ultimo_numero_tracking,
-        CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
-      FROM clientes
-      WHERE activo = 1 AND eliminado_en IS NULL
-      ORDER BY nombre_empresa
-    `);
+    const esOperador = req.session.userRole === 'operador';
+    const clientesQuery = esOperador
+      ? `SELECT c.id, c.nombre_empresa, c.prefijo_tracking, c.ultimo_numero_tracking,
+           CONCAT(c.prefijo_tracking, '-', LPAD(c.ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+         FROM clientes c
+         INNER JOIN cliente_operadores co ON co.cliente_id = c.id
+         WHERE c.activo = 1 AND c.eliminado_en IS NULL AND co.usuario_id = ?
+         ORDER BY c.nombre_empresa`
+      : `SELECT id, nombre_empresa, prefijo_tracking, ultimo_numero_tracking,
+           CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+         FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa`;
+    const clientesParams = esOperador ? [req.session.userId] : [];
+    const [clientes] = await db.query(clientesQuery, clientesParams);
 
     const [[usuarioRow]] = await db.query('SELECT ultimo_cliente_id FROM usuarios WHERE id = ?', [req.session.userId]);
-    const ultimoClienteId = usuarioRow?.ultimo_cliente_id || null;
+    const ultimoClienteId = parseInt(req.query.cliente_id) || usuarioRow?.ultimo_cliente_id || null;
+    const [pictogramas] = await db.query(
+      'SELECT id, nombre, imagen_url FROM pictogramas WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
 
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
@@ -395,6 +444,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
       },
       clientes,
       ultimoClienteId,
+      pictogramas: pictogramas || [],
       error: null
     });
   } catch (error) {
@@ -445,17 +495,18 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
     );
     
 if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino_ciudad) {
-        const [clientes] = await db.query(`
-        SELECT 
-          id,
-          nombre_empresa,
-          prefijo_tracking,
-          ultimo_numero_tracking,
-          CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
-        FROM clientes 
-        WHERE activo = 1 AND eliminado_en IS NULL 
-        ORDER BY nombre_empresa
-      `);
+        const esOp = req.session.userRole === 'operador';
+        const [clientes] = await db.query(
+          esOp
+            ? `SELECT c.id, c.nombre_empresa, c.prefijo_tracking, c.ultimo_numero_tracking,
+                 CONCAT(c.prefijo_tracking, '-', LPAD(c.ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+               FROM clientes c INNER JOIN cliente_operadores co ON co.cliente_id = c.id
+               WHERE c.activo = 1 AND c.eliminado_en IS NULL AND co.usuario_id = ? ORDER BY c.nombre_empresa`
+            : `SELECT id, nombre_empresa, prefijo_tracking, ultimo_numero_tracking,
+                 CONCAT(prefijo_tracking, '-', LPAD(ultimo_numero_tracking + 1, 5, '0')) as proximo_tracking
+               FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa`,
+          esOp ? [req.session.userId] : []
+        );
       return res.render('envios/nuevo', {
         title: 'Crear Nuevo Envío',
         user: {
@@ -561,6 +612,17 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       conn.release();
     }
 
+    // Guardar pictogramas seleccionados
+    const pictoIds = [].concat(req.body.pictogramas || []).map(Number).filter(Boolean);
+    if (pictoIds.length > 0) {
+      for (const pid of pictoIds) {
+        await db.query(
+          'INSERT IGNORE INTO envio_pictogramas (envio_id, pictograma_id) VALUES (?, ?)',
+          [envioId, pid]
+        );
+      }
+    }
+
     // Guardar último cliente usado por este usuario
     await db.query('UPDATE usuarios SET ultimo_cliente_id = ? WHERE id = ?', [cliente_id, req.session.userId]);
 
@@ -612,6 +674,14 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
     const [itemsEditar] = await db.query(
       'SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]
     );
+    const [pictogramas] = await db.query(
+      'SELECT id, nombre, imagen_url FROM pictogramas WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
+    const [pictoEnvio] = await db.query(
+      'SELECT pictograma_id FROM envio_pictogramas WHERE envio_id = ?', [id]
+    ).catch(() => [[]]);
+    const pictoIdsEnvio = (pictoEnvio || []).map(r => r.pictograma_id);
+
     res.render('envios/editar', {
       title: 'Editar Envío',
       user: {
@@ -623,6 +693,8 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       envio: envios[0],
       clientes,
       items: itemsEditar,
+      pictogramas: pictogramas || [],
+      pictoIdsEnvio,
       error: null
     });
   } catch (error) {
@@ -716,6 +788,16 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
       throw txErr;
     } finally {
       conn.release();
+    }
+
+    // Actualizar pictogramas (borrar los actuales y reinsertar los seleccionados)
+    await db.query('DELETE FROM envio_pictogramas WHERE envio_id = ?', [id]);
+    const pictoIdsEdit = [].concat(req.body.pictogramas || []).map(Number).filter(Boolean);
+    for (const pid of pictoIdsEdit) {
+      await db.query(
+        'INSERT IGNORE INTO envio_pictogramas (envio_id, pictograma_id) VALUES (?, ?)',
+        [id, pid]
+      );
     }
 
     console.log('✅ Envío actualizado:', id);
@@ -1048,6 +1130,19 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
               // Obligatorio fuerza mostrar
               if (configuracion['obligatorio_' + k]) configuracion['mostrar_' + k] = true;
             });
+            // Textos editables del template
+            const textKeys = [
+              'texto_entregar_a','texto_peso','texto_entrega_estimada','texto_ref_cliente',
+              'texto_descripcion','texto_fecha_emision','texto_etiqueta'
+            ];
+            textKeys.forEach(k => { if (tpl[k]) configuracion[k] = tpl[k]; });
+            // Tamaños de texto del template
+            const sizeKeys = [
+              'size_tracking','size_ruta_ciudad','size_dest_nombre','size_dest_direccion','size_empresa_nombre',
+              'size_eslogan','size_tipo_servicio','size_detalle_valor','size_descripcion','size_dest_contacto',
+              'size_barra_contacto','size_ruta_etiqueta','size_detalle_etiqueta','size_cab_fecha','size_cab_num'
+            ];
+            sizeKeys.forEach(k => { if (tpl[k]) configuracion[k] = tpl[k]; });
           }
         }
       }
@@ -1074,6 +1169,15 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       );
       guiasRelEtiq = comps;
     }
+    // Pictogramas del envío
+    const [pictosEnvio] = await db.query(`
+      SELECT p.id, p.nombre, p.imagen_url
+      FROM envio_pictogramas ep
+      JOIN pictogramas p ON p.id = ep.pictograma_id
+      WHERE ep.envio_id = ? AND p.activo = 1
+      ORDER BY p.orden ASC, p.nombre ASC
+    `, [id]).catch(() => [[]]);
+
     res.render('envios/etiquetaT', {
       title: 'Etiqueta de Envío',
       envio: envioData,
@@ -1082,6 +1186,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       configuracion: configuracion,
       items: itemsEtiq,
       guiasRelacionadas: guiasRelEtiq,
+      pictogramas: pictosEnvio || [],
       user: {
         nombre: req.session.userName || 'Usuario',
         email: req.session.userEmail || 'usuario@sistema.com',
@@ -1094,6 +1199,34 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
   }
 });
 
+
+// Vista de carta para imprimir pictogramas
+router.get('/:id/pictograma-carta', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [envios] = await db.query('SELECT * FROM envios WHERE id = ?', [id]);
+    if (!envios.length) return res.status(404).send('Envío no encontrado');
+    const envio = envios[0];
+
+    const [pictogramas] = await db.query(`
+      SELECT p.id, p.nombre, p.imagen_url
+      FROM envio_pictogramas ep
+      JOIN pictogramas p ON p.id = ep.pictograma_id
+      WHERE ep.envio_id = ? AND p.activo = 1
+      ORDER BY p.orden ASC, p.nombre ASC
+    `, [id]);
+
+    res.render('envios/pictograma-carta', {
+      title: 'Pictogramas - ' + envio.numero_tracking,
+      envio,
+      pictogramas: pictogramas || [],
+      user: { nombre: req.session.userName, rol: req.session.userRole }
+    });
+  } catch (error) {
+    console.error('Error al cargar pictograma-carta:', error);
+    res.status(500).send('Error al cargar la vista');
+  }
+});
 
 // Marcar que la etiqueta fue impresa con modificaciones de toggles
 router.post('/:id/marcar-etiqueta-modificada', isAuthenticated, async (req, res) => {

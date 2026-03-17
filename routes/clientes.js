@@ -109,21 +109,24 @@ router.get('/api/verificar-prefijo', isAuthenticated, async (req, res) => {
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     const { buscar, orderBy } = req.query;
-    
-    let query = 'SELECT * FROM clientes WHERE eliminado_en IS NULL';
-    const params = [];
-    
+    const esOperador = req.session.userRole === 'operador';
+
+    let query = esOperador
+      ? 'SELECT c.* FROM clientes c INNER JOIN cliente_operadores co ON co.cliente_id = c.id WHERE c.eliminado_en IS NULL AND co.usuario_id = ?'
+      : 'SELECT * FROM clientes WHERE eliminado_en IS NULL';
+    const params = esOperador ? [req.session.userId] : [];
+
     // Filtro de búsqueda
     if (buscar) {
-      query += ` AND (nombre_empresa LIKE ? OR contacto LIKE ? OR email LIKE ? OR telefono LIKE ?)`;
+      query += ` AND (${esOperador ? 'c.' : ''}nombre_empresa LIKE ? OR ${esOperador ? 'c.' : ''}contacto LIKE ? OR ${esOperador ? 'c.' : ''}email LIKE ? OR ${esOperador ? 'c.' : ''}telefono LIKE ?)`;
       const searchTerm = `%${buscar}%`;
       params.push(searchTerm, searchTerm, searchTerm, searchTerm);
     }
-    
+
     // Ordenamiento
     const order = orderBy === 'antiguo' ? 'ASC' : 'DESC';
-    query += ` ORDER BY fecha_creacion ${order}`;
-    
+    query += ` ORDER BY ${esOperador ? 'c.' : ''}fecha_creacion ${order}`;
+
     const [clientes] = await db.query(query, params);
     
     // Obtener cantidad de envíos por cliente
@@ -160,6 +163,7 @@ router.get('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => {
   const [guiaTemplates] = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
   const [[cfgCredito]] = await db.query("SELECT valor FROM configuracion_sistema WHERE clave = 'credito_habilitado'").catch(() => [[null]]);
   const creditoHabilitado = !cfgCredito || cfgCredito.valor !== 'false';
+  const [operadores] = await db.query("SELECT id, nombre, email FROM usuarios WHERE rol = 'operador' AND activo = 1 ORDER BY nombre ASC").catch(() => [[]]);
   res.render('clientes/nuevo', {
     title: 'Nuevo Cliente',
     user: {
@@ -170,6 +174,7 @@ router.get('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => {
     etiquetaTemplates,
     guiaTemplates,
     creditoHabilitado,
+    operadores,
     error: null
   });
 });
@@ -265,13 +270,20 @@ router.post('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => 
     const tplId = parseInt(template_etiqueta_id) || null;
     const guiaTplId = parseInt(template_guia_id) || null;
     const metodoPago = ['PUE', 'PPD'].includes(metodo_pago_defecto) ? metodo_pago_defecto : 'PPD';
-    await db.query(
+    const [result] = await db.query(
       `INSERT INTO clientes
       (nombre_empresa, contacto, telefono, email, direccion, prefijo_tracking, ultimo_numero_tracking, template_etiqueta_id, template_guia_id, metodo_pago_defecto)
        VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
       [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplId, guiaTplId, metodoPago]
     );
-    
+
+    // Asignar operadores seleccionados
+    const opIds = [].concat(req.body.operador_ids || []).map(Number).filter(Boolean);
+    if (opIds.length > 0) {
+      const rows = opIds.map(uid => [result.insertId, uid]);
+      await db.query('INSERT INTO cliente_operadores (cliente_id, usuario_id) VALUES ?', [rows]);
+    }
+
     res.redirect('/clientes?success=created');
     
   } catch (error) {
@@ -353,9 +365,11 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     
     // Obtener envíos del cliente
     const [envios] = await db.query(
-      `SELECT * FROM envios 
-       WHERE cliente_id = ? 
-       ORDER BY fecha_creacion DESC 
+      `SELECT e.*,
+        (SELECT COUNT(*) FROM envio_pictogramas ep WHERE ep.envio_id = e.id) AS tiene_pictogramas
+       FROM envios e
+       WHERE e.cliente_id = ?
+       ORDER BY e.fecha_creacion DESC
        LIMIT 10`,
       [id]
     );
@@ -416,6 +430,9 @@ router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res)
     const [guiaTemplates] = await db.query('SELECT id, nombre FROM guia_templates ORDER BY nombre ASC').catch(() => [[]]);
     const [[cfgCredito]] = await db.query("SELECT valor FROM configuracion_sistema WHERE clave = 'credito_habilitado'").catch(() => [[null]]);
     const creditoHabilitado = !cfgCredito || cfgCredito.valor !== 'false';
+    const [operadores] = await db.query("SELECT id, nombre, email FROM usuarios WHERE rol = 'operador' AND activo = 1 ORDER BY nombre ASC").catch(() => [[]]);
+    const [asignados] = await db.query('SELECT usuario_id FROM cliente_operadores WHERE cliente_id = ?', [id]).catch(() => [[]]);
+    const operadoresAsignados = asignados.map(r => r.usuario_id);
 
     res.render('clientes/editar', {
       title: 'Editar Cliente',
@@ -428,6 +445,8 @@ router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res)
       etiquetaTemplates,
       guiaTemplates,
       creditoHabilitado,
+      operadores,
+      operadoresAsignados,
       error: null
     });
     
@@ -559,6 +578,25 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res
       cliente: clientes[0],
       error: 'Error al actualizar el cliente'
     });
+  }
+});
+
+// ============================================
+// ASIGNAR OPERADORES A CLIENTE (admin/super)
+// ============================================
+router.post('/:id/asignar-operadores', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ids = [].concat(req.body.operador_ids || []).map(Number).filter(Boolean);
+    await db.query('DELETE FROM cliente_operadores WHERE cliente_id = ?', [id]);
+    if (ids.length > 0) {
+      const rows = ids.map(uid => [parseInt(id), uid]);
+      await db.query('INSERT INTO cliente_operadores (cliente_id, usuario_id) VALUES ?', [rows]);
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al asignar operadores:', error);
+    res.status(500).json({ success: false });
   }
 });
 

@@ -144,7 +144,7 @@
       padding: 3px 5px; display: block;
     }
     .footer-content { font-size: 8pt; padding: 6px 6px; min-height: 48px; line-height: 1.6; }
-    .footer-content.tall { min-height: 80px; }
+    .footer-content.tall { min-height: 120px; height: 100%; }
     .referencia-val { font-size: 12pt; font-weight: bold; }
 
     /* ── Expand footer sections to fill remaining page ── */
@@ -166,6 +166,19 @@
       padding: 4px 6px; text-align: center; line-height: 1.4;
     }
 
+    /* ── Tamaños dinámicos desde template ── */
+    .guia-titulo    { font-size: var(--sz-guia-titulo,    13pt)  !important; }
+    .guia-servicio  { font-size: var(--sz-guia-servicio,   8pt)  !important; }
+    .tracking-big   { font-size: var(--sz-tracking-big,   13pt)  !important; }
+    .company-name   { font-size: var(--sz-company-name,    9pt)  !important; }
+    .seccion-label  { font-size: var(--sz-seccion-label,   7pt)  !important; }
+    .seccion-content{ font-size: var(--sz-seccion-content, 7.5pt)!important; }
+    .cargo-th       { font-size: var(--sz-cargo-th,        7pt)  !important; }
+    .cargo-td       { font-size: var(--sz-cargo-td,        7.5pt)!important; }
+    .msg-row        { font-size: var(--sz-msg-row,         7.5pt)!important; }
+    .footer-content { font-size: var(--sz-footer-content,  8pt)  !important; }
+    .pago-big       { font-size: var(--sz-pago-big,        16pt) !important; }
+    .fecha-big      { font-size: var(--sz-pago-big,        16pt) !important; }
     /* ── Elemento oculto ── */
     .guia-hidden { display: none !important; }
 
@@ -221,6 +234,36 @@
   </style>
 </head>
 <body>
+
+<%
+  const _g = guiaCfg || {};
+  const szGuiaTitulo     = _g.size_guia_titulo     ? _g.size_guia_titulo + 'pt'     : '13pt';
+  const szGuiaServicio   = _g.size_guia_servicio   ? _g.size_guia_servicio + 'pt'   : '8pt';
+  const szTrackingBig    = _g.size_tracking_big    ? _g.size_tracking_big + 'pt'    : '13pt';
+  const szCompanyName    = _g.size_company_name    ? _g.size_company_name + 'pt'    : '9pt';
+  const szSeccionLabel   = _g.size_seccion_label   ? _g.size_seccion_label + 'pt'   : '7pt';
+  const szSeccionContent = _g.size_seccion_content ? _g.size_seccion_content + 'pt' : '7.5pt';
+  const szCargoTh        = _g.size_cargo_th        ? _g.size_cargo_th + 'pt'        : '7pt';
+  const szCargaTd        = _g.size_cargo_td        ? _g.size_cargo_td + 'pt'        : '7.5pt';
+  const szMsgRow         = _g.size_msg_row         ? _g.size_msg_row + 'pt'         : '7.5pt';
+  const szFooterContent  = _g.size_footer_content  ? _g.size_footer_content + 'pt'  : '8pt';
+  const szPagoBig        = _g.size_pago_big        ? _g.size_pago_big + 'pt'        : '16pt';
+%>
+<style>
+  :root {
+    --sz-guia-titulo:     <%= szGuiaTitulo %>;
+    --sz-guia-servicio:   <%= szGuiaServicio %>;
+    --sz-tracking-big:    <%= szTrackingBig %>;
+    --sz-company-name:    <%= szCompanyName %>;
+    --sz-seccion-label:   <%= szSeccionLabel %>;
+    --sz-seccion-content: <%= szSeccionContent %>;
+    --sz-cargo-th:        <%= szCargoTh %>;
+    --sz-cargo-td:        <%= szCargaTd %>;
+    --sz-msg-row:         <%= szMsgRow %>;
+    --sz-footer-content:  <%= szFooterContent %>;
+    --sz-pago-big:        <%= szPagoBig %>;
+  }
+</style>
 
 <div class="toolbar">
   <div class="toolbar-left">
@@ -324,7 +367,10 @@
           const descripcionServicio = guiaCfg.descripcion_servicio || 'Servicio de transportes de Carga';
           const tituloGuia = guiaCfg.titulo_guia || 'GUÍA EXPEDIDA';
           const etiquetaColDesc = guiaCfg.etiqueta_col_descripcion || 'DESCRIPCIÓN SEGÚN REMITENTE';
-          const etiquetaOperador = guiaCfg.etiqueta_operador || 'Operador que entregó:';
+          const etiquetaOperador   = guiaCfg.etiqueta_operador    || 'Operador que entregó:';
+          const etiquetaObsOper    = guiaCfg.etiqueta_obs_operador || 'Observaciones:';
+          const etiquetaRecibidoPor= guiaCfg.etiqueta_recibido_por || 'Recibido por: (Nombre, firma y sello)';
+          const etiquetaObsRecibido= guiaCfg.etiqueta_obs_recibido || 'Observaciones:';
 
           const nombreEmpresa = config.empresa_nombre || 'TRANSPORTES';
         %>
@@ -544,12 +590,12 @@
         <!-- ══ OPERADOR QUE ENTREGÓ ══ -->
         <table style="border-top:none;width:100%;" class="footer-grow <%= gc('operador') %>" data-elem="operador">
           <tr>
-            <td style="padding:0;width:65%;">
+            <td style="padding:0;width:40%;">
               <span class="footer-label"><%= etiquetaOperador %></span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
-            <td style="padding:0;width:35%;border-left:1px solid #000;">
-              <span class="footer-label">Observaciones:</span>
+            <td style="padding:0;width:60%;border-left:1px solid #000;" class="<%= gc('obs_operador') %>" data-elem="obs_operador">
+              <span class="footer-label"><%= etiquetaObsOper %></span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
           </tr>
@@ -558,12 +604,12 @@
         <!-- ══ RECIBIDO POR ══ -->
         <table style="border-top:none;width:100%;" class="footer-grow <%= gc('recibido_por') %>" data-elem="recibido_por">
           <tr>
-            <td style="padding:0;width:65%;">
-              <span class="footer-label">Recibido por: (Nombre, firma y sello)</span>
+            <td style="padding:0;width:40%;">
+              <span class="footer-label"><%= etiquetaRecibidoPor %></span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
-            <td style="padding:0;width:35%;border-left:1px solid #000;">
-              <span class="footer-label">Observaciones:</span>
+            <td style="padding:0;width:60%;border-left:1px solid #000;" class="<%= gc('obs_recibido') %>" data-elem="obs_recibido">
+              <span class="footer-label"><%= etiquetaObsRecibido %></span>
               <div class="footer-content tall">&nbsp;</div>
             </td>
           </tr>
@@ -593,6 +639,21 @@
   <div class="panel-guia">
     <div class="tpl-panel">
       <div class="tpl-panel-hdr">Elementos de la Guía</div>
+
+      <!-- Sub-tabs del panel -->
+      <div style="display:flex;gap:3px;margin-bottom:14px;background:#f1f5f9;border-radius:8px;padding:3px;">
+        <button type="button" id="gpanel-btn-elementos" onclick="switchGuiaPanel('elementos')"
+          style="flex:1;padding:5px 0;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all .15s;background:#2563eb;color:white;box-shadow:0 1px 4px rgba(37,99,235,.25);">
+          Elementos
+        </button>
+        <button type="button" id="gpanel-btn-tamanos" onclick="switchGuiaPanel('tamanos')"
+          style="flex:1;padding:5px 0;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:#64748b;">
+          Tamaños
+        </button>
+      </div>
+
+      <!-- Panel: Elementos (toggles) -->
+      <div id="gpanel-elementos">
 
       <%
         function panelGuiaRow(key, icon, label, showVal, isObl) {
@@ -629,8 +690,10 @@
           panelGuiaRow('fecha_entrega',      '🗓️', 'Fecha entrega',    g.mostrar_fecha_entrega,      g.obligatorio_fecha_entrega),
           panelGuiaRow('referencia_cliente', '🔖', 'Referencia',      g.mostrar_referencia_cliente, g.obligatorio_referencia_cliente),
           panelGuiaRow('retorno_documentos', '↩️', 'Retorno docs.',    g.mostrar_retorno_documentos, g.obligatorio_retorno_documentos),
-          panelGuiaRow('operador',           '🚛', 'Operador',        g.mostrar_operador,           g.obligatorio_operador),
-          panelGuiaRow('recibido_por',       '✍️',  'Recibido por',    g.mostrar_recibido_por,       g.obligatorio_recibido_por),
+          panelGuiaRow('operador',           '🚛', 'Operador',              g.mostrar_operador,           g.obligatorio_operador),
+          panelGuiaRow('obs_operador',       '📝', ' ↳ Obs. Operador',      g.mostrar_obs_operador,       g.obligatorio_obs_operador),
+          panelGuiaRow('recibido_por',       '✍️',  'Recibido por',          g.mostrar_recibido_por,       g.obligatorio_recibido_por),
+          panelGuiaRow('obs_recibido',       '📝', ' ↳ Obs. Recibido por',  g.mostrar_obs_recibido,       g.obligatorio_obs_recibido),
           panelGuiaRow('firma_final',        '📋', 'Condiciones',     g.mostrar_firma_final,        g.obligatorio_firma_final),
         ];
         const panelColumnas = [
@@ -676,6 +739,44 @@
       <%- renderPanelSection(panelPie) %>
 
       <p class="tpl-nota">El título, descripción y mensajes se configuran en <strong>Configuración → Guía Expedida</strong>, dentro de cada template.</p>
+      </div><!-- /gpanel-elementos -->
+
+      <!-- Panel: Tamaños de texto -->
+      <div id="gpanel-tamanos" style="display:none;">
+        <p class="tpl-section" style="margin-top:0;">Tamaño de fuente (pt)</p>
+        <%
+          const panelSizes = [
+            { css: '--sz-guia-titulo',     label: 'Título guía',              def: 13, min:  9, max: 18, cur: _g.size_guia_titulo     || 13 },
+            { css: '--sz-guia-servicio',   label: 'Subtítulo servicio',        def:  8, min:  6, max: 12, cur: _g.size_guia_servicio   || 8  },
+            { css: '--sz-tracking-big',    label: 'Núm. de tracking',         def: 13, min:  9, max: 18, cur: _g.size_tracking_big    || 13 },
+            { css: '--sz-company-name',    label: 'Nombre empresa',            def:  9, min:  7, max: 14, cur: _g.size_company_name    || 9  },
+            { css: '--sz-seccion-label',   label: 'Etiquetas de sección',      def:  7, min:  5, max: 10, cur: _g.size_seccion_label   || 7  },
+            { css: '--sz-seccion-content', label: 'Contenido secciones',       def:  8, min:  6, max: 12, cur: _g.size_seccion_content || 8  },
+            { css: '--sz-cargo-th',        label: 'Encabezado tabla',          def:  7, min:  5, max: 10, cur: _g.size_cargo_th        || 7  },
+            { css: '--sz-cargo-td',        label: 'Filas tabla de carga',      def:  8, min:  6, max: 11, cur: _g.size_cargo_td        || 8  },
+            { css: '--sz-msg-row',         label: 'Mensajes / cláusulas',      def:  8, min:  6, max: 12, cur: _g.size_msg_row         || 8  },
+            { css: '--sz-footer-content',  label: 'Contenido footer (fechas)', def:  8, min:  6, max: 12, cur: _g.size_footer_content  || 8  },
+            { css: '--sz-pago-big',        label: 'Pago / Fecha grandes',      def: 16, min: 10, max: 24, cur: _g.size_pago_big        || 16 },
+          ];
+        %>
+        <% panelSizes.forEach(function(s) { %>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span class="tpl-row-lbl"><%= s.label %></span>
+            <span id="gpsz-lbl-<%= s.css.replace('--','').replace(/-/g,'_') %>"
+              style="font-size:0.85rem;font-weight:800;color:#2563eb;min-width:24px;text-align:right;"><%= s.cur %></span>
+          </div>
+          <input type="range" min="<%= s.min %>" max="<%= s.max %>" step="1" value="<%= s.cur %>"
+            oninput="applyGuiaSz('<%= s.css %>',this.value,'gpsz-lbl-<%= s.css.replace('--','').replace(/-/g,'_') %>','<%= s.unit||'pt' %>')"
+            style="width:100%;accent-color:#2563eb;height:4px;cursor:pointer;">
+          <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:#94a3b8;margin-top:2px;">
+            <span><%= s.min %><%= s.unit||'pt' %></span><span>def: <%= s.def %><%= s.unit||'pt' %></span><span><%= s.max %><%= s.unit||'pt' %></span>
+          </div>
+        </div>
+        <% }); %>
+        <p class="tpl-nota">Los tamaños se aplican solo en esta vista. Para guardarlos de forma permanente, edita el template en <strong>Configuración</strong>.</p>
+      </div><!-- /gpanel-tamanos -->
+
     </div>
   </div>
 
@@ -735,6 +836,25 @@
   function toggleElem(key, visible) {
     document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {
       el.classList.toggle('guia-hidden', !visible);
+    });
+  }
+
+  function applyGuiaSz(cssVar, value, lblId, unit) {
+    document.documentElement.style.setProperty(cssVar, value + (unit || 'pt'));
+    var lbl = document.getElementById(lblId);
+    if (lbl) lbl.textContent = value;
+  }
+
+  function switchGuiaPanel(tab) {
+    ['elementos', 'tamanos'].forEach(function(t) {
+      var el  = document.getElementById('gpanel-' + t);
+      var btn = document.getElementById('gpanel-btn-' + t);
+      if (!el || !btn) return;
+      var active = t === tab;
+      el.style.display     = active ? '' : 'none';
+      btn.style.background = active ? '#2563eb' : 'transparent';
+      btn.style.color      = active ? 'white'   : '#64748b';
+      btn.style.boxShadow  = active ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
     });
   }
 

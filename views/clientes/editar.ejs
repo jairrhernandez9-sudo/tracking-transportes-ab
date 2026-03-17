@@ -1107,6 +1107,50 @@
             </button>
           </div>
         </form>
+
+        <!-- ── Asignación de operadores (fuera del form principal) ── -->
+        <% if (typeof operadores !== 'undefined' && operadores.length > 0) { %>
+        <div class="form-section" style="margin-top: 24px;">
+          <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 4px;">
+            <i data-lucide="users" style="width:18px;height:18px;vertical-align:-3px;color:#3b82f6;"></i>
+            Operadores con acceso a este cliente
+          </h3>
+          <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">Solo los operadores seleccionados podrán ver este cliente en su lista.</p>
+          <div style="display: flex; flex-direction: column; gap: 10px;" id="ops-list">
+            <% operadores.forEach(function(op) { %>
+            <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:border-color .15s;"
+                   onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor=operadoresAsignados.includes(op.id)?'#3b82f6':'#e2e8f0'"
+                   id="op-label-<%= op.id %>">
+              <input type="checkbox" id="op-<%= op.id %>" value="<%= op.id %>"
+                <%= (typeof operadoresAsignados !== 'undefined' && operadoresAsignados.includes(op.id)) ? 'checked' : '' %>
+                onchange="toggleOpLabel(<%= op.id %>, this.checked)"
+                style="width:16px;height:16px;accent-color:#3b82f6;cursor:pointer;">
+              <div>
+                <div style="font-weight:700;font-size:0.875rem;color:#1e293b;"><%= op.nombre %></div>
+                <div style="font-size:0.75rem;color:#64748b;"><%= op.email %></div>
+              </div>
+            </label>
+            <% }); %>
+          </div>
+          <div style="margin-top:14px;">
+            <button onclick="guardarOperadores(<%= cliente.id %>)" id="btn-guardar-ops"
+              style="padding:9px 20px;background:#3b82f6;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.875rem;cursor:pointer;">
+              <i data-lucide="save" style="width:15px;height:15px;vertical-align:-2px;"></i>
+              Guardar asignaciones
+            </button>
+            <span id="ops-msg" style="margin-left:12px;font-size:0.8rem;color:#22c55e;display:none;">✓ Guardado</span>
+          </div>
+        </div>
+        <% } else if (typeof operadores !== 'undefined') { %>
+        <div class="form-section" style="margin-top: 24px;">
+          <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 4px;">
+            <i data-lucide="users" style="width:18px;height:18px;vertical-align:-3px;color:#94a3b8;"></i>
+            Operadores con acceso a este cliente
+          </h3>
+          <p style="font-size: 0.85rem; color: #94a3b8;">No hay operadores activos registrados en el sistema.</p>
+        </div>
+        <% } %>
+
       </div>
       
     </main>
@@ -1256,6 +1300,38 @@
         previewText.textContent = '---';
       }
     }
+  </script>
+  <script>
+    var operadoresAsignados = <%- JSON.stringify(typeof operadoresAsignados !== 'undefined' ? operadoresAsignados : []) %>;
+
+    function toggleOpLabel(id, checked) {
+      var lbl = document.getElementById('op-label-' + id);
+      if (lbl) lbl.style.borderColor = checked ? '#3b82f6' : '#e2e8f0';
+    }
+
+    function guardarOperadores(clienteId) {
+      var checkboxes = document.querySelectorAll('#ops-list input[type=checkbox]:checked');
+      var ids = Array.from(checkboxes).map(function(c) { return c.value; });
+      fetch('/clientes/' + clienteId + '/asignar-operadores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operador_ids: ids })
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) {
+          var msg = document.getElementById('ops-msg');
+          msg.style.display = 'inline';
+          setTimeout(function() { msg.style.display = 'none'; }, 3000);
+        }
+      });
+    }
+
+    // Aplicar color inicial a labels ya asignados
+    document.addEventListener('DOMContentLoaded', function() {
+      operadoresAsignados.forEach(function(id) {
+        var lbl = document.getElementById('op-label-' + id);
+        if (lbl) lbl.style.borderColor = '#3b82f6';
+      });
+    });
   </script>
   <script src="/js/notifications.js"></script>
   <script src="/js/sidebar.js"></script>

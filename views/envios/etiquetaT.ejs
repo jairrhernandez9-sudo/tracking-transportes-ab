@@ -127,8 +127,8 @@
     }
 
     .cab-logo img {
-      max-width: 110px;
-      max-height: 44px;
+      max-width: 140px;
+      max-height: 58px;
       object-fit: contain;
       filter: grayscale(100%) contrast(1.3);
       margin-bottom: 2px;
@@ -161,7 +161,8 @@
     }
 
     .cab-fecha-label {
-      font-size: 7.5px;
+      font-size: 8px;
+      font-weight: 800;
       color: #000;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -169,24 +170,26 @@
     }
 
     .cab-fecha-val {
-      font-size: 10px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 900;
       color: #000;
       text-align: center;
+      line-height: 1;
     }
 
     .cab-num {
-      padding: 7px 10px;
+      padding: 7px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 52px;
+      min-width: 58px;
       background: #000;
     }
 
     .cab-num-label {
-      font-size: 7px;
+      font-size: 8px;
+      font-weight: 800;
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -194,9 +197,10 @@
     }
 
     .cab-num-val {
-      font-size: 12px;
+      font-size: 17px;
       font-weight: 900;
       color: #fff;
+      line-height: 1;
     }
 
     /* ── CONTACTO (toggle) ── */
@@ -234,16 +238,16 @@
     }
 
     .tipo-badge {
-      display: inline-block;
-      font-size: 8px;
-      font-weight: 800;
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 1px;
       background: #111;
       color: #fff;
-      border-radius: 20px;
-      padding: 2px 10px;
-      margin-bottom: 4px;
+      border-radius: 3px;
+      padding: 4px 12px;
+      margin-bottom: 5px;
     }
 
     .tracking-numero {
@@ -264,6 +268,50 @@
     }
 
     .barcode-wrap svg { max-width: 100%; }
+
+    /* ── PICTOGRAMAS (toggle) ── */
+    .picto-area {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      border-bottom: 1.5px solid #000;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .picto-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 4px 4px;
+      border-right: 1px solid #ddd;
+    }
+
+    .picto-item:last-child { border-right: none; }
+
+    .picto-item img {
+      width: auto;
+      object-fit: contain;
+      filter: grayscale(100%) contrast(1.3);
+      flex-shrink: 0;
+    }
+
+    .picto-item-name {
+      font-size: 6px;
+      font-weight: 800;
+      color: #000;
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 0.2px;
+      line-height: 1;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* ── RUTA (toggle) ── */
     .ruta {
@@ -287,7 +335,7 @@
     }
 
     .ruta-ciudad {
-      font-size: 14px;
+      font-size: 17px;
       font-weight: 900;
       color: #fff;
       line-height: 1;
@@ -314,6 +362,9 @@
       padding: 6px 9px;
       flex: 1;
       min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .dest-label {
@@ -325,6 +376,13 @@
       border-bottom: 1.5px solid #000;
       padding-bottom: 3px;
       margin-bottom: 4px;
+    }
+
+    .dest-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .dest-empresa {
@@ -365,16 +423,22 @@
       padding: 5px 7px;
       border-right: 1.5px solid #000;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .detalle-item:last-child { border-right: none; }
 
     .detalle-etiqueta {
       font-size: 7.5px;
+      font-weight: 800;
       color: #000;
       text-transform: uppercase;
       letter-spacing: 0.4px;
       margin-bottom: 2px;
+      text-align: center;
     }
 
     .detalle-valor {
@@ -382,6 +446,7 @@
       font-weight: 900;
       color: #000;
       line-height: 1;
+      text-align: center;
     }
 
     .detalle-valor.grande { font-size: 13px; }
@@ -590,8 +655,38 @@
     const showDestNombre        = cfg.mostrar_dest_nombre        !== false;
     const showDestDireccion     = cfg.mostrar_dest_direccion     !== false;
     const showDestReferencia    = cfg.mostrar_dest_referencia    !== false;
+    // Textos editables del template (con fallback a los valores por defecto)
+    const txtEntregarA       = cfg.texto_entregar_a       || 'Entregar a:';
+    const txtPeso            = cfg.texto_peso            || 'Peso';
+    const txtEntregaEst      = cfg.texto_entrega_estimada || 'Entrega estimada';
+    const txtRefCliente      = cfg.texto_ref_cliente      || 'Ref. cliente';
+    const txtDescripcion     = cfg.texto_descripcion      || 'Descripción / Contenido';
+    const txtFechaEmision    = cfg.texto_fecha_emision    || 'Fecha emisión';
+    const txtEtiqueta        = cfg.texto_etiqueta         || 'Etiqueta';
     // Barra de contacto visible si al menos un dato de contacto está activo
     const showContactoBar       = showTelefono || showTelefonoAdicional || showEmail || showSitioWeb;
+    const hasPicto              = typeof pictogramas !== 'undefined' && pictogramas.length > 0;
+    const showPicto             = hasPicto; // default visible si hay pictogramas
+    // Tamaños de texto desde template (con fallback al default CSS)
+    const szTracking       = cfg.size_tracking       ? cfg.size_tracking + 'px'       : '26px';
+    const szRutaCiudad     = cfg.size_ruta_ciudad    ? cfg.size_ruta_ciudad + 'px'    : '17px';
+    const szEmpresaNombre  = cfg.size_empresa_nombre ? cfg.size_empresa_nombre + 'px' : '13px';
+    const szDestNombre     = cfg.size_dest_nombre    ? cfg.size_dest_nombre + 'px'    : '13px';
+    const szDestDireccion  = cfg.size_dest_direccion ? cfg.size_dest_direccion + 'px' : '8.5px';
+    const szEslogan          = cfg.size_eslogan          ? cfg.size_eslogan + 'px'          : '6.5px';
+    const szTipoServicio     = cfg.size_tipo_servicio    ? cfg.size_tipo_servicio + 'px'    : '12px';
+    const szDetalleValor     = cfg.size_detalle_valor    ? cfg.size_detalle_valor + 'px'    : '10px';
+    const szDescripcion      = cfg.size_descripcion      ? cfg.size_descripcion + 'px'      : '8px';
+    const szDestContacto     = cfg.size_dest_contacto    ? cfg.size_dest_contacto + 'px'    : '8px';
+    const szBarraContacto    = cfg.size_barra_contacto   ? cfg.size_barra_contacto + 'px'   : '7px';
+    const szRutaEtiqueta     = cfg.size_ruta_etiqueta    ? cfg.size_ruta_etiqueta + 'px'    : '7.5px';
+    const szDetalleEtiqueta  = cfg.size_detalle_etiqueta ? cfg.size_detalle_etiqueta + 'px' : '7.5px';
+    const szCabFecha         = cfg.size_cab_fecha        ? cfg.size_cab_fecha + 'px'        : '13px';
+    const szCabNum           = cfg.size_cab_num          ? cfg.size_cab_num + 'px'          : '17px';
+
+    // Escalar imagen de pictograma según cantidad — disposición vertical en columna izquierda
+    const pictoCount = hasPicto ? pictogramas.length : 0;
+    const pictoImgH  = pictoCount <= 1 ? 52 : pictoCount <= 2 ? 40 : pictoCount <= 3 ? 30 : 22;
     const cantidadEtiquetas     = typeof cantidad !== 'undefined' ? parseInt(cantidad) : 1;
     const qrBase                = typeof baseUrl !== 'undefined' ? baseUrl : 'https://portal.transportesab.com';
     // Expandir items en unidades individuales
@@ -640,35 +735,76 @@
                data-elem="logo"
                class="<%= !showLogo ? 'etq-hidden' : '' %>">
         <% } %>
-        <div class="cab-logo-nombre"><%= cfg.nombre_empresa || 'TRANSPORTES AB' %></div>
-        <div class="cab-logo-eslogan" data-elem="eslogan" class="<%= !showEslogan ? 'etq-hidden' : '' %>"><%= cfg.eslogan %></div>
+        <div class="cab-logo-nombre" style="font-size:<%= szEmpresaNombre %>;"><%= cfg.nombre_empresa || 'TRANSPORTES AB' %></div>
+        <div class="cab-logo-eslogan" data-elem="eslogan" class="<%= !showEslogan ? 'etq-hidden' : '' %>" style="font-size:<%= szEslogan %>;"><%= cfg.eslogan %></div>
       </div>
 
       <!-- Fecha -->
       <div class="cab-fecha">
-        <div class="cab-fecha-label">Fecha emisión</div>
-        <div class="cab-fecha-val">
+        <div class="cab-fecha-label"><%= txtFechaEmision %></div>
+        <div class="cab-fecha-val" style="font-size:<%= szCabFecha %>;">
           <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: '2-digit' }) %>
         </div>
       </div>
 
       <!-- Número de etiqueta -->
       <div class="cab-num">
-        <div class="cab-num-label">Etiqueta</div>
-        <div class="cab-num-val"><%= i %>/<%= totalUnidades %></div>
+        <div class="cab-num-label"><%= txtEtiqueta %></div>
+        <div class="cab-num-val" style="font-size:<%= szCabNum %>;"><%= i %>/<%= totalUnidades %></div>
       </div>
 
     </div>
 
     <!-- ══ CONTACTO (toggles individuales) ══ -->
-    <div class="barra-contacto <%= !showContactoBar ? 'etq-hidden' : '' %>" data-elem="contacto-bar">
+    <div class="barra-contacto <%= !showContactoBar ? 'etq-hidden' : '' %>" data-elem="contacto-bar" style="font-size:<%= szBarraContacto %>;">
       <% if (cfg.telefono) { %><span data-contact="telefono" class="<%= !showTelefono ? 'etq-hidden' : '' %>">Tel: <%= cfg.telefono %></span><% } %>
       <% if (cfg.telefono_adicional) { %><span data-contact="telefono_adicional" class="<%= !showTelefonoAdicional ? 'etq-hidden' : '' %>"><%= cfg.telefono_adicional %></span><% } %>
       <% if (cfg.email) { %><span data-contact="email" class="<%= !showEmail ? 'etq-hidden' : '' %>"><%= cfg.email %></span><% } %>
       <% if (cfg.sitio_web) { %><span data-contact="sitio_web" class="<%= !showSitioWeb ? 'etq-hidden' : '' %>"><%= cfg.sitio_web.replace(/https?:\/\/(www\.)?/,'') %></span><% } %>
     </div>
 
-    <!-- ══ TRACKING ══ -->
+    <!-- ══ TRACKING + BARCODE (con columna de pictogramas si aplica) ══ -->
+    <% if (hasPicto) { %>
+    <%   const parteLabel2 = envio.es_parcial ? '1' : (envio.numero_parte || '?'); %>
+    <div class="<%= !showPicto ? '' : '' %>" data-elem="picto-wrap"
+         style="display:flex;flex-shrink:0;border-bottom:1.5px solid #000;">
+
+      <!-- COL IZQUIERDA: Pictogramas -->
+      <div class="picto-area <%= !showPicto ? 'etq-hidden' : '' %>" data-elem="picto"
+           style="width:38%;border-right:2px solid #000;border-bottom:none;flex-direction:column;justify-content:center;gap:4px;padding:6px 4px;">
+        <% pictogramas.forEach(function(p) { %>
+        <div class="picto-item" style="border-right:none;border-bottom:none;flex:0 0 auto;width:100%;">
+          <img src="<%= p.imagen_url %>" alt="<%= p.nombre %>" title="<%= p.nombre %>"
+               style="height:<%= pictoImgH %>px;">
+        </div>
+        <% }); %>
+      </div>
+
+      <!-- COL DERECHA: Tracking + Barcode -->
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div class="tracking-section" style="border-bottom:1.5px solid #000;flex:1;">
+          <% if (unidadActual) { %>
+            <div style="text-align:center;margin-bottom:4px;">
+              <span class="tipo-badge" style="font-size:<%= szTipoServicio %>;"><%= unidadActual.tipo %><% if (unidadActual.descripcion) { %> — <%= unidadActual.descripcion %><% } %></span>
+            </div>
+          <% } %>
+          <% if (envio.es_parcial || envio.es_complemento) { %>
+            <div style="text-align:center;margin-bottom:3px;">
+              <span class="sello-parcial">★ PARTE <%= parteLabel2 %> ★</span>
+            </div>
+          <% } %>
+          <div class="tracking-label">N° de Rastreo</div>
+          <div class="tracking-numero" style="font-size:<%= szTracking %>;"><%= envio.numero_tracking %></div>
+        </div>
+        <div class="barcode-wrap <%= !showBarcode ? 'etq-hidden' : '' %>" data-elem="barcode" style="border-bottom:none;">
+          <svg id="barcode-<%= i %>"></svg>
+        </div>
+      </div>
+
+    </div>
+    <% } else { %>
+
+    <!-- Sin pictogramas: layout normal full-width -->
     <div class="tracking-section">
       <% if (unidadActual) { %>
         <div style="text-align:center;margin-bottom:4px;">
@@ -682,76 +818,79 @@
         </div>
       <% } %>
       <div class="tracking-label">N° de Rastreo</div>
-      <div class="tracking-numero"><%= envio.numero_tracking %></div>
+      <div class="tracking-numero" style="font-size:<%= szTracking %>;"><%= envio.numero_tracking %></div>
     </div>
 
-    <!-- ══ CÓDIGO DE BARRAS (toggle) ══ -->
     <div class="barcode-wrap <%= !showBarcode ? 'etq-hidden' : '' %>" data-elem="barcode">
       <svg id="barcode-<%= i %>"></svg>
     </div>
 
+    <% } %>
+
     <!-- ══ RUTA (toggle) ══ -->
     <div class="ruta <%= !showRuta ? 'etq-hidden' : '' %>" data-elem="ruta">
       <div class="ruta-box">
-        <div class="ruta-etiqueta">Origen</div>
-        <div class="ruta-ciudad"><%= (envio.origen_ciudad || envio.origen.split(',')[0]).toUpperCase() %></div>
+        <div class="ruta-etiqueta" style="font-size:<%= szRutaEtiqueta %>;">Origen</div>
+        <div class="ruta-ciudad" style="font-size:<%= szRutaCiudad %>;"><%= (envio.origen_ciudad || envio.origen.split(',')[0]).toUpperCase() %></div>
         <% if (envio.origen_estado) { %><div class="ruta-estado"><%= envio.origen_estado %></div><% } %>
       </div>
       <div class="ruta-flecha">→</div>
       <div class="ruta-box">
-        <div class="ruta-etiqueta">Destino</div>
-        <div class="ruta-ciudad"><%= (envio.destino_ciudad || envio.destino.split(',')[0]).toUpperCase() %></div>
+        <div class="ruta-etiqueta" style="font-size:<%= szRutaEtiqueta %>;">Destino</div>
+        <div class="ruta-ciudad" style="font-size:<%= szRutaCiudad %>;"><%= (envio.destino_ciudad || envio.destino.split(',')[0]).toUpperCase() %></div>
         <% if (envio.destino_estado) { %><div class="ruta-estado"><%= envio.destino_estado %></div><% } %>
       </div>
     </div>
 
     <!-- ══ DESTINATARIO ══ -->
     <div class="destinatario">
-      <div class="dest-label">Entregar a:</div>
-      <div class="dest-empresa <%= !showDestNombre ? 'etq-hidden' : '' %>" data-elem="dest-nombre"><%= envio.nombre_empresa || 'Cliente Final' %></div>
-      <div class="dest-direccion <%= !showDestDireccion ? 'etq-hidden' : '' %>" data-elem="dest-direccion">
-        <% if (envio.destino_calle) { %>
-          <%= envio.destino_calle %><% if (envio.destino_colonia) { %>, Col. <%= envio.destino_colonia %><% } %><br>
-          CP <%= envio.destino_cp || '' %>&nbsp; <%= envio.destino_ciudad || '' %>, <%= envio.destino_estado || '' %>
-        <% } else { %>
-          <%= envio.destino %>
-        <% } %>
-        <% if (envio.destino_referencia) { %>
-          <span data-elem="dest-referencia" class="<%= !showDestReferencia ? 'etq-hidden' : '' %>" style="display:block;font-size:7.5px;color:#000;">Ref: <%= envio.destino_referencia %></span>
+      <div class="dest-label"><%= txtEntregarA %></div>
+      <div class="dest-info">
+        <div class="dest-empresa <%= !showDestNombre ? 'etq-hidden' : '' %>" data-elem="dest-nombre" style="font-size:<%= szDestNombre %>;"><%= envio.nombre_empresa || 'Cliente Final' %></div>
+        <div class="dest-direccion <%= !showDestDireccion ? 'etq-hidden' : '' %>" data-elem="dest-direccion" style="font-size:<%= szDestDireccion %>;">
+          <% if (envio.destino_calle) { %>
+            <%= envio.destino_calle %><% if (envio.destino_colonia) { %>, Col. <%= envio.destino_colonia %><% } %><br>
+            CP <%= envio.destino_cp || '' %>&nbsp; <%= envio.destino_ciudad || '' %>, <%= envio.destino_estado || '' %>
+          <% } else { %>
+            <%= envio.destino %>
+          <% } %>
+          <% if (envio.destino_referencia) { %>
+            <span data-elem="dest-referencia" class="<%= !showDestReferencia ? 'etq-hidden' : '' %>" style="display:block;font-size:7.5px;color:#000;">Ref: <%= envio.destino_referencia %></span>
+          <% } %>
+        </div>
+        <% if (envio.contacto || envio.telefono) { %>
+        <div class="dest-contacto" style="font-size:<%= szDestContacto %>;">
+          <% if (envio.contacto) { %><span data-elem="dest-contacto" class="<%= !showDestContacto ? 'etq-hidden' : '' %>"><%= envio.contacto %></span><% } %>
+          <% if (envio.telefono) { %><span data-elem="dest-telefono" class="<%= !showDestTelefono ? 'etq-hidden' : '' %>">Tel: <%= envio.telefono %></span><% } %>
+        </div>
         <% } %>
       </div>
-      <% if (envio.contacto || envio.telefono) { %>
-      <div class="dest-contacto">
-        <% if (envio.contacto) { %><span data-elem="dest-contacto" class="<%= !showDestContacto ? 'etq-hidden' : '' %>"><%= envio.contacto %></span><% } %>
-        <% if (envio.telefono) { %><span data-elem="dest-telefono" class="<%= !showDestTelefono ? 'etq-hidden' : '' %>">Tel: <%= envio.telefono %></span><% } %>
-      </div>
-      <% } %>
     </div>
 
     <!-- ══ DETALLES DEL PAQUETE ══ -->
     <div class="detalles">
       <div class="detalle-item">
-        <div class="detalle-etiqueta">Peso</div>
-        <div class="detalle-valor grande"><%= envio.peso || '—' %> <span style="font-size:7px;font-weight:600;">kg</span></div>
+        <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtPeso %></div>
+        <div class="detalle-valor grande" style="font-size:<%= szDetalleValor %>;"><%= envio.peso || '—' %> <span style="font-size:7px;font-weight:600;">kg</span></div>
       </div>
       <div class="detalle-item">
-        <div class="detalle-etiqueta">Entrega estimada</div>
-        <div class="detalle-valor">
+        <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtEntregaEst %></div>
+        <div class="detalle-valor" style="font-size:<%= szDetalleValor %>;">
           <% if (envio.fecha_estimada_entrega) { %>
             <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'}) %>
           <% } else { %> — <% } %>
         </div>
       </div>
       <div class="detalle-item">
-        <div class="detalle-etiqueta">Ref. cliente</div>
-        <div class="detalle-valor" style="font-size:11px;font-weight:900;line-height:1.2;"><%= envio.referencia_cliente || '—' %></div>
+        <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtRefCliente %></div>
+        <div class="detalle-valor" style="font-size:<%= szDetalleValor %>;font-weight:900;line-height:1.2;text-align:center;"><%= envio.referencia_cliente || '—' %></div>
       </div>
     </div>
 
     <!-- ══ DESCRIPCIÓN + QR (toggles) ══ -->
     <div class="fila-bottom <%= (!showDesc && !showQr) ? 'etq-hidden' : '' %>" data-elem="fila-bottom">
       <div class="descripcion-box <%= !showDesc ? 'etq-hidden' : '' %>" data-elem="descripcion">
-        <div class="descripcion-etiqueta">Descripción / Contenido</div>
+        <div class="descripcion-etiqueta"><%= txtDescripcion %></div>
         <% if (typeof items !== 'undefined' && items && items.length > 0) { %>
           <% let _eTotPeso = 0; %>
           <table style="width:100%;border-collapse:collapse;font-size:7px;line-height:1.3;">
@@ -779,7 +918,7 @@
             </tfoot>
           </table>
         <% } else { %>
-          <div class="descripcion-texto"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
+          <div class="descripcion-texto" style="font-size:<%= szDescripcion %>;"><%= envio.descripcion || 'Manéjese con cuidado' %></div>
         <% } %>
       </div>
       <div class="qr-box <%= !showQr ? 'etq-hidden' : '' %>" data-elem="qr" style="<%= !showDesc && showQr ? 'flex:1;' : '' %>">
@@ -836,6 +975,7 @@
           panelRow('direccion_fiscal',   '📍', 'Dirección fiscal',    showDireccionFiscal,     !!cfg.direccion,          !!cfg.obligatorio_direccion_fiscal),
         ];
         const panelRowsEnvio = [
+          ...(hasPicto ? [panelRow('picto', '🖼', 'Pictogramas', showPicto, true, false)] : []),
           panelRow('barcode',     '▤',  'Código de barras',        showBarcode, true, !!cfg.obligatorio_barcode),
           panelRow('qr',          '◼',  'Código QR',               showQr,      true, !!cfg.obligatorio_qr),
           panelRow('ruta',        '→',  'Ruta Origen/Destino',     showRuta,    true, !!cfg.obligatorio_ruta),
@@ -1063,6 +1203,19 @@
         var anyFila = descVisible || qrVisible;
         document.querySelectorAll('[data-elem="fila-bottom"]').forEach(function(el) {
           el.classList.toggle('etq-hidden', !anyFila);
+        });
+        return;
+      }
+
+      // Pictogramas: ocultar columna izquierda (el tracking-wrap pasa a flex normal)
+      if (key === 'picto') {
+        document.querySelectorAll('[data-elem="picto"]').forEach(function(el) {
+          el.classList.toggle('etq-hidden', !visible);
+        });
+        // Si se ocultan los pictos, el wrapper flex puede quedar con layout raro;
+        // simplemente ocultamos la columna y el lado derecho ocupa todo
+        document.querySelectorAll('[data-elem="picto-wrap"]').forEach(function(el) {
+          // No ocultar el wrapper, solo la columna izquierda ya se ocultó
         });
         return;
       }

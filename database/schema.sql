@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-03-10
+-- Última actualización: 2026-03-17
 -- Motor: MySQL 8+ / MariaDB 10.5+
 -- ============================================================
 
@@ -84,6 +84,30 @@ CREATE TABLE `etiqueta_templates` (
   `obligatorio_dest_referencia`     TINYINT(1)   NOT NULL DEFAULT 0,
   `obligatorio_dest_contacto`       TINYINT(1)   NOT NULL DEFAULT 0,
   `obligatorio_dest_telefono`       TINYINT(1)   NOT NULL DEFAULT 0,
+  -- Textos editables por template
+  `texto_fecha_emision`             VARCHAR(100) NULL COMMENT 'Label "Fecha emisión" en header',
+  `texto_etiqueta`                  VARCHAR(50)  NULL COMMENT 'Label "Etiqueta" (contador X/Y) en header',
+  `texto_entregar_a`                VARCHAR(100) NULL COMMENT 'Label de la sección "Entregar a:"',
+  `texto_peso`                      VARCHAR(50)  NULL COMMENT 'Label del campo Peso',
+  `texto_entrega_estimada`          VARCHAR(100) NULL COMMENT 'Label del campo Entrega estimada',
+  `texto_ref_cliente`               VARCHAR(100) NULL COMMENT 'Label del campo Ref. cliente',
+  `texto_descripcion`               VARCHAR(100) NULL COMMENT 'Label de la sección Descripción / Contenido',
+  -- Tamaños de fuente (px). NULL = usar default del CSS
+  `size_tracking`                   TINYINT UNSIGNED NULL,
+  `size_ruta_ciudad`                TINYINT UNSIGNED NULL,
+  `size_dest_nombre`                TINYINT UNSIGNED NULL,
+  `size_dest_direccion`             TINYINT UNSIGNED NULL,
+  `size_empresa_nombre`             TINYINT UNSIGNED NULL,
+  `size_eslogan`                    TINYINT UNSIGNED NULL,
+  `size_tipo_servicio`              TINYINT UNSIGNED NULL,
+  `size_detalle_valor`              TINYINT UNSIGNED NULL,
+  `size_descripcion`                TINYINT UNSIGNED NULL,
+  `size_dest_contacto`              TINYINT UNSIGNED NULL,
+  `size_barra_contacto`             TINYINT UNSIGNED NULL,
+  `size_ruta_etiqueta`              TINYINT UNSIGNED NULL,
+  `size_detalle_etiqueta`           TINYINT UNSIGNED NULL,
+  `size_cab_fecha`                  TINYINT UNSIGNED NULL,
+  `size_cab_num`                    TINYINT UNSIGNED NULL,
   `creado_por`                      INT          NULL,
   `created_at`                      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -188,6 +212,11 @@ CREATE TABLE `guia_templates` (
   -- Obligatorio — sub-campos Destinatario
   `obligatorio_destinatario_nombre`    TINYINT(1) DEFAULT 0,
   `obligatorio_destinatario_direccion` TINYINT(1) DEFAULT 0,
+  -- Visibilidad — sección observaciones en entrega
+  `mostrar_obs_operador`            TINYINT(1)   DEFAULT 1,
+  `obligatorio_obs_operador`        TINYINT(1)   DEFAULT 0,
+  `mostrar_obs_recibido`            TINYINT(1)   DEFAULT 1,
+  `obligatorio_obs_recibido`        TINYINT(1)   DEFAULT 0,
   -- Textos editables por template
   `descripcion_servicio`            VARCHAR(200) NULL COMMENT 'Subtítulo en encabezado (ej: Servicio de transportes de Carga)',
   `titulo_guia`                     VARCHAR(100) NULL COMMENT 'Título principal (ej: GUÍA EXPEDIDA, ENVÍO FORÁNEO, ENVÍO NACIONAL)',
@@ -196,7 +225,23 @@ CREATE TABLE `guia_templates` (
   `mensaje_3`                       TEXT         NULL COMMENT 'Condiciones (antes del pie de página)',
   `mensaje_4`                       TEXT         NULL COMMENT 'Mensaje al final del documento (después del disclaimer)',
   `etiqueta_col_descripcion`        VARCHAR(200) NULL COMMENT 'Encabezado columna descripción en tabla de carga',
-  `etiqueta_operador`               VARCHAR(200) NULL COMMENT 'Etiqueta de la sección Operador que entregó',
+  `etiqueta_operador`               VARCHAR(200) NULL COMMENT 'Etiqueta sección Operador que entregó',
+  `etiqueta_obs_operador`           VARCHAR(200) NULL COMMENT 'Etiqueta columna Observaciones (lado operador)',
+  `etiqueta_recibido_por`           VARCHAR(200) NULL COMMENT 'Etiqueta sección Recibido por',
+  `etiqueta_obs_recibido`           VARCHAR(200) NULL COMMENT 'Etiqueta columna Observaciones (lado recibido)',
+  -- Tamaños de fuente (pt). NULL = usar default del CSS
+  `size_guia_titulo`                TINYINT UNSIGNED NULL,
+  `size_tracking_big`               TINYINT UNSIGNED NULL,
+  `size_company_name`               TINYINT UNSIGNED NULL,
+  `size_seccion_content`            TINYINT UNSIGNED NULL,
+  `size_cargo_td`                   TINYINT UNSIGNED NULL,
+  `size_guia_servicio`              TINYINT UNSIGNED NULL,
+  `size_seccion_label`              TINYINT UNSIGNED NULL,
+  `size_cargo_th`                   TINYINT UNSIGNED NULL,
+  `size_footer_content`             TINYINT UNSIGNED NULL,
+  `size_pago_big`                   TINYINT UNSIGNED NULL,
+  `size_msg_row`                    TINYINT UNSIGNED NULL,
+  `height_obs_tall`                 SMALLINT UNSIGNED NULL COMMENT 'Alto mínimo secciones firma (px)',
   `creado_por`                      INT          NULL,
   `creado_en`                       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -417,6 +462,55 @@ CREATE TABLE `fotos_evidencia` (
 
 
 -- ============================================================
+-- ============================================================
+-- TABLA: pictogramas
+-- Símbolos de peligro / manejo subidos por el admin
+-- ============================================================
+DROP TABLE IF EXISTS `pictogramas`;
+CREATE TABLE `pictogramas` (
+  `id`          INT           NOT NULL AUTO_INCREMENT,
+  `nombre`      VARCHAR(100)  NOT NULL,
+  `imagen_url`  VARCHAR(500)  NOT NULL COMMENT 'Ruta pública ej: /uploads/pictogramas/hazmat.png',
+  `orden`       INT           NOT NULL DEFAULT 0 COMMENT 'Para ordenar en la vista',
+  `activo`      TINYINT(1)    NOT NULL DEFAULT 1,
+  `creado_en`   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Símbolos de peligro/manejo para imprimir en etiqueta';
+
+
+-- ============================================================
+-- TABLA: envio_pictogramas
+-- Pivote muchos-a-muchos envío ↔ pictograma
+-- ============================================================
+DROP TABLE IF EXISTS `envio_pictogramas`;
+CREATE TABLE `envio_pictogramas` (
+  `envio_id`       INT  NOT NULL,
+  `pictograma_id`  INT  NOT NULL,
+  PRIMARY KEY (`envio_id`, `pictograma_id`),
+  KEY `fk_ep_picto` (`pictograma_id`),
+  CONSTRAINT `fk_ep_envio`  FOREIGN KEY (`envio_id`)      REFERENCES `envios`      (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ep_picto`  FOREIGN KEY (`pictograma_id`) REFERENCES `pictogramas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- TABLA: cliente_operadores
+-- Asignación de operadores a clientes (muchos a muchos)
+-- El operador solo puede ver/operar los clientes asignados
+-- ============================================================
+DROP TABLE IF EXISTS `cliente_operadores`;
+CREATE TABLE `cliente_operadores` (
+  `cliente_id`  INT NOT NULL,
+  `usuario_id`  INT NOT NULL,
+  PRIMARY KEY (`cliente_id`, `usuario_id`),
+  KEY `fk_co_usuario` (`usuario_id`),
+  CONSTRAINT `fk_co_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_co_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`  (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Operadores asignados a cada cliente; restringe lista de clientes y envíos visibles al operador';
+
+
+-- ============================================================
 -- FKs diferidas (usuarios → clientes)
 -- ============================================================
 ALTER TABLE `usuarios`
@@ -433,4 +527,4 @@ ALTER TABLE `usuarios`
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-03-11
+-- Schema actualizado: 2026-03-17

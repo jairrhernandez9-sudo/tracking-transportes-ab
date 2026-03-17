@@ -1338,11 +1338,17 @@
                         </span>
                       </td>
                       <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
-                      <td>
+                      <td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                         <a href="/envios/<%= envio.id %>" class="btn-ver-envio">
                           <i data-lucide="eye"></i>
                           Ver
                         </a>
+                        <% if (envio.tiene_pictogramas > 0) { %>
+                        <a href="/envios/<%= envio.id %>/pictograma-carta" target="_blank" class="btn-ver-envio" style="background:#f0fdf4;color:#16a34a;border-color:#86efac;">
+                          <i data-lucide="image"></i>
+                          Pictograma
+                        </a>
+                        <% } %>
                       </td>
                     </tr>
                   <% }); %>
