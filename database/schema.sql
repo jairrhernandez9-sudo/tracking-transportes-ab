@@ -471,10 +471,13 @@ CREATE TABLE `pictogramas` (
   `id`          INT           NOT NULL AUTO_INCREMENT,
   `nombre`      VARCHAR(100)  NOT NULL,
   `imagen_url`  VARCHAR(500)  NOT NULL COMMENT 'Ruta pública ej: /uploads/pictogramas/hazmat.png',
-  `orden`       INT           NOT NULL DEFAULT 0 COMMENT 'Para ordenar en la vista',
-  `activo`      TINYINT(1)    NOT NULL DEFAULT 1,
+  `orden`       INT           NULL DEFAULT 0 COMMENT 'Para ordenar en la vista',
+  `activo`      TINYINT(1)    NULL DEFAULT 1,
   `creado_en`   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  `creado_por`  INT           NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_picto_creado` (`creado_por`),
+  CONSTRAINT `fk_picto_creado` FOREIGN KEY (`creado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Símbolos de peligro/manejo para imprimir en etiqueta';
 
 
