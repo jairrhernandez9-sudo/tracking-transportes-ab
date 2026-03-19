@@ -779,6 +779,26 @@
     .td-cant { width: 70px; }
     .td-tipo { width: 160px; }
     .td-peso { width: 90px; }
+    .td-tipo select {
+      width: 100%;
+      padding: 6px 28px 6px 10px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .td-tipo select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .td-tipo select:hover { border-color: #93c5fd; }
     .td-del  { width: 44px; text-align: center; }
     .btn-add-item {
       display: inline-flex; align-items: center; gap: 6px;
@@ -2377,8 +2397,9 @@
     });
     // ══════════════════════════════════════════════════════════════════
     // ══ Items table functions ══════════════════════════════════════════
-    const TIPOS_COMUNES = ['BULTOS','TARIMA','BOTES','CAJA','PALLET','PROTEGIDO',
-      'GUACAL','EMPLEADO','SACO','TAMBOR','ROLLO','TUBO','PIEZAS','KIT','SOBRE'];
+    const TIPOS_COMUNES = <%- JSON.stringify((typeof tiposEmpaques !== 'undefined' && tiposEmpaques.length > 0)
+      ? tiposEmpaques.map(function(t){ return t.nombre; })
+      : ['BULTOS','TARIMA','BOTES','CAJA','PALLET','PROTEGIDO','GUACAL','EMPLEADO','SACO','TAMBOR','ROLLO','TUBO','PIEZAS','KIT','SOBRE']) %>;
 
     function crearFilaItem(cant, tipo, desc, peso) {
       const tr = document.createElement('tr');
@@ -2388,8 +2409,9 @@
             style="text-align:center;" oninput="actualizarPesoTotal()">
         </td>
         <td class="td-tipo">
-          <input type="text" name="item_tipo[]" value="${tipo||''}"
-            placeholder="Ej: BULTOS" list="tiposComunes" oninput="actualizarPesoTotal()">
+          <select name="item_tipo[]" oninput="actualizarPesoTotal()">
+            ${TIPOS_COMUNES.map(t => `<option value="${t}" ${t===(tipo||'')? 'selected':''}>${t}</option>`).join('')}
+          </select>
         </td>
         <td>
           <input type="text" name="item_desc[]" value="${desc||''}"
@@ -2425,13 +2447,6 @@
       if (elH) elH.value = total.toFixed(2);
     }
 
-    // Datalist con tipos comunes
-    (() => {
-      const dl = document.createElement('datalist');
-      dl.id = 'tiposComunes';
-      TIPOS_COMUNES.forEach(t => { const o = document.createElement('option'); o.value = t; dl.appendChild(o); });
-      document.body.appendChild(dl);
-    })();
     // ══════════════════════════════════════════════════════════════════
 
     document.addEventListener('DOMContentLoaded', () => { agregarItem(); });

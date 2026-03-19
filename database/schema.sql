@@ -514,6 +514,30 @@ CREATE TABLE `cliente_operadores` (
 
 
 -- ============================================================
+-- TABLA: tipos_empaques
+-- Catálogo editable de tipos de empaque para ítems de envío
+-- ============================================================
+DROP TABLE IF EXISTS `tipos_empaques`;
+CREATE TABLE `tipos_empaques` (
+  `id`         INT           NOT NULL AUTO_INCREMENT,
+  `nombre`     VARCHAR(100)  NOT NULL,
+  `activo`     TINYINT(1)    NULL DEFAULT 1,
+  `orden`      INT           NULL DEFAULT 0,
+  `creado_en`  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_tipo_empaque_nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catálogo de tipos de empaque para ítems de envío';
+
+INSERT INTO `tipos_empaques` (`nombre`, `orden`) VALUES
+  ('BULTOS',    1),
+  ('TARIMA',    2),
+  ('BOTES',     3),
+  ('CAJA',      4),
+  ('PALLET',    5),
+  ('PROTEGIDO', 6);
+
+
+-- ============================================================
 -- FKs diferidas (usuarios → clientes)
 -- ============================================================
 ALTER TABLE `usuarios`

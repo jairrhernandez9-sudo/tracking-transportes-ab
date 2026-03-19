@@ -1089,19 +1089,19 @@
           </button>
           <% } %>
 
-          <%/* Etiqueta: admin + superusuario */%>
+          <%/* Imprimibles: admin + superusuario */%>
           <% if (!esOperador) { %>
-          <button class="tab-btn <%= tabInicial === 'etiqueta' ? 'active' : '' %>" onclick="openTab(event, 'etiqueta')">
-            <i data-lucide="tag" style="width: 18px; height: 18px;"></i>
-            Etiqueta
+          <button class="tab-btn <%= ['etiqueta','guia','pictogramas'].includes(tabInicial) ? 'active' : '' %>" onclick="openTab(event, 'imprimibles')">
+            <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
+            Imprimibles
           </button>
-          <button class="tab-btn <%= tabInicial === 'guia' ? 'active' : '' %>" onclick="openTab(event, 'guia')">
-            <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
-            Guía Expedida
-          </button>
-          <button class="tab-btn <%= tabInicial === 'pictogramas' ? 'active' : '' %>" onclick="openTab(event, 'pictogramas')">
-            <i data-lucide="image" style="width: 18px; height: 18px;"></i>
-            Pictogramas
+          <% } %>
+
+          <%/* Catálogos: admin + superusuario */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'catalogos' ? 'active' : '' %>" onclick="openTab(event, 'catalogos')">
+            <i data-lucide="package" style="width: 18px; height: 18px;"></i>
+            Catálogos
           </button>
           <% } %>
 
@@ -2096,9 +2096,30 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- TAB: ETIQUETA -->
+        <!-- TAB: IMPRIMIBLES (Etiqueta + Guía + Pictogramas) -->
         <!-- ============================================ -->
-        <div id="etiqueta" class="tab-content">
+        <% if (!esOperador) { %>
+        <% const impSubInicial = ['etiqueta','guia','pictogramas'].includes(tabInicial) ? tabInicial : 'etiqueta'; %>
+        <div id="imprimibles" class="tab-content">
+
+          <!-- Sub-tabs de Imprimibles -->
+          <div style="display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid #e2e8f0;padding-bottom:0;">
+            <button id="imp-btn-etiqueta" onclick="switchImpSubtab('etiqueta')"
+              style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:0.92rem;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;color:#64748b;border-radius:4px 4px 0 0;transition:all .15s;">
+              <i data-lucide="tag" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;"></i>Etiqueta
+            </button>
+            <button id="imp-btn-guia" onclick="switchImpSubtab('guia')"
+              style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:0.92rem;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;color:#64748b;border-radius:4px 4px 0 0;transition:all .15s;">
+              <i data-lucide="file-text" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;"></i>Guía Expedida
+            </button>
+            <button id="imp-btn-pictogramas" onclick="switchImpSubtab('pictogramas')"
+              style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:0.92rem;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;color:#64748b;border-radius:4px 4px 0 0;transition:all .15s;">
+              <i data-lucide="image" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;"></i>Pictogramas
+            </button>
+          </div>
+
+          <!-- Panel: Etiqueta -->
+          <div id="imp-panel-etiqueta">
 
           <%
             // Lista de elementos de la etiqueta con sus claves y etiquetas
@@ -2121,8 +2142,8 @@
               { key: 'dest_contacto',        icon: '👤', label: 'Contacto destinatario',   desc: 'Nombre del contacto en ENTREGAR A',      grupo: 'envio' },
               { key: 'dest_telefono',        icon: '📞', label: 'Teléfono destinatario',   desc: 'Tel. del destinatario en ENTREGAR A',    grupo: 'envio' }
             ];
-            // Template seleccionado actualmente (el que venía en ?template_id= o el primero)
-            const tplId = parseInt(query.template_id) || (etiquetaTemplates.length > 0 ? etiquetaTemplates[0].id : null);
+            // Template seleccionado actualmente (tpl tras guardar, template_id al navegar, o el primero)
+            const tplId = parseInt(query.tpl) || parseInt(query.template_id) || (etiquetaTemplates.length > 0 ? etiquetaTemplates[0].id : null);
             const tplActivo = etiquetaTemplates.find(t => t.id === tplId) || etiquetaTemplates[0] || null;
             const isAdmin = user.rol === 'admin';
             const isAdminOrSuper = user.rol === 'admin' || user.rol === 'superusuario';
@@ -2478,13 +2499,10 @@
           </div>
           <% } %>
 
-        </div><!-- /tab etiqueta -->
+          </div><!-- /imp-panel-etiqueta -->
 
-        <!-- ============================================ -->
-        <!-- TAB: GUÍA EXPEDIDA                           -->
-        <!-- ============================================ -->
-        <% if (!esOperador) { %>
-        <div id="guia" class="tab-content">
+          <!-- Panel: Guía Expedida -->
+          <div id="imp-panel-guia" style="display:none">
 
           <%
             const guiaElementos = [
@@ -2532,7 +2550,7 @@
               { key: 'col_servicios',         icon: '🔧', label: 'Columna Servicios',          desc: 'Columna Servicios en tabla de carga',        grupo: 'tabla' },
               { key: 'col_importe',           icon: '💰', label: 'Columna Importe',            desc: 'Columna Importe en tabla de carga',          grupo: 'tabla' },
             ];
-            const guiaTplId = parseInt(query.guia_template_id) || (guiaTemplates.length > 0 ? guiaTemplates[0].id : null);
+            const guiaTplId = parseInt(query.tpl) || parseInt(query.guia_template_id) || (guiaTemplates.length > 0 ? guiaTemplates[0].id : null);
             const guiaTplActivo = guiaTemplates.find(t => t.id === guiaTplId) || guiaTemplates[0] || null;
           %>
 
@@ -3027,12 +3045,10 @@
           </div>
           <% } %>
 
-        </div><!-- /tab guia -->
+          </div><!-- /imp-panel-guia -->
 
-        <!-- ============================================ -->
-        <!-- TAB: PICTOGRAMAS                             -->
-        <!-- ============================================ -->
-        <div id="pictogramas" class="tab-content">
+          <!-- Panel: Pictogramas -->
+          <div id="imp-panel-pictogramas" style="display:none">
 
           <div class="config-card">
             <div class="card-header">
@@ -3134,8 +3150,159 @@
           </div>
           <% } %>
 
-        </div><!-- /tab pictogramas -->
-        <% } %>
+          </div><!-- /imp-panel-pictogramas -->
+
+        </div><!-- /tab imprimibles -->
+        <% } %><!-- /if !esOperador -->
+
+        <!-- ============================================ -->
+        <!-- TAB: CATÁLOGOS                               -->
+        <!-- ============================================ -->
+        <% if (!esOperador) { %>
+        <div id="catalogos" class="tab-content">
+          <div class="config-card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">
+                  <i data-lucide="package" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                  Tipos de Empaque
+                </h2>
+                <p class="card-description">Opciones disponibles en el campo Tipo al crear o editar un envío</p>
+              </div>
+            </div>
+
+            <% if (query.success === 'tipo_empaque_creado') { %>
+              <div class="alert alert-success" style="margin-bottom: 16px;">
+                <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+                Tipo de empaque creado correctamente.
+              </div>
+            <% } else if (query.success === 'tipo_empaque_actualizado') { %>
+              <div class="alert alert-success" style="margin-bottom: 16px;">
+                <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+                Tipo de empaque actualizado correctamente.
+              </div>
+            <% } else if (query.success === 'tipo_empaque_eliminado') { %>
+              <div class="alert alert-success" style="margin-bottom: 16px;">
+                <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+                Tipo de empaque eliminado.
+              </div>
+            <% } %>
+            <% if (query.error === 'nombre_duplicado') { %>
+              <div class="alert alert-error" style="margin-bottom: 16px;">
+                <i data-lucide="alert-circle" style="width: 18px; height: 18px;"></i>
+                Ya existe un tipo de empaque con ese nombre.
+              </div>
+            <% } else if (query.error === 'nombre_requerido') { %>
+              <div class="alert alert-error" style="margin-bottom: 16px;">
+                <i data-lucide="alert-circle" style="width: 18px; height: 18px;"></i>
+                El nombre es obligatorio.
+              </div>
+            <% } %>
+
+            <% if (tiposEmpaques && tiposEmpaques.length > 0) { %>
+            <div style="overflow-x: auto; margin-bottom: 24px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                <thead>
+                  <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: #475569; width: 60px;">Orden</th>
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 700; color: #475569;">Nombre</th>
+                    <th style="padding: 10px 14px; text-align: center; font-weight: 700; color: #475569; width: 110px;">Estado</th>
+                    <th style="padding: 10px 14px; text-align: center; font-weight: 700; color: #475569; width: 200px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% tiposEmpaques.forEach(function(te, idx) { %>
+                  <tr style="border-bottom: 1px solid #f1f5f9; transition: background .12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                    <td style="padding: 10px 14px; color: #94a3b8; font-size: 0.82rem;"><%= te.orden %></td>
+                    <td style="padding: 10px 14px;">
+                      <span id="te-nombre-<%= te.id %>" style="font-weight: 600; color: #0f172a;"><%= te.nombre %></span>
+                      <form id="te-edit-form-<%= te.id %>" action="/configuracion/catalogos/tipos-empaques/<%= te.id %>/editar" method="POST"
+                            style="display: none; margin-top: 4px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                          <input type="text" name="nombre" value="<%= te.nombre %>"
+                                 style="border: 1px solid #93c5fd; border-radius: 6px; padding: 5px 10px; font-size: 0.875rem; width: 200px; outline: none;"
+                                 required>
+                          <button type="submit"
+                                  style="background: #2563eb; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer;">
+                            Guardar
+                          </button>
+                          <button type="button" onclick="cancelarEditTE(<%= te.id %>)"
+                                  style="background: #f1f5f9; color: #64748b; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.82rem; cursor: pointer;">
+                            Cancelar
+                          </button>
+                        </div>
+                      </form>
+                    </td>
+                    <td style="padding: 10px 14px; text-align: center;">
+                      <% if (te.activo) { %>
+                        <span style="background: #dcfce7; color: #16a34a; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">Activo</span>
+                      <% } else { %>
+                        <span style="background: #fee2e2; color: #dc2626; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">Inactivo</span>
+                      <% } %>
+                    </td>
+                    <td style="padding: 10px 14px; text-align: center;">
+                      <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                        <%/* Editar: admin + superusuario */%>
+                        <button type="button" onclick="editarTE(<%= te.id %>)"
+                                title="Editar nombre"
+                                style="background: #eff6ff; color: #2563eb; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                          <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
+                          Editar
+                        </button>
+                        <%/* Toggle: admin + superusuario */%>
+                        <form action="/configuracion/catalogos/tipos-empaques/<%= te.id %>/toggle" method="POST" style="display:inline;">
+                          <button type="submit"
+                                  title="<%= te.activo ? 'Desactivar' : 'Activar' %>"
+                                  style="background: <%= te.activo ? '#fef9c3' : '#f0fdf4' %>; color: <%= te.activo ? '#854d0e' : '#166534' %>; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                            <i data-lucide="<%= te.activo ? 'eye-off' : 'eye' %>" style="width: 14px; height: 14px;"></i>
+                            <%= te.activo ? 'Desactivar' : 'Activar' %>
+                          </button>
+                        </form>
+                        <%/* Eliminar: solo admin */%>
+                        <% if (esAdmin) { %>
+                        <form action="/configuracion/catalogos/tipos-empaques/<%= te.id %>/eliminar" method="POST" style="display:inline;"
+                              onsubmit="return confirm('¿Eliminar tipo de empaque \"<%= te.nombre %>\"? Esta acción no se puede deshacer.')">
+                          <button type="submit"
+                                  title="Eliminar"
+                                  style="background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            Eliminar
+                          </button>
+                        </form>
+                        <% } %>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+            <% } else { %>
+            <p style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 24px; font-style: italic;">
+              No hay tipos de empaque registrados. Agrega el primero usando el formulario de abajo.
+            </p>
+            <% } %>
+
+            <%/* Formulario agregar nuevo: admin + superusuario */%>
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+              <h3 style="font-size: 0.9rem; font-weight: 700; color: #374151; margin-bottom: 12px;">Agregar tipo de empaque</h3>
+              <form action="/configuracion/catalogos/tipos-empaques/nuevo" method="POST">
+                <div style="display: flex; gap: 10px; align-items: center; max-width: 480px;">
+                  <input type="text" name="nombre" placeholder="Ej. BULTOS, CAJA, PALLET…" required
+                         style="flex: 1; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 9px 14px; font-size: 0.875rem; outline: none; transition: border .15s;"
+                         onfocus="this.style.borderColor='#93c5fd'" onblur="this.style.borderColor='#e2e8f0'">
+                  <button type="submit"
+                          style="background: #2563eb; color: white; border: none; border-radius: 8px; padding: 9px 20px; font-size: 0.875rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    Agregar
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div><!-- /config-card -->
+        </div><!-- /tab catalogos -->
+        <% } %><!-- /if !esOperador -->
 
         <!-- ============================================ -->
         <!-- TAB: PÁGINA DE INICIO                        -->
@@ -3246,6 +3413,16 @@
       });
     }
     
+    // Catálogos: edición inline de tipos de empaque
+    function editarTE(id) {
+      document.getElementById('te-nombre-' + id).style.display = 'none';
+      document.getElementById('te-edit-form-' + id).style.display = 'block';
+    }
+    function cancelarEditTE(id) {
+      document.getElementById('te-nombre-' + id).style.display = '';
+      document.getElementById('te-edit-form-' + id).style.display = 'none';
+    }
+
     // Tabs
     function openTab(event, tabName) {
       const tabContents = document.querySelectorAll('.tab-content');
@@ -3257,23 +3434,47 @@
       document.getElementById(tabName).classList.add('active');
       event.currentTarget.classList.add('active');
 
+      // Si se abre Imprimibles, asegurar que el sub-tab activo sea visible
+      if (tabName === 'imprimibles') {
+        var activeImp = document.querySelector('#imp-panel-etiqueta, #imp-panel-guia, #imp-panel-pictogramas');
+        // Buscar cuál ya está visible; si ninguno, activar etiqueta
+        var hayActivo = ['etiqueta','guia','pictogramas'].some(function(t) {
+          var el = document.getElementById('imp-panel-' + t);
+          return el && el.style.display !== 'none';
+        });
+        if (!hayActivo) switchImpSubtab('etiqueta');
+      }
+
       lucide.createIcons();
     }
 
     // Activar el tab correcto al cargar la página
     document.addEventListener('DOMContentLoaded', function() {
-      const tabInicial = '<%= tabInicial %>';
-      const tabEl = document.getElementById(tabInicial);
-      if (tabEl) {
-        tabEl.classList.add('active');
-        const tabBtn = document.querySelector(`[onclick="openTab(event, '${tabInicial}')"]`);
-        if (tabBtn) tabBtn.classList.add('active');
+      var tabInicial = '<%= tabInicial %>';
+      var imprimiblesMap = { etiqueta: true, guia: true, pictogramas: true };
+
+      if (imprimiblesMap[tabInicial]) {
+        // Activar el tab Imprimibles y el sub-tab correcto
+        var impTab = document.getElementById('imprimibles');
+        var impBtn = document.querySelector('[onclick="openTab(event, \'imprimibles\')"]');
+        if (impTab) impTab.classList.add('active');
+        if (impBtn) impBtn.classList.add('active');
+        switchImpSubtab(tabInicial);
       } else {
-        // Fallback: activar el primero visible
-        const primerTab = document.querySelector('.tab-content');
-        const primerBtn = document.querySelector('.tab-btn');
-        if (primerTab) primerTab.classList.add('active');
-        if (primerBtn) primerBtn.classList.add('active');
+        var tabEl = document.getElementById(tabInicial);
+        if (tabEl) {
+          tabEl.classList.add('active');
+          var tabBtn = document.querySelector('[onclick="openTab(event, \'' + tabInicial + '\')"]');
+          if (tabBtn) tabBtn.classList.add('active');
+        } else {
+          // Fallback: activar el primero visible
+          var primerTab = document.querySelector('.tab-content');
+          var primerBtn = document.querySelector('.tab-btn');
+          if (primerTab) primerTab.classList.add('active');
+          if (primerBtn) primerBtn.classList.add('active');
+          // Inicializar sub-tabs de imprimibles con etiqueta por defecto
+          switchImpSubtab('etiqueta');
+        }
       }
       lucide.createIcons();
 
@@ -3759,6 +3960,7 @@
       const url = new URL(window.location.href);
       url.searchParams.set('template_id', id);
       url.searchParams.set('tab', 'etiqueta');
+      url.searchParams.delete('tpl');
       window.location.href = url.toString();
     }
 
@@ -3783,6 +3985,7 @@
       const url = new URL(window.location.href);
       url.searchParams.set('guia_template_id', id);
       url.searchParams.set('tab', 'guia');
+      url.searchParams.delete('tpl');
       window.location.href = url.toString();
     }
     function gprevUpdateMsg1(val) {
@@ -3818,6 +4021,19 @@
         btn.style.background = active ? '#2563eb' : 'transparent';
         btn.style.color      = active ? 'white'   : '#64748b';
         btn.style.boxShadow  = active ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
+      });
+    }
+    function switchImpSubtab(tab) {
+      const panels = ['etiqueta', 'guia', 'pictogramas'];
+      panels.forEach(function(t) {
+        const el  = document.getElementById('imp-panel-' + t);
+        const btn = document.getElementById('imp-btn-' + t);
+        if (!el || !btn) return;
+        const active = t === tab;
+        el.style.display     = active ? '' : 'none';
+        btn.style.borderBottomColor = active ? '#2563eb' : 'transparent';
+        btn.style.color      = active ? '#2563eb' : '#64748b';
+        btn.style.background = active ? '#eff6ff'  : 'none';
       });
     }
     function switchGuiaSubtab(tab) {

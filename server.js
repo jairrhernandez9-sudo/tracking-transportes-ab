@@ -186,6 +186,17 @@ db.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS template_etiqueta_id INT
 // Migración: columna habilitado en clientes
 db.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS habilitado TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 
+// Migración: catálogo de tipos de empaque
+db.query(`CREATE TABLE IF NOT EXISTS tipos_empaques (
+  id INT NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(100) NOT NULL,
+  activo TINYINT(1) NULL DEFAULT 1,
+  orden INT NULL DEFAULT 0,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_tipo_empaque_nombre (nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`).catch(() => {});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

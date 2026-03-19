@@ -29,6 +29,11 @@ router.get('/', isAuthenticated, async (req, res) => {
         AND LOWER(e.estado_actual) NOT IN ('entregado', 'cancelado')
     `;
     
+    // Filtro por operador: solo sus clientes asignados
+    if (req.session.userRole === 'operador') {
+      query += ` AND e.cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ${db.escape(req.session.userId)})`;
+    }
+
     // Filtro de criticidad
     if (criticidad === 'critico') {
       query += ` AND DATEDIFF(CURDATE(), DATE(e.fecha_estimada_entrega)) > 7`;
@@ -41,6 +46,10 @@ router.get('/', isAuthenticated, async (req, res) => {
     query += ` ORDER BY dias_retraso DESC`;
 
     // Conteos globales (sin filtro de criticidad) para mostrar en los tabs
+    let countWhere = `DATE(fecha_estimada_entrega) < CURDATE() AND LOWER(estado_actual) NOT IN ('entregado', 'cancelado')`;
+    if (req.session.userRole === 'operador') {
+      countWhere += ` AND cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ${db.escape(req.session.userId)})`;
+    }
     const [[counts]] = await db.query(`
       SELECT
         COUNT(*) as total,
@@ -48,8 +57,7 @@ router.get('/', isAuthenticated, async (req, res) => {
         SUM(CASE WHEN DATEDIFF(CURDATE(), DATE(fecha_estimada_entrega)) BETWEEN 4 AND 7  THEN 1 ELSE 0 END) as altos,
         SUM(CASE WHEN DATEDIFF(CURDATE(), DATE(fecha_estimada_entrega)) BETWEEN 1 AND 3  THEN 1 ELSE 0 END) as medios
       FROM envios
-      WHERE DATE(fecha_estimada_entrega) < CURDATE()
-        AND LOWER(estado_actual) NOT IN ('entregado', 'cancelado')
+      WHERE ${countWhere}
     `);
 
     const [enviosRetrasados] = await db.query(query);
@@ -110,10 +118,16 @@ router.get('/', isAuthenticated, async (req, res) => {
 // GET /envios-retrasados/api — JSON para el panel de notificaciones
 router.get('/api', isAuthenticated, async (req, res) => {
   try {
+    const isOperador = req.session.userRole === 'operador';
+    const operadorFilter = isOperador
+      ? `AND e.cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ${db.escape(req.session.userId)})`
+      : '';
+
     const [[{ total }]] = await db.query(`
-      SELECT COUNT(*) as total FROM envios
-      WHERE DATE(fecha_estimada_entrega) < CURDATE()
-        AND LOWER(estado_actual) NOT IN ('entregado', 'cancelado')
+      SELECT COUNT(*) as total FROM envios e
+      WHERE DATE(e.fecha_estimada_entrega) < CURDATE()
+        AND LOWER(e.estado_actual) NOT IN ('entregado', 'cancelado')
+        ${operadorFilter}
     `);
 
     const [items] = await db.query(`
@@ -127,6 +141,7 @@ router.get('/api', isAuthenticated, async (req, res) => {
       LEFT JOIN clientes c ON e.cliente_id = c.id
       WHERE DATE(e.fecha_estimada_entrega) < CURDATE()
         AND LOWER(e.estado_actual) NOT IN ('entregado', 'cancelado')
+        ${operadorFilter}
       ORDER BY dias_retraso DESC
       LIMIT 10
     `);

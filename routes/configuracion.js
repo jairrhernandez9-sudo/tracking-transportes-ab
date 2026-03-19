@@ -129,6 +129,15 @@ async function obtenerDireccionesEmpresa() {
 }
 
 // ── Helpers templates ──────────────────────────────────────────────────────
+async function obtenerTiposEmpaques() {
+  try {
+    const [rows] = await db.query('SELECT * FROM tipos_empaques ORDER BY orden ASC, nombre ASC');
+    return rows;
+  } catch (e) {
+    return [];
+  }
+}
+
 async function obtenerTemplates() {
   const [rows] = await db.query('SELECT * FROM etiqueta_templates ORDER BY nombre ASC');
   return rows;
@@ -153,6 +162,7 @@ router.get('/', async (req, res) => {
     const direccionesDestino  = todasDirecciones.filter(d => d.tipo === 'destino' || d.tipo === 'ambos');
     const etiquetaTemplates = await obtenerTemplates();
     const guiaTemplates     = await obtenerGuiaTemplates();
+    const tiposEmpaques     = await obtenerTiposEmpaques();
     const [pictogramas] = await db.query(
       'SELECT * FROM pictogramas ORDER BY orden ASC, nombre ASC'
     ).catch(() => [[]]);
@@ -177,6 +187,7 @@ router.get('/', async (req, res) => {
       direccionesDestino,
       etiquetaTemplates,
       guiaTemplates,
+      tiposEmpaques,
       pictogramas: pictogramas || [],
       paginaInicio,
       success: req.query.success,
@@ -856,10 +867,10 @@ router.post('/etiqueta/templates/:id/guardar', isAuthenticated, async (req, res)
       [nombre || 'Sin nombre', ...boolVals, ...textVals, ...sizeVals, id]
     );
 
-    res.redirect('/configuracion?success=template_guardado&tab=etiqueta');
+    res.redirect(`/configuracion?success=template_guardado&tab=etiqueta&tpl=${id}`);
   } catch (error) {
     console.error('Error al guardar template:', error);
-    res.redirect('/configuracion?error=error_servidor&tab=etiqueta');
+    res.redirect(`/configuracion?error=error_servidor&tab=etiqueta&tpl=${id}`);
   }
 });
 
@@ -981,10 +992,10 @@ router.post('/guia/templates/:id/guardar', isAuthenticated, async (req, res) => 
         etiqueta_obs_operador || null, etiqueta_recibido_por || null, etiqueta_obs_recibido || null,
         id]
     );
-    res.redirect('/configuracion?success=guia_template_guardado&tab=guia');
+    res.redirect(`/configuracion?success=guia_template_guardado&tab=guia&tpl=${id}`);
   } catch (error) {
     console.error('Error al guardar template de guía:', error);
-    res.redirect('/configuracion?error=error_servidor&tab=guia');
+    res.redirect(`/configuracion?error=error_servidor&tab=guia&tpl=${id}`);
   }
 });
 
@@ -1000,6 +1011,95 @@ router.post('/guia/templates/:id/eliminar', isAuthenticated, async (req, res) =>
   } catch (error) {
     console.error('Error al eliminar template de guía:', error);
     res.redirect('/configuracion?error=error_servidor&tab=guia');
+  }
+});
+
+// ============================================
+// CATÁLOGO: TIPOS DE EMPAQUE
+// ============================================
+
+// Nuevo tipo de empaque (admin + superusuario)
+router.post('/catalogos/tipos-empaques/nuevo', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?tab=catalogos&error=sin_permiso');
+  }
+  try {
+    const nombre = (req.body.nombre || '').trim();
+    if (!nombre) {
+      return res.redirect('/configuracion?tab=catalogos&error=nombre_requerido');
+    }
+    await db.query(
+      'INSERT INTO tipos_empaques (nombre) VALUES (?)',
+      [nombre]
+    );
+    res.redirect('/configuracion?tab=catalogos&success=tipo_empaque_creado');
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.redirect('/configuracion?tab=catalogos&error=nombre_duplicado');
+    }
+    console.error('Error al crear tipo empaque:', error);
+    res.redirect('/configuracion?tab=catalogos&error=error_servidor');
+  }
+});
+
+// Editar tipo de empaque (admin + superusuario)
+router.post('/catalogos/tipos-empaques/:id/editar', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?tab=catalogos&error=sin_permiso');
+  }
+  try {
+    const { id } = req.params;
+    const nombre = (req.body.nombre || '').trim();
+    if (!nombre) {
+      return res.redirect('/configuracion?tab=catalogos&error=nombre_requerido');
+    }
+    await db.query(
+      'UPDATE tipos_empaques SET nombre = ? WHERE id = ?',
+      [nombre, id]
+    );
+    res.redirect('/configuracion?tab=catalogos&success=tipo_empaque_actualizado');
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.redirect('/configuracion?tab=catalogos&error=nombre_duplicado');
+    }
+    console.error('Error al editar tipo empaque:', error);
+    res.redirect('/configuracion?tab=catalogos&error=error_servidor');
+  }
+});
+
+// Eliminar tipo de empaque (solo admin)
+router.post('/catalogos/tipos-empaques/:id/eliminar', isAuthenticated, async (req, res) => {
+  if (req.session.userRole !== 'admin') {
+    return res.redirect('/configuracion?tab=catalogos&error=sin_permiso');
+  }
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM tipos_empaques WHERE id = ?', [id]);
+    res.redirect('/configuracion?tab=catalogos&success=tipo_empaque_eliminado');
+  } catch (error) {
+    console.error('Error al eliminar tipo empaque:', error);
+    res.redirect('/configuracion?tab=catalogos&error=error_servidor');
+  }
+});
+
+// Toggle activo tipo de empaque (admin + superusuario)
+router.post('/catalogos/tipos-empaques/:id/toggle', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?tab=catalogos&error=sin_permiso');
+  }
+  try {
+    const { id } = req.params;
+    await db.query(
+      'UPDATE tipos_empaques SET activo = NOT activo WHERE id = ?',
+      [id]
+    );
+    res.redirect('/configuracion?tab=catalogos&success=tipo_empaque_actualizado');
+  } catch (error) {
+    console.error('Error al toggle tipo empaque:', error);
+    res.redirect('/configuracion?tab=catalogos&error=error_servidor');
   }
 });
 

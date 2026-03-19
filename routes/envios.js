@@ -433,6 +433,9 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
     const [pictogramas] = await db.query(
       'SELECT id, nombre, imagen_url FROM pictogramas WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
     ).catch(() => [[]]);
+    const [tiposEmpaques] = await db.query(
+      'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
 
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
@@ -445,6 +448,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
       clientes,
       ultimoClienteId,
       pictogramas: pictogramas || [],
+      tiposEmpaques: tiposEmpaques || [],
       error: null
     });
   } catch (error) {
@@ -507,6 +511,9 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
                FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa`,
           esOp ? [req.session.userId] : []
         );
+      const [tiposEmpaquesVal] = await db.query(
+        'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+      ).catch(() => [[]]);
       return res.render('envios/nuevo', {
         title: 'Crear Nuevo Envío',
         user: {
@@ -517,6 +524,8 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
         },
         clientes,
         ultimoClienteId: parseInt(cliente_id) || null,
+        pictogramas: [],
+        tiposEmpaques: tiposEmpaquesVal || [],
         error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
@@ -642,6 +651,9 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       WHERE activo = 1 AND eliminado_en IS NULL 
       ORDER BY nombre_empresa
     `);
+    const [tiposEmpaquesErr] = await db.query(
+      'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
       user: {
@@ -652,6 +664,8 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       },
       clientes,
       ultimoClienteId: parseInt(req.body?.cliente_id) || null,
+      pictogramas: [],
+      tiposEmpaques: tiposEmpaquesErr || [],
       error: 'Error al crear el envío: ' + error.message
     });
   }
@@ -681,6 +695,9 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       'SELECT pictograma_id FROM envio_pictogramas WHERE envio_id = ?', [id]
     ).catch(() => [[]]);
     const pictoIdsEnvio = (pictoEnvio || []).map(r => r.pictograma_id);
+    const [tiposEmpaquesEditar] = await db.query(
+      'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
 
     res.render('envios/editar', {
       title: 'Editar Envío',
@@ -695,6 +712,7 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       items: itemsEditar,
       pictogramas: pictogramas || [],
       pictoIdsEnvio,
+      tiposEmpaques: tiposEmpaquesEditar || [],
       error: null
     });
   } catch (error) {
@@ -741,10 +759,15 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
         db.query('SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'),
         db.query('SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id])
       ]);
+      const [tiposEmpaquesEditVal] = await db.query(
+        'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+      ).catch(() => [[]]);
       return res.render('envios/editar', {
         title: 'Editar Envío',
         user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
         envio: envioRow[0], clientes, items: itemsVal,
+        pictogramas: [], pictoIdsEnvio: [],
+        tiposEmpaques: tiposEmpaquesEditVal || [],
         error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
@@ -810,10 +833,15 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
       db.query('SELECT * FROM clientes WHERE activo = 1 AND eliminado_en IS NULL ORDER BY nombre_empresa'),
       db.query('SELECT * FROM envio_items WHERE envio_id = ? ORDER BY id ASC', [id]).catch(() => [[]])
     ]);
+    const [tiposEmpaquesEditErr] = await db.query(
+      'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
+    ).catch(() => [[]]);
     res.render('envios/editar', {
       title: 'Editar Envío',
       user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
       envio: envioRow[0], clientes, items: itemsCatch,
+      pictogramas: [], pictoIdsEnvio: [],
+      tiposEmpaques: tiposEmpaquesEditErr || [],
       error: 'Error al actualizar el envío: ' + error.message
     });
   }
