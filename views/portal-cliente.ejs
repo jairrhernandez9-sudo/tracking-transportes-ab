@@ -603,11 +603,11 @@
             </span>
           </td>
           <td data-label="Fecha" class="fecha-cell">
-            <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit'}) %>
+            <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit', timeZone:'America/Mexico_City'}) %>
           </td>
           <td data-label="Entrega est." class="fecha-cell">
             <% if (envio.fecha_estimada_entrega) { %>
-              <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit'}) %>
+              <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit', timeZone:'America/Mexico_City'}) %>
             <% } else { %>
               <span style="color:#d1d5db;">—</span>
             <% } %>

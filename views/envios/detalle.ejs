@@ -1675,13 +1675,13 @@
                 
                 <div class="info-item">
                   <span class="info-label">Fecha Creación</span>
-                  <span class="info-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX') %></span>
+                  <span class="info-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) %></span>
                 </div>
                 
                 <div class="info-item">
                   <span class="info-label">Fecha Estimada</span>
                   <span class="info-value">
-                    <%= envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : '-' %>
+                    <%= envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) : '-' %>
                   </span>
                 </div>
                 
@@ -1772,7 +1772,7 @@
                       <span style="font-size:10px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:4px;padding:1px 6px;font-weight:700;margin-right:6px;">PARTE 1</span>
                       <%= guiaOrigen.numero_tracking %>
                     </div>
-                    <div class="guia-rel-fecha"><%= new Date(guiaOrigen.fecha_creacion).toLocaleDateString('es-MX') %></div>
+                    <div class="guia-rel-fecha"><%= new Date(guiaOrigen.fecha_creacion).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) %></div>
                   </div>
                   <div style="display:flex;align-items:center;gap:8px;">
                     <span class="badge badge-<%= guiaOrigen.estado_actual %> guia-rel-badge">
@@ -1800,7 +1800,7 @@
                       <%= gr.numero_tracking %>
                       <% if (gr.id == envio.id) { %><span style="font-size:11px;color:#3b82f6;font-weight:400;"> (este envío)</span><% } %>
                     </div>
-                    <div class="guia-rel-fecha"><%= new Date(gr.fecha_creacion).toLocaleDateString('es-MX') %></div>
+                    <div class="guia-rel-fecha"><%= new Date(gr.fecha_creacion).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) %></div>
                   </div>
                   <div style="display:flex;align-items:center;gap:8px;">
                     <span class="badge badge-<%= gr.estado_actual %> guia-rel-badge">
@@ -1853,11 +1853,12 @@
   <div class="timeline-header-left">
     <span class="timeline-estado"><%= item.estado.replace('-', ' ') %></span>
     <span class="timeline-fecha">
-      <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { 
-        day: '2-digit', 
-        month: 'short', 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Mexico_City'
       }) %>
     </span>
   </div>
@@ -2001,7 +2002,7 @@
                       <% historial.forEach((item, index) => { %>
                         <option value="<%= item.id %>" <%= index === 0 ? 'selected' : '' %>>
                           <%= item.estado.replace('-', ' ').toUpperCase() %> 
-                          - <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) %>
+                          - <%= new Date(item.fecha_hora).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' }) %>
                           <% if (item.ubicacion) { %> (<%= item.ubicacion %>)<% } %>
                         </option>
                       <% }); %>

@@ -747,7 +747,7 @@
       <div class="cab-fecha">
         <div class="cab-fecha-label"><%= txtFechaEmision %></div>
         <div class="cab-fecha-val" style="font-size:<%= szCabFecha %>;">
-          <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: '2-digit' }) %>
+          <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: '2-digit', timeZone: 'America/Mexico_City' }) %>
         </div>
       </div>
 
@@ -905,7 +905,7 @@
         <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtEntregaEst %></div>
         <div class="detalle-valor" style="font-size:<%= szDetalleValor %>;">
           <% if (envio.fecha_estimada_entrega) { %>
-            <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'}) %>
+            <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit',timeZone:'America/Mexico_City'}) %>
           <% } else { %> — <% } %>
         </div>
       </div>

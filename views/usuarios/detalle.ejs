@@ -1749,12 +1749,13 @@
                 Fecha de Registro
               </div>
               <div class="info-value">
-                <%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', { 
-                  day: '2-digit', 
-                  month: 'long', 
+                <%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', {
+                  day: '2-digit',
+                  month: 'long',
                   year: 'numeric',
                   hour: '2-digit',
-                  minute: '2-digit'
+                  minute: '2-digit',
+                  timeZone: 'America/Mexico_City'
                 }) %>
               </div>
             </div>
@@ -1796,12 +1797,13 @@
               </div>
               <div class="info-value">
                 <% if (usuario.fecha_modificacion) { %>
-                  <%= new Date(usuario.fecha_modificacion).toLocaleDateString('es-MX', { 
-                    day: '2-digit', 
-                    month: 'short', 
+                  <%= new Date(usuario.fecha_modificacion).toLocaleDateString('es-MX', {
+                    day: '2-digit',
+                    month: 'short',
                     year: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    timeZone: 'America/Mexico_City'
                   }) %>
                 <% } else { %>
                   Sin modificaciones
@@ -1886,7 +1888,7 @@
                 <div class="stat-label">Última Sesión</div>
                 <div class="stat-value" style="font-size: 0.9rem;">
                   <% if (usuario.ultima_sesion) { %>
-                    <%= new Date(usuario.ultima_sesion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) %>
+                    <%= new Date(usuario.ultima_sesion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', timeZone: 'America/Mexico_City' }) %>
                   <% } else { %>
                     N/A
                   <% } %>

@@ -1084,12 +1084,12 @@
             <h3>Período Seleccionado</h3>
             <p>
               <% if (filtros.fecha_inicio && filtros.fecha_fin) { %>
-                Del <%= new Date(filtros.fecha_inicio + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
-                al <%= new Date(filtros.fecha_fin + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }) %>
+                Del <%= new Date(filtros.fecha_inicio + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Mexico_City' }) %>
+                al <%= new Date(filtros.fecha_fin + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Mexico_City' }) %>
               <% } else if (filtros.fecha_inicio) { %>
-                Desde el <%= new Date(filtros.fecha_inicio + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }) %>
+                Desde el <%= new Date(filtros.fecha_inicio + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Mexico_City' }) %>
               <% } else if (filtros.fecha_fin) { %>
-                Hasta el <%= new Date(filtros.fecha_fin + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }) %>
+                Hasta el <%= new Date(filtros.fecha_fin + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'America/Mexico_City' }) %>
               <% } %>
             </p>
           </div>
@@ -1187,7 +1187,7 @@
                       <%= (envio.estado_actual || 'creado').replace('-', ' ').replace('_', ' ').toUpperCase() %>
                     </span>
                   </td>
-                  <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                  <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Mexico_City' }) %></td>
                   <td>
                     <a href="/envios/<%= envio.id %>" class="btn-ver">
                       <i data-lucide="eye"></i>

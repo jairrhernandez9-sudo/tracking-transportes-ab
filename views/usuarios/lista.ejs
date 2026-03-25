@@ -1166,7 +1166,7 @@
                       <%= usuario.activo ? 'Activo' : 'Inactivo' %>
                     </span>
                   </td>
-                  <td><%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                  <td><%= new Date(usuario.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Mexico_City' }) %></td>
                   <td>
                     <div class="actions-cell">
                       <a href="/usuarios/<%= usuario.id %>" class="btn-action">

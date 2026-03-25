@@ -1270,7 +1270,7 @@
                         <%= (envio.estado_actual || 'creado').replace(/_/g, ' ').toUpperCase() %>
                       </span>
                     </td>
-                    <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX') %></td>
+                    <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) %></td>
                     <td>
                       <div class="table-actions">
                         <!-- Ver Detalles -->

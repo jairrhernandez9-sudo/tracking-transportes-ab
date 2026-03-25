@@ -996,7 +996,7 @@
                       <%= (envio.estado_actual || 'creado').replace('-', ' ').replace('_', ' ').toUpperCase() %>
                     </span>
                   </td>
-                  <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                  <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Mexico_City' }) %></td>
                   <td><%= envio.creador_nombre || 'Sistema' %></td>
                   <td>
                     <a href="/envios/<%= envio.id %>" class="btn-ver">

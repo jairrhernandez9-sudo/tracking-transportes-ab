@@ -712,8 +712,8 @@
                   <%= (h.estado || '').replace(/-/g,' ').toUpperCase() %>
                 </span>
                 <span class="timeline-date">
-                  <%= new Date(h.fecha_hora).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'}) %>
-                  · <%= new Date(h.fecha_hora).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) %>
+                  <%= new Date(h.fecha_hora).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City'}) %>
+                  · <%= new Date(h.fecha_hora).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City'}) %>
                 </span>
               </div>
               <% if (h.ubicacion) { %>
@@ -794,7 +794,7 @@
             </div>
             <div>
               <div class="quick-row-label">Fecha de creación</div>
-              <div class="quick-row-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %></div>
+              <div class="quick-row-value"><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric', timeZone:'America/Mexico_City'}) %></div>
             </div>
           </div>
           <% if (envio.fecha_estimada_entrega) { %>
@@ -804,7 +804,7 @@
             </div>
             <div>
               <div class="quick-row-label">Entrega estimada</div>
-              <div class="quick-row-value"><%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'}) %></div>
+              <div class="quick-row-value"><%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric', timeZone:'America/Mexico_City'}) %></div>
             </div>
           </div>
           <% } %>

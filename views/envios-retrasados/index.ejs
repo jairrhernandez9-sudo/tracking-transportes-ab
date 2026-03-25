@@ -545,7 +545,7 @@
               </span>
             </td>
             <td style="color:#64748b;font-size:0.82rem;white-space:nowrap;">
-              <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) %>
+              <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',timeZone:'America/Mexico_City'}) %>
             </td>
             <td>
               <a href="/envios/<%= envio.id %>" class="btn-ver">

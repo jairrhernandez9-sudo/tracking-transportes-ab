@@ -1216,7 +1216,7 @@
                 <div class="stat-box">
                   <div class="stat-label">Desde</div>
                   <div class="stat-value" style="font-size: 1rem;">
-                    <%= new Date(cliente.fecha_creacion).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' }) %>
+                    <%= new Date(cliente.fecha_creacion).toLocaleDateString('es-MX', { month: 'short', year: 'numeric', timeZone: 'America/Mexico_City' }) %>
                   </div>
                 </div>
                 <div class="stat-box">
