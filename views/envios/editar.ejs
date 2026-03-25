@@ -493,26 +493,23 @@
     .td-cant { width: 70px; }
     .td-tipo { width: 160px; }
     .td-peso { width: 90px; }
-    .td-tipo select {
+    .td-tipo input {
       width: 100%;
-      padding: 6px 28px 6px 10px;
+      padding: 6px 10px;
       border: 1.5px solid #d1d5db;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       color: #1e3a5f;
-      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center;
-      -webkit-appearance: none;
-      appearance: none;
-      cursor: pointer;
+      background: #fff;
       transition: border-color .15s, box-shadow .15s;
     }
-    .td-tipo select:focus {
+    .td-tipo input:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59,130,246,.15);
     }
-    .td-tipo select:hover { border-color: #93c5fd; }
+    .td-tipo input:hover { border-color: #93c5fd; }
     .td-del  { width: 44px; text-align: center; }
     .btn-add-item {
       display: inline-flex; align-items: center; gap: 6px;
@@ -533,6 +530,23 @@
       margin-top: 10px; font-size: 14px; color: #374151;
     }
     .items-peso-total strong { font-size: 18px; color: #1e3a8a; }
+  /* ── Chips de referencia ── */
+  .ref-tags-wrapper {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    min-height: 42px; padding: 6px 10px;
+    border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff;
+    cursor: text; transition: border-color .15s;
+  }
+  .ref-tags-wrapper:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+  .ref-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+    border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; white-space: nowrap;
+  }
+  .ref-tag-del { cursor: pointer; color: #93c5fd; font-size: 14px; line-height: 1; background: none; border: none; padding: 0; }
+  .ref-tag-del:hover { color: #1d4ed8; }
+  .ref-tag-input { border: none; outline: none; font-size: 13px; color: #374151; min-width: 140px; flex: 1; background: transparent; padding: 2px 0; }
+  .ref-add-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
   </style>
   <link rel="stylesheet" href="/css/responsive.css">
 </head>
@@ -691,18 +705,17 @@
               
               <!-- ⬇️ NUEVO CAMPO: REFERENCIA DEL CLIENTE -->
               <div class="form-group">
-                <label class="form-label">Referencia del Cliente</label>
-                <input 
-                  type="text" 
-                  name="referencia_cliente" 
-                  class="form-input" 
-                  value="<%= envio.referencia_cliente || '' %>"
-                  placeholder="Ej: PO-2024-001, ORD-12345"
-                  maxlength="100"
-                >
-                <p class="form-help">
-                  <i data-lucide="info" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i>
-                  Número de orden o referencia interna del cliente (opcional)
+                <label class="form-label">Referencias del Cliente</label>
+                <div class="ref-tags-wrapper" id="refTagsWrapper" onclick="document.getElementById('refTagInput').focus()">
+                  <div id="refTagsContainer"></div>
+                  <input type="text" id="refTagInput" class="ref-tag-input"
+                    placeholder="Ej: PO-2024-001 y presiona Enter" maxlength="100"
+                    onkeydown="refTagKeydown(event)">
+                </div>
+                <input type="hidden" name="referencia_cliente" id="refTagHidden" value="<%= envio.referencia_cliente || '' %>">
+                <p class="ref-add-hint">
+                  <i data-lucide="corner-down-left" style="width:11px;height:11px;display:inline;vertical-align:middle;"></i>
+                  Presiona <strong>Enter</strong> o <strong>,</strong> para agregar cada referencia
                 </p>
               </div>
               
@@ -722,6 +735,11 @@
                     </tr></thead>
                     <tbody id="itemsTbody"></tbody>
                   </table>
+                  <datalist id="tipos-comunes-list">
+                    <% if (typeof tiposEmpaques !== 'undefined') { tiposEmpaques.forEach(function(t) { %>
+                      <option value="<%= t.nombre %>">
+                    <% }); } %>
+                  </datalist>
                 </div>
                 <button type="button" class="btn-add-item" onclick="agregarItem()">
                   <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
@@ -792,14 +810,13 @@
                   </datalist>
                 </div>
                 <div class="form-group">
+                  <% const estadosMX = ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas']; %>
                   <label class="form-label required">Estado</label>
-                  <select name="origen_estado" class="form-select" required>
-                    <option value="">Selecciona...</option>
-                    <% const estadosMX = ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas']; %>
-                    <% estadosMX.forEach(est => { %>
-                      <option value="<%= est %>" <%= (envio.origen_estado === est) ? 'selected' : '' %>><%= est %></option>
-                    <% }); %>
-                  </select>
+                  <input type="text" name="origen_estado" class="form-input" list="estados-mx-list"
+                    value="<%= envio.origen_estado || '' %>" placeholder="Estado..." required autocomplete="off">
+                  <datalist id="estados-mx-list">
+                    <% estadosMX.forEach(est => { %><option value="<%= est %>"><% }); %>
+                  </datalist>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Referencia</label>
@@ -856,12 +873,8 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label required">Estado</label>
-                  <select name="destino_estado" class="form-select" required>
-                    <option value="">Selecciona...</option>
-                    <% estadosMX.forEach(est => { %>
-                      <option value="<%= est %>" <%= (envio.destino_estado === est) ? 'selected' : '' %>><%= est %></option>
-                    <% }); %>
-                  </select>
+                  <input type="text" name="destino_estado" class="form-input" list="estados-mx-list"
+                    value="<%= envio.destino_estado || '' %>" placeholder="Estado..." required autocomplete="off">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Referencia</label>
@@ -987,9 +1000,9 @@
             style="text-align:center;" oninput="actualizarPesoTotal()">
         </td>
         <td class="td-tipo">
-          <select name="item_tipo[]" oninput="actualizarPesoTotal()">
-            ${TIPOS_COMUNES.map(t => `<option value="${t}" ${t===(tipo||'')? 'selected':''}>${t}</option>`).join('')}
-          </select>
+          <input type="text" name="item_tipo[]" list="tipos-comunes-list"
+            value="${tipo||''}" placeholder="Tipo..."
+            oninput="actualizarPesoTotal()" autocomplete="off">
         </td>
         <td>
           <input type="text" name="item_desc[]" value="${desc||''}"
@@ -1027,7 +1040,51 @@
 
     // ══════════════════════════════════════════════════════════════════
 
+    // ══ Referencias múltiples ══════════════════════════════════════════
+    const _refs = [];
+
+    function refTagKeydown(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        refTagAgregar();
+      } else if (e.key === 'Backspace' && e.target.value === '' && _refs.length > 0) {
+        refTagEliminar(_refs.length - 1);
+      }
+    }
+    function refTagAgregar() {
+      const input = document.getElementById('refTagInput');
+      const val = input.value.trim().replace(/,+$/, '');
+      if (!val) return;
+      if (_refs.includes(val)) { input.value = ''; return; }
+      _refs.push(val);
+      refTagRender();
+      input.value = '';
+    }
+    function refTagEliminar(idx) {
+      _refs.splice(idx, 1);
+      refTagRender();
+    }
+    function refTagRender() {
+      const container = document.getElementById('refTagsContainer');
+      const hidden    = document.getElementById('refTagHidden');
+      container.innerHTML = _refs.map((r, i) => `
+        <span class="ref-tag">${r}
+          <button type="button" class="ref-tag-del" onclick="refTagEliminar(${i})">×</button>
+        </span>`).join('');
+      hidden.value = _refs.join(', ');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      // Inicializar chips desde valor guardado
+      const hiddenRef = document.getElementById('refTagHidden');
+      if (hiddenRef && hiddenRef.value.trim()) {
+        hiddenRef.value.split(',').map(s => s.trim()).filter(Boolean).forEach(r => {
+          if (!_refs.includes(r)) { _refs.push(r); }
+        });
+        refTagRender();
+      }
+
+      // Cargar ítems existentes
       const el = document.getElementById('items-data');
       const existingItems = el ? JSON.parse(el.textContent) : [];
       if (existingItems.length > 0) {

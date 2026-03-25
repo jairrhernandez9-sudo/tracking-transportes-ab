@@ -655,9 +655,13 @@
     const showDestNombre        = cfg.mostrar_dest_nombre        !== false;
     const showDestDireccion     = cfg.mostrar_dest_direccion     !== false;
     const showDestReferencia    = cfg.mostrar_dest_referencia    !== false;
+    const showAliasRuta         = cfg.mostrar_alias_ruta         === true && (!!origenAlias || !!destinoAlias);
+    const showPesoTotal         = cfg.mostrar_peso_total         !== false;
+    const showPesoItem          = cfg.mostrar_peso_item          === true;
     // Textos editables del template (con fallback a los valores por defecto)
     const txtEntregarA       = cfg.texto_entregar_a       || 'Entregar a:';
-    const txtPeso            = cfg.texto_peso            || 'Peso';
+    const txtPeso            = cfg.texto_peso            || 'Peso total';
+    const txtPesoItem        = cfg.texto_peso_item        || 'Peso';
     const txtEntregaEst      = cfg.texto_entrega_estimada || 'Entrega estimada';
     const txtRefCliente      = cfg.texto_ref_cliente      || 'Ref. cliente';
     const txtDescripcion     = cfg.texto_descripcion      || 'Descripción / Contenido';
@@ -695,7 +699,7 @@
       items.forEach(function(it) {
         const cant = parseInt(it.cantidad) || 1;
         for (let u = 0; u < cant; u++) {
-          unidades.push({ tipo: it.tipo, descripcion: it.descripcion });
+          unidades.push({ tipo: it.tipo, descripcion: it.descripcion, peso: it.peso });
         }
       });
     }
@@ -831,14 +835,32 @@
     <div class="ruta <%= !showRuta ? 'etq-hidden' : '' %>" data-elem="ruta">
       <div class="ruta-box">
         <div class="ruta-etiqueta" style="font-size:<%= szRutaEtiqueta %>;">Origen</div>
-        <div class="ruta-ciudad" style="font-size:<%= szRutaCiudad %>;"><%= (envio.origen_ciudad || envio.origen.split(',')[0]).toUpperCase() %></div>
-        <% if (envio.origen_estado) { %><div class="ruta-estado"><%= envio.origen_estado %></div><% } %>
+        <div class="ruta-ciudad" data-elem="ruta-ciudad-origen" style="font-size:<%= szRutaCiudad %>;<%= showAliasRuta && origenAlias ? 'display:none' : '' %>">
+          <%= (envio.origen_ciudad || envio.origen.split(',')[0]).toUpperCase() %>
+        </div>
+        <% if (origenAlias) { %>
+        <div class="ruta-ciudad" data-elem="ruta-alias-origen" style="font-size:<%= szRutaCiudad %>;<%= !(showAliasRuta && origenAlias) ? 'display:none' : '' %>">
+          <%= origenAlias.toUpperCase() %>
+        </div>
+        <% } %>
+        <div data-elem="ruta-estado-origen" class="<%= showAliasRuta ? 'etq-hidden' : '' %>">
+          <% if (envio.origen_estado) { %><div class="ruta-estado"><%= envio.origen_estado %></div><% } %>
+        </div>
       </div>
       <div class="ruta-flecha">→</div>
       <div class="ruta-box">
         <div class="ruta-etiqueta" style="font-size:<%= szRutaEtiqueta %>;">Destino</div>
-        <div class="ruta-ciudad" style="font-size:<%= szRutaCiudad %>;"><%= (envio.destino_ciudad || envio.destino.split(',')[0]).toUpperCase() %></div>
-        <% if (envio.destino_estado) { %><div class="ruta-estado"><%= envio.destino_estado %></div><% } %>
+        <div class="ruta-ciudad" data-elem="ruta-ciudad-destino" style="font-size:<%= szRutaCiudad %>;<%= showAliasRuta && destinoAlias ? 'display:none' : '' %>">
+          <%= (envio.destino_ciudad || envio.destino.split(',')[0]).toUpperCase() %>
+        </div>
+        <% if (destinoAlias) { %>
+        <div class="ruta-ciudad" data-elem="ruta-alias-destino" style="font-size:<%= szRutaCiudad %>;<%= !(showAliasRuta && destinoAlias) ? 'display:none' : '' %>">
+          <%= destinoAlias.toUpperCase() %>
+        </div>
+        <% } %>
+        <div data-elem="ruta-estado-destino" class="<%= showAliasRuta ? 'etq-hidden' : '' %>">
+          <% if (envio.destino_estado) { %><div class="ruta-estado"><%= envio.destino_estado %></div><% } %>
+        </div>
       </div>
     </div>
 
@@ -869,9 +891,15 @@
 
     <!-- ══ DETALLES DEL PAQUETE ══ -->
     <div class="detalles">
-      <div class="detalle-item">
+      <div class="detalle-item <%= !showPesoTotal ? 'etq-hidden' : '' %>" data-elem="peso-total">
         <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtPeso %></div>
         <div class="detalle-valor grande" style="font-size:<%= szDetalleValor %>;"><%= envio.peso || '—' %> <span style="font-size:7px;font-weight:600;">kg</span></div>
+      </div>
+      <div class="detalle-item <%= !showPesoItem ? 'etq-hidden' : '' %>" data-elem="peso-item">
+        <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtPesoItem %></div>
+        <div class="detalle-valor grande" style="font-size:<%= szDetalleValor %>;">
+          <%= (unidadActual && unidadActual.peso != null) ? parseFloat(unidadActual.peso).toFixed(2) : (envio.peso || '—') %> <span style="font-size:7px;font-weight:600;">kg</span>
+        </div>
       </div>
       <div class="detalle-item">
         <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtEntregaEst %></div>
@@ -979,6 +1007,9 @@
           panelRow('barcode',     '▤',  'Código de barras',        showBarcode, true, !!cfg.obligatorio_barcode),
           panelRow('qr',          '◼',  'Código QR',               showQr,      true, !!cfg.obligatorio_qr),
           panelRow('ruta',        '→',  'Ruta Origen/Destino',     showRuta,    true, !!cfg.obligatorio_ruta),
+          panelRow('alias-ruta',  '🏷', 'Alias de sucursal',       showAliasRuta, !!(origenAlias || destinoAlias), !!cfg.obligatorio_alias_ruta),
+          panelRow('peso-total',  '⚖️', 'Peso total de guía',      showPesoTotal, true, !!cfg.obligatorio_peso_total),
+          panelRow('peso-item',   '📦', 'Peso por ítem',           showPesoItem,  true, !!cfg.obligatorio_peso_item),
           panelRow('descripcion',    '📝', 'Descripción del paquete',    showDesc,           true, !!cfg.obligatorio_descripcion),
           panelRow('dest-nombre',     '🏢', 'Nombre destinatario',        showDestNombre,     true,                 !!cfg.obligatorio_dest_nombre),
           panelRow('dest-direccion', '📍', 'Dirección destinatario',     showDestDireccion,  true,                 !!cfg.obligatorio_dest_direccion),
@@ -1057,7 +1088,10 @@
         "dest_direccion":     <%= showDestDireccion  ? 'true' : 'false' %>,
         "dest_referencia":    <%= showDestReferencia ? 'true' : 'false' %>,
         "dest_contacto":      <%= showDestContacto   ? 'true' : 'false' %>,
-        "dest_telefono":      <%= showDestTelefono   ? 'true' : 'false' %>
+        "dest_telefono":      <%= showDestTelefono   ? 'true' : 'false' %>,
+        "alias-ruta":         <%= showAliasRuta      ? 'true' : 'false' %>,
+        "peso-total":         <%= showPesoTotal      ? 'true' : 'false' %>,
+        "peso-item":          <%= showPesoItem       ? 'true' : 'false' %>
       }
     }
   </script>
@@ -1216,6 +1250,21 @@
         // simplemente ocultamos la columna y el lado derecho ocupa todo
         document.querySelectorAll('[data-elem="picto-wrap"]').forEach(function(el) {
           // No ocultar el wrapper, solo la columna izquierda ya se ocultó
+        });
+        return;
+      }
+
+      // Alias de sucursal: alterna entre ciudad y alias en la banda de ruta
+      if (key === 'alias-ruta') {
+        ['origen', 'destino'].forEach(function(side) {
+          var ciudadEl = document.querySelector('[data-elem="ruta-ciudad-' + side + '"]');
+          var aliasEl  = document.querySelector('[data-elem="ruta-alias-' + side + '"]');
+          var estadoEl = document.querySelector('[data-elem="ruta-estado-' + side + '"]');
+          if (aliasEl) {
+            aliasEl.style.display  = visible ? '' : 'none';
+            if (ciudadEl) ciudadEl.style.display = visible ? 'none' : '';
+          }
+          if (estadoEl) estadoEl.classList.toggle('etq-hidden', visible);
         });
         return;
       }

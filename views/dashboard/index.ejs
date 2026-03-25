@@ -1663,16 +1663,18 @@
               <div class="activity-item">
                 <div class="activity-date">
                   <div class="date-day">
-                    <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', { 
-                      day: 'numeric', 
-                      month: 'short'
+                    <%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {
+                      day: 'numeric',
+                      month: 'short',
+                      timeZone: 'America/Mexico_City'
                     }) %>
                   </div>
                   <div class="date-time">
-                    <%= new Date(envio.fecha_creacion).toLocaleTimeString('es-MX', { 
+                    <%= new Date(envio.fecha_creacion).toLocaleTimeString('es-MX', {
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: true
+                      hour12: true,
+                      timeZone: 'America/Mexico_City'
                     }) %>
                   </div>
                 </div>

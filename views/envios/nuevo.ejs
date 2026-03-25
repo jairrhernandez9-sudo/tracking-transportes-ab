@@ -779,26 +779,23 @@
     .td-cant { width: 70px; }
     .td-tipo { width: 160px; }
     .td-peso { width: 90px; }
-    .td-tipo select {
+    .td-tipo input {
       width: 100%;
-      padding: 6px 28px 6px 10px;
+      padding: 6px 10px;
       border: 1.5px solid #d1d5db;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       color: #1e3a5f;
-      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center;
-      -webkit-appearance: none;
-      appearance: none;
-      cursor: pointer;
+      background: #fff;
       transition: border-color .15s, box-shadow .15s;
     }
-    .td-tipo select:focus {
+    .td-tipo input:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59,130,246,.15);
     }
-    .td-tipo select:hover { border-color: #93c5fd; }
+    .td-tipo input:hover { border-color: #93c5fd; }
     .td-del  { width: 44px; text-align: center; }
     .btn-add-item {
       display: inline-flex; align-items: center; gap: 6px;
@@ -1191,6 +1188,11 @@
                     </tr></thead>
                     <tbody id="itemsTbody"></tbody>
                   </table>
+                  <datalist id="tipos-comunes-list">
+                    <% if (typeof tiposEmpaques !== 'undefined') { tiposEmpaques.forEach(function(t) { %>
+                      <option value="<%= t.nombre %>">
+                    <% }); } %>
+                  </datalist>
                 </div>
                 <button type="button" class="btn-add-item" onclick="agregarItem()">
                   <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
@@ -1269,41 +1271,21 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label required">Estado</label>
-                  <select name="origen_estado" class="form-input" required>
-                    <option value="">Selecciona un estado...</option>
-                    <option value="Aguascalientes">Aguascalientes</option>
-                    <option value="Baja California">Baja California</option>
-                    <option value="Baja California Sur">Baja California Sur</option>
-                    <option value="Campeche">Campeche</option>
-                    <option value="Chiapas">Chiapas</option>
-                    <option value="Chihuahua">Chihuahua</option>
-                    <option value="Ciudad de México">Ciudad de México</option>
-                    <option value="Coahuila">Coahuila</option>
-                    <option value="Colima">Colima</option>
-                    <option value="Durango">Durango</option>
-                    <option value="Guanajuato">Guanajuato</option>
-                    <option value="Guerrero">Guerrero</option>
-                    <option value="Hidalgo">Hidalgo</option>
-                    <option value="Jalisco">Jalisco</option>
-                    <option value="México">México</option>
-                    <option value="Michoacán">Michoacán</option>
-                    <option value="Morelos">Morelos</option>
-                    <option value="Nayarit">Nayarit</option>
-                    <option value="Nuevo León">Nuevo León</option>
-                    <option value="Oaxaca">Oaxaca</option>
-                    <option value="Puebla">Puebla</option>
-                    <option value="Querétaro">Querétaro</option>
-                    <option value="Quintana Roo">Quintana Roo</option>
-                    <option value="San Luis Potosí">San Luis Potosí</option>
-                    <option value="Sinaloa">Sinaloa</option>
-                    <option value="Sonora">Sonora</option>
-                    <option value="Tabasco">Tabasco</option>
-                    <option value="Tamaulipas">Tamaulipas</option>
-                    <option value="Tlaxcala">Tlaxcala</option>
-                    <option value="Veracruz">Veracruz</option>
-                    <option value="Yucatán">Yucatán</option>
-                    <option value="Zacatecas">Zacatecas</option>
-                  </select>
+                  <input type="text" name="origen_estado" class="form-input" list="estados-mx-list"
+                    placeholder="Estado..." required autocomplete="off">
+                  <datalist id="estados-mx-list">
+                    <option value="Aguascalientes"><option value="Baja California"><option value="Baja California Sur">
+                    <option value="Campeche"><option value="Chiapas"><option value="Chihuahua">
+                    <option value="Ciudad de México"><option value="Coahuila"><option value="Colima">
+                    <option value="Durango"><option value="Estado de México"><option value="Guanajuato">
+                    <option value="Guerrero"><option value="Hidalgo"><option value="Jalisco">
+                    <option value="Michoacán"><option value="Morelos"><option value="Nayarit">
+                    <option value="Nuevo León"><option value="Oaxaca"><option value="Puebla">
+                    <option value="Querétaro"><option value="Quintana Roo"><option value="San Luis Potosí">
+                    <option value="Sinaloa"><option value="Sonora"><option value="Tabasco">
+                    <option value="Tamaulipas"><option value="Tlaxcala"><option value="Veracruz">
+                    <option value="Yucatán"><option value="Zacatecas">
+                  </datalist>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Referencia</label>
@@ -1355,41 +1337,8 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label required">Estado</label>
-                  <select name="destino_estado" class="form-input" required>
-                    <option value="">Selecciona un estado...</option>
-                    <option value="Aguascalientes">Aguascalientes</option>
-                    <option value="Baja California">Baja California</option>
-                    <option value="Baja California Sur">Baja California Sur</option>
-                    <option value="Campeche">Campeche</option>
-                    <option value="Chiapas">Chiapas</option>
-                    <option value="Chihuahua">Chihuahua</option>
-                    <option value="Ciudad de México">Ciudad de México</option>
-                    <option value="Coahuila">Coahuila</option>
-                    <option value="Colima">Colima</option>
-                    <option value="Durango">Durango</option>
-                    <option value="Guanajuato">Guanajuato</option>
-                    <option value="Guerrero">Guerrero</option>
-                    <option value="Hidalgo">Hidalgo</option>
-                    <option value="Jalisco">Jalisco</option>
-                    <option value="México">México</option>
-                    <option value="Michoacán">Michoacán</option>
-                    <option value="Morelos">Morelos</option>
-                    <option value="Nayarit">Nayarit</option>
-                    <option value="Nuevo León">Nuevo León</option>
-                    <option value="Oaxaca">Oaxaca</option>
-                    <option value="Puebla">Puebla</option>
-                    <option value="Querétaro">Querétaro</option>
-                    <option value="Quintana Roo">Quintana Roo</option>
-                    <option value="San Luis Potosí">San Luis Potosí</option>
-                    <option value="Sinaloa">Sinaloa</option>
-                    <option value="Sonora">Sonora</option>
-                    <option value="Tabasco">Tabasco</option>
-                    <option value="Tamaulipas">Tamaulipas</option>
-                    <option value="Tlaxcala">Tlaxcala</option>
-                    <option value="Veracruz">Veracruz</option>
-                    <option value="Yucatán">Yucatán</option>
-                    <option value="Zacatecas">Zacatecas</option>
-                  </select>
+                  <input type="text" name="destino_estado" class="form-input" list="estados-mx-list"
+                    placeholder="Estado..." required autocomplete="off">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Referencia</label>
@@ -2409,9 +2358,9 @@
             style="text-align:center;" oninput="actualizarPesoTotal()">
         </td>
         <td class="td-tipo">
-          <select name="item_tipo[]" oninput="actualizarPesoTotal()">
-            ${TIPOS_COMUNES.map(t => `<option value="${t}" ${t===(tipo||'')? 'selected':''}>${t}</option>`).join('')}
-          </select>
+          <input type="text" name="item_tipo[]" list="tipos-comunes-list"
+            value="${tipo||''}" placeholder="Tipo..."
+            oninput="actualizarPesoTotal()" autocomplete="off">
         </td>
         <td>
           <input type="text" name="item_desc[]" value="${desc||''}"

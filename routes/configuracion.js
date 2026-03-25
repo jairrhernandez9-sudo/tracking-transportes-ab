@@ -784,12 +784,15 @@ const TEMPLATE_FIELDS = [
   'obligatorio_email','obligatorio_sitio_web','obligatorio_rfc','obligatorio_direccion_fiscal',
   'obligatorio_barcode','obligatorio_qr','obligatorio_ruta','obligatorio_descripcion',
   'obligatorio_dest_contacto','obligatorio_dest_telefono',
-  'obligatorio_dest_nombre','obligatorio_dest_direccion','obligatorio_dest_referencia'
+  'obligatorio_dest_nombre','obligatorio_dest_direccion','obligatorio_dest_referencia',
+  'mostrar_alias_ruta','obligatorio_alias_ruta',
+  'mostrar_peso_total','obligatorio_peso_total',
+  'mostrar_peso_item','obligatorio_peso_item'
 ];
 // Campos de texto editables del template de etiqueta (no son boolean)
 const TEMPLATE_TEXT_FIELDS = [
-  'texto_entregar_a','texto_peso','texto_entrega_estimada','texto_ref_cliente','texto_descripcion',
-  'texto_fecha_emision','texto_etiqueta'
+  'texto_entregar_a','texto_peso','texto_peso_item','texto_entrega_estimada','texto_ref_cliente',
+  'texto_descripcion','texto_fecha_emision','texto_etiqueta'
 ];
 // Campos de tamaño (TINYINT, NULL = usar default CSS)
 const TEMPLATE_SIZE_FIELDS = [
@@ -1029,9 +1032,10 @@ router.post('/catalogos/tipos-empaques/nuevo', isAuthenticated, async (req, res)
     if (!nombre) {
       return res.redirect('/configuracion?tab=catalogos&error=nombre_requerido');
     }
+    const [[maxRow]] = await db.query('SELECT COALESCE(MAX(orden), 0) + 1 AS siguiente FROM tipos_empaques');
     await db.query(
-      'INSERT INTO tipos_empaques (nombre) VALUES (?)',
-      [nombre]
+      'INSERT INTO tipos_empaques (nombre, orden) VALUES (?, ?)',
+      [nombre, maxRow.siguiente]
     );
     res.redirect('/configuracion?tab=catalogos&success=tipo_empaque_creado');
   } catch (error) {
@@ -1099,6 +1103,47 @@ router.post('/catalogos/tipos-empaques/:id/toggle', isAuthenticated, async (req,
     res.redirect('/configuracion?tab=catalogos&success=tipo_empaque_actualizado');
   } catch (error) {
     console.error('Error al toggle tipo empaque:', error);
+    res.redirect('/configuracion?tab=catalogos&error=error_servidor');
+  }
+});
+
+// Mover tipo de empaque arriba/abajo (admin + superusuario)
+router.post('/catalogos/tipos-empaques/:id/mover', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?tab=catalogos&error=sin_permiso');
+  }
+  try {
+    const { id } = req.params;
+    const { direccion } = req.body; // 'arriba' o 'abajo'
+
+    const [[actual]] = await db.query('SELECT id, orden FROM tipos_empaques WHERE id = ?', [id]);
+    if (!actual) return res.redirect('/configuracion?tab=catalogos');
+
+    // Buscar el vecino más cercano en la dirección indicada
+    let vecinos;
+    if (direccion === 'arriba') {
+      [vecinos] = await db.query(
+        'SELECT id, orden FROM tipos_empaques WHERE orden < ? ORDER BY orden DESC LIMIT 1',
+        [actual.orden]
+      );
+    } else {
+      [vecinos] = await db.query(
+        'SELECT id, orden FROM tipos_empaques WHERE orden > ? ORDER BY orden ASC LIMIT 1',
+        [actual.orden]
+      );
+    }
+
+    if (vecinos.length === 0) return res.redirect('/configuracion?tab=catalogos');
+    const vecino = vecinos[0];
+
+    // Intercambiar órdenes
+    await db.query('UPDATE tipos_empaques SET orden = ? WHERE id = ?', [vecino.orden, actual.id]);
+    await db.query('UPDATE tipos_empaques SET orden = ? WHERE id = ?', [actual.orden, vecino.id]);
+
+    res.redirect('/configuracion?tab=catalogos');
+  } catch (error) {
+    console.error('Error al mover tipo empaque:', error);
     res.redirect('/configuracion?tab=catalogos&error=error_servidor');
   }
 });

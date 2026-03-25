@@ -147,6 +147,17 @@ db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_nombre TINY
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_referencia TINYINT(1) DEFAULT 0`).catch(() => {});
 
+// Migración: alias de sucursal en banda de ruta de etiqueta
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_alias_ruta TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_alias_ruta TINYINT(1) DEFAULT 0`).catch(() => {});
+
+// Migración: peso total de guía y peso por ítem en etiqueta
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_peso_total TINYINT(1) DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_peso_total TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_peso_item TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_peso_item TINYINT(1) DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN texto_peso_item VARCHAR(50) NULL`).catch(() => {});
+
 // Migración: tabla etiqueta_templates
 db.query(`
   CREATE TABLE IF NOT EXISTS etiqueta_templates (

@@ -84,11 +84,20 @@ CREATE TABLE `etiqueta_templates` (
   `obligatorio_dest_referencia`     TINYINT(1)   NOT NULL DEFAULT 0,
   `obligatorio_dest_contacto`       TINYINT(1)   NOT NULL DEFAULT 0,
   `obligatorio_dest_telefono`       TINYINT(1)   NOT NULL DEFAULT 0,
+  -- Alias de sucursal en banda de ruta
+  `mostrar_alias_ruta`              TINYINT(1)   NOT NULL DEFAULT 0,
+  `obligatorio_alias_ruta`          TINYINT(1)   NOT NULL DEFAULT 0,
+  -- Peso total de guía y peso por ítem
+  `mostrar_peso_total`              TINYINT(1)   NOT NULL DEFAULT 1,
+  `obligatorio_peso_total`          TINYINT(1)   NOT NULL DEFAULT 0,
+  `mostrar_peso_item`               TINYINT(1)   NOT NULL DEFAULT 0,
+  `obligatorio_peso_item`           TINYINT(1)   NOT NULL DEFAULT 0,
   -- Textos editables por template
   `texto_fecha_emision`             VARCHAR(100) NULL COMMENT 'Label "Fecha emisión" en header',
   `texto_etiqueta`                  VARCHAR(50)  NULL COMMENT 'Label "Etiqueta" (contador X/Y) en header',
   `texto_entregar_a`                VARCHAR(100) NULL COMMENT 'Label de la sección "Entregar a:"',
-  `texto_peso`                      VARCHAR(50)  NULL COMMENT 'Label del campo Peso',
+  `texto_peso`                      VARCHAR(50)  NULL COMMENT 'Label del campo Peso total',
+  `texto_peso_item`                 VARCHAR(50)  NULL COMMENT 'Label del campo Peso por ítem',
   `texto_entrega_estimada`          VARCHAR(100) NULL COMMENT 'Label del campo Entrega estimada',
   `texto_ref_cliente`               VARCHAR(100) NULL COMMENT 'Label del campo Ref. cliente',
   `texto_descripcion`               VARCHAR(100) NULL COMMENT 'Label de la sección Descripción / Contenido',

@@ -1151,7 +1151,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
             'SELECT * FROM etiqueta_templates WHERE id = ?', [clienteRow.template_etiqueta_id]
           );
           if (tpl) {
-            const keys = ['logo','eslogan','telefono','telefono_adicional','email','sitio_web','rfc','direccion_fiscal','barcode','qr','ruta','descripcion','dest_contacto','dest_telefono','dest_nombre','dest_direccion','dest_referencia'];
+            const keys = ['logo','eslogan','telefono','telefono_adicional','email','sitio_web','rfc','direccion_fiscal','barcode','qr','ruta','descripcion','dest_contacto','dest_telefono','dest_nombre','dest_direccion','dest_referencia','alias_ruta','peso_total','peso_item'];
             keys.forEach(k => {
               configuracion['mostrar_' + k]    = !!tpl['mostrar_' + k];
               configuracion['obligatorio_' + k] = !!tpl['obligatorio_' + k];
@@ -1160,7 +1160,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
             });
             // Textos editables del template
             const textKeys = [
-              'texto_entregar_a','texto_peso','texto_entrega_estimada','texto_ref_cliente',
+              'texto_entregar_a','texto_peso','texto_peso_item','texto_entrega_estimada','texto_ref_cliente',
               'texto_descripcion','texto_fecha_emision','texto_etiqueta'
             ];
             textKeys.forEach(k => { if (tpl[k]) configuracion[k] = tpl[k]; });
@@ -1197,6 +1197,24 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       );
       guiasRelEtiq = comps;
     }
+    // Alias de sucursal para la banda de ruta de la etiqueta
+    let origenAliasEtq = null;
+    if (envioData.origen_calle && envioData.origen_ciudad) {
+      const [origenRowsEtq] = await db.query(
+        'SELECT alias FROM direcciones_empresa WHERE calle = ? AND ciudad = ? LIMIT 1',
+        [envioData.origen_calle, envioData.origen_ciudad]
+      );
+      origenAliasEtq = origenRowsEtq[0]?.alias || null;
+    }
+    let destinoAliasEtq = null;
+    if (envioData.cliente_id && envioData.destino_calle && envioData.destino_ciudad) {
+      const [destinoRowsEtq] = await db.query(
+        'SELECT alias FROM direcciones_cliente WHERE cliente_id = ? AND calle = ? AND ciudad = ? LIMIT 1',
+        [envioData.cliente_id, envioData.destino_calle, envioData.destino_ciudad]
+      );
+      destinoAliasEtq = destinoRowsEtq[0]?.alias || null;
+    }
+
     // Pictogramas del envío
     const [pictosEnvio] = await db.query(`
       SELECT p.id, p.nombre, p.imagen_url
@@ -1215,6 +1233,8 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       items: itemsEtiq,
       guiasRelacionadas: guiasRelEtiq,
       pictogramas: pictosEnvio || [],
+      origenAlias: origenAliasEtq,
+      destinoAlias: destinoAliasEtq,
       user: {
         nombre: req.session.userName || 'Usuario',
         email: req.session.userEmail || 'usuario@sistema.com',
