@@ -899,7 +899,7 @@
           <p class="form-subtitle">Completa los datos del cliente. Los campos marcados con * son obligatorios.</p>
         </div>
         
-        <form action="/clientes/<%= cliente.id %>/editar" method="POST">
+        <form action="/clientes/<%= cliente.id %>/editar" method="POST" enctype="multipart/form-data">
           <div class="form-grid">
             
             <!-- Nombre Empresa -->
@@ -1092,6 +1092,47 @@
                 <input type="text" class="form-input" value="PUE: Pago en una Sola Exhibición" disabled style="background:#f1f5f9;color:#94a3b8;">
                 <p style="font-size:0.75rem;color:#f59e0b;margin-top:4px;">El crédito está desactivado globalmente en Configuración → Tarifas</p>
                 <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo del cliente para portal -->
+          <div style="margin: 28px 0 8px; padding-top: 24px; border-top: 2px solid #f1f5f9;">
+            <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 6px;">
+              <i data-lucide="image" style="width:18px;height:18px;vertical-align:-3px;color:#3b82f6;"></i>
+              Logo del cliente
+            </h3>
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">Se muestra en el portal de seguimiento junto al logo de la empresa. Máx. 2 MB (JPG, PNG, WEBP, SVG).</p>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <% if (cliente.logo_url) { %>
+                <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:10px;">
+                  <img src="<%= cliente.logo_url %>" alt="Logo actual" style="height:40px;max-width:120px;object-fit:contain;">
+                  <span style="font-size:0.75rem;color:#64748b;">Logo actual</span>
+                </div>
+                <label style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#eff6ff;color:#2563eb;border:1.5px solid #bfdbfe;border-radius:9px;cursor:pointer;font-size:0.85rem;font-weight:700;transition:all .15s;"
+                       onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                  <i data-lucide="upload" style="width:15px;height:15px;"></i>
+                  Cambiar logo
+                  <input type="file" name="logo_cliente" accept="image/*" style="display:none;" onchange="previewClienteLogo(this)">
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#dc2626;border:1.5px solid #fecaca;border-radius:9px;cursor:pointer;font-size:0.85rem;font-weight:700;transition:all .15s;"
+                       onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'"
+                       onclick="document.getElementById('eliminar_logo_input').value='1';document.getElementById('logo_preview_box').style.display='none';this.style.display='none';">
+                  <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                  Eliminar logo
+                </label>
+                <input type="hidden" name="eliminar_logo" id="eliminar_logo_input" value="0">
+              <% } else { %>
+                <label style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#eff6ff;color:#2563eb;border:1.5px dashed #93c5fd;border-radius:9px;cursor:pointer;font-size:0.85rem;font-weight:700;transition:all .15s;"
+                       onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                  <i data-lucide="image-plus" style="width:16px;height:16px;"></i>
+                  Subir logo del cliente
+                  <input type="file" name="logo_cliente" accept="image/*" style="display:none;" onchange="previewClienteLogo(this)">
+                </label>
+              <% } %>
+              <div id="logo_preview_box" style="display:none;background:#f8fafc;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;align-items:center;gap:10px;">
+                <img id="logo_preview_img" src="" alt="Preview" style="height:40px;max-width:120px;object-fit:contain;">
+                <span style="font-size:0.75rem;color:#16a34a;font-weight:600;">Nuevo logo</span>
               </div>
             </div>
           </div>
@@ -1332,6 +1373,22 @@
         if (lbl) lbl.style.borderColor = '#3b82f6';
       });
     });
+  </script>
+  <script>
+    function previewClienteLogo(input) {
+      if (!input.files || !input.files[0]) return;
+      const box = document.getElementById('logo_preview_box');
+      const img = document.getElementById('logo_preview_img');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+        box.style.display = 'flex';
+      };
+      reader.readAsDataURL(input.files[0]);
+      // Si había eliminar_logo activo, cancelarlo
+      const elim = document.getElementById('eliminar_logo_input');
+      if (elim) elim.value = '0';
+    }
   </script>
   <script src="/js/notifications.js"></script>
   <script src="/js/sidebar.js"></script>

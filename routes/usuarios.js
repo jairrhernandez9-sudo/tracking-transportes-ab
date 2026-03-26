@@ -13,30 +13,26 @@ router.get('/', isAuthenticated, requireAdmin, async (req, res) => {
     const { buscar, rol } = req.query;
     
     let query = `
-      SELECT 
-        id,
-        nombre,
-        email,
-        rol,
-        activo,
-        fecha_creacion
-      FROM usuarios
+      SELECT
+        u.id, u.nombre, u.email, u.rol, u.activo, u.fecha_creacion,
+        (SELECT COUNT(*) FROM usuario_sucursales WHERE usuario_id = u.id) AS num_sucursales
+      FROM usuarios u
       WHERE 1=1
     `;
     
     const params = [];
     
     if (buscar) {
-      query += ` AND (nombre LIKE ? OR email LIKE ?)`;
+      query += ` AND (u.nombre LIKE ? OR u.email LIKE ?)`;
       params.push(`%${buscar}%`, `%${buscar}%`);
     }
-    
+
     if (rol) {
-      query += ` AND rol = ?`;
+      query += ` AND u.rol = ?`;
       params.push(rol);
     }
-    
-    query += ` ORDER BY fecha_creacion DESC`;
+
+    query += ` ORDER BY u.fecha_creacion DESC`;
     
     const [usuarios] = await db.query(query, params);
     
@@ -115,7 +111,7 @@ router.get('/:id', isAuthenticated, requireAdmin, async (req, res) => {
     
     // Obtener datos del usuario
     const [usuarios] = await db.query(
-      'SELECT id, nombre, email, rol, activo, fecha_creacion FROM usuarios WHERE id = ?',
+      'SELECT id, nombre, email, rol, activo, fecha_creacion, cliente_id, sucursal_dir_id FROM usuarios WHERE id = ?',
       [userId]
     );
     
@@ -275,15 +271,31 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
 router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
   try {
     const [usuarios] = await db.query(
-      'SELECT id, nombre, email, rol, activo, fecha_creacion FROM usuarios WHERE id = ?',
+      'SELECT id, nombre, email, rol, activo, fecha_creacion, cliente_id, sucursal_dir_id FROM usuarios WHERE id = ?',
       [req.params.id]
     );
-    
+
     if (usuarios.length === 0) {
       return res.redirect('/usuarios?error=notfound');
     }
-    
+
+    const usuario = usuarios[0];
     const [clientes] = await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa');
+
+    let sucursales = [];
+    if (usuario.cliente_id) {
+      [sucursales] = await db.query(
+        'SELECT id, alias, ciudad FROM direcciones_cliente WHERE cliente_id = ? AND activa = 1 ORDER BY alias',
+        [usuario.cliente_id]
+      );
+    }
+
+    const [sucAsignadas] = await db.query(
+      'SELECT sucursal_dir_id FROM usuario_sucursales WHERE usuario_id = ?',
+      [usuario.id]
+    );
+    const sucursalesAsignadasIds = sucAsignadas.map(s => s.sucursal_dir_id);
+
     res.render('usuarios/editar', {
       title: 'Editar Usuario',
       user: {
@@ -291,8 +303,10 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
         email: req.session.userEmail,
         rol: req.session.userRole
       },
-      usuario: usuarios[0],
+      usuario,
       clientes,
+      sucursales,
+      sucursalesAsignadasIds,
       error: null,
       success: null
     });
@@ -378,48 +392,55 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
     const activo = req.body.activo ? 1 : 0;
     
     const cliente_id_edit = (rol === 'cliente' && req.body.cliente_id) ? parseInt(req.body.cliente_id) : null;
+    const sucursalIds = rol === 'cliente' && req.body.sucursal_ids
+      ? (Array.isArray(req.body.sucursal_ids) ? req.body.sucursal_ids : [req.body.sucursal_ids]).map(Number).filter(Boolean)
+      : [];
+
     let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ? WHERE id = ?';
     let updateParams = [nombre, email, rol, activo, cliente_id_edit, userId];
-    
+
     if (password_nueva) {
       // Validar contraseñas
       if (password_nueva !== password_confirmar) {
         return res.render('usuarios/editar', {
           title: 'Editar Usuario',
-          user: {
-            nombre: req.session.userName,
-            email: req.session.userEmail,
-            rol: req.session.userRole
-          },
+          user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
           usuario: { ...usuario, nombre, email, rol },
+          clientes: await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa').then(([r]) => r),
+          sucursales: [],
           error: 'Las contraseñas no coinciden',
           success: null
         });
       }
-      
+
       if (password_nueva.length < 6) {
         return res.render('usuarios/editar', {
           title: 'Editar Usuario',
-          user: {
-            nombre: req.session.userName,
-            email: req.session.userEmail,
-            rol: req.session.userRole
-          },
+          user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
           usuario: { ...usuario, nombre, email, rol },
+          clientes: await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa').then(([r]) => r),
+          sucursales: [],
           error: 'La contraseña debe tener al menos 6 caracteres',
           success: null
         });
       }
-      
+
       // Hash de la nueva contraseña
       const hashedPassword = await bcrypt.hash(password_nueva, 10);
       updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ?, password = ? WHERE id = ?';
       updateParams = [nombre, email, rol, activo, cliente_id_edit, hashedPassword, userId];
     }
-    
+
     // Actualizar usuario
     await db.query(updateQuery, updateParams);
-    
+
+    // Guardar multi-sucursales
+    await db.query('DELETE FROM usuario_sucursales WHERE usuario_id = ?', [userId]);
+    if (sucursalIds.length > 0) {
+      const values = sucursalIds.map(id => [parseInt(userId), id]);
+      await db.query('INSERT INTO usuario_sucursales (usuario_id, sucursal_dir_id) VALUES ?', [values]);
+    }
+
     // Si el usuario editó su propio perfil, actualizar sesión
     if (userId == req.session.userId) {
       req.session.userName  = nombre;
@@ -433,6 +454,21 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar usuario:', error);
     res.redirect('/usuarios?error=update');
+  }
+});
+
+// ============================================
+// API: Sucursales de un cliente (para selector dinámico)
+// ============================================
+router.get('/api/cliente/:id/sucursales', isAuthenticated, requireAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT id, alias, ciudad FROM direcciones_cliente WHERE cliente_id = ? AND activa = 1 ORDER BY alias',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (e) {
+    res.json([]);
   }
 });
 

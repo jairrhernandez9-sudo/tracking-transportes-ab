@@ -1159,6 +1159,11 @@
                       %>
                       <%= rolLabels[usuario.rol] || usuario.rol %>
                     </span>
+                    <% if (usuario.rol === 'cliente' && usuario.num_sucursales > 0) { %>
+                    <span style="display:inline-flex;align-items:center;gap:3px;margin-left:4px;padding:2px 7px;background:#eff6ff;color:#2563eb;border-radius:5px;font-size:0.68rem;font-weight:600;">
+                      <i data-lucide="map-pin" style="width:11px;height:11px;"></i> Sucursal
+                    </span>
+                    <% } %>
                   </td>
                   <td>
                     <span class="status-badge <%= usuario.activo ? 'activo' : 'inactivo' %>">

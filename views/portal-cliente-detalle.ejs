@@ -57,6 +57,18 @@
       color: rgba(255,255,255,0.5); font-size: 10.5px; font-weight: 600;
       text-transform: uppercase; letter-spacing: .8px;
     }
+    .brand-separator {
+      width: 1px; height: 36px;
+      background: rgba(255,255,255,0.25);
+      flex-shrink: 0; margin: 0 4px;
+    }
+    .cliente-logo-wrap {
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px; padding: 4px 7px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cliente-logo-img { height: 30px; max-width: 100px; object-fit: contain; }
+    @media (max-width: 640px) { .brand-separator, .cliente-logo-wrap { display: none; } }
     .header-right { display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
     .btn-back, .btn-logout {
       display: flex; align-items: center; gap: 6px;
@@ -475,9 +487,15 @@
       </div>
     <% } %>
     <div>
-      <div class="portal-brand-name">Transportes AB</div>
+      <div class="portal-brand-name"><%= envio.nombre_empresa %></div>
       <div class="portal-brand-sub">Portal de Seguimiento</div>
     </div>
+    <% if (typeof clienteLogoUrl !== 'undefined' && clienteLogoUrl) { %>
+      <div class="brand-separator"></div>
+      <div class="cliente-logo-wrap">
+        <img src="<%= clienteLogoUrl %>" alt="Logo cliente" class="cliente-logo-img">
+      </div>
+    <% } %>
   </div>
 
   <div class="header-right">
@@ -843,6 +861,28 @@
           <i data-lucide="copy" style="width:15px;height:15px;"></i>
           Copiar número de tracking
         </button>
+        <% if (guiaDisponible) { %>
+        <a href="/portal-cliente/envio/<%= envio.id %>/guia" target="_blank" class="btn-action secondary">
+          <i data-lucide="file-text" style="width:15px;height:15px;"></i>
+          Imprimir guía expedida
+        </a>
+        <% } else { %>
+        <div class="btn-action secondary" style="opacity:0.5;cursor:not-allowed;pointer-events:none;justify-content:flex-start;gap:8px;">
+          <i data-lucide="clock" style="width:15px;height:15px;color:#94a3b8;"></i>
+          <span style="color:#94a3b8;font-size:12px;">Guía expedida aún no generada</span>
+        </div>
+        <% } %>
+        <% if (etiquetaDisponible) { %>
+        <a href="/portal-cliente/envio/<%= envio.id %>/etiqueta" target="_blank" class="btn-action secondary">
+          <i data-lucide="tag" style="width:15px;height:15px;"></i>
+          Imprimir tickets
+        </a>
+        <% } else { %>
+        <div class="btn-action secondary" style="opacity:0.5;cursor:not-allowed;pointer-events:none;justify-content:flex-start;gap:8px;">
+          <i data-lucide="clock" style="width:15px;height:15px;color:#94a3b8;"></i>
+          <span style="color:#94a3b8;font-size:12px;">Tickets aún no generados</span>
+        </div>
+        <% } %>
         <a href="/portal-cliente" class="btn-action secondary">
           <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
           Ver todos mis envíos

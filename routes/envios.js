@@ -356,7 +356,7 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       }
     }
 
-    // Buscar alias de la dirección de origen en direcciones_empresa
+    // Buscar alias de la dirección de origen: primero en empresa, luego en clientes
     let origenAlias = null;
     if (envio.origen_calle && envio.origen_ciudad) {
       const [origenRows] = await db.query(
@@ -364,6 +364,13 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
         [envio.origen_calle, envio.origen_ciudad]
       );
       origenAlias = origenRows[0]?.alias || null;
+      if (!origenAlias) {
+        const [origenClienteRows] = await db.query(
+          `SELECT alias FROM direcciones_cliente WHERE calle = ? AND ciudad = ? LIMIT 1`,
+          [envio.origen_calle, envio.origen_ciudad]
+        );
+        origenAlias = origenClienteRows[0]?.alias || null;
+      }
     }
 
     // Buscar alias de la dirección de destino en direcciones_cliente
@@ -401,6 +408,83 @@ router.post('/api/lugar-expedicion', isAuthenticated, async (req, res) => {
     await db.query('UPDATE usuarios SET ultimo_lugar_expedicion = ? WHERE id = ?', [lugar || null, req.session.userId]);
     res.json({ ok: true });
   } catch (e) {
+    res.json({ ok: false });
+  }
+});
+
+// Guardar config de guía impresa (estado de toggles al momento de imprimir)
+const GUIA_CONFIG_KEYS = [
+  'mostrar_logo','mostrar_rfc','mostrar_telefono','mostrar_sitio_web','mostrar_barcode',
+  'mostrar_seccion_remitente','mostrar_remitente_nombre','mostrar_remitente_direccion','mostrar_remitente_telefono',
+  'mostrar_seccion_facturar','mostrar_facturar_nombre','mostrar_facturar_direccion','mostrar_facturar_contacto',
+  'mostrar_facturar_telefono','mostrar_facturar_email','mostrar_facturar_rfc',
+  'mostrar_seccion_destinatario','mostrar_destinatario_nombre','mostrar_destinatario_direccion',
+  'mostrar_clausula_seguro','mostrar_observaciones','mostrar_condiciones_pago',
+  'mostrar_fecha_emision','mostrar_fecha_entrega','mostrar_referencia_cliente','mostrar_retorno_documentos',
+  'mostrar_operador','mostrar_obs_operador','mostrar_recibido_por','mostrar_obs_recibido',
+  'mostrar_firma_final','mostrar_col_volumen','mostrar_col_peso_facturado','mostrar_col_servicios',
+  'mostrar_col_importe','mostrar_pie_datos','mostrar_disclaimer'
+];
+
+router.post('/api/guardar-config-guia', isAuthenticated, async (req, res) => {
+  try {
+    const { envio_id, config } = req.body;
+    if (!envio_id || !config) return res.json({ ok: false });
+
+    const values = GUIA_CONFIG_KEYS.map(k => (config[k] ? 1 : 0));
+    const setCols = GUIA_CONFIG_KEYS.map(k => `${k} = ?`).join(', ');
+
+    await db.query(
+      `INSERT INTO guias_config_impresa (envio_id, ${GUIA_CONFIG_KEYS.join(', ')})
+       VALUES (?, ${GUIA_CONFIG_KEYS.map(() => '?').join(', ')})
+       ON DUPLICATE KEY UPDATE ${setCols}`,
+      [envio_id, ...values, ...values]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Error guardar config guia:', e);
+    res.json({ ok: false });
+  }
+});
+
+// Guardar config de etiqueta impresa (estado de toggles al momento de imprimir)
+const ETIQUETA_CONFIG_KEYS = [
+  'mostrar_logo','mostrar_eslogan','mostrar_telefono','mostrar_telefono_adicional',
+  'mostrar_email','mostrar_sitio_web','mostrar_rfc','mostrar_direccion_fiscal',
+  'mostrar_barcode','mostrar_qr','mostrar_ruta','mostrar_descripcion',
+  'mostrar_dest_nombre','mostrar_dest_direccion','mostrar_dest_referencia',
+  'mostrar_dest_contacto','mostrar_dest_telefono',
+  'mostrar_alias_ruta','mostrar_peso_total','mostrar_peso_item'
+];
+
+router.post('/api/guardar-config-etiqueta', isAuthenticated, async (req, res) => {
+  try {
+    const { envio_id, config } = req.body;
+    if (!envio_id || !config) return res.json({ ok: false });
+
+    // Normalizar claves: alias-ruta → alias_ruta, peso-total → peso_total, etc.
+    const normalized = {};
+    Object.keys(config).forEach(k => {
+      normalized[k.replace(/-/g, '_')] = config[k];
+    });
+
+    const values = ETIQUETA_CONFIG_KEYS.map(k => {
+      const shortKey = k.replace('mostrar_', '');
+      return normalized[shortKey] !== undefined ? (normalized[shortKey] ? 1 : 0)
+           : normalized['mostrar_' + shortKey] !== undefined ? (normalized['mostrar_' + shortKey] ? 1 : 0)
+           : 1;
+    });
+    const setCols = ETIQUETA_CONFIG_KEYS.map(k => `${k} = ?`).join(', ');
+
+    await db.query(
+      `INSERT INTO etiquetas_config_impresa (envio_id, ${ETIQUETA_CONFIG_KEYS.join(', ')})
+       VALUES (?, ${ETIQUETA_CONFIG_KEYS.map(() => '?').join(', ')})
+       ON DUPLICATE KEY UPDATE ${setCols}`,
+      [envio_id, ...values, ...values]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Error guardar config etiqueta:', e);
     res.json({ ok: false });
   }
 });
@@ -1197,7 +1281,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       );
       guiasRelEtiq = comps;
     }
-    // Alias de sucursal para la banda de ruta de la etiqueta
+    // Alias de sucursal para la banda de ruta de la etiqueta: primero empresa, luego clientes
     let origenAliasEtq = null;
     if (envioData.origen_calle && envioData.origen_ciudad) {
       const [origenRowsEtq] = await db.query(
@@ -1205,6 +1289,13 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
         [envioData.origen_calle, envioData.origen_ciudad]
       );
       origenAliasEtq = origenRowsEtq[0]?.alias || null;
+      if (!origenAliasEtq) {
+        const [origenClienteRowsEtq] = await db.query(
+          'SELECT alias FROM direcciones_cliente WHERE calle = ? AND ciudad = ? LIMIT 1',
+          [envioData.origen_calle, envioData.origen_ciudad]
+        );
+        origenAliasEtq = origenClienteRowsEtq[0]?.alias || null;
+      }
     }
     let destinoAliasEtq = null;
     if (envioData.cliente_id && envioData.destino_calle && envioData.destino_ciudad) {

@@ -52,6 +52,19 @@ db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_direcci
 
 // Migración: último lugar de expedición por usuario
 db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_lugar_expedicion VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sucursal_dir_id INT NULL`).catch(() => {});
+
+// Migración: multi-sucursal por usuario
+db.query(`
+  CREATE TABLE IF NOT EXISTS usuario_sucursales (
+    usuario_id      INT NOT NULL,
+    sucursal_dir_id INT NOT NULL,
+    PRIMARY KEY (usuario_id, sucursal_dir_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+`).catch(() => {});
+
+// Migración: logo del cliente (para portal)
+db.query(`ALTER TABLE clientes ADD COLUMN logo_url VARCHAR(500) NULL`).catch(() => {});
 
 // Migración: etiquetas personalizables en guia_templates
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_col_descripcion VARCHAR(200) NULL`).catch(() => {});
@@ -191,6 +204,81 @@ db.query(`
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `).catch(() => {});
+
+// Tabla: config de guía impresa por envío (estado de toggles al momento de imprimir)
+db.query(`CREATE TABLE IF NOT EXISTS guias_config_impresa (
+  id INT NOT NULL AUTO_INCREMENT,
+  envio_id INT NOT NULL,
+  mostrar_logo TINYINT(1) DEFAULT 1,
+  mostrar_rfc TINYINT(1) DEFAULT 1,
+  mostrar_telefono TINYINT(1) DEFAULT 1,
+  mostrar_sitio_web TINYINT(1) DEFAULT 1,
+  mostrar_barcode TINYINT(1) DEFAULT 1,
+  mostrar_seccion_remitente TINYINT(1) DEFAULT 1,
+  mostrar_remitente_nombre TINYINT(1) DEFAULT 1,
+  mostrar_remitente_direccion TINYINT(1) DEFAULT 1,
+  mostrar_remitente_telefono TINYINT(1) DEFAULT 1,
+  mostrar_seccion_facturar TINYINT(1) DEFAULT 1,
+  mostrar_facturar_nombre TINYINT(1) DEFAULT 1,
+  mostrar_facturar_direccion TINYINT(1) DEFAULT 1,
+  mostrar_facturar_contacto TINYINT(1) DEFAULT 1,
+  mostrar_facturar_telefono TINYINT(1) DEFAULT 1,
+  mostrar_facturar_email TINYINT(1) DEFAULT 1,
+  mostrar_facturar_rfc TINYINT(1) DEFAULT 1,
+  mostrar_seccion_destinatario TINYINT(1) DEFAULT 1,
+  mostrar_destinatario_nombre TINYINT(1) DEFAULT 1,
+  mostrar_destinatario_direccion TINYINT(1) DEFAULT 1,
+  mostrar_clausula_seguro TINYINT(1) DEFAULT 1,
+  mostrar_observaciones TINYINT(1) DEFAULT 1,
+  mostrar_condiciones_pago TINYINT(1) DEFAULT 1,
+  mostrar_fecha_emision TINYINT(1) DEFAULT 1,
+  mostrar_fecha_entrega TINYINT(1) DEFAULT 1,
+  mostrar_referencia_cliente TINYINT(1) DEFAULT 1,
+  mostrar_retorno_documentos TINYINT(1) DEFAULT 1,
+  mostrar_operador TINYINT(1) DEFAULT 1,
+  mostrar_obs_operador TINYINT(1) DEFAULT 1,
+  mostrar_recibido_por TINYINT(1) DEFAULT 1,
+  mostrar_obs_recibido TINYINT(1) DEFAULT 1,
+  mostrar_firma_final TINYINT(1) DEFAULT 1,
+  mostrar_col_volumen TINYINT(1) DEFAULT 1,
+  mostrar_col_peso_facturado TINYINT(1) DEFAULT 1,
+  mostrar_col_servicios TINYINT(1) DEFAULT 1,
+  mostrar_col_importe TINYINT(1) DEFAULT 1,
+  mostrar_pie_datos TINYINT(1) DEFAULT 1,
+  mostrar_disclaimer TINYINT(1) DEFAULT 1,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_envio (envio_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`).catch(() => {});
+
+// Tabla: config de etiqueta impresa por envío (estado de toggles al momento de imprimir)
+db.query(`CREATE TABLE IF NOT EXISTS etiquetas_config_impresa (
+  id INT NOT NULL AUTO_INCREMENT,
+  envio_id INT NOT NULL,
+  mostrar_logo TINYINT(1) DEFAULT 1,
+  mostrar_eslogan TINYINT(1) DEFAULT 1,
+  mostrar_telefono TINYINT(1) DEFAULT 1,
+  mostrar_telefono_adicional TINYINT(1) DEFAULT 1,
+  mostrar_email TINYINT(1) DEFAULT 1,
+  mostrar_sitio_web TINYINT(1) DEFAULT 1,
+  mostrar_rfc TINYINT(1) DEFAULT 1,
+  mostrar_direccion_fiscal TINYINT(1) DEFAULT 1,
+  mostrar_barcode TINYINT(1) DEFAULT 1,
+  mostrar_qr TINYINT(1) DEFAULT 1,
+  mostrar_ruta TINYINT(1) DEFAULT 1,
+  mostrar_descripcion TINYINT(1) DEFAULT 1,
+  mostrar_dest_nombre TINYINT(1) DEFAULT 1,
+  mostrar_dest_direccion TINYINT(1) DEFAULT 1,
+  mostrar_dest_referencia TINYINT(1) DEFAULT 1,
+  mostrar_dest_contacto TINYINT(1) DEFAULT 1,
+  mostrar_dest_telefono TINYINT(1) DEFAULT 1,
+  mostrar_alias_ruta TINYINT(1) DEFAULT 0,
+  mostrar_peso_total TINYINT(1) DEFAULT 1,
+  mostrar_peso_item TINYINT(1) DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_envio (envio_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`).catch(() => {});
 
 // Migración: columna template_etiqueta_id en clientes
 db.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS template_etiqueta_id INT NULL`).catch(() => {});

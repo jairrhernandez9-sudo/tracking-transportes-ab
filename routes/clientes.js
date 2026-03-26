@@ -3,12 +3,35 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { isAuthenticated } = require('../middleware/auth');
+const multer = require('multer');
+const path   = require('path');
+const fs     = require('fs');
 // ⬅️ NUEVO: Importar funciones de tracking
 const {
   generarPrefijoUnico,
   prefijoDisponible,
   validarFormatoPrefijo
 } = require('../utils/tracking-utils');
+
+// Multer para logo del cliente (admin)
+const storageClienteLogo = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'public/uploads/clientes';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `cliente_${req.params.id}_${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+const uploadClienteLogo = multer({
+  storage: storageClienteLogo,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/jpeg|jpg|png|gif|webp|svg/.test(path.extname(file.originalname).toLowerCase())) cb(null, true);
+    else cb(new Error('Solo imágenes'));
+  }
+});
 
 // ============================================
 // APIs PARA PREFIJOS (NUEVO)
@@ -459,7 +482,7 @@ router.get('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res)
 // ============================================
 // EDITAR CLIENTE (POST) - MODIFICADO
 // ============================================
-router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, uploadClienteLogo.single('logo_cliente'), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -536,7 +559,29 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res
       }
     }
     
-    // ⬅️ MODIFICADO: Actualizar cliente con prefijo y templates
+    // Manejo de logo del cliente
+    let logoUpdateSql = '';
+    let logoUpdateParams = [];
+    if (req.body.eliminar_logo === '1') {
+      // Borrar archivo anterior
+      const [[clienteLogoRow]] = await db.query('SELECT logo_url FROM clientes WHERE id = ?', [id]);
+      if (clienteLogoRow?.logo_url) {
+        const oldPath = path.join('public', clienteLogoRow.logo_url.replace(/^\//, ''));
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+      logoUpdateSql = ', logo_url = NULL';
+    } else if (req.file) {
+      // Borrar logo anterior si existe
+      const [[clienteLogoRow]] = await db.query('SELECT logo_url FROM clientes WHERE id = ?', [id]);
+      if (clienteLogoRow?.logo_url) {
+        const oldPath = path.join('public', clienteLogoRow.logo_url.replace(/^\//, ''));
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+      logoUpdateSql = ', logo_url = ?';
+      logoUpdateParams = ['/uploads/clientes/' + req.file.filename];
+    }
+
+    // Actualizar cliente con prefijo, templates y logo
     const tplIdEdit = parseInt(template_etiqueta_id) || null;
     const guiaTplIdEdit = parseInt(template_guia_id) || null;
     const metodoPagoEdit = ['PUE', 'PPD'].includes(metodo_pago_defecto) ? metodo_pago_defecto : 'PPD';
@@ -544,10 +589,11 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res
       `UPDATE clientes
        SET nombre_empresa = ?, contacto = ?, telefono = ?, email = ?, direccion = ?, prefijo_tracking = ?,
            template_etiqueta_id = ?, template_guia_id = ?, metodo_pago_defecto = ?
+           ${logoUpdateSql}
        WHERE id = ?`,
-      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplIdEdit, guiaTplIdEdit, metodoPagoEdit, id]
+      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplIdEdit, guiaTplIdEdit, metodoPagoEdit, ...logoUpdateParams, id]
     );
-    
+
     res.redirect(`/clientes/${id}?success=updated`);
     
   } catch (error) {

@@ -68,10 +68,44 @@
       text-transform: uppercase; letter-spacing: .8px;
     }
 
+    /* Separador y logo del cliente */
+    .brand-separator {
+      width: 1px; height: 36px;
+      background: rgba(255,255,255,0.25);
+      flex-shrink: 0; margin: 0 4px;
+    }
+    .cliente-logo-area { display: flex; align-items: center; gap: 8px; position: relative; }
+    .cliente-logo-wrap {
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px; padding: 4px 7px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cliente-logo-img { height: 30px; max-width: 100px; object-fit: contain; }
+    .btn-logo-upload {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .2s; flex-shrink: 0;
+    }
+    .btn-logo-upload:hover { background: rgba(255,255,255,0.3); }
+    .btn-logo-upload-empty {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px dashed rgba(255,255,255,0.3);
+      border-radius: 8px; cursor: pointer; transition: all .2s;
+      color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 600;
+    }
+    .btn-logo-upload-empty:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
     .portal-user-area { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
     .portal-user-info { text-align: right; }
     .portal-user-name    { color: #f1f5f9; font-size: 13px; font-weight: 700; }
-    .portal-user-company { color: rgba(255,255,255,0.45); font-size: 11px; }
+    .portal-user-sucursal {
+      color: rgba(255,255,255,0.55); font-size: 10.5px; font-weight: 600;
+      display: flex; align-items: center; gap: 4px; justify-content: flex-end;
+    }
     .portal-avatar {
       width: 38px; height: 38px; border-radius: 10px;
       background: rgba(255,255,255,0.15);
@@ -380,6 +414,9 @@
         font-size: 10px; display: block; text-transform: uppercase; margin-bottom: 2px;
       }
     }
+    @media (max-width: 640px) {
+      .brand-separator, .cliente-logo-area { display: none; }
+    }
     @media (max-width: 480px) {
       .portal-brand-sub { display: none; }
       .welcome-chip { font-size: 12px; padding: 8px 14px; }
@@ -400,16 +437,42 @@
         <i data-lucide="truck" style="width:20px;height:20px;color:#fff;"></i>
       </div>
     <% } %>
+    <%# Logo del cliente — a la derecha del logo empresa %>
+    <div class="brand-separator"></div>
+    <div class="cliente-logo-area">
+      <% if (typeof clienteLogoUrl !== 'undefined' && clienteLogoUrl) { %>
+        <div class="portal-logo-wrap">
+          <img src="<%= clienteLogoUrl %>" alt="Logo cliente" class="cliente-logo-img">
+        </div>
+        <button type="button" class="btn-logo-upload" title="Cambiar logo" onclick="document.getElementById('logoFileInput').click()">
+          <i data-lucide="camera" style="width:12px;height:12px;color:rgba(255,255,255,0.8);"></i>
+        </button>
+      <% } else { %>
+        <button type="button" class="btn-logo-upload-empty" title="Subir logo de tu empresa" onclick="document.getElementById('logoFileInput').click()">
+          <i data-lucide="image-plus" style="width:13px;height:13px;"></i>
+          <span>Tu logo</span>
+        </button>
+      <% } %>
+    </div>
+
     <div class="portal-brand-info">
       <div class="portal-brand-name"><%= cliente.nombre_empresa %></div>
       <div class="portal-brand-sub">Portal de Seguimiento</div>
     </div>
   </div>
 
+  <%# Formulario oculto para subir logo %>
+  <form id="formLogoCliente" action="/portal-cliente/logo" method="POST" enctype="multipart/form-data" style="display:none;">
+    <input type="file" id="logoFileInput" name="logo" accept="image/*" onchange="this.form.submit()">
+  </form>
+
   <div class="portal-user-area">
     <div class="portal-user-info">
       <div class="portal-user-name"><%= user.nombre %></div>
-      <div class="portal-user-company">Cliente</div>
+      <div class="portal-user-sucursal">
+        <i data-lucide="<%= (typeof sucursalLabel !== 'undefined' && sucursalLabel !== 'Todos los envíos') ? 'map-pin' : 'globe' %>" style="width:10px;height:10px;"></i>
+        <%= typeof sucursalLabel !== 'undefined' ? sucursalLabel : 'Todos los envíos' %>
+      </div>
     </div>
     <div class="portal-avatar">
       <%= user.nombre ? user.nombre.charAt(0).toUpperCase() : 'C' %>
@@ -483,7 +546,7 @@
       <i data-lucide="lock" style="width:36px;height:36px;color:#dc2626;"></i>
     </div>
     <h2 style="font-size:1.4rem;font-weight:800;color:#1f2937;margin-bottom:10px;">Portal no disponible</h2>
-    <p style="color:#6b7280;font-size:0.95rem;max-width:400px;margin:0 auto;">Tu cuenta ha sido deshabilitada temporalmente. Contacta a tu ejecutivo para más información.</p>
+    <p style="color:#6b7280;font-size:0.95rem;max-width:400px;margin:0 auto;">Tu cuenta ha sido deshabilitada temporalmente. Contactanos para más información.</p>
   </div>
   <% } else { %>
 

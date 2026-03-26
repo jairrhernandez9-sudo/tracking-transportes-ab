@@ -182,6 +182,30 @@
     /* ── Elemento oculto ── */
     .guia-hidden { display: none !important; }
 
+    /* ── Impresión ── */
+    @page { size: letter; margin: 0; }
+    @media print {
+      body { background: white; overflow: visible; }
+      .toolbar, .panel-guia, .zoom-bar { display: none !important; }
+      .page-layout { display: block; height: auto; }
+      .guia-area { overflow: visible; display: block; background: white; cursor: default; }
+      #guia-canvas { display: block; transform: none !important; zoom: 1 !important; }
+      .page {
+        width: 215.9mm;
+        height: 279.4mm;
+        margin: 0;
+        padding: 5mm 6mm;
+        box-shadow: none;
+        display: flex !important;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .footer-grow { flex: 1; min-height: 40px; overflow: hidden; }
+      .footer-grow tr { height: 100%; }
+      .footer-grow td { height: 100%; }
+      .footer-grow .footer-content.tall { min-height: 0; height: 100%; }
+    }
+
     /* ── Panel de toggles ── */
     .panel-guia {
       width: 248px;
@@ -221,16 +245,6 @@
     .zoom-reset { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 0.75rem; cursor: pointer; padding: 0 2px; transition: color 0.15s; }
     .zoom-reset:hover { color: white; }
 
-    /* ── Print ── */
-    @media print {
-      body { background: white; overflow: auto; }
-      .toolbar, .panel-guia, .zoom-bar { display: none !important; }
-      .page-layout { display: block; height: auto; }
-      .guia-area { overflow: visible; cursor: default; }
-      #guia-canvas { zoom: 1 !important; }
-      .page { width: 100%; margin: 0; padding: 5mm 6mm; box-shadow: none; min-height: 0; }
-      @page { size: letter; margin: 8mm 8mm 8mm 8mm; }
-    }
   </style>
 </head>
 <body>
@@ -265,6 +279,28 @@
   }
 </style>
 
+<% const hayLugares   = lugaresExpedicion && lugaresExpedicion.length >= 1; %>
+<% const sinSeleccion = hayLugares && !lugarExpedicion; %>
+<% const sinLugares   = !hayLugares; %>
+<% const esAdmin      = user && (user.rol === 'admin' || user.rol === 'superusuario'); %>
+<% const esCliente    = typeof clienteView !== 'undefined' && clienteView; %>
+
+<% if (esCliente) { %>
+<div class="toolbar">
+  <div class="toolbar-left">
+    <a href="/portal-cliente/envio/<%= envio.id %>" class="btn-back">← Volver</a>
+    <span class="toolbar-title">Guía Expedida</span>
+    <span class="toolbar-tracking"><%= envio.numero_tracking %></span>
+  </div>
+  <button class="btn-print" onclick="window.print()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Imprimir / Descargar PDF
+  </button>
+</div>
+<% } else { %>
+<!-- Vista cliente: botón de impresión sin guardar config -->
 <div class="toolbar">
   <div class="toolbar-left">
     <a href="/envios/<%= envio.id %>" class="btn-back">← Volver al detalle</a>
@@ -272,10 +308,6 @@
     <span class="toolbar-tracking"><%= envio.numero_tracking %></span>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
-    <% const hayLugares    = lugaresExpedicion && lugaresExpedicion.length >= 1; %>
-    <% const sinSeleccion  = hayLugares && !lugarExpedicion; %>
-    <% const sinLugares    = !hayLugares; %>
-    <% const esAdmin       = user && (user.rol === 'admin' || user.rol === 'superusuario'); %>
     <% if (sinLugares) { %>
       <!-- No hay lugares configurados -->
       <div style="display:flex;align-items:center;gap:10px;">
@@ -304,7 +336,7 @@
     </div>
     <% } %>
     <button id="btn-print" class="btn-print"
-      onclick="window.print()"
+      onclick="guardarYImprimir()"
       <%= (sinSeleccion || sinLugares) ? 'disabled' : '' %>
       style="<%= (sinSeleccion || sinLugares) ? 'opacity:0.45;cursor:not-allowed;pointer-events:none;' : '' %>">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
@@ -314,8 +346,9 @@
     </button>
   </div>
 </div>
+<% } %>
 
-<div class="page-layout">
+<div class="page-layout" style="<%= esCliente ? 'padding-right:0' : '' %>">
   <div class="guia-area" id="guia-area">
     <div id="guia-canvas">
       <div class="page">
@@ -636,6 +669,7 @@
   </div><!-- /guia-area -->
 
   <!-- ── Panel de toggles ── -->
+  <% if (!esCliente) { %>
   <div class="panel-guia">
     <div class="tpl-panel">
       <div class="tpl-panel-hdr">Elementos de la Guía</div>
@@ -779,10 +813,12 @@
 
     </div>
   </div>
+  <% } %>
 
 </div><!-- /page-layout -->
 
 <!-- ── Barra de zoom ── -->
+<% if (!esCliente) { %>
 <div class="zoom-bar">
   <button class="zoom-btn" onclick="changeZoom(-0.1)">−</button>
   <input type="range" id="zoom-slider" class="zoom-slider" min="30" max="200" value="75" step="5" oninput="setZoom(this.value/100)">
@@ -790,6 +826,7 @@
   <span class="zoom-pct" id="zoom-pct">75%</span>
   <button class="zoom-reset" onclick="setZoom(0.75)">↺</button>
 </div>
+<% } %>
 
 <script>
   JsBarcode("#barcode", "<%= envio.numero_tracking %>", {
@@ -800,8 +837,8 @@
   function setZoom(v) {
     _zoom = Math.min(2.0, Math.max(0.3, Math.round(v * 20) / 20));
     document.getElementById('guia-canvas').style.zoom = _zoom;
-    document.getElementById('zoom-slider').value = Math.round(_zoom * 100);
-    document.getElementById('zoom-pct').textContent = Math.round(_zoom * 100) + '%';
+    var sl = document.getElementById('zoom-slider'); if (sl) sl.value = Math.round(_zoom * 100);
+    var pt = document.getElementById('zoom-pct'); if (pt) pt.textContent = Math.round(_zoom * 100) + '%';
   }
   function changeZoom(d) { setZoom(_zoom + d); }
 
@@ -833,9 +870,26 @@
     }).catch(function() {});
   }
 
+  // Estado actual de toggles (se actualiza en cada cambio y se guarda al imprimir)
+  var _guiaConfig = <%- JSON.stringify(
+    Object.keys(guiaCfg).filter(function(k){ return k.startsWith('mostrar_'); }).reduce(function(acc,k){ acc[k]=!!guiaCfg[k]; return acc; }, {})
+  ) %>;
+  var _envioId = <%= envio.id %>;
+
   function toggleElem(key, visible) {
     document.querySelectorAll('[data-elem="' + key + '"]').forEach(function(el) {
       el.classList.toggle('guia-hidden', !visible);
+    });
+    _guiaConfig['mostrar_' + key] = !!visible;
+  }
+
+  function guardarYImprimir() {
+    fetch('/envios/api/guardar-config-guia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ envio_id: _envioId, config: _guiaConfig })
+    }).finally(function() {
+      window.print();
     });
   }
 
@@ -857,6 +911,7 @@
       btn.style.boxShadow  = active ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
     });
   }
+
 
   document.addEventListener('DOMContentLoaded', function() {
     setZoom(0.75);

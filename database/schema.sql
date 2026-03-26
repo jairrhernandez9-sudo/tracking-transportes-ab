@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-03-17
+-- Última actualización: 2026-03-26
 -- Motor: MySQL 8+ / MariaDB 10.5+
 -- ============================================================
 
@@ -33,6 +33,7 @@ CREATE TABLE `usuarios` (
   `ultimo_cliente_id` INT          DEFAULT NULL,
   `alias`            VARCHAR(80)   DEFAULT NULL COMMENT 'Nombre público / cargo mostrado al cliente. Si NULL se usa el nombre real.',
   `ultimo_lugar_expedicion` VARCHAR(200) DEFAULT NULL COMMENT 'Último lugar de expedición usado al imprimir la Guía Expedida',
+  `sucursal_dir_id` INT DEFAULT NULL COMMENT 'FK a direcciones_cliente — si tiene valor, el usuario solo ve envíos de esa sucursal',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -279,6 +280,7 @@ CREATE TABLE `clientes` (
   `template_etiqueta_id`    INT           NULL COMMENT 'FK a etiqueta_templates',
   `template_guia_id`        INT           NULL COMMENT 'FK a guia_templates',
   `metodo_pago_defecto`     VARCHAR(3)    NOT NULL DEFAULT 'PPD' COMMENT 'PUE o PPD (SAT)',
+  `logo_url`                VARCHAR(500)  NULL COMMENT 'Logo del cliente mostrado en el portal',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_prefijo_tracking` (`prefijo_tracking`),
   KEY `fk_cliente_etpl` (`template_etiqueta_id`),
@@ -496,9 +498,11 @@ CREATE TABLE `pictogramas` (
 -- ============================================================
 DROP TABLE IF EXISTS `envio_pictogramas`;
 CREATE TABLE `envio_pictogramas` (
+  `id`             INT  NOT NULL AUTO_INCREMENT,
   `envio_id`       INT  NOT NULL,
   `pictograma_id`  INT  NOT NULL,
-  PRIMARY KEY (`envio_id`, `pictograma_id`),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_envio_picto` (`envio_id`, `pictograma_id`),
   KEY `fk_ep_picto` (`pictograma_id`),
   CONSTRAINT `fk_ep_envio`  FOREIGN KEY (`envio_id`)      REFERENCES `envios`      (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_ep_picto`  FOREIGN KEY (`pictograma_id`) REFERENCES `pictogramas` (`id`) ON DELETE CASCADE
@@ -547,6 +551,94 @@ INSERT INTO `tipos_empaques` (`nombre`, `orden`) VALUES
 
 
 -- ============================================================
+-- Multi-sucursal por usuario cliente
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `usuario_sucursales` (
+  `usuario_id`      INT NOT NULL,
+  `sucursal_dir_id` INT NOT NULL,
+  PRIMARY KEY (`usuario_id`, `sucursal_dir_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- Config de guía impresa por envío
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `guias_config_impresa` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `envio_id` INT NOT NULL,
+  `mostrar_logo` TINYINT(1) DEFAULT 1,
+  `mostrar_rfc` TINYINT(1) DEFAULT 1,
+  `mostrar_telefono` TINYINT(1) DEFAULT 1,
+  `mostrar_sitio_web` TINYINT(1) DEFAULT 1,
+  `mostrar_barcode` TINYINT(1) DEFAULT 1,
+  `mostrar_seccion_remitente` TINYINT(1) DEFAULT 1,
+  `mostrar_remitente_nombre` TINYINT(1) DEFAULT 1,
+  `mostrar_remitente_direccion` TINYINT(1) DEFAULT 1,
+  `mostrar_remitente_telefono` TINYINT(1) DEFAULT 1,
+  `mostrar_seccion_facturar` TINYINT(1) DEFAULT 1,
+  `mostrar_facturar_nombre` TINYINT(1) DEFAULT 1,
+  `mostrar_facturar_direccion` TINYINT(1) DEFAULT 1,
+  `mostrar_facturar_contacto` TINYINT(1) DEFAULT 1,
+  `mostrar_facturar_telefono` TINYINT(1) DEFAULT 1,
+  `mostrar_facturar_email` TINYINT(1) DEFAULT 1,
+  `mostrar_facturar_rfc` TINYINT(1) DEFAULT 1,
+  `mostrar_seccion_destinatario` TINYINT(1) DEFAULT 1,
+  `mostrar_destinatario_nombre` TINYINT(1) DEFAULT 1,
+  `mostrar_destinatario_direccion` TINYINT(1) DEFAULT 1,
+  `mostrar_clausula_seguro` TINYINT(1) DEFAULT 1,
+  `mostrar_observaciones` TINYINT(1) DEFAULT 1,
+  `mostrar_condiciones_pago` TINYINT(1) DEFAULT 1,
+  `mostrar_fecha_emision` TINYINT(1) DEFAULT 1,
+  `mostrar_fecha_entrega` TINYINT(1) DEFAULT 1,
+  `mostrar_referencia_cliente` TINYINT(1) DEFAULT 1,
+  `mostrar_retorno_documentos` TINYINT(1) DEFAULT 1,
+  `mostrar_operador` TINYINT(1) DEFAULT 1,
+  `mostrar_obs_operador` TINYINT(1) DEFAULT 1,
+  `mostrar_recibido_por` TINYINT(1) DEFAULT 1,
+  `mostrar_obs_recibido` TINYINT(1) DEFAULT 1,
+  `mostrar_firma_final` TINYINT(1) DEFAULT 1,
+  `mostrar_col_volumen` TINYINT(1) DEFAULT 1,
+  `mostrar_col_peso_facturado` TINYINT(1) DEFAULT 1,
+  `mostrar_col_servicios` TINYINT(1) DEFAULT 1,
+  `mostrar_col_importe` TINYINT(1) DEFAULT 1,
+  `mostrar_pie_datos` TINYINT(1) DEFAULT 1,
+  `mostrar_disclaimer` TINYINT(1) DEFAULT 1,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_envio` (`envio_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Config de etiqueta impresa por envío
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `etiquetas_config_impresa` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `envio_id` INT NOT NULL,
+  `mostrar_logo` TINYINT(1) DEFAULT 1,
+  `mostrar_eslogan` TINYINT(1) DEFAULT 1,
+  `mostrar_telefono` TINYINT(1) DEFAULT 1,
+  `mostrar_telefono_adicional` TINYINT(1) DEFAULT 1,
+  `mostrar_email` TINYINT(1) DEFAULT 1,
+  `mostrar_sitio_web` TINYINT(1) DEFAULT 1,
+  `mostrar_rfc` TINYINT(1) DEFAULT 1,
+  `mostrar_direccion_fiscal` TINYINT(1) DEFAULT 1,
+  `mostrar_barcode` TINYINT(1) DEFAULT 1,
+  `mostrar_qr` TINYINT(1) DEFAULT 1,
+  `mostrar_ruta` TINYINT(1) DEFAULT 1,
+  `mostrar_descripcion` TINYINT(1) DEFAULT 1,
+  `mostrar_dest_nombre` TINYINT(1) DEFAULT 1,
+  `mostrar_dest_direccion` TINYINT(1) DEFAULT 1,
+  `mostrar_dest_referencia` TINYINT(1) DEFAULT 1,
+  `mostrar_dest_contacto` TINYINT(1) DEFAULT 1,
+  `mostrar_dest_telefono` TINYINT(1) DEFAULT 1,
+  `mostrar_alias_ruta` TINYINT(1) DEFAULT 0,
+  `mostrar_peso_total` TINYINT(1) DEFAULT 1,
+  `mostrar_peso_item` TINYINT(1) DEFAULT 0,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_envio` (`envio_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- FKs diferidas (usuarios → clientes)
 -- ============================================================
 ALTER TABLE `usuarios`
@@ -563,4 +655,4 @@ ALTER TABLE `usuarios`
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-03-17
+-- Schema actualizado: 2026-03-26

@@ -64,6 +64,7 @@ router.post('/login', async (req, res) => {
     req.session.userEmail = user.email;
     req.session.userRole = user.rol;
     req.session.clienteId = user.cliente_id || null;
+    req.session.sucursalDirId = user.sucursal_dir_id || null;
 
     // Redirigir según rol
     if (user.rol === 'cliente') {
