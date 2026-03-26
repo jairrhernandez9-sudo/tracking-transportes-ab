@@ -623,7 +623,8 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
     const descripcion = _iTipo.map((t,i) => t&&t.trim() ? `${_iCant[i]||1}x ${t.trim()}` : null).filter(Boolean).join(', ') || null;
 
     //  GENERAR TRACKING PERSONALIZADO POR CLIENTE
-    const numeroTracking = await generarSiguienteTracking(cliente_id);
+    const numItems = _iTipo.filter(t => t && t.trim()).length;
+    const numeroTracking = await generarSiguienteTracking(cliente_id, origen_ciudad, destino_ciudad, numItems);
 
     // Obtener nombre y metodo_pago del cliente para snapshot histórico
     const [clienteRows] = await db.query(

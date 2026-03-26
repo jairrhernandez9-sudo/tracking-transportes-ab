@@ -113,41 +113,58 @@ async function generarPrefijoUnico(nombreEmpresa) {
 
 /**
  * Genera el siguiente número de tracking para un cliente
- * Formato: PREFIJO-00001
- * El contador crece infinitamente
- * 
- * @param {number} clienteId - ID del cliente
- * @returns {Promise<string>} Número de tracking completo (ej: "ITP-00001")
+ * Formato: PREFIJO-NNNNNOD2603
+ *   PREFIJO-NNNNN = prefijo del cliente + contador incremental
+ *   O             = primera letra de la ciudad de origen
+ *   D             = primera letra de la ciudad de destino
+ *   26            = día del mes (2 dígitos)
+ *   03            = número de items del envío (2 dígitos)
+ *
+ * @param {number} clienteId     - ID del cliente
+ * @param {string} origenCiudad  - Ciudad de origen del envío
+ * @param {string} destinoCiudad - Ciudad de destino del envío
+ * @param {number} numItems      - Cantidad de items/líneas del envío
+ * @returns {Promise<string>} Número de tracking completo (ej: "MDS-00030TO2603")
  */
-async function generarSiguienteTracking(clienteId) {
+async function generarSiguienteTracking(clienteId, origenCiudad = '', destinoCiudad = '', numItems = 0) {
   try {
     // Obtener información del cliente
     const [cliente] = await db.query(
       'SELECT prefijo_tracking, ultimo_numero_tracking FROM clientes WHERE id = ?',
       [clienteId]
     );
-    
+
     if (cliente.length === 0) {
       throw new Error(`Cliente con ID ${clienteId} no encontrado`);
     }
-    
+
     const { prefijo_tracking, ultimo_numero_tracking } = cliente[0];
-    
+
     // Incrementar el contador
     const nuevoNumero = ultimo_numero_tracking + 1;
-    
+
     // Actualizar el contador en la base de datos
     await db.query(
       'UPDATE clientes SET ultimo_numero_tracking = ? WHERE id = ?',
       [nuevoNumero, clienteId]
     );
-    
+
     // Formatear el número con ceros a la izquierda (mínimo 5 dígitos)
     const numeroFormateado = nuevoNumero.toString().padStart(5, '0');
-    
+
+    // Primera letra de origen y destino (mayúscula, 'X' si vacío)
+    const letraOrigen  = (origenCiudad  || '').trim().charAt(0).toUpperCase() || 'X';
+    const letraDestino = (destinoCiudad || '').trim().charAt(0).toUpperCase() || 'X';
+
+    // Día del mes (2 dígitos)
+    const dia = new Date().getDate().toString().padStart(2, '0');
+
+    // Número de items del envío (2 dígitos)
+    const items = numItems.toString().padStart(2, '0');
+
     // Retornar el tracking completo
-    return `${prefijo_tracking}-${numeroFormateado}`;
-    
+    return `${prefijo_tracking}-${numeroFormateado}${letraOrigen}${letraDestino}${dia}${items}`;
+
   } catch (error) {
     console.error('Error generando tracking:', error);
     throw error;

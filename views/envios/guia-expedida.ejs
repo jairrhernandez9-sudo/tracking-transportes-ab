@@ -106,6 +106,7 @@
 
     .tracking-big  { font-size: 13pt; font-weight: bold; letter-spacing: 1px; display: block; margin-top: 3px; }
     .folio-row     { font-size: 7pt; color: #444; margin-top: 2px; }
+    #barcode       { max-width: 100%; max-height: 36px; width: auto; height: auto; }
 
     /* ── Secciones (remitente / facturar / destinatario) ── */
     .seccion-label {
@@ -830,7 +831,7 @@
 
 <script>
   JsBarcode("#barcode", "<%= envio.numero_tracking %>", {
-    format: "CODE128", width: 1.5, height: 50, displayValue: false, margin: 2
+    format: "CODE128", width: 1.2, height: 32, displayValue: false, margin: 2
   });
 
   var _zoom = 0.75;
