@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const { generarSiguienteTracking } = require('../utils/tracking-utils'); 
+const { generarSiguienteTracking } = require('../utils/tracking-utils');
+const { registrarActividad } = require('../utils/actividad');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -403,6 +404,10 @@ router.get('/:id/guia-expedida', isAuthenticated, async (req, res) => {
       destinoAlias = destinoRows[0]?.alias || null;
     }
 
+    await registrarActividad(req, {
+      accion: 'GUIA_IMPRESA', entidad: 'envio', entidadId: parseInt(id),
+      descripcion: `Guía expedida impresa del envío ${envio.numero_tracking}`
+    });
     res.render('envios/guia-expedida', {
       title: `Guía ${envio.numero_tracking}`,
       envio,
@@ -741,6 +746,11 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
     await db.query('UPDATE usuarios SET ultimo_cliente_id = ? WHERE id = ?', [cliente_id, req.session.userId]);
 
     console.log('✅ Envío creado:', numeroTracking);
+    await registrarActividad(req, {
+      accion: 'ENVIO_CREADO', entidad: 'envio', entidadId: envioId,
+      descripcion: `Envío ${numeroTracking} creado para ${cliente_nombre_snapshot || 'cliente'}`,
+      detalle: { tracking: numeroTracking, destino: destino_ciudad }
+    });
     res.redirect(`/envios/${envioId}?success=creado`);
 
   } catch (error) {
@@ -929,6 +939,11 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     }
 
     console.log('✅ Envío actualizado:', id);
+    await registrarActividad(req, {
+      accion: 'ENVIO_EDITADO', entidad: 'envio', entidadId: parseInt(id),
+      descripcion: `Envío #${id} modificado`,
+      detalle: { destino: destino_ciudad, cliente_id }
+    });
     res.redirect(`/envios/${id}?success=actualizado`);
 
   } catch (error) {
@@ -994,6 +1009,11 @@ router.post('/:id/actualizar-estado', isAuthenticated, async (req, res) => {
     );
     
     console.log('✅ Estado actualizado:', nuevo_estado);
+    await registrarActividad(req, {
+      accion: 'ENVIO_ESTADO_CAMBIADO', entidad: 'envio', entidadId: parseInt(id),
+      descripcion: `Estado del envío #${id} cambiado a "${nuevo_estado}"`,
+      detalle: { nuevo_estado, ubicacion, comentarios: comentarios || null }
+    });
     res.json({ success: true, historial_id: result.insertId });
     
   } catch (error) {
@@ -1159,6 +1179,11 @@ router.post('/:id/eliminar', isAuthenticated, async (req, res) => {
     });
 
     console.log('✅ Envío eliminado:', id);
+    await registrarActividad(req, {
+      accion: 'ENVIO_ELIMINADO', entidad: 'envio', entidadId: parseInt(id),
+      descripcion: `Envío #${id} eliminado permanentemente`,
+      detalle: relacionados.length > 0 ? { relacionados_desvinculados: relacionados.map(r => r.numero_tracking) } : undefined
+    });
     res.json({
       success: true,
       message: 'Envío eliminado correctamente',
@@ -1349,6 +1374,11 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       ORDER BY p.orden ASC, p.nombre ASC
     `, [id]).catch(() => [[]]);
 
+    await registrarActividad(req, {
+      accion: 'ETIQUETA_IMPRESA', entidad: 'envio', entidadId: parseInt(id),
+      descripcion: `Etiqueta impresa del envío ${envioData.numero_tracking}`,
+      detalle: { cantidad: parseInt(cantidad) }
+    });
     res.render('envios/etiquetaT', {
       title: 'Etiqueta de Envío',
       envio: envioData,

@@ -311,6 +311,28 @@ db.query(`CREATE TABLE IF NOT EXISTS tipos_empaques (
   UNIQUE KEY uk_tipo_empaque_nombre (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`).catch(() => {});
 
+// Migración: tabla de log de actividad del sistema
+db.query(`
+  CREATE TABLE IF NOT EXISTS actividad_log (
+    id            INT NOT NULL AUTO_INCREMENT,
+    fecha         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_id    INT NULL,
+    usuario_nombre VARCHAR(150) NOT NULL DEFAULT 'Sistema',
+    usuario_rol   VARCHAR(50)  NOT NULL DEFAULT 'sistema',
+    accion        VARCHAR(60)  NOT NULL,
+    entidad       VARCHAR(50)  NOT NULL,
+    entidad_id    INT NULL,
+    descripcion   VARCHAR(500) NOT NULL,
+    detalle       JSON NULL,
+    ip            VARCHAR(50)  NULL,
+    PRIMARY KEY (id),
+    KEY idx_activ_fecha    (fecha),
+    KEY idx_activ_usuario  (usuario_id),
+    KEY idx_activ_accion   (accion),
+    KEY idx_activ_entidad  (entidad, entidad_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`).catch(() => {});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

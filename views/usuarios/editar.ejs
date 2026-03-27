@@ -1099,6 +1099,14 @@ input[type="text"]::-moz-reveal {
               <span>Configuración</span>
             </a>
           </li>
+          <% if (user && user.email === 'jose.cordoba@transportesab.com') { %>
+          <li class="nav-item">
+            <a href="/historial/actividad" class="nav-link">
+              <i data-lucide="activity"></i>
+              <span>Historial</span>
+            </a>
+          </li>
+          <% } %>
         </ul>
       </div>
     </aside>

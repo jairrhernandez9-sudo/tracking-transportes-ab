@@ -4,6 +4,7 @@ const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 const { isAuthenticated } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/roles');
+const { registrarActividad } = require('../utils/actividad');
 
 // ============================================
 // LISTA DE USUARIOS (Solo Admin)
@@ -249,6 +250,10 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
       [nombre, email, hashedPassword, rol, activo, clienteIdVal]
     );
     
+    await registrarActividad(req, {
+      accion: 'USUARIO_CREADO', entidad: 'usuario',
+      descripcion: `Usuario "${nombre}" (${rol}) creado`
+    });
     res.redirect('/usuarios?success=created');
     
   } catch (error) {
@@ -480,6 +485,10 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
       req.session.clienteId = cliente_id_edit;
     }
     
+    await registrarActividad(req, {
+      accion: 'USUARIO_EDITADO', entidad: 'usuario', entidadId: parseInt(userId),
+      descripcion: `Usuario "${nombre}" (${rol}) modificado`
+    });
     res.redirect('/usuarios?success=updated');
     
   } catch (error) {
@@ -533,6 +542,10 @@ router.post('/:id/eliminar', isAuthenticated, requireAdmin, async (req, res) => 
     // Eliminar usuario
     await db.query('DELETE FROM usuarios WHERE id = ?', [userId]);
     
+    await registrarActividad(req, {
+      accion: 'USUARIO_ELIMINADO', entidad: 'usuario', entidadId: parseInt(userId),
+      descripcion: `Usuario #${userId} eliminado`
+    });
     res.redirect('/usuarios?success=deleted');
     
   } catch (error) {

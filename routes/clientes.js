@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { isAuthenticated } = require('../middleware/auth');
+const { registrarActividad } = require('../utils/actividad');
 const multer = require('multer');
 const path   = require('path');
 const fs     = require('fs');
@@ -307,6 +308,10 @@ router.post('/nuevo', isAuthenticated, requireAdminOrSuper, async (req, res) => 
       await db.query('INSERT INTO cliente_operadores (cliente_id, usuario_id) VALUES ?', [rows]);
     }
 
+    await registrarActividad(req, {
+      accion: 'CLIENTE_CREADO', entidad: 'cliente', entidadId: result.insertId,
+      descripcion: `Cliente "${nombre_empresa}" creado`
+    });
     res.redirect('/clientes?success=created');
     
   } catch (error) {
@@ -599,6 +604,10 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, uploadClienteLo
       [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplIdEdit, guiaTplIdEdit, metodoPagoEdit, ...logoUpdateParams, id]
     );
 
+    await registrarActividad(req, {
+      accion: 'CLIENTE_EDITADO', entidad: 'cliente', entidadId: parseInt(id),
+      descripcion: `Cliente "${nombre_empresa}" modificado`
+    });
     res.redirect(`/clientes/${id}?success=updated`);
     
   } catch (error) {
@@ -725,6 +734,10 @@ router.post('/:id/eliminar-permanente', isAuthenticated, requireAdmin, async (re
     // Desvincular envíos antes de borrar (FK constraint)
     await db.query('UPDATE envios SET cliente_id = NULL WHERE cliente_id = ?', [id]);
     await db.query('DELETE FROM clientes WHERE id = ?', [id]);
+    await registrarActividad(req, {
+      accion: 'CLIENTE_ELIMINADO', entidad: 'cliente', entidadId: parseInt(id),
+      descripcion: `Cliente #${id} eliminado permanentemente`
+    });
     res.json({ success: true });
     
   } catch (error) {

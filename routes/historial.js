@@ -4,6 +4,72 @@ const db = require('../config/database');
 const { isAuthenticated } = require('../middleware/auth');
 
 // ============================================
+// HISTORIAL DE ACTIVIDAD DEL SISTEMA
+// ============================================
+router.get('/actividad', isAuthenticated, async (req, res) => {
+  if (req.session.userEmail !== 'jose.cordoba@transportesab.com') {
+    return res.status(403).send('No tienes acceso a esta página.');
+  }
+  try {
+    const POR_PAGINA = 50;
+    const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+    const offset  = (pagina - 1) * POR_PAGINA;
+
+    const { accion, entidad, usuario_id, fecha_desde, fecha_hasta, q } = req.query;
+
+    let where = ['1=1'];
+    let params = [];
+
+    if (accion)      { where.push('a.accion = ?');       params.push(accion); }
+    if (entidad)     { where.push('a.entidad = ?');      params.push(entidad); }
+    if (usuario_id)  { where.push('a.usuario_id = ?');   params.push(parseInt(usuario_id)); }
+    if (fecha_desde) { where.push('DATE(a.fecha) >= ?'); params.push(fecha_desde); }
+    if (fecha_hasta) { where.push('DATE(a.fecha) <= ?'); params.push(fecha_hasta); }
+    if (q)           { where.push('(a.descripcion LIKE ? OR a.usuario_nombre LIKE ?)'); params.push(`%${q}%`, `%${q}%`); }
+
+    const whereStr = where.join(' AND ');
+
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) as total FROM actividad_log a WHERE ${whereStr}`, params
+    );
+
+    const [registros] = await db.query(
+      `SELECT a.*, DATE_FORMAT(a.fecha, '%d/%m/%Y %H:%i:%s') as fecha_fmt
+       FROM actividad_log a
+       WHERE ${whereStr}
+       ORDER BY a.fecha DESC
+       LIMIT ? OFFSET ?`,
+      [...params, POR_PAGINA, offset]
+    );
+
+    // Para el filtro de usuarios únicos
+    const [usuariosLog] = await db.query(
+      `SELECT DISTINCT usuario_id, usuario_nombre FROM actividad_log
+       WHERE usuario_id IS NOT NULL ORDER BY usuario_nombre`
+    );
+
+    const totalPaginas = Math.ceil(total / POR_PAGINA);
+
+    res.render('historial/actividad', {
+      title: 'Historial de Actividad',
+      registros,
+      usuariosLog,
+      filtros: { accion, entidad, usuario_id, fecha_desde, fecha_hasta, q },
+      pagination: { pagina, totalPaginas, total },
+      user: {
+        id: req.session.userId,
+        nombre: req.session.userName,
+        email: req.session.userEmail,
+        rol: req.session.userRole
+      }
+    });
+  } catch (error) {
+    console.error('Error al cargar historial de actividad:', error);
+    res.status(500).send('Error al cargar el historial de actividad');
+  }
+});
+
+// ============================================
 // ELIMINAR ESTADO DEL HISTORIAL
 // ============================================
 router.delete('/:id/eliminar', isAuthenticated, async (req, res) => {

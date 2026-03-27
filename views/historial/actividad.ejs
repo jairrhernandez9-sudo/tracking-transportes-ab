@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; }
+
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    }
+    .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 12px; }
+    .logo-icon-image { width: 42px; height: 42px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0; }
+    .logo-icon-image img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-info { display: flex; flex-direction: column; gap: 2px; }
+    .logo-text { color: white; font-size: 1.1rem; font-weight: 900; line-height: 1; }
+    .logo-tagline { color: rgba(255,255,255,0.7); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-section { margin-bottom: 24px; }
+    .nav-section-title { font-size: 0.65rem; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; padding: 0 14px; margin-bottom: 8px; }
+    .nav-menu { list-style: none; }
+    .nav-item { margin-bottom: 4px; }
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; position: relative; }
+    .nav-link i { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(4px); }
+    .nav-link.active { background: rgba(255,255,255,0.15); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .nav-link.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: white; border-radius: 0 4px 4px 0; }
+
+    /* ── MAIN ── */
+    .main-content { margin-left: 260px; flex: 1; padding: 40px; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 2px solid #f1f5f9; }
+    .welcome h1 { font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+    .welcome p { color: #64748b; font-size: 0.95rem; }
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: white; border: 2px solid #e2e8f0; border-radius: 14px; cursor: pointer; transition: all 0.3s ease; position: relative; }
+    .user-profile:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.1); }
+    .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.9rem; position: relative; flex-shrink: 0; }
+    .user-status-dot { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; background: #10b981; border: 2px solid white; border-radius: 50%; }
+    .user-info h4 { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+    .user-info p { font-size: 0.75rem; color: #64748b; }
+    .user-chevron { width: 18px; height: 18px; color: #94a3b8; transition: transform 0.2s; }
+    .user-profile.open .user-chevron { transform: rotate(180deg); }
+    .user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 8px; min-width: 220px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); z-index: 1000; display: none; }
+    .user-profile.open .user-dropdown { display: block; }
+    .user-dropdown-header { padding: 12px; display: flex; gap: 12px; align-items: center; }
+    .user-dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6,#2563eb); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; flex-shrink: 0; }
+    .user-dropdown-name { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+    .user-dropdown-email { font-size: 0.75rem; color: #64748b; }
+    .user-dropdown-badge { display: inline-block; padding: 2px 8px; background: #dbeafe; color: #1d4ed8; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-top: 4px; }
+    .user-dropdown-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+    .user-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #475569; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; }
+    .user-dropdown-item:hover { background: #f8fafc; color: #0f172a; }
+    .user-dropdown-item i { width: 18px; height: 18px; }
+    .user-dropdown-item.logout { color: #ef4444; }
+    .user-dropdown-item.logout:hover { background: #fef2f2; }
+
+    /* ── FILTROS ── */
+    .filtros-card { background: white; border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e2e8f0; }
+    .filtros-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr) auto auto; gap: 12px; align-items: end; }
+    .filtro-group label { display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .filtro-group select, .filtro-group input[type="text"], .filtro-group input[type="date"] {
+      width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.87rem; color: #1e293b; background: white; font-family: inherit; transition: border-color 0.2s;
+    }
+    .filtro-group select:focus, .filtro-group input:focus { outline: none; border-color: #3b82f6; }
+    .btn-filtrar { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-size: 0.87rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; white-space: nowrap; }
+    .btn-filtrar:hover { background: #2563eb; }
+    .btn-limpiar { padding: 10px 14px; background: #f1f5f9; color: #64748b; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.87rem; font-weight: 700; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; font-family: inherit; white-space: nowrap; }
+    .btn-limpiar:hover { background: #e2e8f0; color: #334155; }
+
+    /* ── STATS ── */
+    .resultados-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .resultados-count { font-size: 0.87rem; color: #64748b; }
+    .resultados-count strong { color: #0f172a; font-weight: 700; }
+
+    /* ── TABLA ── */
+    .tabla-card { background: white; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e2e8f0; overflow: hidden; }
+    .tabla-actividad { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+    .tabla-actividad thead th { background: #f8fafc; padding: 13px 16px; text-align: left; font-size: 0.71rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+    .tabla-actividad tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+    .tabla-actividad tbody tr:last-child { border-bottom: none; }
+    .tabla-actividad tbody tr:hover { background: #f8fafc; }
+    .tabla-actividad td { padding: 12px 16px; vertical-align: middle; }
+    .td-fecha { white-space: nowrap; color: #64748b; font-size: 0.81rem; font-variant-numeric: tabular-nums; }
+    .usuario-nombre { font-weight: 700; color: #1e293b; font-size: 0.87rem; white-space: nowrap; }
+    .usuario-rol { font-size: 0.72rem; color: #94a3b8; display: block; }
+    .td-descripcion { color: #334155; max-width: 380px; }
+    .td-detalle { max-width: 180px; }
+    .detalle-json { font-size: 0.74rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; max-height: 48px; overflow: hidden; cursor: pointer; transition: max-height 0.25s; line-height: 1.4; }
+    .detalle-json.expanded { max-height: 240px; }
+    .td-ip { color: #94a3b8; font-size: 0.78rem; white-space: nowrap; font-family: monospace; }
+
+    /* ── BADGES ── */
+    .badge-accion { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; white-space: nowrap; letter-spacing: 0.3px; }
+    .badge-ENVIO_CREADO          { background: #dcfce7; color: #15803d; }
+    .badge-ENVIO_EDITADO         { background: #dbeafe; color: #1d4ed8; }
+    .badge-ENVIO_ELIMINADO       { background: #fee2e2; color: #b91c1c; }
+    .badge-ENVIO_ESTADO_CAMBIADO { background: #fef9c3; color: #854d0e; }
+    .badge-ETIQUETA_IMPRESA      { background: #f0fdf4; color: #166534; }
+    .badge-GUIA_IMPRESA          { background: #eff6ff; color: #1e40af; }
+    .badge-CLIENTE_CREADO        { background: #dcfce7; color: #15803d; }
+    .badge-CLIENTE_EDITADO       { background: #dbeafe; color: #1d4ed8; }
+    .badge-CLIENTE_ELIMINADO     { background: #fee2e2; color: #b91c1c; }
+    .badge-USUARIO_CREADO        { background: #dcfce7; color: #15803d; }
+    .badge-USUARIO_EDITADO       { background: #dbeafe; color: #1d4ed8; }
+    .badge-USUARIO_ELIMINADO     { background: #fee2e2; color: #b91c1c; }
+    .badge-LOGIN                 { background: #f0fdf4; color: #15803d; }
+    .badge-LOGOUT                { background: #f1f5f9; color: #475569; }
+    .badge-default               { background: #f1f5f9; color: #475569; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { padding: 70px 20px; text-align: center; color: #94a3b8; }
+    .empty-state i { width: 52px; height: 52px; margin-bottom: 14px; opacity: 0.35; display: block; margin-left: auto; margin-right: auto; }
+    .empty-state p { font-size: 0.92rem; }
+
+    /* ── PAGINACIÓN ── */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 20px; border-top: 1px solid #f1f5f9; }
+    .page-btn { padding: 8px 14px; border: 2px solid #e2e8f0; background: white; border-radius: 10px; font-size: 0.83rem; font-weight: 700; color: #475569; cursor: pointer; text-decoration: none; transition: all 0.15s; font-family: inherit; }
+    .page-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .page-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+    .page-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+    @media (max-width: 968px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .filtros-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon-image">
+        <img src="/images/logo-transportes-ab.png" alt="Logo">
+      </div>
+      <div class="logo-info">
+        <span class="logo-text">Transportes AB</span>
+        <span class="logo-tagline">Sistema Tracking</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">PRINCIPAL</div>
+      <ul class="nav-menu">
+        <% if (!user || user.rol !== 'operador') { %>
+        <li class="nav-item">
+          <a href="/dashboard" class="nav-link">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <% } %>
+        <li class="nav-item">
+          <a href="/envios" class="nav-link">
+            <i data-lucide="package"></i>
+            <span>Envíos</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/envios-retrasados" class="nav-link">
+            <i data-lucide="alert-triangle"></i>
+            <span>Envíos Retrasados</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">GESTIÓN</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/clientes" class="nav-link">
+            <i data-lucide="users"></i>
+            <span>Clientes</span>
+          </a>
+        </li>
+        <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+        <li class="nav-item">
+          <a href="/reportes" class="nav-link">
+            <i data-lucide="bar-chart"></i>
+            <span>Reportes</span>
+          </a>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+
+    <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+    <div class="nav-section">
+      <div class="nav-section-title">SISTEMA</div>
+      <ul class="nav-menu">
+        <% if (user.rol === 'admin') { %>
+        <li class="nav-item">
+          <a href="/usuarios" class="nav-link">
+            <i data-lucide="user-cog"></i>
+            <span>Usuarios</span>
+          </a>
+        </li>
+        <% } %>
+        <li class="nav-item">
+          <a href="/configuracion" class="nav-link">
+            <i data-lucide="settings"></i>
+            <span>Configuración</span>
+          </a>
+        </li>
+        <% if (user.email === 'jose.cordoba@transportesab.com') { %>
+        <li class="nav-item">
+          <a href="/historial/actividad" class="nav-link active">
+            <i data-lucide="activity"></i>
+            <span>Historial</span>
+          </a>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+    <% } %>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="welcome">
+        <h1>
+          <i data-lucide="activity" style="width:30px;height:30px;color:#3b82f6;"></i>
+          Historial de Actividad
+        </h1>
+        <p>Registro de todas las acciones realizadas en el sistema</p>
+      </div>
+
+      <div class="user-profile" id="userProfileBtn">
+        <div class="user-avatar">
+          <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %>
+          <span class="user-status-dot"></span>
+        </div>
+        <div class="user-info">
+          <h4><%= user && user.nombre ? user.nombre : 'Usuario' %></h4>
+          <p><%= user && user.email ? user.email : '' %></p>
+        </div>
+        <i data-lucide="chevron-down" class="user-chevron"></i>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-header">
+            <div class="user-dropdown-avatar"><%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U' %></div>
+            <div class="user-dropdown-info">
+              <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Usuario' %></div>
+              <div class="user-dropdown-email"><%= user && user.email ? user.email : '' %></div>
+              <span class="user-dropdown-badge"><%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %></span>
+            </div>
+          </div>
+          <div class="user-dropdown-divider"></div>
+          <a href="/mi-perfil" class="user-dropdown-item">
+            <i data-lucide="user"></i><span>Mi perfil</span>
+          </a>
+          <div class="user-dropdown-divider"></div>
+          <a href="/auth/logout" class="user-dropdown-item logout">
+            <i data-lucide="log-out"></i><span>Cerrar sesión</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- FILTROS -->
+    <div class="filtros-card">
+      <form method="GET" action="/historial/actividad">
+        <div class="filtros-grid">
+          <div class="filtro-group">
+            <label>Buscar</label>
+            <input type="text" name="q" value="<%= filtros.q || '' %>" placeholder="Descripción, usuario...">
+          </div>
+          <div class="filtro-group">
+            <label>Acción</label>
+            <select name="accion">
+              <option value="">Todas</option>
+              <% ['ENVIO_CREADO','ENVIO_EDITADO','ENVIO_ELIMINADO','ENVIO_ESTADO_CAMBIADO','ETIQUETA_IMPRESA','GUIA_IMPRESA','CLIENTE_CREADO','CLIENTE_EDITADO','CLIENTE_ELIMINADO','USUARIO_CREADO','USUARIO_EDITADO','USUARIO_ELIMINADO','LOGIN','LOGOUT'].forEach(a => { %>
+              <option value="<%= a %>" <%= filtros.accion === a ? 'selected' : '' %>><%= a.replace(/_/g,' ') %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="filtro-group">
+            <label>Usuario</label>
+            <select name="usuario_id">
+              <option value="">Todos</option>
+              <% usuariosLog.forEach(u => { %>
+              <option value="<%= u.usuario_id %>" <%= String(filtros.usuario_id) === String(u.usuario_id) ? 'selected' : '' %>><%= u.usuario_nombre %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="filtro-group">
+            <label>Desde</label>
+            <input type="date" name="fecha_desde" value="<%= filtros.fecha_desde || '' %>">
+          </div>
+          <div class="filtro-group">
+            <label>Hasta</label>
+            <input type="date" name="fecha_hasta" value="<%= filtros.fecha_hasta || '' %>">
+          </div>
+          <div class="filtro-group">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn-filtrar">
+              <i data-lucide="search" style="width:15px;height:15px;"></i> Filtrar
+            </button>
+          </div>
+          <div class="filtro-group">
+            <label>&nbsp;</label>
+            <a href="/historial/actividad" class="btn-limpiar">
+              <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="resultados-bar">
+      <p class="resultados-count">
+        <strong><%= pagination.total.toLocaleString('es-MX') %></strong>
+        registro<%= pagination.total !== 1 ? 's' : '' %> encontrado<%= pagination.total !== 1 ? 's' : '' %>
+        <% if (pagination.totalPaginas > 1) { %>
+        &nbsp;—&nbsp; página <strong><%= pagination.pagina %></strong> de <strong><%= pagination.totalPaginas %></strong>
+        <% } %>
+      </p>
+    </div>
+
+    <!-- TABLA -->
+    <div class="tabla-card">
+      <% if (registros.length === 0) { %>
+      <div class="empty-state">
+        <i data-lucide="inbox"></i>
+        <p>No se encontraron registros con los filtros aplicados.</p>
+      </div>
+      <% } else { %>
+      <table class="tabla-actividad">
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Descripción</th>
+            <th>Detalle</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% registros.forEach(function(r) {
+            const accionesValidas = ['ENVIO_CREADO','ENVIO_EDITADO','ENVIO_ELIMINADO','ENVIO_ESTADO_CAMBIADO','ETIQUETA_IMPRESA','GUIA_IMPRESA','CLIENTE_CREADO','CLIENTE_EDITADO','CLIENTE_ELIMINADO','USUARIO_CREADO','USUARIO_EDITADO','USUARIO_ELIMINADO','LOGIN','LOGOUT'];
+          %>
+          <tr>
+            <td class="td-fecha"><%= r.fecha_fmt %></td>
+            <td>
+              <span class="usuario-nombre"><%= r.usuario_nombre %></span>
+              <span class="usuario-rol"><%= r.usuario_rol %></span>
+            </td>
+            <td>
+              <span class="badge-accion <%= accionesValidas.includes(r.accion) ? 'badge-' + r.accion : 'badge-default' %>">
+                <%= r.accion.replace(/_/g, ' ') %>
+              </span>
+            </td>
+            <td class="td-descripcion"><%= r.descripcion %></td>
+            <td class="td-detalle">
+              <% if (r.detalle) { %>
+              <div class="detalle-json" onclick="this.classList.toggle('expanded')" title="Clic para expandir"><%- typeof r.detalle === 'string' ? r.detalle : JSON.stringify(r.detalle, null, 2) %></div>
+              <% } else { %>
+              <span style="color:#cbd5e1;">—</span>
+              <% } %>
+            </td>
+            <td class="td-ip"><%= r.ip || '—' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+
+      <!-- PAGINACIÓN -->
+      <% if (pagination.totalPaginas > 1) { %>
+      <div class="pagination">
+        <%
+          const buildUrl = (p) => {
+            const params = new URLSearchParams();
+            if (filtros.q)           params.set('q', filtros.q);
+            if (filtros.accion)      params.set('accion', filtros.accion);
+            if (filtros.usuario_id)  params.set('usuario_id', filtros.usuario_id);
+            if (filtros.fecha_desde) params.set('fecha_desde', filtros.fecha_desde);
+            if (filtros.fecha_hasta) params.set('fecha_hasta', filtros.fecha_hasta);
+            params.set('pagina', p);
+            return '/historial/actividad?' + params.toString();
+          };
+        %>
+        <a href="<%= buildUrl(1) %>" class="page-btn <%= pagination.pagina === 1 ? 'disabled' : '' %>">«</a>
+        <a href="<%= buildUrl(pagination.pagina - 1) %>" class="page-btn <%= pagination.pagina === 1 ? 'disabled' : '' %>">‹</a>
+        <% for (let p = Math.max(1, pagination.pagina - 3); p <= Math.min(pagination.totalPaginas, pagination.pagina + 3); p++) { %>
+        <a href="<%= buildUrl(p) %>" class="page-btn <%= p === pagination.pagina ? 'active' : '' %>"><%= p %></a>
+        <% } %>
+        <a href="<%= buildUrl(pagination.pagina + 1) %>" class="page-btn <%= pagination.pagina === pagination.totalPaginas ? 'disabled' : '' %>">›</a>
+        <a href="<%= buildUrl(pagination.totalPaginas) %>" class="page-btn <%= pagination.pagina === pagination.totalPaginas ? 'disabled' : '' %>">»</a>
+      </div>
+      <% } %>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // Dropdown del perfil
+  const profileBtn = document.getElementById('userProfileBtn');
+  if (profileBtn) {
+    profileBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('open');
+    });
+    document.addEventListener('click', function() {
+      profileBtn.classList.remove('open');
+    });
+  }
+</script>
+<script src="/js/sidebar.js"></script>
+</body>
+</html>

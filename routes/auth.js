@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const db = require('../config/database');
 const { redirectIfAuthenticated } = require('../middleware/auth');
+const { registrarActividad } = require('../utils/actividad');
 
 // Página de login
 router.get('/login', redirectIfAuthenticated, (req, res) => {
@@ -66,6 +67,11 @@ router.post('/login', async (req, res) => {
     req.session.clienteId = user.cliente_id || null;
     req.session.sucursalDirId = user.sucursal_dir_id || null;
 
+    await registrarActividad(req, {
+      accion: 'LOGIN', entidad: 'usuario', entidadId: user.id,
+      descripcion: `${user.nombre} (${user.rol}) inició sesión`
+    });
+
     // Redirigir según rol
     if (user.rol === 'cliente') {
       return res.redirect('/portal-cliente');
@@ -92,11 +98,15 @@ router.post('/login', async (req, res) => {
 });
 
 // Logout
-router.get('/logout', (req, res) => {
+router.get('/logout', async (req, res) => {
+  try {
+    await registrarActividad(req, {
+      accion: 'LOGOUT', entidad: 'usuario', entidadId: req.session.userId,
+      descripcion: `${req.session.userName || 'Usuario'} cerró sesión`
+    });
+  } catch (_) {}
   req.session.destroy((err) => {
-    if (err) {
-      console.error('Error al cerrar sesión:', err);
-    }
+    if (err) console.error('Error al cerrar sesión:', err);
     res.redirect('/auth/login');
   });
 });
