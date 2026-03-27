@@ -910,7 +910,14 @@
         <div class="detalle-etiqueta" style="font-size:<%= szDetalleEtiqueta %>;"><%= txtEntregaEst %></div>
         <div class="detalle-valor" style="font-size:<%= szDetalleValor %>;">
           <% if (envio.fecha_estimada_entrega) { %>
-            <%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit',timeZone:'America/Mexico_City'}) %>
+            <%
+              const _feStr = envio.fecha_estimada_entrega instanceof Date
+                ? envio.fecha_estimada_entrega.toISOString().split('T')[0]
+                : String(envio.fecha_estimada_entrega).split('T')[0];
+              const [_feY, _feM, _feD] = _feStr.split('-');
+              const _mesesEtq = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+            %>
+            <%= `${_feD} ${_mesesEtq[parseInt(_feM)-1]} ${String(_feY).slice(2)}` %>
           <% } else { %> — <% } %>
         </div>
       </div>
