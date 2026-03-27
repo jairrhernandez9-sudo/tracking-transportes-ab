@@ -1289,6 +1289,13 @@
                             <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i>
                           </button>
                         <% } %>
+
+                        <!-- Eliminar (Solo Admin) -->
+                        <% if (user && user.rol === 'admin') { %>
+                          <button class="btn-icon btn-eliminar-envio" data-id="<%= envio.id %>" data-tracking="<%= envio.numero_tracking %>" title="Eliminar envío" style="color:#ef4444;">
+                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                          </button>
+                        <% } %>
                       </div>
                     </td>
                   </tr>
@@ -1363,6 +1370,40 @@
   </div>
   
   <!-- Modal Cancelar Envío -->
+  <!-- Modal Eliminar Envío -->
+  <div id="modalEliminarEnvio" class="modal">
+    <div class="modal-content" style="max-width:460px;">
+      <div class="modal-header">
+        <h2>
+          <i data-lucide="trash-2" style="width:24px;height:24px;color:#ef4444;"></i>
+          Eliminar Envío
+        </h2>
+        <button class="modal-close" onclick="cerrarModalEliminarEnvio()">
+          <i data-lucide="x" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#64748b;margin-bottom:16px;font-size:0.95rem;">
+          Estás a punto de eliminar el envío <strong id="trackingEliminarEnvio" style="color:#1e293b;"></strong>
+        </p>
+        <div class="alert" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b;display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:8px;border:1px solid #fca5a5;margin-bottom:0;">
+          <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px;"></i>
+          <span style="font-size:0.87rem;line-height:1.5;">Esta acción es <strong>permanente e irreversible</strong>. Se eliminarán todos los datos del envío, historial de estados y evidencias.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="cerrarModalEliminarEnvio()">
+          <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
+          Cancelar
+        </button>
+        <button id="btnConfirmarEliminarEnvio" class="btn" style="background:#ef4444;color:#fff;border-color:#ef4444;" onclick="confirmarEliminarEnvio()">
+          <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="modalCancelar" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1502,8 +1543,11 @@
 
     // Variables globales para cancelación
     let envioIdCancelar = null;
-    
-    // Delegación de eventos para botones de cancelar
+
+    // Variables globales para eliminación
+    let envioIdEliminar = null;
+
+    // Delegación de eventos para botones de cancelar y eliminar
     document.addEventListener('DOMContentLoaded', function() {
       document.addEventListener('click', function(e) {
         const cancelBtn = e.target.closest('.btn-icon.cancel');
@@ -1512,7 +1556,57 @@
           const tracking = cancelBtn.getAttribute('data-tracking');
           abrirModalCancelar(id, tracking);
         }
+        const eliminarBtn = e.target.closest('.btn-eliminar-envio');
+        if (eliminarBtn) {
+          const id = eliminarBtn.getAttribute('data-id');
+          const tracking = eliminarBtn.getAttribute('data-tracking');
+          abrirModalEliminarEnvio(id, tracking);
+        }
       });
+    });
+
+    function abrirModalEliminarEnvio(id, tracking) {
+      envioIdEliminar = id;
+      document.getElementById('trackingEliminarEnvio').textContent = tracking;
+      document.getElementById('modalEliminarEnvio').classList.add('show');
+      lucide.createIcons();
+    }
+
+    function cerrarModalEliminarEnvio() {
+      document.getElementById('modalEliminarEnvio').classList.remove('show');
+      envioIdEliminar = null;
+    }
+
+    async function confirmarEliminarEnvio() {
+      const btn = document.getElementById('btnConfirmarEliminarEnvio');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" style="width:18px;height:18px;"></i> Eliminando...';
+      lucide.createIcons();
+      try {
+        const response = await fetch(`/envios/${envioIdEliminar}/eliminar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (data.success) {
+          cerrarModalEliminarEnvio();
+          window.location.reload();
+        } else {
+          alert(data.message || 'Error al eliminar el envío');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="trash-2" style="width:18px;height:18px;"></i> Eliminar';
+          lucide.createIcons();
+        }
+      } catch (err) {
+        alert('Error de conexión al eliminar el envío');
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="trash-2" style="width:18px;height:18px;"></i> Eliminar';
+        lucide.createIcons();
+      }
+    }
+
+    document.getElementById('modalEliminarEnvio')?.addEventListener('click', function(e) {
+      if (e.target === this) cerrarModalEliminarEnvio();
     });
     
     // Abrir modal de cancelación

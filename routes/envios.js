@@ -1126,38 +1126,51 @@ router.post('/:id/cancelar', isAuthenticated, async (req, res) => {
 
 // Eliminar envío físicamente (solo admin, solo para pruebas)
 router.post('/:id/eliminar', isAuthenticated, async (req, res) => {
+  if (req.session.userRole !== 'admin') {
+    return res.status(403).json({ success: false, message: 'No tienes permisos para eliminar envíos' });
+  }
+
+  const { id } = req.params;
+  const conn = await db.getConnection();
   try {
-    const { id } = req.params;
-    
-    // Solo admin puede eliminar
-    if (req.session.userRole !== 'admin') {
-      return res.status(403).json({ success: false, message: 'No tienes permisos para eliminar envíos' });
-    }
-    
-    // Eliminar fotos asociadas
-    const [fotos] = await db.query(`
-      SELECT fe.url_foto 
+    // Obtener fotos ANTES de borrar (para limpiar archivos después)
+    const [fotos] = await conn.query(`
+      SELECT fe.url_foto
       FROM fotos_evidencia fe
       INNER JOIN historial_estados he ON fe.historial_estado_id = he.id
       WHERE he.envio_id = ?
     `, [id]);
-    
+
+    // Verificar envíos relacionados (parciales/complementarios)
+    const [relacionados] = await conn.query(
+      'SELECT id, numero_tracking FROM envios WHERE envio_relacionado_id = ?', [id]
+    );
+
+    await conn.beginTransaction();
+    await conn.query('DELETE FROM envios WHERE id = ?', [id]);
+    await conn.commit();
+
+    // Limpiar archivos físicos después de confirmar el commit
     fotos.forEach(foto => {
       const filePath = path.join(__dirname, '..', 'public', foto.url_foto);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     });
-    
-    // Eliminar de base de datos (CASCADE debería encargarse del resto)
-    await db.query('DELETE FROM envios WHERE id = ?', [id]);
-    
+
     console.log('✅ Envío eliminado:', id);
-    res.json({ success: true, message: 'Envío eliminado correctamente' });
-    
+    res.json({
+      success: true,
+      message: 'Envío eliminado correctamente',
+      relacionadosDesvinculados: relacionados.length > 0 ? relacionados.map(r => r.numero_tracking) : []
+    });
+
   } catch (error) {
+    await conn.rollback().catch(() => {});
     console.error('Error al eliminar envío:', error);
     res.status(500).json({ success: false, message: 'Error al eliminar el envío' });
+  } finally {
+    conn.release();
   }
 });
 
