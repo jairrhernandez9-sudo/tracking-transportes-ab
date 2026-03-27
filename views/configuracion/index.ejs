@@ -2172,11 +2172,20 @@
               <% } %>
 
               <% if (isAdminOrSuper) { %>
-              <button type="button" onclick="abrirModalNuevoTemplate()"
-                style="padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="plus" style="width:15px;height:15px;"></i>
-                Crear nuevo Template
-              </button>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <button type="button" onclick="abrirModalNuevoTemplate()"
+                  style="padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="plus" style="width:15px;height:15px;"></i>
+                  Crear nuevo Template
+                </button>
+                <% if (tplActivo) { %>
+                <button type="button" onclick="abrirModalDuplicarEtqTpl()"
+                  style="padding: 8px 18px; background: #f8fafc; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="copy" style="width:15px;height:15px;"></i>
+                  Duplicar
+                </button>
+                <% } %>
+              </div>
               <% } %>
 
               <% if (tplActivo) { %>
@@ -2196,6 +2205,18 @@
                 </button>
                 <% } %>
               <% } %>
+
+              <% if (isAdminOrSuper && tplActivo) { %>
+              <div id="toggle-wrap-bloquear-etq" style="display:inline-flex;align-items:center;gap:8px;margin-left:auto;">
+                <span id="lbl-bloquear-etq" style="font-size:0.82rem;font-weight:700;color:<%= tplActivo.bloqueado ? '#2563eb' : '#64748b' %>;">
+                  <i data-lucide="<%= tplActivo.bloqueado ? 'lock' : 'unlock' %>" style="width:13px;height:13px;vertical-align:-2px;"></i>
+                  <%= tplActivo.bloqueado ? 'Bloqueado' : 'Bloquear' %>
+                </span>
+                <div id="slider-bloquear-etq" style="position:relative;width:40px;height:22px;background:<%= tplActivo.bloqueado ? '#2563eb' : '#cbd5e1' %>;border-radius:11px;transition:background .2s;cursor:<%= isAdmin ? 'pointer' : 'not-allowed' %>;" <%- !isAdmin ? 'title="Solo el admin puede bloquear"' : `onclick="toggleBloquearEtq(${tplActivo.id})"` %>>
+                  <div id="knob-bloquear-etq" style="position:absolute;top:3px;left:<%= tplActivo.bloqueado ? '21px' : '3px' %>;width:16px;height:16px;background:white;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);pointer-events:none;"></div>
+                </div>
+              </div>
+              <% } %>
             </div>
 
             <% if (etiquetaTemplates.length > 0) { %>
@@ -2207,7 +2228,7 @@
 
           <!-- ── Formulario del template seleccionado ── -->
           <% if (tplActivo && isAdminOrSuper) { %>
-          <form action="/configuracion/etiqueta/templates/<%= tplActivo.id %>/guardar" method="POST">
+          <form action="/configuracion/etiqueta/templates/<%= tplActivo.id %>/guardar" method="POST" id="form-etq-tpl" data-bloqueado="<%= tplActivo.bloqueado ? '1' : '0' %>">
             <div class="config-card">
               <div class="card-header">
                 <h2 class="card-title">
@@ -2221,7 +2242,7 @@
               </div>
 
               <!-- Nombre del template -->
-              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px;">
+              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <label style="font-size: 0.85rem; font-weight: 700; color: #374151; white-space: nowrap;">Nombre del template:</label>
                 <input type="text" name="nombre" value="<%= tplActivo.nombre %>"
                   style="flex: 1; max-width: 320px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600;" required>
@@ -2993,6 +3014,35 @@
           </div>
           <% } %>
 
+          <!-- ── Modal: Duplicar template de etiqueta ── -->
+          <% if (isAdminOrSuper && tplActivo) { %>
+          <div id="modal-duplicar-etq-tpl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:16px; padding:32px; width:460px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b;">Duplicar Template</h3>
+                <button type="button" onclick="cerrarModalDuplicarEtqTpl()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:#94a3b8;">&times;</button>
+              </div>
+              <p style="font-size:0.85rem;color:#64748b;margin-bottom:16px;">Se copiará el template <strong><%= tplActivo.nombre %></strong> con un nuevo nombre.</p>
+              <form action="/configuracion/etiqueta/templates/<%= tplActivo.id %>/duplicar" method="POST">
+                <div style="margin-bottom:16px;">
+                  <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:6px;">Nuevo nombre *</label>
+                  <input type="text" name="nuevo_nombre" id="input-duplicar-etq" required placeholder="Nombre del nuevo template"
+                    oninput="validarNombreDuplicarEtq(this.value)"
+                    style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-weight:600;">
+                  <p id="hint-duplicar-etq" style="font-size:0.78rem;color:#94a3b8;margin-top:4px;">El nombre debe ser único.</p>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                  <button type="button" onclick="cerrarModalDuplicarEtqTpl()" style="padding:9px 18px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Cancelar</button>
+                  <button type="submit" id="btn-submit-duplicar-etq" style="padding:9px 18px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">
+                    <i data-lucide="copy" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px;"></i>
+                    Duplicar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <% } %>
+
           <!-- ── Modal: Crear nuevo template ── -->
           <% if (isAdminOrSuper) { %>
           <div id="modal-nuevo-tpl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
@@ -3099,11 +3149,20 @@
               <% } %>
 
               <% if (isAdminOrSuper) { %>
-              <button type="button" onclick="abrirModalNuevoGuiaTpl()"
-                style="padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="plus" style="width:15px;height:15px;"></i>
-                Crear nuevo Template
-              </button>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <button type="button" onclick="abrirModalNuevoGuiaTpl()"
+                  style="padding: 8px 18px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="plus" style="width:15px;height:15px;"></i>
+                  Crear nuevo Template
+                </button>
+                <% if (guiaTplActivo) { %>
+                <button type="button" onclick="abrirModalDuplicarGuiaTpl()"
+                  style="padding: 8px 18px; background: #f8fafc; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="copy" style="width:15px;height:15px;"></i>
+                  Duplicar
+                </button>
+                <% } %>
+              </div>
               <% } %>
 
               <% if (guiaTplActivo) { %>
@@ -3123,6 +3182,18 @@
                 </button>
                 <% } %>
               <% } %>
+
+              <% if (isAdminOrSuper && guiaTplActivo) { %>
+              <div id="toggle-wrap-bloquear-guia" style="display:inline-flex;align-items:center;gap:8px;margin-left:auto;">
+                <span id="lbl-bloquear-guia" style="font-size:0.82rem;font-weight:700;color:<%= guiaTplActivo.bloqueado ? '#2563eb' : '#64748b' %>;">
+                  <i data-lucide="<%= guiaTplActivo.bloqueado ? 'lock' : 'unlock' %>" style="width:13px;height:13px;vertical-align:-2px;"></i>
+                  <%= guiaTplActivo.bloqueado ? 'Bloqueado' : 'Bloquear' %>
+                </span>
+                <div id="slider-bloquear-guia" style="position:relative;width:40px;height:22px;background:<%= guiaTplActivo.bloqueado ? '#2563eb' : '#cbd5e1' %>;border-radius:11px;transition:background .2s;cursor:<%= isAdmin ? 'pointer' : 'not-allowed' %>;" <%- !isAdmin ? 'title="Solo el admin puede bloquear"' : `onclick="toggleBloquearGuia(${guiaTplActivo.id})"` %>>
+                  <div id="knob-bloquear-guia" style="position:absolute;top:3px;left:<%= guiaTplActivo.bloqueado ? '21px' : '3px' %>;width:16px;height:16px;background:white;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);pointer-events:none;"></div>
+                </div>
+              </div>
+              <% } %>
             </div>
             <% if (guiaTemplates.length > 0) { %>
             <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">
@@ -3133,7 +3204,7 @@
 
           <!-- Formulario del template seleccionado -->
           <% if (guiaTplActivo && isAdminOrSuper) { %>
-          <form action="/configuracion/guia/templates/<%= guiaTplActivo.id %>/guardar" method="POST">
+          <form action="/configuracion/guia/templates/<%= guiaTplActivo.id %>/guardar" method="POST" id="form-guia-tpl" data-bloqueado="<%= guiaTplActivo.bloqueado ? '1' : '0' %>">
             <div class="config-card">
               <div class="card-header">
                 <h2 class="card-title">
@@ -3144,7 +3215,7 @@
               </div>
 
               <!-- Nombre del template -->
-              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px;">
+              <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <label style="font-size: 0.85rem; font-weight: 700; color: #374151; white-space: nowrap;">Nombre del template:</label>
                 <input type="text" name="nombre" value="<%= guiaTplActivo.nombre %>"
                   style="flex: 1; max-width: 320px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-weight: 600;" required>
@@ -3536,6 +3607,35 @@
             <% if (isAdminOrSuper) { %>
             <p style="font-size: 0.85rem; margin-top: 6px;">Crea el primer template con el botón de arriba.</p>
             <% } %>
+          </div>
+          <% } %>
+
+          <!-- Modal: Duplicar template de guía -->
+          <% if (isAdminOrSuper && guiaTplActivo) { %>
+          <div id="modal-duplicar-guia-tpl" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:16px; padding:32px; width:460px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b;">Duplicar Template de Guía</h3>
+                <button type="button" onclick="cerrarModalDuplicarGuiaTpl()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:#94a3b8;">&times;</button>
+              </div>
+              <p style="font-size:0.85rem;color:#64748b;margin-bottom:16px;">Se copiará el template <strong><%= guiaTplActivo.nombre %></strong> con un nuevo nombre.</p>
+              <form action="/configuracion/guia/templates/<%= guiaTplActivo.id %>/duplicar" method="POST">
+                <div style="margin-bottom:16px;">
+                  <label style="display:block;font-size:0.85rem;font-weight:700;color:#374151;margin-bottom:6px;">Nuevo nombre *</label>
+                  <input type="text" name="nuevo_nombre" id="input-duplicar-guia" required placeholder="Nombre del nuevo template"
+                    oninput="validarNombreDuplicarGuia(this.value)"
+                    style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-weight:600;">
+                  <p id="hint-duplicar-guia" style="font-size:0.78rem;color:#94a3b8;margin-top:4px;">El nombre debe ser único.</p>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                  <button type="button" onclick="cerrarModalDuplicarGuiaTpl()" style="padding:9px 18px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Cancelar</button>
+                  <button type="submit" id="btn-submit-duplicar-guia" style="padding:9px 18px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">
+                    <i data-lucide="copy" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px;"></i>
+                    Duplicar
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
           <% } %>
 
@@ -4596,6 +4696,156 @@
       const m = document.getElementById('modal-nuevo-guia-tpl');
       if (m) { m.style.display = 'none'; }
     }
+
+    // ── Nombres existentes para validación en tiempo real ──
+    const etqNombresExistentes = <%- JSON.stringify(etiquetaTemplates.map(t => t.nombre.trim().toLowerCase())) %>;
+    const guiaNombresExistentes = <%- JSON.stringify(guiaTemplates.map(t => t.nombre.trim().toLowerCase())) %>;
+
+    function validarNombreDuplicarEtq(valor) {
+      const hint = document.getElementById('hint-duplicar-etq');
+      const input = document.getElementById('input-duplicar-etq');
+      const btn = document.getElementById('btn-submit-duplicar-etq');
+      const existe = etqNombresExistentes.includes(valor.trim().toLowerCase());
+      if (existe) {
+        hint.textContent = 'Este nombre de template ya existe.';
+        hint.style.color = '#dc2626';
+        input.style.borderColor = '#fca5a5';
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+      } else {
+        hint.textContent = valor.trim() ? '' : 'El nombre debe ser único.';
+        hint.style.color = '#94a3b8';
+        input.style.borderColor = valor.trim() ? '#86efac' : '#e2e8f0';
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.cursor = 'pointer';
+      }
+    }
+
+    function validarNombreDuplicarGuia(valor) {
+      const hint = document.getElementById('hint-duplicar-guia');
+      const input = document.getElementById('input-duplicar-guia');
+      const btn = document.getElementById('btn-submit-duplicar-guia');
+      const existe = guiaNombresExistentes.includes(valor.trim().toLowerCase());
+      if (existe) {
+        hint.textContent = 'Este nombre de template ya existe.';
+        hint.style.color = '#dc2626';
+        input.style.borderColor = '#fca5a5';
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+      } else {
+        hint.textContent = valor.trim() ? '' : 'El nombre debe ser único.';
+        hint.style.color = '#94a3b8';
+        input.style.borderColor = valor.trim() ? '#86efac' : '#e2e8f0';
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.cursor = 'pointer';
+      }
+    }
+
+    // ── Duplicar templates ──
+    function abrirModalDuplicarEtqTpl() {
+      const m = document.getElementById('modal-duplicar-etq-tpl');
+      if (!m) return;
+      const input = document.getElementById('input-duplicar-etq');
+      const hint = document.getElementById('hint-duplicar-etq');
+      if (input) { input.value = ''; input.style.borderColor = '#e2e8f0'; }
+      if (hint) { hint.textContent = 'El nombre debe ser único.'; hint.style.color = '#94a3b8'; }
+      const btn = document.getElementById('btn-submit-duplicar-etq');
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = 'pointer'; }
+      m.style.display = 'flex';
+    }
+    function cerrarModalDuplicarEtqTpl() {
+      const m = document.getElementById('modal-duplicar-etq-tpl');
+      if (m) { m.style.display = 'none'; }
+    }
+    function abrirModalDuplicarGuiaTpl() {
+      const m = document.getElementById('modal-duplicar-guia-tpl');
+      if (!m) return;
+      const input = document.getElementById('input-duplicar-guia');
+      const hint = document.getElementById('hint-duplicar-guia');
+      if (input) { input.value = ''; input.style.borderColor = '#e2e8f0'; }
+      if (hint) { hint.textContent = 'El nombre debe ser único.'; hint.style.color = '#94a3b8'; }
+      const btn = document.getElementById('btn-submit-duplicar-guia');
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.style.cursor = 'pointer'; }
+      m.style.display = 'flex';
+    }
+    function cerrarModalDuplicarGuiaTpl() {
+      const m = document.getElementById('modal-duplicar-guia-tpl');
+      if (m) { m.style.display = 'none'; }
+    }
+
+    // ── Bloquear/desbloquear templates ──
+    function applyBloqueo(formId, bloqueado) {
+      const form = document.getElementById(formId);
+      if (!form) return;
+      // Checkboxes de toggles
+      form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.disabled = bloqueado;
+        const label = cb.closest('label');
+        if (label) {
+          label.style.opacity = bloqueado ? '0.4' : '';
+          label.style.filter  = bloqueado ? 'grayscale(1)' : '';
+          label.style.cursor  = bloqueado ? 'not-allowed' : '';
+        }
+      });
+      // Inputs de texto, número, range, selects y textareas
+      form.querySelectorAll('input[type="text"], input[type="number"], input[type="range"], textarea, select').forEach(el => {
+        el.disabled         = bloqueado;
+        el.style.opacity    = bloqueado ? '0.6' : '';
+        el.style.background = bloqueado ? '#f1f5f9' : '';
+        el.style.cursor     = bloqueado ? 'not-allowed' : '';
+      });
+      // Botón guardar
+      form.querySelectorAll('button[type="submit"]').forEach(btn => {
+        btn.disabled      = bloqueado;
+        btn.style.opacity = bloqueado ? '0.5' : '';
+        btn.style.cursor  = bloqueado ? 'not-allowed' : '';
+      });
+    }
+
+    function updateToggleBloqueo(prefix, bloqueado) {
+      const lbl = document.getElementById('lbl-bloquear-' + prefix);
+      if (lbl) {
+        lbl.style.color = bloqueado ? '#2563eb' : '#64748b';
+        lbl.innerHTML = `<i data-lucide="${bloqueado ? 'lock' : 'unlock'}" style="width:13px;height:13px;vertical-align:-2px;"></i> ${bloqueado ? 'Bloqueado' : 'Bloquear'}`;
+        lucide.createIcons();
+      }
+      const slider = document.getElementById('slider-bloquear-' + prefix);
+      if (slider) slider.style.background = bloqueado ? '#2563eb' : '#cbd5e1';
+      const knob = document.getElementById('knob-bloquear-' + prefix);
+      if (knob) knob.style.left = bloqueado ? '21px' : '3px';
+    }
+
+    async function toggleBloquearEtq(tplId) {
+      const r = await fetch(`/configuracion/etiqueta/templates/${tplId}/bloquear`, { method: 'POST' });
+      const data = await r.json();
+      if (!data.ok) { alert('Error al cambiar bloqueo'); return; }
+      const bloqueado = data.bloqueado === 1;
+      updateToggleBloqueo('etq', bloqueado);
+      applyBloqueo('form-etq-tpl', bloqueado);
+      document.getElementById('form-etq-tpl').dataset.bloqueado = bloqueado ? '1' : '0';
+    }
+
+    async function toggleBloquearGuia(tplId) {
+      const r = await fetch(`/configuracion/guia/templates/${tplId}/bloquear`, { method: 'POST' });
+      const data = await r.json();
+      if (!data.ok) { alert('Error al cambiar bloqueo'); return; }
+      const bloqueado = data.bloqueado === 1;
+      updateToggleBloqueo('guia', bloqueado);
+      applyBloqueo('form-guia-tpl', bloqueado);
+      document.getElementById('form-guia-tpl').dataset.bloqueado = bloqueado ? '1' : '0';
+    }
+
+    // Aplicar bloqueo inicial al cargar la página
+    (function() {
+      const etqForm = document.getElementById('form-etq-tpl');
+      if (etqForm && etqForm.dataset.bloqueado === '1') applyBloqueo('form-etq-tpl', true);
+      const guiaForm = document.getElementById('form-guia-tpl');
+      if (guiaForm && guiaForm.dataset.bloqueado === '1') applyBloqueo('form-guia-tpl', true);
+    })();
 
     // ── Vista previa etiqueta térmica ──
     function syncEtqPreview() {

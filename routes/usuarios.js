@@ -271,7 +271,11 @@ router.post('/nuevo', isAuthenticated, requireAdmin, async (req, res) => {
 router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
   try {
     const [usuarios] = await db.query(
-      'SELECT id, nombre, email, rol, activo, fecha_creacion, cliente_id, sucursal_dir_id FROM usuarios WHERE id = ?',
+      `SELECT id, nombre, email, rol, activo, fecha_creacion, cliente_id, sucursal_dir_id,
+        ver_botones_detalle, ver_telefono_detalle, ver_contacto_detalle, ver_editado_por_detalle,
+        ver_panel_estado, ver_comentario_estado, ver_panel_evidencia, ver_comentario_evidencia,
+        ver_acciones_rapidas
+       FROM usuarios WHERE id = ?`,
       [req.params.id]
     );
 
@@ -433,6 +437,33 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
 
     // Actualizar usuario
     await db.query(updateQuery, updateParams);
+
+    // Guardar permisos de vista en detalle de envío
+    await db.query(
+      `UPDATE usuarios SET
+        ver_botones_detalle       = ?,
+        ver_telefono_detalle      = ?,
+        ver_contacto_detalle      = ?,
+        ver_editado_por_detalle   = ?,
+        ver_panel_estado          = ?,
+        ver_comentario_estado     = ?,
+        ver_panel_evidencia       = ?,
+        ver_comentario_evidencia  = ?,
+        ver_acciones_rapidas      = ?
+       WHERE id = ?`,
+      [
+        req.body.ver_botones_detalle      ? 1 : 0,
+        req.body.ver_telefono_detalle     ? 1 : 0,
+        req.body.ver_contacto_detalle     ? 1 : 0,
+        req.body.ver_editado_por_detalle  ? 1 : 0,
+        req.body.ver_panel_estado         ? 1 : 0,
+        req.body.ver_comentario_estado    ? 1 : 0,
+        req.body.ver_panel_evidencia      ? 1 : 0,
+        req.body.ver_comentario_evidencia ? 1 : 0,
+        req.body.ver_acciones_rapidas     ? 1 : 0,
+        userId
+      ]
+    );
 
     // Guardar multi-sucursales
     await db.query('DELETE FROM usuario_sucursales WHERE usuario_id = ?', [userId]);

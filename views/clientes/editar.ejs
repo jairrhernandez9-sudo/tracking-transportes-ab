@@ -996,6 +996,7 @@
             
           </div>
           <!-- ⬅️ NUEVO: Prefijo de Tracking -->
+          <% if (user.rol === 'admin') { %>
             <div class="form-group full-width" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 16px; border: 2px solid #f59e0b;">
               <label class="form-label" style="color: #92400e; font-weight: 700; font-size: 1.05rem;">
                 <i data-lucide="hash" style="width: 20px; height: 20px;"></i>
@@ -1023,17 +1024,18 @@
                 </div>
               <% } %>
               
+              <% if (user.rol === 'admin') { %>
               <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
                 Puedes modificar el prefijo si es necesario. Los envíos futuros usarán el nuevo prefijo.
               </p>
-              
+
               <div style="display: flex; gap: 12px; align-items: flex-start;">
                 <div style="flex: 1;">
-<input 
-  type="text" 
+<input
+  type="text"
   id="prefijo_tracking_input"
-  name="prefijo_tracking_manual" 
-  class="form-input" 
+  name="prefijo_tracking_manual"
+  class="form-input"
   value="<%= cliente.prefijo_tracking %>"
   placeholder="Ej: ITP, JAB, TDN"
   minlength="2"
@@ -1044,7 +1046,7 @@
                   <div id="prefijo_status" style="margin-top: 8px; font-size: 0.85rem; font-weight: 600;"></div>
                 </div>
               </div>
-              
+
               <div id="preview_tracking" style="margin-top: 16px; padding: 16px; background: white; border-radius: 12px; border: 2px dashed #cbd5e1;">
                 <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
                   PRÓXIMO TRACKING CON EL NUEVO PREFIJO
@@ -1053,7 +1055,9 @@
                   <span id="preview_text"><%= cliente.prefijo_tracking %></span>-<%= String(cliente.ultimo_numero_tracking + 1).padStart(5, '0') %>
                 </div>
               </div>
+              <% } %>
             </div>
+          <% } %>
 
           <!-- Diseño de Guías -->
           <div style="margin: 28px 0 8px; padding-top: 24px; border-top: 2px solid #f1f5f9;">

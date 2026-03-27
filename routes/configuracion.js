@@ -38,7 +38,7 @@ const uploadCSV = multer({ storage: multer.memoryStorage(), limits: { fileSize: 
 // Configuración multer para logo de empresa
 const storageLogo = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'public/images';
+    const uploadDir = 'public/uploads';
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -59,7 +59,7 @@ const uploadLogo = multer({
 // Configuración multer para logo B&N de etiqueta
 const storageLogoBw = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'public/images';
+    const uploadDir = 'public/uploads';
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -641,7 +641,7 @@ router.post('/logo/upload', uploadLogo.single('logo_file'), async (req, res) => 
       return res.redirect('/configuracion?error=archivo_requerido');
     }
 
-    const logoUrl = '/images/' + req.file.filename;
+    const logoUrl = '/uploads/' + req.file.filename;
 
     await db.query(
       'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
@@ -662,7 +662,7 @@ router.post('/logo/upload', uploadLogo.single('logo_file'), async (req, res) => 
 router.post('/logo-bw/upload', uploadLogoBw.single('logo_bw_file'), async (req, res) => {
   try {
     if (!req.file) return res.redirect('/configuracion?error=archivo_requerido');
-    const logoUrl = '/images/' + req.file.filename;
+    const logoUrl = '/uploads/' + req.file.filename;
     await db.query(
       `INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
        VALUES ('empresa_logo_bw_url', ?, 'texto', 'empresa', 'Logo blanco/negro para etiqueta térmica', ?)
@@ -894,6 +894,59 @@ router.post('/etiqueta/templates/:id/eliminar', isAuthenticated, async (req, res
   }
 });
 
+// Duplicar template de etiqueta (admin + superusuario)
+router.post('/etiqueta/templates/:id/duplicar', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=etiqueta');
+  }
+  try {
+    const { id } = req.params;
+    const nuevoNombre = (req.body.nuevo_nombre || '').trim();
+    if (!nuevoNombre) {
+      return res.redirect(`/configuracion?error=nombre_requerido&tab=etiqueta&tpl=${id}`);
+    }
+    // Validar que no exista un template con ese nombre
+    const [[existente]] = await db.query('SELECT id FROM etiqueta_templates WHERE nombre = ?', [nuevoNombre]);
+    if (existente) {
+      return res.redirect(`/configuracion?error=nombre_duplicado&tab=etiqueta&tpl=${id}`);
+    }
+    // Copiar el template origen
+    const [[origen]] = await db.query('SELECT * FROM etiqueta_templates WHERE id = ?', [id]);
+    if (!origen) return res.redirect('/configuracion?error=notfound&tab=etiqueta');
+
+    const allFields = [...TEMPLATE_FIELDS, ...TEMPLATE_TEXT_FIELDS, ...TEMPLATE_SIZE_FIELDS];
+    const cols = ['nombre', ...allFields, 'creado_por'].join(', ');
+    const vals = [nuevoNombre, ...allFields.map(f => origen[f] ?? null), req.session.userId];
+    const placeholders = vals.map(() => '?').join(', ');
+    const [result] = await db.query(
+      `INSERT INTO etiqueta_templates (${cols}) VALUES (${placeholders})`, vals
+    );
+    res.redirect(`/configuracion?success=template_duplicado&tab=etiqueta&tpl=${result.insertId}`);
+  } catch (error) {
+    console.error('Error al duplicar template de etiqueta:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=etiqueta');
+  }
+});
+
+// Bloquear/desbloquear template de etiqueta (solo admin)
+router.post('/etiqueta/templates/:id/bloquear', isAuthenticated, async (req, res) => {
+  if (req.session.userRole !== 'admin') {
+    return res.json({ ok: false, error: 'sin_permiso' });
+  }
+  try {
+    const { id } = req.params;
+    const [[tpl]] = await db.query('SELECT bloqueado FROM etiqueta_templates WHERE id = ?', [id]);
+    if (!tpl) return res.json({ ok: false, error: 'notfound' });
+    const nuevoBloqueado = tpl.bloqueado ? 0 : 1;
+    await db.query('UPDATE etiqueta_templates SET bloqueado = ? WHERE id = ?', [nuevoBloqueado, id]);
+    res.json({ ok: true, bloqueado: nuevoBloqueado });
+  } catch (error) {
+    console.error('Error al bloquear template de etiqueta:', error);
+    res.json({ ok: false, error: 'error_servidor' });
+  }
+});
+
 // ============================================
 // TEMPLATES DE GUÍA EXPEDIDA
 // ============================================
@@ -1014,6 +1067,59 @@ router.post('/guia/templates/:id/eliminar', isAuthenticated, async (req, res) =>
   } catch (error) {
     console.error('Error al eliminar template de guía:', error);
     res.redirect('/configuracion?error=error_servidor&tab=guia');
+  }
+});
+
+// Duplicar template de guía (admin + superusuario)
+router.post('/guia/templates/:id/duplicar', isAuthenticated, async (req, res) => {
+  const rol = req.session.userRole;
+  if (rol !== 'admin' && rol !== 'superusuario') {
+    return res.redirect('/configuracion?error=sin_permiso&tab=guia');
+  }
+  try {
+    const { id } = req.params;
+    const nuevoNombre = (req.body.nuevo_nombre || '').trim();
+    if (!nuevoNombre) {
+      return res.redirect(`/configuracion?error=nombre_requerido&tab=guia&tpl=${id}`);
+    }
+    const [[existente]] = await db.query('SELECT id FROM guia_templates WHERE nombre = ?', [nuevoNombre]);
+    if (existente) {
+      return res.redirect(`/configuracion?error=nombre_duplicado&tab=guia&tpl=${id}`);
+    }
+    const [[origen]] = await db.query('SELECT * FROM guia_templates WHERE id = ?', [id]);
+    if (!origen) return res.redirect('/configuracion?error=notfound&tab=guia');
+
+    const guiaTextFields = ['descripcion_servicio','titulo_guia','mensaje_1','mensaje_2','mensaje_3','mensaje_4',
+      'etiqueta_col_descripcion','etiqueta_operador','etiqueta_obs_operador','etiqueta_recibido_por','etiqueta_obs_recibido'];
+    const allFields = [...GUIA_TEMPLATE_FIELDS, ...GUIA_SIZE_FIELDS, ...guiaTextFields];
+    const cols = ['nombre', ...allFields, 'creado_por'].join(', ');
+    const vals = [nuevoNombre, ...allFields.map(f => origen[f] ?? null), req.session.userId];
+    const placeholders = vals.map(() => '?').join(', ');
+    const [result] = await db.query(
+      `INSERT INTO guia_templates (${cols}) VALUES (${placeholders})`, vals
+    );
+    res.redirect(`/configuracion?success=guia_template_duplicado&tab=guia&tpl=${result.insertId}`);
+  } catch (error) {
+    console.error('Error al duplicar template de guía:', error);
+    res.redirect('/configuracion?error=error_servidor&tab=guia');
+  }
+});
+
+// Bloquear/desbloquear template de guía (solo admin)
+router.post('/guia/templates/:id/bloquear', isAuthenticated, async (req, res) => {
+  if (req.session.userRole !== 'admin') {
+    return res.json({ ok: false, error: 'sin_permiso' });
+  }
+  try {
+    const { id } = req.params;
+    const [[tpl]] = await db.query('SELECT bloqueado FROM guia_templates WHERE id = ?', [id]);
+    if (!tpl) return res.json({ ok: false, error: 'notfound' });
+    const nuevoBloqueado = tpl.bloqueado ? 0 : 1;
+    await db.query('UPDATE guia_templates SET bloqueado = ? WHERE id = ?', [nuevoBloqueado, id]);
+    res.json({ ok: true, bloqueado: nuevoBloqueado });
+  } catch (error) {
+    console.error('Error al bloquear template de guía:', error);
+    res.json({ ok: false, error: 'error_servidor' });
   }
 });
 

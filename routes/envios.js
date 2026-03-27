@@ -39,7 +39,7 @@ function isAuthenticated(req, res, next) {
 // Configuración de Multer para subir fotos
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'public/images/evidencias';
+    const uploadDir = 'public/uploads/evidencias';
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -220,6 +220,25 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     ).catch(() => [[]]);
     const tienePictogramas = pictogramasEnvio.length > 0;
 
+    // Permisos de vista del usuario actual
+    const [[permsRow]] = await db.query(
+      `SELECT ver_botones_detalle, ver_telefono_detalle, ver_contacto_detalle,
+              ver_editado_por_detalle, ver_panel_estado, ver_comentario_estado,
+              ver_panel_evidencia, ver_comentario_evidencia, ver_acciones_rapidas
+       FROM usuarios WHERE id = ?`, [req.session.userId]
+    ).catch(() => [[{}]]);
+    const vistaPermisos = {
+      botones:            (permsRow?.ver_botones_detalle           ?? 1) !== 0,
+      telefono:           (permsRow?.ver_telefono_detalle          ?? 1) !== 0,
+      contacto:           (permsRow?.ver_contacto_detalle          ?? 1) !== 0,
+      editadoPor:         (permsRow?.ver_editado_por_detalle       ?? 1) !== 0,
+      panelEstado:        (permsRow?.ver_panel_estado              ?? 1) !== 0,
+      comentarioEstado:   (permsRow?.ver_comentario_estado         ?? 1) !== 0,
+      panelEvidencia:     (permsRow?.ver_panel_evidencia           ?? 1) !== 0,
+      comentarioEvidencia:(permsRow?.ver_comentario_evidencia      ?? 1) !== 0,
+      accionesRapidas:    (permsRow?.ver_acciones_rapidas          ?? 1) !== 0,
+    };
+
     res.render('envios/detalle', {
       title: 'Detalle del Envío',
       user: {
@@ -234,6 +253,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       guiaOrigen,
       guiasRelacionadas,
       tienePictogramas,
+      vistaPermisos,
       success
     });
   } catch (error) {
@@ -1001,7 +1021,7 @@ router.post('/:id/subir-fotos', isAuthenticated, upload.array('fotos', 5), async
     
     // Guardar cada archivo en la base de datos
     for (const file of req.files) {
-      const urlFoto = `/images/evidencias/${file.filename}`;
+      const urlFoto = `/uploads/evidencias/${file.filename}`;
       
       await db.query(
         `INSERT INTO fotos_evidencia (historial_estado_id, url_foto, descripcion)

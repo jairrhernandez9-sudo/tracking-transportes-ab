@@ -533,6 +533,11 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, uploadClienteLo
 
     let prefijoFinal = clienteActual[0].prefijo_tracking;
 
+    // Solo admin puede cambiar el prefijo
+    if (prefijo_tracking_manual && prefijo_tracking_manual.trim() !== '' && req.session.userRole !== 'admin') {
+      return renderError('No tienes permiso para cambiar el prefijo de tracking.');
+    }
+
     // Si se proporcionó un nuevo prefijo
     if (prefijo_tracking_manual && prefijo_tracking_manual.trim() !== '') {
       const nuevoPrefijoUpper = prefijo_tracking_manual.toUpperCase();

@@ -66,6 +66,21 @@ db.query(`
 // Migración: logo del cliente (para portal)
 db.query(`ALTER TABLE clientes ADD COLUMN logo_url VARCHAR(500) NULL`).catch(() => {});
 
+// Migración: permisos de vista en detalle de envío por usuario
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_botones_detalle TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_telefono_detalle TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_contacto_detalle TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_editado_por_detalle TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_panel_estado TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_comentario_estado TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_panel_evidencia TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_comentario_evidencia TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_acciones_rapidas TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+
+// Migración: bloqueo de toggles en templates
+db.query(`ALTER TABLE etiqueta_templates ADD COLUMN bloqueado TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE guia_templates ADD COLUMN bloqueado TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+
 // Migración: etiquetas personalizables en guia_templates
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_col_descripcion VARCHAR(200) NULL`).catch(() => {});
 db.query(`ALTER TABLE guia_templates ADD COLUMN etiqueta_operador VARCHAR(200) NULL`).catch(() => {});

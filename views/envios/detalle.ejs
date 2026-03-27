@@ -1596,6 +1596,7 @@
                   <i data-lucide="package" style="width: 24px; height: 24px; color: #3b82f6;"></i>
                   Información General
                 </h2>
+                <% if (vistaPermisos.botones) { %>
                 <div style="display:flex;align-items:center;gap:8px;">
                   <a href="/envios/<%= envio.id %>/guia-expedida" target="_blank"
                      style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;width:auto;font-size:0.82rem;font-weight:700;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:8px;text-decoration:none;border:none;box-shadow:0 2px 8px rgba(37,99,235,.35);transition:all .2s;"
@@ -1612,6 +1613,7 @@
                     Editar
                   </a>
                 </div>
+                <% } %>
               </div>
               
 <div class="tracking-number">
@@ -1636,20 +1638,26 @@
                   <span class="info-value"><%= envio.nombre_empresa || 'Sin cliente' %></span>
                 </div>
                 
+                <% if (vistaPermisos.contacto) { %>
                 <div class="info-item">
                   <span class="info-label">Contacto</span>
                   <span class="info-value"><%= envio.contacto || '-' %></span>
                 </div>
-                
+                <% } %>
+
+                <% if (vistaPermisos.telefono) { %>
                 <div class="info-item">
                   <span class="info-label">Teléfono</span>
                   <span class="info-value"><%= envio.telefono || '-' %></span>
                 </div>
-                
+                <% } %>
+
+                <% if (vistaPermisos.contacto) { %>
                 <div class="info-item">
                   <span class="info-label">Email</span>
                   <span class="info-value"><%= envio.cliente_email || '-' %></span>
                 </div>
+                <% } %>
               
                 
                 <div class="info-item">
@@ -1927,6 +1935,7 @@
           <!-- COLUMNA DERECHA -->
           <div>
             <!-- ACTUALIZAR ESTADO -->
+            <% if (vistaPermisos.panelEstado) { %>
             <div class="action-card">
               <h3 class="action-title">
                 <i data-lucide="refresh-cw" style="width: 20px; height: 20px; color: #3b82f6;"></i>
@@ -1971,10 +1980,12 @@
                     <input type="text" name="ubicacion" class="form-input" placeholder="Ciudad, Estado" required>
                   </div>
                   
+                  <% if (vistaPermisos.comentarioEstado) { %>
                   <div class="form-group">
                     <label class="form-label">Comentarios</label>
                     <textarea name="comentarios" class="form-textarea" placeholder="Información adicional..."></textarea>
                   </div>
+                  <% } %>
                   
                   <button type="submit" class="btn btn-primary">
                     <i data-lucide="check" style="width: 18px; height: 18px;"></i>
@@ -1983,8 +1994,10 @@
                 </form>
               <% } %>
             </div>
-            
+            <% } %>
+
             <!-- SUBIR EVIDENCIA -->
+            <% if (vistaPermisos.panelEvidencia) { %>
             <div class="action-card">
               <h3 class="action-title">
                 <i data-lucide="camera" style="width: 20px; height: 20px; color: #3b82f6;"></i>
@@ -2033,10 +2046,12 @@
                   
                   <div id="previewContainer" class="preview-container" style="display: none;"></div>
                   
+                  <% if (vistaPermisos.comentarioEvidencia) { %>
                   <div class="form-group">
                     <label class="form-label">Comentario general (opcional)</label>
                     <textarea name="comentario" class="form-textarea" placeholder="Comentario sobre las evidencias..." rows="3"></textarea>
                   </div>
+                  <% } %>
                   
                   <div id="uploadStatus" class="upload-status" style="display: none;"></div>
                   
@@ -2055,8 +2070,10 @@
                 </div>
               <% } %>
             </div>
-            
+            <% } %>
+
             <!-- ACCIONES RÁPIDAS -->
+            <% if (vistaPermisos.accionesRapidas) { %>
             <div class="action-card">
               <h3 class="action-title">
                 <i data-lucide="zap" style="width: 20px; height: 20px; color: #3b82f6;"></i>
@@ -2087,8 +2104,9 @@
                 <% } %>
               </div>
             </div>
+            <% } %>
           </div>
-          
+
         </div>
       </div>
     </main>

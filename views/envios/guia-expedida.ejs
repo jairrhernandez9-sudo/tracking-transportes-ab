@@ -385,7 +385,13 @@
           const fechaEmision = ahora.toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'});
           const horaEmision  = ahora.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'}) + ' Hrs.';
           const fechaEntrega = envio.fecha_estimada_entrega
-            ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'})
+            ? (() => {
+                const s = envio.fecha_estimada_entrega instanceof Date
+                  ? envio.fecha_estimada_entrega.toISOString().split('T')[0]
+                  : String(envio.fecha_estimada_entrega).split('T')[0];
+                const [y, m, d] = s.split('-');
+                return `${d}/${m}/${y}`;
+              })()
             : 'Por definir';
 
           const estadoLabel = {
