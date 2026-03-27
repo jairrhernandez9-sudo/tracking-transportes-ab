@@ -1215,7 +1215,7 @@ input[type="text"]::-moz-reveal {
             <i data-lucide="user" style="width:15px;height:15px;display:inline;vertical-align:middle;margin-right:5px;"></i>
             Información General
           </button>
-          <% if (['admin','superusuario'].includes(user.rol)) { %>
+          <% if (['admin','superusuario'].includes(user.rol) && usuario.rol !== 'cliente') { %>
           <button type="button" class="edit-tab" onclick="switchTab('tab-permisos', this)">
             <i data-lucide="eye" style="width:15px;height:15px;display:inline;vertical-align:middle;margin-right:5px;"></i>
             Permisos de Vista
@@ -1388,7 +1388,7 @@ input[type="text"]::-moz-reveal {
           </div><!-- /tab-info -->
 
           <!-- TAB: Permisos de Vista -->
-          <% if (['admin','superusuario'].includes(user.rol)) { %>
+          <% if (['admin','superusuario'].includes(user.rol) && usuario.rol !== 'cliente') { %>
           <div id="tab-permisos" class="tab-panel">
 
             <div class="permisos-section">
