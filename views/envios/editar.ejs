@@ -891,9 +891,95 @@
                 </div>
               </div>
             </div>
-            
+
+            <!-- Sección Documentar a (condicional) -->
+            <% const tieneDocEdit = !!(envio.documentar_nombre || envio.documentar_calle); %>
+            <% if ((typeof documentarActivo !== 'undefined' && documentarActivo) || tieneDocEdit) { %>
+            <div class="form-section">
+              <h2 class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <span style="display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="file-check" style="width:24px;height:24px;color:#3b82f6;"></i>
+                  Documentar a:
+                </span>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.87rem;font-weight:500;color:#475569;">
+                  <i data-lucide="copy-check" style="width:16px;height:16px;color:#64748b;"></i>
+                  Requiero documentar
+                  <span style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;">
+                    <input type="checkbox" id="toggleDocumentarEdit" name="requiere_documentar" value="1"
+                      onchange="toggleDocSectionEdit(this)"
+                      style="opacity:0;width:0;height:0;"
+                      <%= tieneDocEdit ? 'checked' : '' %>>
+                    <span onclick="document.getElementById('toggleDocumentarEdit').click();toggleDocSectionEdit(document.getElementById('toggleDocumentarEdit'))"
+                      style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:<%= tieneDocEdit ? '#3b82f6' : '#cbd5e1' %>;border-radius:24px;transition:.3s;" id="sliderDocEdit">
+                      <span style="position:absolute;height:18px;width:18px;left:<%= tieneDocEdit ? '23px' : '3px' %>;bottom:3px;background:white;border-radius:50%;transition:.3s;" id="sliderDocEditKnob"></span>
+                    </span>
+                  </span>
+                </label>
+              </h2>
+              <div id="doc-fields-edit" style="<%= tieneDocEdit ? '' : 'display:none' %>">
+                <div style="display:flex;gap:12px;align-items:center;margin-bottom:4px;">
+                  <button type="button" id="btnDocumentar" onclick="abrirModalDocumentar()"
+                    style="flex:1;padding:12px 20px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;">
+                    <i data-lucide="building-2" style="width:18px;height:18px;"></i>
+                    <%= tieneDocEdit && envio.documentar_nombre ? '✓ ' + envio.documentar_nombre : 'Seleccionar Dirección Guardada' %>
+                  </button>
+                  <button type="button" onclick="limpiarDocumentar()"
+                    style="padding:12px 16px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;cursor:pointer;color:#64748b;">
+                    <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+                  </button>
+                </div>
+                <div class="dir-grid">
+                  <div class="form-group" style="grid-column:1/-1;">
+                    <label class="form-label">Nombre / Empresa</label>
+                    <input type="text" name="documentar_nombre" class="form-input"
+                      value="<%= envio.documentar_nombre || '' %>"
+                      placeholder="Ej: Almex Tlalnepantla">
+                  </div>
+                  <div class="form-group" style="grid-column:1/-1;">
+                    <label class="form-label">Calle y Número</label>
+                    <input type="text" name="documentar_calle" class="form-input"
+                      value="<%= envio.documentar_calle || '' %>"
+                      placeholder="Ej: Rio Lerma 15 A y B">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Colonia</label>
+                    <input type="text" name="documentar_colonia" class="form-input"
+                      value="<%= envio.documentar_colonia || '' %>" placeholder="Ej: Centro Industrial">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">C.P.</label>
+                    <input type="text" name="documentar_cp" class="form-input" maxlength="5"
+                      value="<%= envio.documentar_cp || '' %>" placeholder="54030">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ciudad</label>
+                    <input type="text" name="documentar_ciudad" class="form-input"
+                      value="<%= envio.documentar_ciudad || '' %>" placeholder="Escribe la ciudad">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <input type="text" name="documentar_estado" class="form-input"
+                      value="<%= envio.documentar_estado || '' %>" placeholder="Estado...">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Referencia</label>
+                    <input type="text" name="documentar_referencia" class="form-input"
+                      value="<%= envio.documentar_referencia || '' %>" placeholder="Ej: 80">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <script>
+              function toggleDocSectionEdit(cb) {
+                document.getElementById('doc-fields-edit').style.display = cb.checked ? '' : 'none';
+                document.getElementById('sliderDocEdit').style.background = cb.checked ? '#3b82f6' : '#cbd5e1';
+                document.getElementById('sliderDocEditKnob').style.left = cb.checked ? '23px' : '3px';
+              }
+            </script>
+            <% } %>
+
           </div>
-          
+
           <% if (typeof pictogramas !== 'undefined' && pictogramas.length > 0) { %>
           <!-- Pictogramas -->
           <div class="form-section" style="margin-top:20px;">
@@ -1126,7 +1212,30 @@
       lucide.createIcons();
     }
     function cerrarModalOrigen()  { document.getElementById('modalOrigenDir').classList.remove('open'); }
-    function cerrarModalDestino() { document.getElementById('modalDestinoDir').classList.remove('open'); }
+    function cerrarModalDestino() { _docModalMode = false; document.getElementById('modalDestinoDir').classList.remove('open'); }
+
+    // ── DOCUMENTAR MODAL ──
+    let _docModalMode = false;
+    async function abrirModalDocumentar() {
+      _docModalMode = true;
+      document.getElementById('modalDestinoDir').classList.add('open');
+      document.getElementById('destinoBuscador').value = '';
+      await _cargarBodegas();
+      const cid = document.querySelector('[name="cliente_id"]')?.value;
+      if (cid) await _cargarDirCliente(cid);
+      _renderDirModal('destino');
+      lucide.createIcons();
+    }
+    function limpiarDocumentar() {
+      ['calle','colonia','cp','ciudad','estado','referencia'].forEach(f => {
+        const el = document.querySelector(`[name="documentar_${f}"]`);
+        if (el) el.value = '';
+      });
+      const nombreEl = document.querySelector('[name="documentar_nombre"]');
+      if (nombreEl) nombreEl.value = '';
+      document.getElementById('btnDocumentar').innerHTML = '<i data-lucide="building-2" style="width:18px;height:18px;"></i> Seleccionar Dirección Guardada';
+      lucide.createIcons();
+    }
 
     async function _cargarBodegas() {
       if (_bodegas.length) return;
@@ -1183,16 +1292,30 @@
       const lista = tab === 'bodegas' ? _bodegas : _dirCliente;
       const d = lista.find(x => x.id === id);
       if (!d) return;
-      const p = tipo;
+
+      // Si el modal de destino fue abierto en modo documentar
+      const efectivo = (_docModalMode && tipo === 'destino') ? 'documentar' : tipo;
+      const p = efectivo;
+
       document.querySelector(`[name="${p}_calle"]`).value      = d.calle      || '';
       document.querySelector(`[name="${p}_colonia"]`).value    = d.colonia    || '';
       document.querySelector(`[name="${p}_cp"]`).value         = d.cp         || '';
       document.querySelector(`[name="${p}_ciudad"]`).value     = d.ciudad     || '';
       document.querySelector(`[name="${p}_estado"]`).value     = d.estado     || '';
       document.querySelector(`[name="${p}_referencia"]`).value = d.referencia || '';
-      const btnId = tipo === 'origen' ? 'btnOrigen' : 'btnDestino';
-      document.getElementById(btnId).textContent = '✓ ' + d.alias;
-      tipo === 'origen' ? cerrarModalOrigen() : cerrarModalDestino();
+
+      if (efectivo === 'documentar') {
+        const nomEl = document.querySelector('[name="documentar_nombre"]');
+        if (nomEl) nomEl.value = d.alias || '';
+        document.getElementById('btnDocumentar').textContent = '✓ ' + d.alias;
+        cerrarModalDestino(); // resetea _docModalMode
+      } else if (efectivo === 'origen') {
+        document.getElementById('btnOrigen').textContent = '✓ ' + d.alias;
+        cerrarModalOrigen();
+      } else {
+        document.getElementById('btnDestino').textContent = '✓ ' + d.alias;
+        cerrarModalDestino();
+      }
     }
 
     function limpiarOrigen() {

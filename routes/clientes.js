@@ -152,7 +152,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     query += ` ORDER BY ${esOperador ? 'c.' : ''}fecha_creacion ${order}`;
 
     const [clientes] = await db.query(query, params);
-    
+
     // Obtener cantidad de envíos por cliente
     for (let cliente of clientes) {
       const [envios] = await db.query(
@@ -161,7 +161,17 @@ router.get('/', isAuthenticated, async (req, res) => {
       );
       cliente.total_envios = envios[0].total;
     }
-    
+
+    // Permisos de vista del usuario logueado
+    const [[permsRow]] = await db.query(
+      `SELECT ver_telefono_detalle, ver_contacto_detalle FROM usuarios WHERE id = ?`,
+      [req.session.userId]
+    ).catch(() => [[{}]]);
+    const vistaPermisos = {
+      telefono: (permsRow?.ver_telefono_detalle ?? 1) !== 0,
+      contacto: (permsRow?.ver_contacto_detalle ?? 1) !== 0,
+    };
+
     res.render('clientes/lista', {
       title: 'Gestión de Clientes',
       user: {
@@ -170,7 +180,8 @@ router.get('/', isAuthenticated, async (req, res) => {
         rol: req.session.userRole
       },
       clientes,
-      filtros: { buscar: buscar || '', orderBy: orderBy || 'reciente' }
+      filtros: { buscar: buscar || '', orderBy: orderBy || 'reciente' },
+      vistaPermisos
     });
     
   } catch (error) {

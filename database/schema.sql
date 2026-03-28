@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-03-26
+-- Última actualización: 2026-03-28
 -- Motor: MySQL 8+ / MariaDB 10.5+
 -- ============================================================
 
@@ -43,8 +43,10 @@ CREATE TABLE `usuarios` (
   `ver_comentario_estado`      TINYINT(1) NOT NULL DEFAULT 1,
   `ver_panel_evidencia`        TINYINT(1) NOT NULL DEFAULT 1,
   `ver_comentario_evidencia`   TINYINT(1) NOT NULL DEFAULT 1,
-  `ver_acciones_rapidas`       TINYINT(1) NOT NULL DEFAULT 1,
-  `auto_activar_cliente`       TINYINT(1) NOT NULL DEFAULT 0,
+  `ver_acciones_rapidas`            TINYINT(1) NOT NULL DEFAULT 1,
+  `ver_actualizado_por_detalle`     TINYINT(1) NOT NULL DEFAULT 1,
+  `ver_reimp_por_detalle`           TINYINT(1) NOT NULL DEFAULT 1,
+  `auto_activar_cliente`            TINYINT(1) NOT NULL DEFAULT 0,
   -- Columnas visibles en lista de envíos
   `col_folio`                  TINYINT(1) NOT NULL DEFAULT 1,
   `col_tracking`               TINYINT(1) NOT NULL DEFAULT 1,
@@ -54,6 +56,10 @@ CREATE TABLE `usuarios` (
   `col_destino`                TINYINT(1) NOT NULL DEFAULT 1,
   `col_estado`                 TINYINT(1) NOT NULL DEFAULT 1,
   `col_fecha`                  TINYINT(1) NOT NULL DEFAULT 1,
+  `col_autor`                  TINYINT(1) NOT NULL DEFAULT 1,
+  -- Campo Documentar a
+  `ultimo_documentar`          TINYINT(1) NOT NULL DEFAULT 0,
+  `documentar_activo`          TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -425,8 +431,19 @@ CREATE TABLE `envios` (
   `numero_parte`            INT           DEFAULT NULL,
   -- Etiqueta / Pago
   `etiqueta_modificada`     TINYINT(1)    NOT NULL DEFAULT '0',
+  `editado_por_nombre`      VARCHAR(150)  DEFAULT NULL,
   -- Pago (SAT: PUE = contado, PPD = crédito)
   `metodo_pago`             VARCHAR(3)    NOT NULL DEFAULT 'PPD' COMMENT 'PUE o PPD (SAT). Copiado del cliente al crear el envío.',
+  -- Auditoría
+  `editado_por_nombre`      VARCHAR(150)  DEFAULT NULL,
+  -- Campo Documentar a (dirección alternativa de entrega)
+  `documentar_nombre`       VARCHAR(200)  DEFAULT NULL,
+  `documentar_calle`        VARCHAR(200)  DEFAULT NULL,
+  `documentar_colonia`      VARCHAR(150)  DEFAULT NULL,
+  `documentar_cp`           VARCHAR(10)   DEFAULT NULL,
+  `documentar_ciudad`       VARCHAR(150)  DEFAULT NULL,
+  `documentar_estado`       VARCHAR(100)  DEFAULT NULL,
+  `documentar_referencia`   VARCHAR(200)  DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `numero_tracking` (`numero_tracking`),
   KEY `cliente_id` (`cliente_id`),
@@ -624,9 +641,14 @@ CREATE TABLE IF NOT EXISTS `guias_config_impresa` (
   `mostrar_col_importe` TINYINT(1) DEFAULT 1,
   `mostrar_pie_datos` TINYINT(1) DEFAULT 1,
   `mostrar_disclaimer` TINYINT(1) DEFAULT 1,
+  `activa`            TINYINT(1)   NOT NULL DEFAULT 1,
+  `checksum`          VARCHAR(64)  NULL,
+  `primera_impresion` TIMESTAMP    NULL,
+  `veces_impresa`     INT          NOT NULL DEFAULT 1,
+  `ultimo_usuario`    VARCHAR(150) NULL,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_envio` (`envio_id`)
+  KEY `idx_gcfg_envio` (`envio_id`, `activa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -655,9 +677,30 @@ CREATE TABLE IF NOT EXISTS `etiquetas_config_impresa` (
   `mostrar_alias_ruta` TINYINT(1) DEFAULT 0,
   `mostrar_peso_total` TINYINT(1) DEFAULT 1,
   `mostrar_peso_item` TINYINT(1) DEFAULT 0,
+  `activa`            TINYINT(1)   NOT NULL DEFAULT 1,
+  `checksum`          VARCHAR(64)  NULL,
+  `primera_impresion` TIMESTAMP    NULL,
+  `veces_impresa`     INT          NOT NULL DEFAULT 1,
+  `ultimo_usuario`    VARCHAR(150) NULL,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_envio` (`envio_id`)
+  KEY `idx_ecfg_envio` (`envio_id`, `activa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Historial de impresiones (guía y etiqueta)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `impresiones_log` (
+  `id`             INT          NOT NULL AUTO_INCREMENT,
+  `envio_id`       INT          NOT NULL,
+  `tipo`           ENUM('guia','etiqueta') NOT NULL,
+  `usuario_id`     INT          NULL,
+  `usuario_nombre` VARCHAR(150) NOT NULL DEFAULT 'Sistema',
+  `fecha`          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `tuvo_cambios`   TINYINT(1)   NOT NULL DEFAULT 0,
+  `desde_portal`   TINYINT(1)   NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_implog_envio` (`envio_id`, `tipo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

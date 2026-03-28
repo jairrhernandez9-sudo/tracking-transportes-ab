@@ -261,7 +261,7 @@
 
     /* ── BARCODE (toggle) ── */
     .barcode-wrap {
-      padding: 3px 12px 1px;
+      padding: 2px 12px 1px;
       text-align: center;
       border-bottom: 1.5px solid #000;
       flex-shrink: 0;
@@ -871,6 +871,44 @@
 
     <!-- ══ DESTINATARIO ══ -->
     <div class="destinatario">
+      <% if (envio.documentar_nombre || envio.documentar_calle) { %>
+      <!-- Layout dos columnas: Entregar A | Documentar A -->
+      <div style="display:flex;gap:0;height:100%;align-items:stretch;">
+        <!-- Columna izquierda: Entregar A -->
+        <div style="flex:1;padding-right:6px;display:flex;flex-direction:column;justify-content:flex-start;">
+          <div class="dest-label" style="margin-bottom:3px;"><%= txtEntregarA %></div>
+          <div class="dest-empresa <%= !showDestNombre ? 'etq-hidden' : '' %>" data-elem="dest-nombre" style="font-size:<%= szDestNombre %>;"><%= envio.nombre_empresa || 'Cliente Final' %></div>
+          <div class="dest-direccion <%= !showDestDireccion ? 'etq-hidden' : '' %>" data-elem="dest-direccion" style="font-size:<%= szDestDireccion %>;">
+            <% if (envio.destino_calle) { %>
+              <%= envio.destino_calle %><% if (envio.destino_colonia) { %>, Col. <%= envio.destino_colonia %><% } %><br>
+              CP <%= envio.destino_cp || '' %>&nbsp; <%= envio.destino_ciudad || '' %>, <%= envio.destino_estado || '' %>
+            <% } else { %>
+              <%= envio.destino %>
+            <% } %>
+            <% if (envio.destino_referencia) { %>
+              <span data-elem="dest-referencia" class="<%= !showDestReferencia ? 'etq-hidden' : '' %>" style="display:block;font-size:7.5px;color:#000;">Ref: <%= envio.destino_referencia %></span>
+            <% } %>
+          </div>
+          <% if (envio.contacto || envio.telefono) { %>
+          <div class="dest-contacto" style="font-size:<%= szDestContacto %>;">
+            <% if (envio.contacto) { %><span data-elem="dest-contacto" class="<%= !showDestContacto ? 'etq-hidden' : '' %>"><%= envio.contacto %></span><% } %>
+            <% if (envio.telefono) { %><span data-elem="dest-telefono" class="<%= !showDestTelefono ? 'etq-hidden' : '' %>">Tel: <%= envio.telefono %></span><% } %>
+          </div>
+          <% } %>
+        </div>
+        <!-- Columna derecha: Documentar A -->
+        <div data-elem="documentar" style="flex:1;padding-left:6px;border-left:1.5px solid #000;display:flex;flex-direction:column;justify-content:flex-start;">
+          <div class="dest-label" style="margin-bottom:3px;">Documentar a:</div>
+          <% if (envio.documentar_nombre) { %><div style="font-weight:700;font-size:<%= szDestNombre %>;line-height:1.1;margin-bottom:2px;"><%= envio.documentar_nombre %></div><% } %>
+          <div style="font-size:<%= szDestDireccion %>;line-height:1.4;color:#222;">
+            <% if (envio.documentar_calle) { %><%= envio.documentar_calle %><% if (envio.documentar_colonia) { %>, Col. <%= envio.documentar_colonia %><% } %><br><% } %>
+            <%= [envio.documentar_cp ? 'CP '+envio.documentar_cp : null, envio.documentar_ciudad, envio.documentar_estado].filter(Boolean).join('  ') %>
+            <% if (envio.documentar_referencia) { %><br>Ref: <%= envio.documentar_referencia %><% } %>
+          </div>
+        </div>
+      </div>
+      <% } else { %>
+      <!-- Layout normal sin documentar -->
       <div class="dest-label"><%= txtEntregarA %></div>
       <div class="dest-info">
         <div class="dest-empresa <%= !showDestNombre ? 'etq-hidden' : '' %>" data-elem="dest-nombre" style="font-size:<%= szDestNombre %>;"><%= envio.nombre_empresa || 'Cliente Final' %></div>
@@ -892,6 +930,7 @@
         </div>
         <% } %>
       </div>
+      <% } %>
     </div>
 
     <!-- ══ DETALLES DEL PAQUETE ══ -->
@@ -1029,6 +1068,7 @@
           panelRow('dest-referencia','🔖', 'Referencia destino',         showDestReferencia, !!(envio.destino_referencia), !!cfg.obligatorio_dest_referencia),
           panelRow('dest-contacto',  '👤', 'Contacto destinatario',      showDestContacto,   !!(envio.contacto),   !!cfg.obligatorio_dest_contacto),
           panelRow('dest-telefono',  '📞', 'Teléfono destinatario',      showDestTelefono,   !!(envio.telefono),   !!cfg.obligatorio_dest_telefono),
+          ...(envio.documentar_nombre || envio.documentar_calle ? [panelRow('documentar', '📋', 'Documentar a', true, true, false)] : []),
         ];
       %>
 
@@ -1178,7 +1218,7 @@
       for (var i = 1; i <= etqCfg.total; i++) {
         try {
           JsBarcode('#barcode-' + i, etqCfg.tracking, {
-            format: 'CODE128', width: 1.7, height: 42,
+            format: 'CODE128', width: 1.7, height: 32,
             displayValue: false, margin: 0, background: 'transparent'
           });
         } catch(e) { console.warn('Barcode ' + i + ':', e); }

@@ -278,10 +278,11 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
     const [usuarios] = await db.query(
       `SELECT id, nombre, email, rol, activo, fecha_creacion, cliente_id, sucursal_dir_id,
         ver_botones_detalle, ver_telefono_detalle, ver_contacto_detalle, ver_editado_por_detalle,
+        ver_actualizado_por_detalle, ver_reimp_por_detalle,
         ver_panel_estado, ver_comentario_estado, ver_panel_evidencia, ver_comentario_evidencia,
-        ver_acciones_rapidas, auto_activar_cliente,
+        ver_acciones_rapidas, auto_activar_cliente, documentar_activo,
         col_folio, col_tracking, col_referencia, col_cliente,
-        col_origen, col_destino, col_estado, col_fecha
+        col_origen, col_destino, col_estado, col_fecha, col_autor
        FROM usuarios WHERE id = ?`,
       [req.params.id]
     );
@@ -452,12 +453,15 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
         ver_telefono_detalle      = ?,
         ver_contacto_detalle      = ?,
         ver_editado_por_detalle   = ?,
+        ver_actualizado_por_detalle = ?,
+        ver_reimp_por_detalle     = ?,
         ver_panel_estado          = ?,
         ver_comentario_estado     = ?,
         ver_panel_evidencia       = ?,
         ver_comentario_evidencia  = ?,
         ver_acciones_rapidas      = ?,
         auto_activar_cliente      = ?,
+        documentar_activo         = ?,
         col_folio                 = ?,
         col_tracking              = ?,
         col_referencia            = ?,
@@ -465,19 +469,23 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
         col_origen                = ?,
         col_destino               = ?,
         col_estado                = ?,
-        col_fecha                 = ?
+        col_fecha                 = ?,
+        col_autor                 = ?
        WHERE id = ?`,
       [
         req.body.ver_botones_detalle      ? 1 : 0,
         req.body.ver_telefono_detalle     ? 1 : 0,
         req.body.ver_contacto_detalle     ? 1 : 0,
-        req.body.ver_editado_por_detalle  ? 1 : 0,
-        req.body.ver_panel_estado         ? 1 : 0,
+        req.body.ver_editado_por_detalle        ? 1 : 0,
+        req.body.ver_actualizado_por_detalle    ? 1 : 0,
+        req.body.ver_reimp_por_detalle          ? 1 : 0,
+        req.body.ver_panel_estado               ? 1 : 0,
         req.body.ver_comentario_estado    ? 1 : 0,
         req.body.ver_panel_evidencia      ? 1 : 0,
         req.body.ver_comentario_evidencia ? 1 : 0,
         req.body.ver_acciones_rapidas     ? 1 : 0,
         req.body.auto_activar_cliente     ? 1 : 0,
+        req.body.documentar_activo        ? 1 : 0,
         req.body.col_folio                ? 1 : 0,
         req.body.col_tracking             ? 1 : 0,
         req.body.col_referencia           ? 1 : 0,
@@ -486,6 +494,7 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
         req.body.col_destino              ? 1 : 0,
         req.body.col_estado               ? 1 : 0,
         req.body.col_fecha                ? 1 : 0,
+        req.body.col_autor                ? 1 : 0,
         userId
       ]
     );

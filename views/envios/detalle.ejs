@@ -1705,6 +1705,36 @@
                   <span class="info-label">Creado Por</span>
                   <span class="info-value"><%= envio.creador_nombre || '-' %></span>
                 </div>
+
+                <% if (vistaPermisos.editadoPor && envio.editado_por_nombre) { %>
+                <div class="info-item">
+                  <span class="info-label">Editado Por</span>
+                  <span class="info-value"><%= envio.editado_por_nombre %></span>
+                </div>
+                <% } %>
+
+                <% if (vistaPermisos.actualizadoPor && typeof actualizadoPorNombre !== 'undefined' && actualizadoPorNombre) { %>
+                <div class="info-item">
+                  <span class="info-label">Actualizado Por</span>
+                  <span class="info-value"><%= actualizadoPorNombre %></span>
+                </div>
+                <% } %>
+
+                <% if (vistaPermisos.reimpPor && typeof reimpPorList !== 'undefined' && reimpPorList && reimpPorList.length > 0) { %>
+                <div class="info-item" style="grid-column:1/-1;">
+                  <span class="info-label">Impreso desde Portal</span>
+                  <div style="display:flex;flex-direction:column;gap:4px;margin-top:2px;">
+                    <% reimpPorList.forEach(function(r) { %>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <span class="info-value" style="margin:0;"><%= r.usuario_nombre %></span>
+                      <span style="font-size:0.72rem;color:#94a3b8;">
+                        <%= new Date(r.ultima_fecha).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) %>
+                      </span>
+                    </div>
+                    <% }); %>
+                  </div>
+                </div>
+                <% } %>
               </div>
               
             </div>
@@ -1942,6 +1972,93 @@
           
           <!-- COLUMNA DERECHA -->
           <div>
+
+            <!-- HISTÓRICO DE IMPRESOS -->
+            <% if (historialImpresos && ((historialImpresos.guia && historialImpresos.guia.length > 0) || (historialImpresos.etiqueta && historialImpresos.etiqueta.length > 0))) { %>
+            <div class="action-card" style="margin-bottom:16px;">
+              <h3 class="action-title" style="cursor:pointer;user-select:none;" onclick="toggleHistImpresion(this)">
+                <i data-lucide="printer" style="width:20px;height:20px;color:#3b82f6;"></i>
+                Histórico de Impresos
+                <i data-lucide="chevron-down" style="width:16px;height:16px;margin-left:auto;color:#94a3b8;" id="iconHistImpresion"></i>
+              </h3>
+              <div id="panelHistImpresion">
+
+                <!-- Versiones de Guía -->
+                <% if (historialImpresos.guia && historialImpresos.guia.length > 0) { %>
+                <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:4px;">Guía Expedida</div>
+                <% historialImpresos.guia.forEach(function(v) { %>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;">
+                  <% if (v.activa) { %>
+                  <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#22c55e;flex-shrink:0;margin-top:2px;" title="Versión activa"></i>
+                  <% } else { %>
+                  <i data-lucide="circle" style="width:16px;height:16px;color:#cbd5e1;flex-shrink:0;margin-top:2px;" title="Versión anterior"></i>
+                  <% } %>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.77rem;font-weight:<%= v.activa ? '600' : '400' %>;color:<%= v.activa ? '#1e293b' : '#94a3b8' %>;word-break:break-all;">
+                      <%= v.nombre %>
+                    </div>
+                    <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+                    <div style="font-size:0.71rem;color:#64748b;margin-top:2px;">
+                      Impresa <%= v.veces %> vez<%= v.veces !== 1 ? 'es' : '' %>
+                      <% if (v.usuario) { %> · Último: <%= v.usuario %><% } %>
+                    </div>
+                    <% } %>
+                  </div>
+                </div>
+                <% }); %>
+                <% } %>
+
+                <!-- Versiones de Etiqueta -->
+                <% if (historialImpresos.etiqueta && historialImpresos.etiqueta.length > 0) { %>
+                <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:10px;">Etiqueta Térmica</div>
+                <% historialImpresos.etiqueta.forEach(function(v) { %>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;">
+                  <% if (v.activa) { %>
+                  <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#22c55e;flex-shrink:0;margin-top:2px;" title="Versión activa"></i>
+                  <% } else { %>
+                  <i data-lucide="circle" style="width:16px;height:16px;color:#cbd5e1;flex-shrink:0;margin-top:2px;" title="Versión anterior"></i>
+                  <% } %>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.77rem;font-weight:<%= v.activa ? '600' : '400' %>;color:<%= v.activa ? '#1e293b' : '#94a3b8' %>;word-break:break-all;">
+                      <%= v.nombre %>
+                    </div>
+                    <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+                    <div style="font-size:0.71rem;color:#64748b;margin-top:2px;">
+                      Impresa <%= v.veces %> vez<%= v.veces !== 1 ? 'es' : '' %>
+                      <% if (v.usuario) { %> · Último: <%= v.usuario %><% } %>
+                    </div>
+                    <% } %>
+                  </div>
+                </div>
+                <% }); %>
+                <% } %>
+
+                <!-- Log detallado solo para admin/superusuario -->
+                <% if (user && (user.rol === 'admin' || user.rol === 'superusuario') && historialImpresos.log && historialImpresos.log.length > 0) { %>
+                <div style="margin-top:10px;border-top:1px solid #f1f5f9;padding-top:8px;">
+                  <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Registro de impresiones</div>
+                  <div style="max-height:140px;overflow-y:auto;">
+                    <% historialImpresos.log.forEach(log => { %>
+                    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.72rem;color:#64748b;border-bottom:1px solid #f8fafc;">
+                      <span style="background:<%= log.tipo === 'guia' ? '#eff6ff' : '#f0fdf4' %>;color:<%= log.tipo === 'guia' ? '#1d4ed8' : '#15803d' %>;padding:1px 6px;border-radius:4px;font-weight:600;flex-shrink:0;font-size:0.68rem;">
+                        <%= log.tipo === 'guia' ? 'Guía' : 'Etiqueta' %>
+                      </span>
+                      <span><%= log.usuario_nombre %></span>
+                      <span style="margin-left:auto;white-space:nowrap;">
+                        <%= new Date(log.fecha).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) %>
+                      </span>
+                      <% if (log.tuvo_cambios) { %>
+                      <span title="Se detectaron cambios" style="color:#f59e0b;">✦</span>
+                      <% } %>
+                    </div>
+                    <% }); %>
+                  </div>
+                </div>
+                <% } %>
+              </div>
+            </div>
+            <% } %>
+
             <!-- ACTUALIZAR ESTADO -->
             <% if (vistaPermisos.panelEstado) { %>
             <div class="action-card">
@@ -2640,6 +2757,16 @@ async function eliminarEstado(estadoId) {
   </script>
   <% } %>
 
+  <script>
+    function toggleHistImpresion(header) {
+      var panel = document.getElementById('panelHistImpresion');
+      var icon  = document.getElementById('iconHistImpresion');
+      var open  = panel.style.display !== 'none';
+      panel.style.display = open ? 'none' : '';
+      if (icon) icon.setAttribute('data-lucide', open ? 'chevron-right' : 'chevron-down');
+      lucide.createIcons();
+    }
+  </script>
   <script src="/js/notifications.js"></script>
   <script src="/js/sidebar.js"></script>
 </body>

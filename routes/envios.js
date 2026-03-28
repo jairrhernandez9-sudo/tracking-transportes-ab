@@ -6,6 +6,7 @@ const { registrarActividad } = require('../utils/actividad');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // ============================================
 // FUNCIÓN HELPER: Construir dirección completa
@@ -134,7 +135,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 
     const [[colRow]] = await db.query(
       `SELECT col_folio, col_tracking, col_referencia, col_cliente,
-              col_origen, col_destino, col_estado, col_fecha
+              col_origen, col_destino, col_estado, col_fecha, col_autor
        FROM usuarios WHERE id = ?`,
       [req.session.userId]
     ).catch(() => [[{}]]);
@@ -143,6 +144,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       tracking:   (colRow?.col_tracking   ?? 1) !== 0,
       referencia: (colRow?.col_referencia ?? 1) !== 0,
       cliente:    (colRow?.col_cliente    ?? 1) !== 0,
+      autor:      (colRow?.col_autor      ?? 1) !== 0,
       origen:     (colRow?.col_origen     ?? 1) !== 0,
       destino:    (colRow?.col_destino    ?? 1) !== 0,
       estado:     (colRow?.col_estado     ?? 1) !== 0,
@@ -243,7 +245,8 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     const [[permsRow]] = await db.query(
       `SELECT ver_botones_detalle, ver_telefono_detalle, ver_contacto_detalle,
               ver_editado_por_detalle, ver_panel_estado, ver_comentario_estado,
-              ver_panel_evidencia, ver_comentario_evidencia, ver_acciones_rapidas
+              ver_panel_evidencia, ver_comentario_evidencia, ver_acciones_rapidas,
+              ver_actualizado_por_detalle, ver_reimp_por_detalle
        FROM usuarios WHERE id = ?`, [req.session.userId]
     ).catch(() => [[{}]]);
     const vistaPermisos = {
@@ -251,11 +254,68 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       telefono:           (permsRow?.ver_telefono_detalle          ?? 1) !== 0,
       contacto:           (permsRow?.ver_contacto_detalle          ?? 1) !== 0,
       editadoPor:         (permsRow?.ver_editado_por_detalle       ?? 1) !== 0,
+      actualizadoPor:     (permsRow?.ver_actualizado_por_detalle   ?? 1) !== 0,
+      reimpPor:           (permsRow?.ver_reimp_por_detalle         ?? 1) !== 0,
       panelEstado:        (permsRow?.ver_panel_estado              ?? 1) !== 0,
       comentarioEstado:   (permsRow?.ver_comentario_estado         ?? 1) !== 0,
       panelEvidencia:     (permsRow?.ver_panel_evidencia           ?? 1) !== 0,
       comentarioEvidencia:(permsRow?.ver_comentario_evidencia      ?? 1) !== 0,
       accionesRapidas:    (permsRow?.ver_acciones_rapidas          ?? 1) !== 0,
+    };
+
+    // Actualizado por: último registro de historial_estados
+    const actualizadoPorNombre = historial.length > 0
+      ? (historial[0].usuario_nombre || null)
+      : null;
+
+    // Re-imprimido por: impresiones desde portal
+    const [reimpPorList] = await db.query(
+      `SELECT DISTINCT usuario_nombre, MAX(fecha) as ultima_fecha
+       FROM impresiones_log
+       WHERE envio_id = ? AND desde_portal = 1
+       GROUP BY usuario_nombre
+       ORDER BY ultima_fecha DESC`,
+      [id]
+    ).catch(() => [[]]);
+
+    // Historial de impresos — todas las versiones
+    const [guiaVersiones] = await db.query(
+      `SELECT activa, primera_impresion, veces_impresa, ultimo_usuario
+       FROM guias_config_impresa WHERE envio_id = ? ORDER BY id DESC`, [id]
+    ).catch(() => [[]]);
+    const [etqVersiones]  = await db.query(
+      `SELECT activa, primera_impresion, veces_impresa, ultimo_usuario
+       FROM etiquetas_config_impresa WHERE envio_id = ? ORDER BY id DESC`, [id]
+    ).catch(() => [[]]);
+    const [logImpresiones] = await db.query(
+      `SELECT tipo, usuario_nombre, fecha, tuvo_cambios, desde_portal
+       FROM impresiones_log WHERE envio_id = ? AND desde_portal = 0 ORDER BY fecha DESC LIMIT 20`, [id]
+    ).catch(() => [[]]);
+
+    function nombreArchivo(tracking, ts) {
+      if (!ts) return null;
+      const d   = new Date(ts);
+      const dd  = String(d.getUTCDate()).padStart(2, '0');
+      const mm  = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const yy  = String(d.getUTCFullYear()).slice(2);
+      const hh  = String(d.getUTCHours()).padStart(2, '0');
+      const min = String(d.getUTCMinutes()).padStart(2, '0');
+      return `${tracking}-${dd}${mm}${yy}-${hh}${min}.PDF`;
+    }
+    const historialImpresos = {
+      guia:     guiaVersiones.map(v => ({
+        activa:  !!v.activa,
+        nombre:  nombreArchivo(envio.numero_tracking, v.primera_impresion) || `${envio.numero_tracking}-GUIA.PDF`,
+        veces:   v.veces_impresa,
+        usuario: v.ultimo_usuario,
+      })),
+      etiqueta: etqVersiones.map(v => ({
+        activa:  !!v.activa,
+        nombre:  nombreArchivo(`TK${envio.numero_tracking}`, v.primera_impresion) || `TK${envio.numero_tracking}-ETIQUETA.PDF`,
+        veces:   v.veces_impresa,
+        usuario: v.ultimo_usuario,
+      })),
+      log: logImpresiones,
     };
 
     res.render('envios/detalle', {
@@ -273,6 +333,9 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       guiasRelacionadas,
       tienePictogramas,
       vistaPermisos,
+      historialImpresos,
+      actualizadoPorNombre,
+      reimpPorList,
       success
     });
   } catch (error) {
@@ -456,6 +519,26 @@ router.post('/api/lugar-expedicion', isAuthenticated, async (req, res) => {
 });
 
 // Guardar config de guía impresa (estado de toggles al momento de imprimir)
+// Calcula checksum del estado actual de un envío + config de toggles (para detectar cambios)
+async function calcularChecksumEnvio(envioId, config = {}) {
+  try {
+    const [[envio]] = await db.query(
+      `SELECT numero_tracking, origen, destino, descripcion, peso,
+              fecha_estimada_entrega, metodo_pago, cliente_id, cliente_nombre,
+              es_parcial, es_complemento, numero_parte
+       FROM envios WHERE id = ?`, [envioId]
+    );
+    const [items] = await db.query(
+      'SELECT cantidad, tipo, descripcion, peso FROM envio_items WHERE envio_id = ? ORDER BY id ASC',
+      [envioId]
+    );
+    const data = JSON.stringify({ envio, items, config });
+    return crypto.createHash('md5').update(data).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
 const GUIA_CONFIG_KEYS = [
   'mostrar_logo','mostrar_rfc','mostrar_telefono','mostrar_sitio_web','mostrar_barcode',
   'mostrar_seccion_remitente','mostrar_remitente_nombre','mostrar_remitente_direccion','mostrar_remitente_telefono',
@@ -474,15 +557,42 @@ router.post('/api/guardar-config-guia', isAuthenticated, async (req, res) => {
     const { envio_id, config } = req.body;
     if (!envio_id || !config) return res.json({ ok: false });
 
-    const values = GUIA_CONFIG_KEYS.map(k => (config[k] ? 1 : 0));
-    const setCols = GUIA_CONFIG_KEYS.map(k => `${k} = ?`).join(', ');
+    const nuevoChecksum = await calcularChecksumEnvio(envio_id, config);
+    const [[existente]] = await db.query(
+      'SELECT checksum, veces_impresa FROM guias_config_impresa WHERE envio_id = ?', [envio_id]
+    ).catch(() => [[null]]);
 
+    const tuvoCAmbios = !existente || existente.checksum !== nuevoChecksum;
+    const usuarioNombre = req.session.userName || 'Sistema';
+    const usuarioId    = req.session.userId    || null;
+
+    if (tuvoCAmbios) {
+      // Cambios → marcar versión anterior como inactiva e insertar nueva
+      const values = GUIA_CONFIG_KEYS.map(k => (config[k] ? 1 : 0));
+      const ahora  = new Date();
+      await db.query(`UPDATE guias_config_impresa SET activa = 0 WHERE envio_id = ?`, [envio_id]);
+      await db.query(
+        `INSERT INTO guias_config_impresa
+           (envio_id, ${GUIA_CONFIG_KEYS.join(', ')}, activa, checksum, primera_impresion, veces_impresa, ultimo_usuario)
+         VALUES (?, ${GUIA_CONFIG_KEYS.map(() => '?').join(', ')}, 1, ?, ?, 1, ?)`,
+        [envio_id, ...values, nuevoChecksum, ahora, usuarioNombre]
+      );
+    } else {
+      // Sin cambios → solo incrementar contador en la versión activa
+      await db.query(
+        `UPDATE guias_config_impresa SET veces_impresa = veces_impresa + 1, ultimo_usuario = ?
+         WHERE envio_id = ? AND activa = 1`,
+        [usuarioNombre, envio_id]
+      );
+    }
+
+    // Registrar en log
     await db.query(
-      `INSERT INTO guias_config_impresa (envio_id, ${GUIA_CONFIG_KEYS.join(', ')})
-       VALUES (?, ${GUIA_CONFIG_KEYS.map(() => '?').join(', ')})
-       ON DUPLICATE KEY UPDATE ${setCols}`,
-      [envio_id, ...values, ...values]
-    );
+      `INSERT INTO impresiones_log (envio_id, tipo, usuario_id, usuario_nombre, tuvo_cambios)
+       VALUES (?, 'guia', ?, ?, ?)`,
+      [envio_id, usuarioId, usuarioNombre, tuvoCAmbios ? 1 : 0]
+    ).catch(() => {});
+
     res.json({ ok: true });
   } catch (e) {
     console.error('Error guardar config guia:', e);
@@ -519,12 +629,39 @@ router.post('/api/guardar-config-etiqueta', isAuthenticated, async (req, res) =>
     });
     const setCols = ETIQUETA_CONFIG_KEYS.map(k => `${k} = ?`).join(', ');
 
+    const nuevoChecksum = await calcularChecksumEnvio(envio_id, normalized);
+    const [[existente]] = await db.query(
+      'SELECT checksum, veces_impresa FROM etiquetas_config_impresa WHERE envio_id = ?', [envio_id]
+    ).catch(() => [[null]]);
+
+    const tuvoCAmbios  = !existente || existente.checksum !== nuevoChecksum;
+    const usuarioNombre = req.session.userName || 'Sistema';
+    const usuarioId    = req.session.userId    || null;
+
+    if (tuvoCAmbios) {
+      const ahora = new Date();
+      await db.query(`UPDATE etiquetas_config_impresa SET activa = 0 WHERE envio_id = ?`, [envio_id]);
+      await db.query(
+        `INSERT INTO etiquetas_config_impresa
+           (envio_id, ${ETIQUETA_CONFIG_KEYS.join(', ')}, activa, checksum, primera_impresion, veces_impresa, ultimo_usuario)
+         VALUES (?, ${ETIQUETA_CONFIG_KEYS.map(() => '?').join(', ')}, 1, ?, ?, 1, ?)`,
+        [envio_id, ...values, nuevoChecksum, ahora, usuarioNombre]
+      );
+    } else {
+      await db.query(
+        `UPDATE etiquetas_config_impresa SET veces_impresa = veces_impresa + 1, ultimo_usuario = ?
+         WHERE envio_id = ? AND activa = 1`,
+        [usuarioNombre, envio_id]
+      );
+    }
+
+    // Registrar en log
     await db.query(
-      `INSERT INTO etiquetas_config_impresa (envio_id, ${ETIQUETA_CONFIG_KEYS.join(', ')})
-       VALUES (?, ${ETIQUETA_CONFIG_KEYS.map(() => '?').join(', ')})
-       ON DUPLICATE KEY UPDATE ${setCols}`,
-      [envio_id, ...values, ...values]
-    );
+      `INSERT INTO impresiones_log (envio_id, tipo, usuario_id, usuario_nombre, tuvo_cambios)
+       VALUES (?, 'etiqueta', ?, ?, ?)`,
+      [envio_id, usuarioId, usuarioNombre, tuvoCAmbios ? 1 : 0]
+    ).catch(() => {});
+
     res.json({ ok: true });
   } catch (e) {
     console.error('Error guardar config etiqueta:', e);
@@ -555,7 +692,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
     const clientesParams = esOperador ? [req.session.userId] : [];
     const [clientes] = await db.query(clientesQuery, clientesParams);
 
-    const [[usuarioRow]] = await db.query('SELECT ultimo_cliente_id FROM usuarios WHERE id = ?', [req.session.userId]);
+    const [[usuarioRow]] = await db.query('SELECT ultimo_cliente_id, ultimo_documentar, documentar_activo FROM usuarios WHERE id = ?', [req.session.userId]);
     const ultimoClienteId = parseInt(req.query.cliente_id) || usuarioRow?.ultimo_cliente_id || null;
     const [pictogramas] = await db.query(
       'SELECT id, nombre, imagen_url FROM pictogramas WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
@@ -563,6 +700,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
     const [tiposEmpaques] = await db.query(
       'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
     ).catch(() => [[]]);
+    const documentarActivo = !!(usuarioRow?.documentar_activo);
 
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
@@ -576,6 +714,8 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
       ultimoClienteId,
       pictogramas: pictogramas || [],
       tiposEmpaques: tiposEmpaques || [],
+      documentarActivo,
+      ultimoDocumentar: !!(usuarioRow?.ultimo_documentar),
       error: null
     });
   } catch (error) {
@@ -587,8 +727,8 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
 // Crear nuevo envío (POST)
 router.post('/nuevo', isAuthenticated, async (req, res) => {
   try {
-    const { 
-      cliente_id, 
+    const {
+      cliente_id,
       referencia_cliente,
       envio_relacionado_id,
       fecha_estimada_entrega,
@@ -603,7 +743,15 @@ router.post('/nuevo', isAuthenticated, async (req, res) => {
       destino_ciudad,
       destino_estado,
       destino_cp,
-      destino_referencia
+      destino_referencia,
+      requiere_documentar,
+      documentar_nombre,
+      documentar_calle,
+      documentar_colonia,
+      documentar_cp,
+      documentar_ciudad,
+      documentar_estado,
+      documentar_referencia
     } = req.body;
     
     // ⬅️ CONSTRUIR DIRECCIONES COMPLETAS
@@ -697,25 +845,35 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       numeroParte = 1; // la raíz siempre es parte 1
     }
 
+    // Documentar: solo guardar si el toggle estaba activo
+    const usaDocumentar = requiere_documentar === '1';
+
     // Insertar en transacción
     const conn = await db.getConnection();
     let envioId;
     try {
       await conn.beginTransaction();
-
       const [result] = await conn.query(
         `INSERT INTO envios (
           numero_tracking, cliente_id, cliente_nombre, referencia_cliente,
           descripcion, peso, fecha_estimada_entrega, origen, destino,
           origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia,
           destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia,
+          documentar_nombre, documentar_calle, documentar_colonia, documentar_cp, documentar_ciudad, documentar_estado, documentar_referencia,
           usuario_creador_id, es_parcial, es_complemento, envio_relacionado_id, numero_parte, metodo_pago
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           numeroTracking, cliente_id, cliente_nombre_snapshot, referencia_cliente,
           descripcion, peso, fecha_estimada_entrega, origen, destino,
           origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia || null,
           destino_calle, destino_colonia, destino_ciudad, destino_estado, destino_cp, destino_referencia || null,
+          usaDocumentar ? (documentar_nombre || null) : null,
+          usaDocumentar ? (documentar_calle || null) : null,
+          usaDocumentar ? (documentar_colonia || null) : null,
+          usaDocumentar ? (documentar_cp || null) : null,
+          usaDocumentar ? (documentar_ciudad || null) : null,
+          usaDocumentar ? (documentar_estado || null) : null,
+          usaDocumentar ? (documentar_referencia || null) : null,
           req.session.userId, es_parcial, es_complemento,
           (es_complemento || es_parcial) && envio_relacionado_id ? parseInt(envio_relacionado_id) : null,
           numeroParte, metodo_pago_envio
@@ -760,8 +918,11 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       }
     }
 
-    // Guardar último cliente usado por este usuario
-    await db.query('UPDATE usuarios SET ultimo_cliente_id = ? WHERE id = ?', [cliente_id, req.session.userId]);
+    // Guardar último cliente usado y estado del toggle Documentar
+    await db.query(
+      'UPDATE usuarios SET ultimo_cliente_id = ?, ultimo_documentar = ? WHERE id = ?',
+      [cliente_id, usaDocumentar ? 1 : 0, req.session.userId]
+    );
 
     // Auto-activar portal cliente si el usuario tiene el flag activo
     const [[usuarioFlag]] = await db.query(
@@ -881,6 +1042,10 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
     ).catch(() => [[]]);
 
+    const [[usuarioEditar]] = await db.query(
+      'SELECT documentar_activo FROM usuarios WHERE id = ?', [req.session.userId]
+    ).catch(() => [[{}]]);
+
     res.render('envios/editar', {
       title: 'Editar Envío',
       user: {
@@ -895,6 +1060,7 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       pictogramas: pictogramas || [],
       pictoIdsEnvio,
       tiposEmpaques: tiposEmpaquesEditar || [],
+      documentarActivo: !!(usuarioEditar?.documentar_activo),
       error: null
     });
   } catch (error) {
@@ -922,7 +1088,15 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
       destino_ciudad,
       destino_estado,
       destino_cp,
-      destino_referencia
+      destino_referencia,
+      requiere_documentar: req_doc_edit,
+      documentar_nombre:    doc_nombre,
+      documentar_calle:     doc_calle,
+      documentar_colonia:   doc_colonia,
+      documentar_cp:        doc_cp,
+      documentar_ciudad:    doc_ciudad,
+      documentar_estado:    doc_estado,
+      documentar_referencia: doc_referencia
     } = req.body;
 
     const origen  = construirDireccionCompleta(origen_calle, origen_colonia, origen_ciudad, origen_estado, origen_cp, origen_referencia);
@@ -958,20 +1132,36 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
     try {
       await conn.beginTransaction();
 
+      // Obtener alias o nombre del usuario que edita
+      const [[editorRow]] = await db.query(
+        'SELECT COALESCE(alias, nombre) AS display FROM usuarios WHERE id = ?', [req.session.userId]
+      ).catch(() => [[{ display: req.session.userName }]]);
+      const editadoPorNombre = editorRow?.display || req.session.userName || 'Sistema';
+
+      const usaDocEdit = req_doc_edit === '1';
       await conn.query(
         `UPDATE envios SET
           cliente_id = ?, referencia_cliente = ?, descripcion = ?, peso = ?,
           fecha_estimada_entrega = ?,
           origen = ?, destino = ?,
           origen_calle = ?, origen_colonia = ?, origen_ciudad = ?, origen_estado = ?, origen_cp = ?, origen_referencia = ?,
-          destino_calle = ?, destino_colonia = ?, destino_ciudad = ?, destino_estado = ?, destino_cp = ?, destino_referencia = ?
+          destino_calle = ?, destino_colonia = ?, destino_ciudad = ?, destino_estado = ?, destino_cp = ?, destino_referencia = ?,
+          documentar_nombre = ?, documentar_calle = ?, documentar_colonia = ?, documentar_cp = ?, documentar_ciudad = ?, documentar_estado = ?, documentar_referencia = ?,
+          editado_por_nombre = ?
          WHERE id = ?`,
         [
           cliente_id, referencia_cliente, descripcion, peso, fecha_estimada_entrega,
           origen, destino,
           origen_calle, origen_colonia || null, origen_ciudad, origen_estado, origen_cp, origen_referencia || null,
           destino_calle, destino_colonia || null, destino_ciudad, destino_estado, destino_cp, destino_referencia || null,
-          id
+          usaDocEdit ? (doc_nombre || null) : null,
+          usaDocEdit ? (doc_calle  || null) : null,
+          usaDocEdit ? (doc_colonia || null) : null,
+          usaDocEdit ? (doc_cp     || null) : null,
+          usaDocEdit ? (doc_ciudad || null) : null,
+          usaDocEdit ? (doc_estado || null) : null,
+          usaDocEdit ? (doc_referencia || null) : null,
+          editadoPorNombre, id
         ]
       );
 

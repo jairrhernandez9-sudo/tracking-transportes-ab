@@ -230,7 +230,7 @@ router.post('/empresa', async (req, res) => {
       ['empresa_aviso_privacidad', empresa_aviso_privacidad],
       ['lugares_expedicion', lugares_expedicion]
     ];
-    
+
     for (const [clave, valor] of updates) {
       await db.query(`
         INSERT INTO configuracion_sistema (clave, valor, tipo, categoria, descripcion, modificado_por)
@@ -238,7 +238,7 @@ router.post('/empresa', async (req, res) => {
         ON DUPLICATE KEY UPDATE valor = ?, modificado_por = ?
       `, [clave, valor || '', 'Campo ' + clave, req.session.userId, valor || '', req.session.userId]);
     }
-    
+
     res.redirect('/configuracion?success=empresa_actualizada');
   } catch (error) {
     console.error('Error al actualizar empresa:', error);

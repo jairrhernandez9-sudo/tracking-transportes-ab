@@ -80,6 +80,49 @@ db.query(`ALTER TABLE usuarios ADD COLUMN ver_acciones_rapidas TINYINT(1) NOT NU
 // Migración: auto-activar portal cliente al crear envío
 db.query(`ALTER TABLE usuarios ADD COLUMN auto_activar_cliente TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 
+// Migración: campos de auditoría en envíos
+db.query(`ALTER TABLE envios ADD COLUMN editado_por_nombre VARCHAR(150) NULL`).catch(() => {});
+
+// Migración: toggles de vista nuevos
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_actualizado_por_detalle TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN ver_reimp_por_detalle       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+
+// Migración: historial de impresos
+// Multi-versión: quitar UNIQUE en envio_id y agregar flag activa
+db.query(`ALTER TABLE guias_config_impresa     DROP INDEX uq_envio`).catch(() => {});
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN activa           TINYINT(1)   NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa DROP INDEX uq_envio`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN activa           TINYINT(1)   NOT NULL DEFAULT 1`).catch(() => {});
+// desde_portal en log
+db.query(`ALTER TABLE impresiones_log ADD COLUMN desde_portal TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN checksum          VARCHAR(64)  NULL`).catch(() => {});
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN primera_impresion TIMESTAMP    NULL`).catch(() => {});
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN veces_impresa     INT NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN ultimo_usuario    VARCHAR(150) NULL`).catch(() => {});
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN checksum          VARCHAR(64)  NULL`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN primera_impresion TIMESTAMP    NULL`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN veces_impresa     INT NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN ultimo_usuario    VARCHAR(150) NULL`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`).catch(() => {});
+// Rellenar primera_impresion con updated_at en registros viejos que la tengan NULL
+db.query(`UPDATE guias_config_impresa     SET primera_impresion = updated_at WHERE primera_impresion IS NULL AND updated_at IS NOT NULL`).catch(() => {});
+db.query(`UPDATE etiquetas_config_impresa SET primera_impresion = updated_at WHERE primera_impresion IS NULL AND updated_at IS NOT NULL`).catch(() => {});
+db.query(`
+  CREATE TABLE IF NOT EXISTS impresiones_log (
+    id             INT          NOT NULL AUTO_INCREMENT,
+    envio_id       INT          NOT NULL,
+    tipo           ENUM('guia','etiqueta') NOT NULL,
+    usuario_id     INT          NULL,
+    usuario_nombre VARCHAR(150) NOT NULL DEFAULT 'Sistema',
+    fecha          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tuvo_cambios   TINYINT(1)   NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    KEY idx_implog_envio (envio_id, tipo)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`).catch(() => {});
+
 // Migración: columnas visibles en lista de envíos por usuario
 db.query(`ALTER TABLE usuarios ADD COLUMN col_folio       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN col_tracking    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
@@ -89,6 +132,7 @@ db.query(`ALTER TABLE usuarios ADD COLUMN col_origen      TINYINT(1) NOT NULL DE
 db.query(`ALTER TABLE usuarios ADD COLUMN col_destino     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN col_estado      TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN col_fecha       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN col_autor       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 
 // Migración: bloqueo de toggles en templates
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN bloqueado TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
@@ -191,6 +235,19 @@ db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_dest_referencia 
 // Migración: alias de sucursal en banda de ruta de etiqueta
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_alias_ruta TINYINT(1) DEFAULT 0`).catch(() => {});
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN obligatorio_alias_ruta TINYINT(1) DEFAULT 0`).catch(() => {});
+
+// Migración: campo Documentar en envíos
+db.query(`ALTER TABLE envios ADD COLUMN documentar_nombre    VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE envios ADD COLUMN documentar_calle     VARCHAR(200) NULL`).catch(() => {});
+db.query(`ALTER TABLE envios ADD COLUMN documentar_colonia   VARCHAR(150) NULL`).catch(() => {});
+db.query(`ALTER TABLE envios ADD COLUMN documentar_cp        VARCHAR(10)  NULL`).catch(() => {});
+db.query(`ALTER TABLE envios ADD COLUMN documentar_ciudad    VARCHAR(150) NULL`).catch(() => {});
+db.query(`ALTER TABLE envios ADD COLUMN documentar_estado    VARCHAR(100) NULL`).catch(() => {});
+db.query(`ALTER TABLE envios ADD COLUMN documentar_referencia VARCHAR(200) NULL`).catch(() => {});
+// Migración: memoria del toggle Documentar por usuario
+db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_documentar   TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+// Migración: habilitación de campo Documentar por usuario
+db.query(`ALTER TABLE usuarios ADD COLUMN documentar_activo  TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 
 // Migración: peso total de guía y peso por ítem en etiqueta
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_peso_total TINYINT(1) DEFAULT 1`).catch(() => {});

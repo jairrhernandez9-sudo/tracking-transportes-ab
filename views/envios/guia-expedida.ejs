@@ -450,10 +450,11 @@
           </tr>
         </table>
 
-        <!-- ══ REMITENTE / FACTURAR / DESTINATARIO ══ -->
+        <!-- ══ REMITENTE / FACTURAR / DESTINATARIO [/ DOCUMENTAR] ══ -->
+        <% const tieneDocumentar = !!(envio.documentar_nombre || envio.documentar_calle); %>
         <table style="border-top:none;">
           <tr>
-            <td style="width:33%;padding:0;" class="<%= gc('seccion_remitente') %>" data-elem="seccion_remitente">
+            <td style="width:<%= tieneDocumentar ? '25%' : '33%' %>;padding:0;" class="<%= gc('seccion_remitente') %>" data-elem="seccion_remitente">
               <span class="seccion-label">Remitente: (Origen)</span>
               <div class="seccion-content">
                 <div class="<%= gc('remitente_nombre') %>" data-elem="remitente_nombre"><strong><%= origenAlias || nombreEmpresa %></strong></div>
@@ -461,7 +462,7 @@
                 <% if (config.empresa_telefono) { %><div class="<%= gc('remitente_telefono') %>" data-elem="remitente_telefono">Tel. <%= config.empresa_telefono %></div><% } %>
               </div>
             </td>
-            <td style="width:34%;padding:0;border-left:1px solid #000;" class="<%= gc('seccion_facturar') %>" data-elem="seccion_facturar">
+            <td style="width:<%= tieneDocumentar ? '25%' : '34%' %>;padding:0;border-left:1px solid #000;" class="<%= gc('seccion_facturar') %>" data-elem="seccion_facturar">
               <span class="seccion-label">Facturar a:</span>
               <div class="seccion-content">
                 <div class="<%= gc('facturar_nombre') %>" data-elem="facturar_nombre"><strong><%= envio.nombre_empresa || '-' %></strong></div>
@@ -472,13 +473,24 @@
                 <% if (envio.cliente_rfc) { %><div class="<%= gc('facturar_rfc') %>" data-elem="facturar_rfc">RFC: <%= envio.cliente_rfc %></div><% } %>
               </div>
             </td>
-            <td style="width:33%;padding:0;border-left:1px solid #000;" class="<%= gc('seccion_destinatario') %>" data-elem="seccion_destinatario">
+            <td style="width:<%= tieneDocumentar ? '25%' : '33%' %>;padding:0;border-left:1px solid #000;" class="<%= gc('seccion_destinatario') %>" data-elem="seccion_destinatario">
               <span class="seccion-label">Destinatario: (Destino)</span>
               <div class="seccion-content">
                 <div class="<%= gc('destinatario_nombre') %>" data-elem="destinatario_nombre"><strong><%= destinoAlias || envio.destino_ciudad || '' %></strong></div>
                 <div class="<%= gc('destinatario_direccion') %>" data-elem="destinatario_direccion"><%= dirDestino() %></div>
               </div>
             </td>
+            <% if (tieneDocumentar) { %>
+            <td style="width:25%;padding:0;border-left:1px solid #000;" data-elem="seccion_documentar">
+              <span class="seccion-label">Documentar :</span>
+              <div class="seccion-content">
+                <% if (envio.documentar_nombre) { %><strong><%= envio.documentar_nombre %></strong><br><% } %>
+                <% if (envio.documentar_calle) { %><%= envio.documentar_calle %><% if (envio.documentar_colonia) { %>, Col. <%= envio.documentar_colonia %><% } %><br><% } %>
+                <%= [envio.documentar_cp ? 'CP '+envio.documentar_cp : null, envio.documentar_ciudad, envio.documentar_estado].filter(Boolean).join(', ') %>
+                <% if (envio.documentar_referencia) { %><br>Ref: <%= envio.documentar_referencia %><% } %>
+              </div>
+            </td>
+            <% } %>
           </tr>
         </table>
 
@@ -722,6 +734,7 @@
           panelGuiaRow('seccion_destinatario', '📍', 'Destinatario',       g.mostrar_seccion_destinatario, g.obligatorio_seccion_destinatario),
           panelGuiaRow('destinatario_nombre',  ' ↳', '  Nombre',           g.mostrar_destinatario_nombre,  g.obligatorio_destinatario_nombre),
           panelGuiaRow('destinatario_direccion',' ↳','  Dirección',         g.mostrar_destinatario_direccion,g.obligatorio_destinatario_direccion),
+          ...(tieneDocumentar ? [panelGuiaRow('seccion_documentar', '📋', 'Documentar a', true, false)] : []),
           panelGuiaRow('clausula_seguro',      '🛡️', 'Cláusula seguro',    g.mostrar_clausula_seguro,      g.obligatorio_clausula_seguro),
         ];
         const panelCondiciones = [

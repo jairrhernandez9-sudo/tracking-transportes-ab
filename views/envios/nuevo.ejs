@@ -926,6 +926,13 @@
     .dir-card-alias { font-weight:700; font-size:0.95rem; margin-bottom:4px; }
     .dir-card-addr { font-size:0.83rem; color:#64748b; }
     .dir-empty { text-align:center; color:#94a3b8; padding:32px 0; font-size:0.9rem; }
+    /* Toggle switch para sección Documentar */
+    .switch { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#cbd5e1; border-radius:24px; transition:.3s; }
+    .slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+    .switch input:checked + .slider { background:#3b82f6; }
+    .switch input:checked + .slider:before { transform:translateX(20px); }
   </style>
   <link rel="stylesheet" href="/css/responsive.css">
 </head>
@@ -1355,9 +1362,84 @@
                 </div>
               </div>
             </div>
-            
+
+            <!-- Sección 5: Documentar a (condicional) -->
+            <% if (typeof documentarActivo !== 'undefined' && documentarActivo) { %>
+            <div class="form-section">
+              <h2 class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <span style="display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="file-check" style="width:24px;height:24px;color:#3b82f6;"></i>
+                  Documentar a:
+                </span>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.87rem;font-weight:500;color:#475569;">
+                  <i data-lucide="copy-check" style="width:16px;height:16px;color:#64748b;"></i>
+                  Requiero documentar
+                  <span class="switch" style="margin:0;">
+                    <input type="checkbox" id="toggleDocumentar" name="requiere_documentar" value="1"
+                      onchange="toggleDocSection(this)"
+                      <%= (typeof ultimoDocumentar !== 'undefined' && ultimoDocumentar) ? 'checked' : '' %>>
+                    <span class="slider"></span>
+                  </span>
+                </label>
+              </h2>
+
+              <div id="doc-fields" style="<%= (typeof ultimoDocumentar !== 'undefined' && ultimoDocumentar) ? '' : 'display:none' %>">
+                <div style="display:flex;gap:12px;align-items:center;margin-bottom:4px;">
+                  <button type="button" id="btnDocumentar" onclick="abrirModalDocumentar()"
+                    style="flex:1;padding:12px 20px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;">
+                    <i data-lucide="building-2" style="width:18px;height:18px;"></i>
+                    Seleccionar Dirección Guardada
+                  </button>
+                  <button type="button" onclick="limpiarDocumentar()"
+                    style="padding:12px 16px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;cursor:pointer;color:#64748b;">
+                    <i data-lucide="x" style="width:15px;height:15px;"></i> Limpiar
+                  </button>
+                </div>
+                <input type="hidden" name="documentar_nombre" id="documentar_nombre_hidden">
+                <div class="dir-grid">
+                  <div class="form-group" style="grid-column:1/-1;">
+                    <label class="form-label">Nombre / Empresa</label>
+                    <input type="text" id="documentar_nombre_txt" class="form-input"
+                      placeholder="Ej: Almex Tlalnepantla"
+                      oninput="document.getElementById('documentar_nombre_hidden').value=this.value">
+                  </div>
+                  <div class="form-group" style="grid-column:1/-1;">
+                    <label class="form-label">Calle y Número</label>
+                    <input type="text" name="documentar_calle" class="form-input"
+                      placeholder="Ej: Rio Lerma 15 A y B">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Colonia</label>
+                    <input type="text" name="documentar_colonia" class="form-input"
+                      placeholder="Ej: Centro Industrial">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">C.P.</label>
+                    <input type="text" name="documentar_cp" class="form-input" maxlength="5"
+                      placeholder="54030">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ciudad</label>
+                    <input type="text" name="documentar_ciudad" class="form-input" list="ciudades"
+                      placeholder="Escribe la ciudad">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <input type="text" name="documentar_estado" class="form-input" list="estados-mx-list"
+                      placeholder="Estado..." autocomplete="off">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Referencia</label>
+                    <input type="text" name="documentar_referencia" class="form-input"
+                      placeholder="Ej: 80">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
           </div>
-          
+
           <% if (typeof pictogramas !== 'undefined' && pictogramas.length > 0) { %>
           <!-- Pictogramas -->
           <div class="form-section" style="margin-top:20px;">
@@ -1853,7 +1935,37 @@
         }
 
         function cerrarModalDestino() {
+          docModalMode = false;
           document.getElementById('modalDireccionDestino').classList.remove('open');
+        }
+
+        // ── DOCUMENTAR MODAL ──
+        let docModalMode = false;
+        function abrirModalDocumentar() {
+          docModalMode = true;
+          document.getElementById('modalDireccionDestino').classList.add('open');
+          const b = document.getElementById('destinoBuscador'); if (b) b.value = '';
+          cargarDireccionesBodegas('destino');
+          const clienteId = document.querySelector('[name="cliente_id"]')?.value;
+          if (clienteId) cargarDireccionesClienteModal(clienteId, 'destino');
+          cargarDireccionesUniversales();
+          cambiarTabDestino('clientes');
+          lucide.createIcons();
+        }
+        function toggleDocSection(cb) {
+          document.getElementById('doc-fields').style.display = cb.checked ? '' : 'none';
+        }
+        function limpiarDocumentar() {
+          document.querySelector('[name="documentar_calle"]').value = '';
+          document.querySelector('[name="documentar_colonia"]').value = '';
+          document.querySelector('[name="documentar_cp"]').value = '';
+          document.querySelector('[name="documentar_ciudad"]').value = '';
+          document.querySelector('[name="documentar_estado"]').value = '';
+          document.querySelector('[name="documentar_referencia"]').value = '';
+          document.getElementById('documentar_nombre_hidden').value = '';
+          document.getElementById('documentar_nombre_txt').value = '';
+          document.getElementById('btnDocumentar').innerHTML = '<i data-lucide="building-2" style="width:18px;height:18px;"></i> Seleccionar Dirección Guardada';
+          lucide.createIcons();
         }
 
         // Cerrar modales con ESC o click fuera
@@ -2112,34 +2224,36 @@
             return;
           }
           
-          // Determinar prefijo de campos (origen_ o destino_)
-          const prefijo = tipoModal === 'origen' ? 'origen' : 'destino';
-          
-          // Auto-llenar campos
+          // Si el modal de destino fue abierto en modo documentar, redirigir
+          const efectivoModal = (docModalMode && tipoModal === 'destino') ? 'documentar' : tipoModal;
+
+          // Determinar prefijo de campos
+          const prefijo = efectivoModal === 'origen' ? 'origen' : (efectivoModal === 'documentar' ? 'documentar' : 'destino');
+
+          // Auto-llenar campos de dirección
           document.querySelector(`[name="${prefijo}_calle"]`).value = direccion.calle || '';
           document.querySelector(`[name="${prefijo}_colonia"]`).value = direccion.colonia || '';
           document.querySelector(`[name="${prefijo}_cp"]`).value = direccion.cp || '';
           document.querySelector(`[name="${prefijo}_ciudad"]`).value = direccion.ciudad || '';
           document.querySelector(`[name="${prefijo}_estado"]`).value = direccion.estado || '';
           document.querySelector(`[name="${prefijo}_referencia"]`).value = direccion.referencia || '';
-          
-          // Actualizar botón con la selección
-          const boton = document.getElementById(`btn${tipoModal.charAt(0).toUpperCase() + tipoModal.slice(1)}`);
-          boton.textContent = '✓ ' + direccion.alias;
-          
-          // Guardar selección y registrar en recientes
+
+          // Actualizar botón y estado
           const recKey = `${tipoDireccion}-${direccionId}`;
           agregarReciente(recKey);
-          if (tipoModal === 'origen') {
+
+          if (efectivoModal === 'documentar') {
+            document.getElementById('documentar_nombre_hidden').value = direccion.alias || '';
+            document.getElementById('documentar_nombre_txt').value = direccion.alias || '';
+            document.getElementById('btnDocumentar').textContent = '✓ ' + (direccion.alias || direccion.ciudad || '');
+            cerrarModalDestino(); // resetea docModalMode
+          } else if (efectivoModal === 'origen') {
+            document.getElementById('btnOrigen').textContent = '✓ ' + direccion.alias;
             origenSeleccionado = { tipo: tipoDireccion, direccion };
-          } else {
-            destinoSeleccionado = { tipo: tipoDireccion, direccion };
-          }
-          
-          // Cerrar modal
-          if (tipoModal === 'origen') {
             cerrarModalOrigen();
           } else {
+            document.getElementById('btnDestino').textContent = '✓ ' + direccion.alias;
+            destinoSeleccionado = { tipo: tipoDireccion, direccion };
             cerrarModalDestino();
           }
           

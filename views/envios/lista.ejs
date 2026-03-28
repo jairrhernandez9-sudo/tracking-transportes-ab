@@ -1241,6 +1241,7 @@
                   <% if (!colPermisos || colPermisos.origen)     { %><th>Origen</th><% } %>
                   <% if (!colPermisos || colPermisos.destino)    { %><th>Destino</th><% } %>
                   <% if (!colPermisos || colPermisos.estado)     { %><th>Estado</th><% } %>
+                  <% if (!colPermisos || colPermisos.autor)      { %><th>Autor</th><% } %>
                   <% if (!colPermisos || colPermisos.fecha)      { %><th>Fecha</th><% } %>
                   <th>Acciones</th>
                 </tr>
@@ -1289,6 +1290,9 @@
                         <%= (envio.estado_actual || 'creado').replace(/_/g, ' ').toUpperCase() %>
                       </span>
                     </td>
+                    <% } %>
+                    <% if (!colPermisos || colPermisos.autor)   { %>
+                    <td style="font-size:0.82rem;color:#475569;"><%= envio.creador_nombre || '-' %></td>
                     <% } %>
                     <% if (!colPermisos || colPermisos.fecha)   { %>
                     <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) %></td>

@@ -1405,6 +1405,18 @@ input[type="text"]::-moz-reveal {
                   El usuario imprime de manera automática el registro para activar al cliente
                 </label>
               </div>
+              <div class="checkbox-container" style="margin-top:10px;">
+                <input
+                  type="checkbox"
+                  name="documentar_activo"
+                  id="documentarActivoCheckbox"
+                  class="checkbox-input"
+                  <%= usuario.documentar_activo ? 'checked' : '' %>
+                >
+                <label for="documentarActivoCheckbox" class="checkbox-label">
+                  El usuario puede usar el campo "Documentar a" al crear guías
+                </label>
+              </div>
             </div>
             
           </div>
@@ -1458,6 +1470,28 @@ input[type="text"]::-moz-reveal {
                 </div>
                 <label class="switch">
                   <input type="checkbox" name="ver_editado_por_detalle" value="1" <%= (usuario.ver_editado_por_detalle !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Actualizado por</span>
+                  <span class="permiso-desc">Usuario que registró el último cambio de estado</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="ver_actualizado_por_detalle" value="1" <%= (usuario.ver_actualizado_por_detalle !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Impreso desde Portal</span>
+                  <span class="permiso-desc">Usuarios del portal que han impreso documentos de este envío</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="ver_reimp_por_detalle" value="1" <%= (usuario.ver_reimp_por_detalle !== 0) ? 'checked' : '' %>>
                   <span class="slider"></span>
                 </label>
               </div>
@@ -1625,6 +1659,17 @@ input[type="text"]::-moz-reveal {
                 </div>
                 <label class="switch">
                   <input type="checkbox" name="col_fecha" value="1" <%= (usuario.col_fecha !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Autor</span>
+                  <span class="permiso-desc">Usuario que creó la guía</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_autor" value="1" <%= (usuario.col_autor !== 0) ? 'checked' : '' %>>
                   <span class="slider"></span>
                 </label>
               </div>

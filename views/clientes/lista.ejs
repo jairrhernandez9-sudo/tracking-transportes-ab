@@ -1181,7 +1181,7 @@
                 </div>
                 <div class="cliente-title">
                   <div class="cliente-nombre"><%= cliente.nombre_empresa %></div>
-                  <% if (cliente.contacto) { %>
+                  <% if (cliente.contacto && vistaPermisos.contacto) { %>
                     <div class="cliente-contacto"><%= cliente.contacto %></div>
                   <% } %>
                 </div>
@@ -1194,14 +1194,14 @@
               </div>
               
               <div class="cliente-info">
-                <% if (cliente.email) { %>
+                <% if (cliente.email && vistaPermisos.contacto) { %>
                   <div class="info-row">
                     <i data-lucide="mail"></i>
                     <span><%= cliente.email %></span>
                   </div>
                 <% } %>
-                
-                <% if (cliente.telefono) { %>
+
+                <% if (cliente.telefono && vistaPermisos.telefono) { %>
                   <div class="info-row">
                     <i data-lucide="phone"></i>
                     <span><%= cliente.telefono %></span>
