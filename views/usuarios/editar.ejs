@@ -1228,6 +1228,10 @@ input[type="text"]::-moz-reveal {
             <i data-lucide="eye" style="width:15px;height:15px;display:inline;vertical-align:middle;margin-right:5px;"></i>
             Permisos de Vista
           </button>
+          <button type="button" class="edit-tab" onclick="switchTab('tab-columnas', this)">
+            <i data-lucide="columns" style="width:15px;height:15px;display:inline;vertical-align:middle;margin-right:5px;"></i>
+            Columnas
+          </button>
           <% } %>
         </div>
 
@@ -1378,15 +1382,27 @@ input[type="text"]::-moz-reveal {
                 Estado
               </label>
               <div class="checkbox-container">
-                <input 
-                  type="checkbox" 
-                  name="activo" 
-                  id="activoCheckbox" 
+                <input
+                  type="checkbox"
+                  name="activo"
+                  id="activoCheckbox"
                   class="checkbox-input"
                   <%= usuario.activo ? 'checked' : '' %>
                 >
                 <label for="activoCheckbox" class="checkbox-label">
                   Usuario activo (puede iniciar sesión en el sistema)
+                </label>
+              </div>
+              <div class="checkbox-container" style="margin-top:10px;">
+                <input
+                  type="checkbox"
+                  name="auto_activar_cliente"
+                  id="autoActivarCheckbox"
+                  class="checkbox-input"
+                  <%= usuario.auto_activar_cliente ? 'checked' : '' %>
+                >
+                <label for="autoActivarCheckbox" class="checkbox-label">
+                  El usuario imprime de manera automática el registro para activar al cliente
                 </label>
               </div>
             </div>
@@ -1515,6 +1531,106 @@ input[type="text"]::-moz-reveal {
             </div>
 
           </div><!-- /tab-permisos -->
+
+          <!-- TAB: Columnas de Lista de Envíos -->
+          <div id="tab-columnas" class="tab-panel">
+
+            <div class="permisos-section">
+              <div class="permisos-section-title">Columnas visibles en Gestión de Envíos</div>
+              <p style="font-size:0.8rem;color:#6b7280;margin-bottom:16px;">
+                Define qué columnas verá este usuario en la tabla principal de envíos. La columna Acciones siempre es visible.
+              </p>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Folio</span>
+                  <span class="permiso-desc">Número interno del envío (ID)</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_folio" value="1" <%= (usuario.col_folio !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Tracking</span>
+                  <span class="permiso-desc">Número de tracking del envío</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_tracking" value="1" <%= (usuario.col_tracking !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Referencia</span>
+                  <span class="permiso-desc">Referencia interna del cliente</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_referencia" value="1" <%= (usuario.col_referencia !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Cliente</span>
+                  <span class="permiso-desc">Nombre del cliente o empresa</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_cliente" value="1" <%= (usuario.col_cliente !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Origen</span>
+                  <span class="permiso-desc">Dirección de origen del envío</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_origen" value="1" <%= (usuario.col_origen !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Destino</span>
+                  <span class="permiso-desc">Dirección de destino del envío</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_destino" value="1" <%= (usuario.col_destino !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Estado</span>
+                  <span class="permiso-desc">Estado actual del envío</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_estado" value="1" <%= (usuario.col_estado !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Fecha</span>
+                  <span class="permiso-desc">Fecha de creación del envío</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="col_fecha" value="1" <%= (usuario.col_fecha !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+            </div>
+          </div><!-- /tab-columnas -->
           <% } %>
 
           <div class="form-actions">

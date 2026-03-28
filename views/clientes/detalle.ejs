@@ -1222,7 +1222,7 @@
               </div>
               <div class="cliente-main-info">
                 <h2 class="cliente-nombre"><%= cliente.nombre_empresa %></h2>
-                <% if (cliente.contacto) { %>
+                <% if (cliente.contacto && vistaPermisos.contacto) { %>
                   <div class="cliente-contacto"><%= cliente.contacto %></div>
                 <% } %>
                 <span class="status-badge <%= cliente.activo === 1 ? 'status-activo' : 'status-inactivo' %>">
@@ -1232,6 +1232,7 @@
             </div>
             
             <div class="info-grid">
+              <% if (vistaPermisos.contacto) { %>
               <div class="info-item">
                 <span class="info-label">
                   <i data-lucide="mail"></i>
@@ -1239,7 +1240,9 @@
                 </span>
                 <span class="info-value"><%= cliente.email || '-' %></span>
               </div>
-              
+              <% } %>
+
+              <% if (vistaPermisos.telefono) { %>
               <div class="info-item">
                 <span class="info-label">
                   <i data-lucide="phone"></i>
@@ -1247,6 +1250,7 @@
                 </span>
                 <span class="info-value"><%= cliente.telefono || '-' %></span>
               </div>
+              <% } %>
               
               <div class="info-item">
                 <span class="info-label">

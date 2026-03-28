@@ -132,6 +132,23 @@ router.get('/', isAuthenticated, async (req, res) => {
       [...params, limit, offset]
     );
 
+    const [[colRow]] = await db.query(
+      `SELECT col_folio, col_tracking, col_referencia, col_cliente,
+              col_origen, col_destino, col_estado, col_fecha
+       FROM usuarios WHERE id = ?`,
+      [req.session.userId]
+    ).catch(() => [[{}]]);
+    const colPermisos = {
+      folio:      (colRow?.col_folio      ?? 1) !== 0,
+      tracking:   (colRow?.col_tracking   ?? 1) !== 0,
+      referencia: (colRow?.col_referencia ?? 1) !== 0,
+      cliente:    (colRow?.col_cliente    ?? 1) !== 0,
+      origen:     (colRow?.col_origen     ?? 1) !== 0,
+      destino:    (colRow?.col_destino    ?? 1) !== 0,
+      estado:     (colRow?.col_estado     ?? 1) !== 0,
+      fecha:      (colRow?.col_fecha      ?? 1) !== 0,
+    };
+
     res.render('envios/lista', {
       title: 'Lista de Envíos',
       user: {
@@ -142,7 +159,8 @@ router.get('/', isAuthenticated, async (req, res) => {
       },
       envios,
       filtros: { buscar, estado: estado || 'todos', orderBy },
-      pagination: { page: currentPage, totalPages, totalEnvios, limit }
+      pagination: { page: currentPage, totalPages, totalEnvios, limit },
+      colPermisos
     });
   } catch (error) {
     console.error('Error al obtener envíos:', error);
@@ -744,6 +762,55 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
 
     // Guardar último cliente usado por este usuario
     await db.query('UPDATE usuarios SET ultimo_cliente_id = ? WHERE id = ?', [cliente_id, req.session.userId]);
+
+    // Auto-activar portal cliente si el usuario tiene el flag activo
+    const [[usuarioFlag]] = await db.query(
+      'SELECT auto_activar_cliente FROM usuarios WHERE id = ?', [req.session.userId]
+    ).catch(() => [[{}]]);
+    if (usuarioFlag?.auto_activar_cliente) {
+      // Leer template del cliente para respetar su configuración de mostrar_*
+      let guiaMostrar = {};
+      let etqMostrar  = {};
+      if (cliente_id) {
+        const [[tplIds]] = await db.query(
+          'SELECT template_guia_id, template_etiqueta_id FROM clientes WHERE id = ?', [cliente_id]
+        ).catch(() => [[{}]]);
+        if (tplIds?.template_guia_id) {
+          const [[tplGuia]] = await db.query(
+            'SELECT * FROM guia_templates WHERE id = ?', [tplIds.template_guia_id]
+          ).catch(() => [[{}]]);
+          if (tplGuia) {
+            GUIA_CONFIG_KEYS.forEach(k => { guiaMostrar[k] = tplGuia[k] !== undefined ? (tplGuia[k] ? 1 : 0) : 1; });
+          }
+        }
+        if (tplIds?.template_etiqueta_id) {
+          const [[tplEtq]] = await db.query(
+            'SELECT * FROM etiqueta_templates WHERE id = ?', [tplIds.template_etiqueta_id]
+          ).catch(() => [[{}]]);
+          if (tplEtq) {
+            ETIQUETA_CONFIG_KEYS.forEach(k => { etqMostrar[k] = tplEtq[k] !== undefined ? (tplEtq[k] ? 1 : 0) : 1; });
+          }
+        }
+      }
+
+      const guiaVals = GUIA_CONFIG_KEYS.map(k => guiaMostrar[k] !== undefined ? guiaMostrar[k] : 1);
+      const guiaSet  = GUIA_CONFIG_KEYS.map(k => `${k} = ?`).join(', ');
+      await db.query(
+        `INSERT INTO guias_config_impresa (envio_id, ${GUIA_CONFIG_KEYS.join(', ')})
+         VALUES (?, ${GUIA_CONFIG_KEYS.map(() => '?').join(', ')})
+         ON DUPLICATE KEY UPDATE ${guiaSet}`,
+        [envioId, ...guiaVals, ...guiaVals]
+      ).catch(() => {});
+
+      const etqVals = ETIQUETA_CONFIG_KEYS.map(k => etqMostrar[k] !== undefined ? etqMostrar[k] : 1);
+      const etqSet  = ETIQUETA_CONFIG_KEYS.map(k => `${k} = ?`).join(', ');
+      await db.query(
+        `INSERT INTO etiquetas_config_impresa (envio_id, ${ETIQUETA_CONFIG_KEYS.join(', ')})
+         VALUES (?, ${ETIQUETA_CONFIG_KEYS.map(() => '?').join(', ')})
+         ON DUPLICATE KEY UPDATE ${etqSet}`,
+        [envioId, ...etqVals, ...etqVals]
+      ).catch(() => {});
+    }
 
     console.log('✅ Envío creado:', numeroTracking);
     await registrarActividad(req, {

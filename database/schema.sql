@@ -44,6 +44,16 @@ CREATE TABLE `usuarios` (
   `ver_panel_evidencia`        TINYINT(1) NOT NULL DEFAULT 1,
   `ver_comentario_evidencia`   TINYINT(1) NOT NULL DEFAULT 1,
   `ver_acciones_rapidas`       TINYINT(1) NOT NULL DEFAULT 1,
+  `auto_activar_cliente`       TINYINT(1) NOT NULL DEFAULT 0,
+  -- Columnas visibles en lista de envíos
+  `col_folio`                  TINYINT(1) NOT NULL DEFAULT 1,
+  `col_tracking`               TINYINT(1) NOT NULL DEFAULT 1,
+  `col_referencia`             TINYINT(1) NOT NULL DEFAULT 1,
+  `col_cliente`                TINYINT(1) NOT NULL DEFAULT 1,
+  `col_origen`                 TINYINT(1) NOT NULL DEFAULT 1,
+  `col_destino`                TINYINT(1) NOT NULL DEFAULT 1,
+  `col_estado`                 TINYINT(1) NOT NULL DEFAULT 1,
+  `col_fecha`                  TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -658,6 +668,29 @@ ALTER TABLE `usuarios`
     FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`) ON DELETE SET NULL;
 
 
+-- ------------------------------------------------------------
+-- Tabla: actividad_log
+-- Registro de todas las acciones realizadas en el sistema
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `actividad_log` (
+  `id`             INT          NOT NULL AUTO_INCREMENT,
+  `fecha`          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `usuario_id`     INT          NULL,
+  `usuario_nombre` VARCHAR(150) NOT NULL DEFAULT 'Sistema',
+  `usuario_rol`    VARCHAR(50)  NOT NULL DEFAULT 'sistema',
+  `accion`         VARCHAR(60)  NOT NULL,
+  `entidad`        VARCHAR(50)  NOT NULL,
+  `entidad_id`     INT          NULL,
+  `descripcion`    VARCHAR(500) NOT NULL,
+  `detalle`        JSON         NULL,
+  `ip`             VARCHAR(50)  NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_activ_fecha`   (`fecha`),
+  KEY `idx_activ_usuario` (`usuario_id`),
+  KEY `idx_activ_accion`  (`accion`),
+  KEY `idx_activ_entidad` (`entidad`, `entidad_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -667,4 +700,4 @@ ALTER TABLE `usuarios`
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-03-26
+-- Schema actualizado: 2026-03-27

@@ -1234,19 +1234,24 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>Tracking</th>
-                  <th>Referencia</th>
-                  <th>Cliente</th>
-                  <th>Origen</th>
-                  <th>Destino</th>
-                  <th>Estado</th>
-                  <th>Fecha</th>
+                  <% if (!colPermisos || colPermisos.folio)      { %><th>Folio</th><% } %>
+                  <% if (!colPermisos || colPermisos.tracking)   { %><th>Tracking</th><% } %>
+                  <% if (!colPermisos || colPermisos.referencia) { %><th>Referencia</th><% } %>
+                  <% if (!colPermisos || colPermisos.cliente)    { %><th>Cliente</th><% } %>
+                  <% if (!colPermisos || colPermisos.origen)     { %><th>Origen</th><% } %>
+                  <% if (!colPermisos || colPermisos.destino)    { %><th>Destino</th><% } %>
+                  <% if (!colPermisos || colPermisos.estado)     { %><th>Estado</th><% } %>
+                  <% if (!colPermisos || colPermisos.fecha)      { %><th>Fecha</th><% } %>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <% envios.forEach(envio => { %>
                   <tr class="<%= (user && (user.rol === 'admin' || user.rol === 'superusuario') && envio.etiqueta_modificada) ? 'etq-modificada' : '' %>">
+                    <% if (!colPermisos || colPermisos.folio) { %>
+                    <td style="font-size:0.8rem;color:#64748b;font-weight:600;">#<%= envio.id %></td>
+                    <% } %>
+                    <% if (!colPermisos || colPermisos.tracking) { %>
                     <td>
                       <span class="tracking-number"><%= envio.numero_tracking %></span>
                       <% if (envio.es_parcial) { %>
@@ -1261,24 +1266,33 @@
                         </span>
                       <% } %>
                     </td>
-<td>
-  <% if (envio.referencia_cliente) { %>
-    <span class="referencia-cell"><%= envio.referencia_cliente %></span>
-  <% } else { %>
-    <span class="referencia-cell sin-referencia">Sin ref.</span>
-  <% } %>
-</td>
+                    <% } %>
+                    <% if (!colPermisos || colPermisos.referencia) { %>
+                    <td>
+                      <% if (envio.referencia_cliente) { %>
+                        <span class="referencia-cell"><%= envio.referencia_cliente %></span>
+                      <% } else { %>
+                        <span class="referencia-cell sin-referencia">Sin ref.</span>
+                      <% } %>
+                    </td>
+                    <% } %>
+                    <% if (!colPermisos || colPermisos.cliente) { %>
                     <td>
                       <strong><%= envio.nombre_empresa || 'Sin cliente' %></strong>
                     </td>
-                    <td><%= envio.origen || '-' %></td>
-                    <td><%= envio.destino || '-' %></td>
+                    <% } %>
+                    <% if (!colPermisos || colPermisos.origen)  { %><td><%= envio.origen  || '-' %></td><% } %>
+                    <% if (!colPermisos || colPermisos.destino) { %><td><%= envio.destino || '-' %></td><% } %>
+                    <% if (!colPermisos || colPermisos.estado)  { %>
                     <td>
                       <span class="badge badge-<%= envio.estado_actual || 'creado' %>">
                         <%= (envio.estado_actual || 'creado').replace(/_/g, ' ').toUpperCase() %>
                       </span>
                     </td>
+                    <% } %>
+                    <% if (!colPermisos || colPermisos.fecha)   { %>
                     <td><%= new Date(envio.fecha_creacion).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) %></td>
+                    <% } %>
                     <td>
                       <div class="table-actions">
                         <!-- Ver Detalles -->

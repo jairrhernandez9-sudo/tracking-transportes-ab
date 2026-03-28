@@ -415,11 +415,21 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     
     // Obtener direcciones del cliente
     const [direcciones] = await db.query(`
-      SELECT * FROM direcciones_cliente 
-      WHERE cliente_id = ? AND activa = 1 
+      SELECT * FROM direcciones_cliente
+      WHERE cliente_id = ? AND activa = 1
       ORDER BY es_predeterminada DESC, alias ASC
     `, [id]);
-    
+
+    // Permisos de vista del usuario logueado
+    const [[permsRow]] = await db.query(
+      `SELECT ver_telefono_detalle, ver_contacto_detalle FROM usuarios WHERE id = ?`,
+      [req.session.userId]
+    ).catch(() => [[{}]]);
+    const vistaPermisos = {
+      telefono: (permsRow?.ver_telefono_detalle ?? 1) !== 0,
+      contacto: (permsRow?.ver_contacto_detalle ?? 1) !== 0,
+    };
+
     res.render('clientes/detalle', {
       title: cliente.nombre_empresa,
       user: {
@@ -430,9 +440,10 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       cliente,
       envios,
       stats: stats[0],
-       direcciones, 
-      success: req.query.success, 
-      error: req.query.error 
+      direcciones,
+      vistaPermisos,
+      success: req.query.success,
+      error: req.query.error
     });
     
   } catch (error) {
