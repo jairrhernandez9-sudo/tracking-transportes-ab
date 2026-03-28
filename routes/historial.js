@@ -34,7 +34,7 @@ router.get('/actividad', isAuthenticated, async (req, res) => {
     );
 
     const [registros] = await db.query(
-      `SELECT a.*, DATE_FORMAT(a.fecha, '%d/%m/%Y %H:%i:%s') as fecha_fmt
+      `SELECT a.*, DATE_FORMAT(CONVERT_TZ(a.fecha, '+00:00', 'America/Mexico_City'), '%d/%m/%Y %H:%i:%s') as fecha_fmt
        FROM actividad_log a
        WHERE ${whereStr}
        ORDER BY a.fecha DESC

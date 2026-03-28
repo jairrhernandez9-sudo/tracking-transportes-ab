@@ -34,6 +34,14 @@ router.get('/', isAuthenticated, async (req, res) => {
       query += ` AND e.cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ${db.escape(req.session.userId)})`;
     }
 
+    // Limitar a guías propias si el permiso está activo
+    const [[soloRow]] = await db.query(
+      `SELECT solo_guias_propias FROM usuarios WHERE id = ?`, [req.session.userId]
+    ).catch(() => [[{}]]);
+    if (soloRow?.solo_guias_propias) {
+      query += ` AND e.usuario_creador_id = ${db.escape(req.session.userId)}`;
+    }
+
     // Filtro de criticidad
     if (criticidad === 'critico') {
       query += ` AND DATEDIFF(CURDATE(), DATE(e.fecha_estimada_entrega)) > 7`;
@@ -49,6 +57,9 @@ router.get('/', isAuthenticated, async (req, res) => {
     let countWhere = `DATE(fecha_estimada_entrega) < CURDATE() AND LOWER(estado_actual) NOT IN ('entregado', 'cancelado')`;
     if (req.session.userRole === 'operador') {
       countWhere += ` AND cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ${db.escape(req.session.userId)})`;
+    }
+    if (soloRow?.solo_guias_propias) {
+      countWhere += ` AND usuario_creador_id = ${db.escape(req.session.userId)}`;
     }
     const [[counts]] = await db.query(`
       SELECT
@@ -123,11 +134,19 @@ router.get('/api', isAuthenticated, async (req, res) => {
       ? `AND e.cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ${db.escape(req.session.userId)})`
       : '';
 
+    const [[soloRowApi]] = await db.query(
+      `SELECT solo_guias_propias FROM usuarios WHERE id = ?`, [req.session.userId]
+    ).catch(() => [[{}]]);
+    const soloFilter = soloRowApi?.solo_guias_propias
+      ? `AND e.usuario_creador_id = ${db.escape(req.session.userId)}`
+      : '';
+
     const [[{ total }]] = await db.query(`
       SELECT COUNT(*) as total FROM envios e
       WHERE DATE(e.fecha_estimada_entrega) < CURDATE()
         AND LOWER(e.estado_actual) NOT IN ('entregado', 'cancelado')
         ${operadorFilter}
+        ${soloFilter}
     `);
 
     const [items] = await db.query(`
@@ -142,6 +161,7 @@ router.get('/api', isAuthenticated, async (req, res) => {
       WHERE DATE(e.fecha_estimada_entrega) < CURDATE()
         AND LOWER(e.estado_actual) NOT IN ('entregado', 'cancelado')
         ${operadorFilter}
+        ${soloFilter}
       ORDER BY dias_retraso DESC
       LIMIT 10
     `);

@@ -1393,6 +1393,7 @@ input[type="text"]::-moz-reveal {
                   Usuario activo (puede iniciar sesión en el sistema)
                 </label>
               </div>
+              <% if (usuario.rol !== 'cliente') { %>
               <div class="checkbox-container" style="margin-top:10px;">
                 <input
                   type="checkbox"
@@ -1417,6 +1418,7 @@ input[type="text"]::-moz-reveal {
                   El usuario puede usar el campo "Documentar a" al crear guías
                 </label>
               </div>
+              <% } %>
             </div>
             
           </div>
@@ -1670,6 +1672,17 @@ input[type="text"]::-moz-reveal {
                 </div>
                 <label class="switch">
                   <input type="checkbox" name="col_autor" value="1" <%= (usuario.col_autor !== 0) ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="permiso-row" style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;">
+                <div class="permiso-row-info">
+                  <span class="permiso-label">Limitar guías visibles solo de su propiedad</span>
+                  <span class="permiso-desc">El usuario solo verá las guías que él mismo creó</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="solo_guias_propias" value="1" <%= usuario.solo_guias_propias ? 'checked' : '' %>>
                   <span class="slider"></span>
                 </label>
               </div>

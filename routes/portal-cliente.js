@@ -329,8 +329,8 @@ router.get('/envio/:id', soloCliente, async (req, res) => {
     );
 
     // Verificar si los documentos ya fueron generados por el operador
-    const [[guiaDisponible]]    = await db.query('SELECT id FROM guias_config_impresa WHERE envio_id = ? AND activa = 1', [id]);
-    const [[etiquetaDisponible]] = await db.query('SELECT id FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1', [id]);
+    const [[guiaDisponible]]    = await db.query('SELECT id FROM guias_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]);
+    const [[etiquetaDisponible]] = await db.query('SELECT id FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]);
 
     const [[clienteDetRow]] = await db.query('SELECT logo_url FROM clientes WHERE id = ?', [clienteId]);
     res.render('portal-cliente-detalle', {
@@ -386,7 +386,7 @@ router.get('/envio/:id/guia', soloCliente, async (req, res) => {
 
     // Si el operador aún no ha imprimido la guía, mostrar mensaje
     const [[guiaGenerada]] = await db.query(
-      'SELECT id FROM guias_config_impresa WHERE envio_id = ? AND activa = 1', [id]
+      'SELECT id FROM guias_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]
     );
     if (!guiaGenerada) return res.send(portalDocNoGenerado('Guía expedida', envio.numero_tracking, id));
 
@@ -469,7 +469,7 @@ router.get('/envio/:id/guia', soloCliente, async (req, res) => {
 
     // Cargar config guardada al imprimir (estado de toggles del operador)
     const [[configImpresa]] = await db.query(
-      'SELECT * FROM guias_config_impresa WHERE envio_id = ? AND activa = 1', [id]
+      'SELECT * FROM guias_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]
     );
     if (configImpresa) {
       Object.keys(guiaCfg).forEach(k => {
@@ -532,7 +532,7 @@ router.get('/envio/:id/etiqueta', soloCliente, async (req, res) => {
 
     // Si el operador aún no ha imprimido la etiqueta, mostrar mensaje
     const [[etqGenerada]] = await db.query(
-      'SELECT id FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1', [id]
+      'SELECT id FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]
     );
     if (!etqGenerada) return res.send(portalDocNoGenerado('Etiqueta', envioData.numero_tracking, id));
 
@@ -613,7 +613,7 @@ router.get('/envio/:id/etiqueta', soloCliente, async (req, res) => {
 
     // Cargar config guardada al imprimir (estado de toggles del operador)
     const [[etqConfigImpresa]] = await db.query(
-      'SELECT * FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1', [id]
+      'SELECT * FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]
     );
     if (etqConfigImpresa) {
       const keyMap = {

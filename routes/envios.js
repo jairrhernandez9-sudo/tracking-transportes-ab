@@ -71,10 +71,29 @@ const upload = multer({
 
 // ==================== RUTAS ====================
 
+// API: direcciones de clientes para filtro en cascada
+router.get('/api/direcciones-filtro', isAuthenticated, async (req, res) => {
+  try {
+    const clienteIds = [].concat(req.query['clientes[]'] || req.query.clientes || []).map(Number).filter(Boolean);
+    if (!clienteIds.length) return res.json([]);
+    const placeholders = clienteIds.map(() => '?').join(',');
+    const [dirs] = await db.query(
+      `SELECT id, alias, ciudad FROM direcciones_cliente
+       WHERE cliente_id IN (${placeholders}) AND activa = 1
+       ORDER BY alias ASC`,
+      clienteIds
+    );
+    res.json(dirs);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
 // Lista de envíos con filtros y paginación
 router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const { buscar, estado, orderBy } = req.query;
+    const { buscar, estado, orderBy, dir_id } = req.query;
+    const clienteIds = [].concat(req.query['clientes[]'] || req.query.clientes || []).map(Number).filter(Boolean);
     const page  = Math.max(1, parseInt(req.query.page) || 1);
     const limit = 25;
 
@@ -85,6 +104,28 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (esOperador) {
       whereClause += ` AND e.cliente_id IN (SELECT cliente_id FROM cliente_operadores WHERE usuario_id = ?)`;
       params.push(req.session.userId);
+    }
+
+    // Limitar a guías propias si el permiso está activo
+    const [[soloRow]] = await db.query(
+      `SELECT solo_guias_propias FROM usuarios WHERE id = ?`, [req.session.userId]
+    ).catch(() => [[{}]]);
+    if (soloRow?.solo_guias_propias) {
+      whereClause += ` AND e.usuario_creador_id = ?`;
+      params.push(req.session.userId);
+    }
+
+    if (clienteIds.length > 0) {
+      const placeholders = clienteIds.map(() => '?').join(',');
+      whereClause += ` AND e.cliente_id IN (${placeholders})`;
+      params.push(...clienteIds);
+    }
+
+    if (dir_id) {
+      whereClause += ` AND e.destino_ciudad COLLATE utf8mb4_unicode_ci = (SELECT ciudad FROM direcciones_cliente WHERE id = ? LIMIT 1)
+                       AND e.destino_estado COLLATE utf8mb4_unicode_ci = (SELECT estado FROM direcciones_cliente WHERE id = ? LIMIT 1)
+                       AND e.destino_cp     COLLATE utf8mb4_unicode_ci = (SELECT cp    FROM direcciones_cliente WHERE id = ? LIMIT 1)`;
+      params.push(dir_id, dir_id, dir_id);
     }
 
     if (buscar) {
@@ -103,6 +144,27 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (estado && estado !== 'todos') {
       whereClause += ` AND e.estado_actual = ?`;
       params.push(estado);
+    }
+
+    // Cargar lista de clientes para el filtro de empresas
+    const esOpFiltro = esOperador;
+    const clientesQuery = esOpFiltro
+      ? `SELECT c.id, c.nombre_empresa FROM clientes c
+         INNER JOIN cliente_operadores co ON co.cliente_id = c.id
+         WHERE c.eliminado_en IS NULL AND co.usuario_id = ?
+         ORDER BY c.nombre_empresa`
+      : `SELECT id, nombre_empresa FROM clientes WHERE eliminado_en IS NULL ORDER BY nombre_empresa`;
+    const [clientesList] = await db.query(clientesQuery, esOpFiltro ? [req.session.userId] : []).catch(() => [[]]);
+
+    // Cargar direcciones de los clientes seleccionados para pre-poblar el dropdown
+    let direccionesList = [];
+    if (clienteIds.length > 0) {
+      const ph = clienteIds.map(() => '?').join(',');
+      const [dirs] = await db.query(
+        `SELECT id, alias, ciudad FROM direcciones_cliente WHERE cliente_id IN (${ph}) AND activa = 1 ORDER BY alias`,
+        clienteIds
+      ).catch(() => [[]]);
+      direccionesList = dirs;
     }
 
     const [countResult] = await db.query(
@@ -160,7 +222,9 @@ router.get('/', isAuthenticated, async (req, res) => {
         rol: req.session.userRole
       },
       envios,
-      filtros: { buscar, estado: estado || 'todos', orderBy },
+      filtros: { buscar, estado: estado || 'todos', orderBy, clienteIds, dir_id: dir_id || '' },
+      clientesList,
+      direccionesList,
       pagination: { page: currentPage, totalPages, totalEnvios, limit },
       colPermisos
     });
@@ -280,11 +344,11 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 
     // Historial de impresos — todas las versiones
     const [guiaVersiones] = await db.query(
-      `SELECT activa, primera_impresion, veces_impresa, ultimo_usuario
+      `SELECT activa, presentado_portal, primera_impresion, veces_impresa, ultimo_usuario
        FROM guias_config_impresa WHERE envio_id = ? ORDER BY id DESC`, [id]
     ).catch(() => [[]]);
     const [etqVersiones]  = await db.query(
-      `SELECT activa, primera_impresion, veces_impresa, ultimo_usuario
+      `SELECT activa, presentado_portal, primera_impresion, veces_impresa, ultimo_usuario
        FROM etiquetas_config_impresa WHERE envio_id = ? ORDER BY id DESC`, [id]
     ).catch(() => [[]]);
     const [logImpresiones] = await db.query(
@@ -304,16 +368,18 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     }
     const historialImpresos = {
       guia:     guiaVersiones.map(v => ({
-        activa:  !!v.activa,
-        nombre:  nombreArchivo(envio.numero_tracking, v.primera_impresion) || `${envio.numero_tracking}-GUIA.PDF`,
-        veces:   v.veces_impresa,
-        usuario: v.ultimo_usuario,
+        activa:            !!v.activa,
+        presentado_portal: !!v.presentado_portal,
+        nombre:            nombreArchivo(envio.numero_tracking, v.primera_impresion) || `${envio.numero_tracking}-GUIA.PDF`,
+        veces:             v.veces_impresa,
+        usuario:           v.ultimo_usuario,
       })),
       etiqueta: etqVersiones.map(v => ({
-        activa:  !!v.activa,
-        nombre:  nombreArchivo(`TK${envio.numero_tracking}`, v.primera_impresion) || `TK${envio.numero_tracking}-ETIQUETA.PDF`,
-        veces:   v.veces_impresa,
-        usuario: v.ultimo_usuario,
+        activa:            !!v.activa,
+        presentado_portal: !!v.presentado_portal,
+        nombre:            nombreArchivo(`TK${envio.numero_tracking}`, v.primera_impresion) || `TK${envio.numero_tracking}-ETIQUETA.PDF`,
+        veces:             v.veces_impresa,
+        usuario:           v.ultimo_usuario,
       })),
       log: logImpresiones,
     };
@@ -559,10 +625,10 @@ router.post('/api/guardar-config-guia', isAuthenticated, async (req, res) => {
 
     const nuevoChecksum = await calcularChecksumEnvio(envio_id, config);
     const [[existente]] = await db.query(
-      'SELECT checksum, veces_impresa FROM guias_config_impresa WHERE envio_id = ?', [envio_id]
+      'SELECT checksum, veces_impresa, presentado_portal FROM guias_config_impresa WHERE envio_id = ? AND activa = 1', [envio_id]
     ).catch(() => [[null]]);
 
-    const tuvoCAmbios = !existente || existente.checksum !== nuevoChecksum;
+    const tuvoCAmbios = !existente || existente.checksum !== nuevoChecksum || !existente.presentado_portal;
     const usuarioNombre = req.session.userName || 'Sistema';
     const usuarioId    = req.session.userId    || null;
 
@@ -600,6 +666,27 @@ router.post('/api/guardar-config-guia', isAuthenticated, async (req, res) => {
   }
 });
 
+// Resetear presentación de guía al cliente (des-presentar con un clic)
+router.post('/:id/resetear-guia', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!['admin', 'superusuario', 'operador'].includes(req.session.userRole)) {
+      return res.status(403).json({ ok: false, message: 'Sin permisos' });
+    }
+    const [result] = await db.query(
+      'UPDATE guias_config_impresa SET presentado_portal = 0 WHERE envio_id = ? AND activa = 1',
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      return res.json({ ok: false, message: 'No hay guía activa para este envío' });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Error resetear guia:', e);
+    res.status(500).json({ ok: false });
+  }
+});
+
 // Guardar config de etiqueta impresa (estado de toggles al momento de imprimir)
 const ETIQUETA_CONFIG_KEYS = [
   'mostrar_logo','mostrar_eslogan','mostrar_telefono','mostrar_telefono_adicional',
@@ -631,10 +718,10 @@ router.post('/api/guardar-config-etiqueta', isAuthenticated, async (req, res) =>
 
     const nuevoChecksum = await calcularChecksumEnvio(envio_id, normalized);
     const [[existente]] = await db.query(
-      'SELECT checksum, veces_impresa FROM etiquetas_config_impresa WHERE envio_id = ?', [envio_id]
+      'SELECT checksum, veces_impresa, presentado_portal FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1', [envio_id]
     ).catch(() => [[null]]);
 
-    const tuvoCAmbios  = !existente || existente.checksum !== nuevoChecksum;
+    const tuvoCAmbios  = !existente || existente.checksum !== nuevoChecksum || !existente.presentado_portal;
     const usuarioNombre = req.session.userName || 'Sistema';
     const usuarioId    = req.session.userId    || null;
 
@@ -666,6 +753,27 @@ router.post('/api/guardar-config-etiqueta', isAuthenticated, async (req, res) =>
   } catch (e) {
     console.error('Error guardar config etiqueta:', e);
     res.json({ ok: false });
+  }
+});
+
+// Resetear presentación de etiqueta/ticket al cliente (des-presentar con un clic)
+router.post('/:id/resetear-etiqueta', isAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!['admin', 'superusuario', 'operador'].includes(req.session.userRole)) {
+      return res.status(403).json({ ok: false, message: 'Sin permisos' });
+    }
+    const [result] = await db.query(
+      'UPDATE etiquetas_config_impresa SET presentado_portal = 0 WHERE envio_id = ? AND activa = 1',
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      return res.json({ ok: false, message: 'No hay etiqueta activa para este envío' });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Error resetear etiqueta:', e);
+    res.status(500).json({ ok: false });
   }
 });
 

@@ -10,7 +10,10 @@
       "Bash(1:*)",
       "Bash(__NEW_LINE_34890032bdc543ca__ echo:*)",
       "Bash(\"$MYSQL\" -h localhost -u root -proot tracking_local 2)",
-      "Bash(__NEW_LINE_07107740de645cbf__ \"$MYSQL\" -h localhost -u root -proot tracking_local 2)"
+      "Bash(__NEW_LINE_07107740de645cbf__ \"$MYSQL\" -h localhost -u root -proot tracking_local 2)",
+      "Bash(MYSQL=\"/c/Program Files/MySQL/MySQL Server 9.6/bin/mysql\")",
+      "Bash(\"$MYSQL\" -h localhost -u root -proot tracking_local -e \":*)",
+      "Bash(\"$MYSQL\" -h shuttle.proxy.rlwy.net -P 17996 -u root -pUWfQChJPLuUJfGAoYLsCDyhLdgpqTRqw railway -e \":*)"
     ]
   }
 }

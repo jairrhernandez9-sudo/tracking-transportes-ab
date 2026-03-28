@@ -1974,7 +1974,7 @@
           <div>
 
             <!-- HISTÓRICO DE IMPRESOS -->
-            <% if (historialImpresos && ((historialImpresos.guia && historialImpresos.guia.length > 0) || (historialImpresos.etiqueta && historialImpresos.etiqueta.length > 0))) { %>
+            <% if (vistaPermisos.reimpPor && historialImpresos && ((historialImpresos.guia && historialImpresos.guia.length > 0) || (historialImpresos.etiqueta && historialImpresos.etiqueta.length > 0))) { %>
             <div class="action-card" style="margin-bottom:16px;">
               <h3 class="action-title" style="cursor:pointer;user-select:none;" onclick="toggleHistImpresion(this)">
                 <i data-lucide="printer" style="width:20px;height:20px;color:#3b82f6;"></i>
@@ -1986,17 +1986,35 @@
                 <!-- Versiones de Guía -->
                 <% if (historialImpresos.guia && historialImpresos.guia.length > 0) { %>
                 <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:4px;">Guía Expedida</div>
-                <% historialImpresos.guia.forEach(function(v) { %>
+                <% historialImpresos.guia.forEach(function(v, idx) { %>
                 <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;">
-                  <% if (v.activa) { %>
+                  <% if (v.activa && v.presentado_portal) { %>
+                  <%/* Activa y presentada al cliente — botón para des-presentar (solo admin/superusuario/operador) */%>
+                  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+                  <button onclick="resetearGuia(this)" data-envio="<%= envio.id %>"
+                    style="background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;margin-top:2px;"
+                    title="Clic para marcar como no presentada aún al cliente">
+                    <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#22c55e;pointer-events:none;"></i>
+                  </button>
+                  <% } else { %>
                   <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#22c55e;flex-shrink:0;margin-top:2px;" title="Versión activa"></i>
+                  <% } %>
+                  <% } else if (v.activa && !v.presentado_portal) { %>
+                  <%/* Activa pero des-presentada — pendiente de reimpresión */%>
+                  <i data-lucide="clock" style="width:16px;height:16px;color:#f59e0b;flex-shrink:0;margin-top:2px;" title="Pendiente de reimpresión — no visible para el cliente"></i>
+                  <% } else if (!v.activa && !v.presentado_portal) { %>
+                  <%/* Versión anterior que fue des-presentada */%>
+                  <i data-lucide="clock" style="width:16px;height:16px;color:#fbbf24;opacity:0.5;flex-shrink:0;margin-top:2px;" title="Versión anterior (fue des-presentada)"></i>
                   <% } else { %>
                   <i data-lucide="circle" style="width:16px;height:16px;color:#cbd5e1;flex-shrink:0;margin-top:2px;" title="Versión anterior"></i>
                   <% } %>
                   <div style="flex:1;min-width:0;">
-                    <div style="font-size:0.77rem;font-weight:<%= v.activa ? '600' : '400' %>;color:<%= v.activa ? '#1e293b' : '#94a3b8' %>;word-break:break-all;">
+                    <div style="font-size:0.77rem;font-weight:<%= v.activa ? '600' : '400' %>;color:<%= (v.activa && v.presentado_portal) ? '#1e293b' : (v.activa && !v.presentado_portal) ? '#92400e' : '#94a3b8' %>;word-break:break-all;">
                       <%= v.nombre %>
                     </div>
+                    <% if (v.activa && !v.presentado_portal) { %>
+                    <div style="font-size:0.68rem;color:#d97706;margin-top:1px;font-weight:500;">No presentada al cliente — reimprimir para activar</div>
+                    <% } %>
                     <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
                     <div style="font-size:0.71rem;color:#64748b;margin-top:2px;">
                       Impresa <%= v.veces %> vez<%= v.veces !== 1 ? 'es' : '' %>
@@ -2013,15 +2031,30 @@
                 <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:10px;">Etiqueta Térmica</div>
                 <% historialImpresos.etiqueta.forEach(function(v) { %>
                 <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;">
-                  <% if (v.activa) { %>
+                  <% if (v.activa && v.presentado_portal) { %>
+                  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+                  <button onclick="resetearEtiqueta(this)" data-envio="<%= envio.id %>"
+                    style="background:none;border:none;padding:0;cursor:pointer;flex-shrink:0;margin-top:2px;"
+                    title="Clic para marcar como no presentada aún al cliente">
+                    <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#22c55e;pointer-events:none;"></i>
+                  </button>
+                  <% } else { %>
                   <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#22c55e;flex-shrink:0;margin-top:2px;" title="Versión activa"></i>
+                  <% } %>
+                  <% } else if (v.activa && !v.presentado_portal) { %>
+                  <i data-lucide="clock" style="width:16px;height:16px;color:#f59e0b;flex-shrink:0;margin-top:2px;" title="Pendiente de reimpresión — no visible para el cliente"></i>
+                  <% } else if (!v.activa && !v.presentado_portal) { %>
+                  <i data-lucide="clock" style="width:16px;height:16px;color:#fbbf24;opacity:0.5;flex-shrink:0;margin-top:2px;" title="Versión anterior (fue des-presentada)"></i>
                   <% } else { %>
                   <i data-lucide="circle" style="width:16px;height:16px;color:#cbd5e1;flex-shrink:0;margin-top:2px;" title="Versión anterior"></i>
                   <% } %>
                   <div style="flex:1;min-width:0;">
-                    <div style="font-size:0.77rem;font-weight:<%= v.activa ? '600' : '400' %>;color:<%= v.activa ? '#1e293b' : '#94a3b8' %>;word-break:break-all;">
+                    <div style="font-size:0.77rem;font-weight:<%= v.activa ? '600' : '400' %>;color:<%= (v.activa && v.presentado_portal) ? '#1e293b' : (v.activa && !v.presentado_portal) ? '#92400e' : '#94a3b8' %>;word-break:break-all;">
                       <%= v.nombre %>
                     </div>
+                    <% if (v.activa && !v.presentado_portal) { %>
+                    <div style="font-size:0.68rem;color:#d97706;margin-top:1px;font-weight:500;">No presentada al cliente — reimprimir para activar</div>
+                    <% } %>
                     <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
                     <div style="font-size:0.71rem;color:#64748b;margin-top:2px;">
                       Impresa <%= v.veces %> vez<%= v.veces !== 1 ? 'es' : '' %>
@@ -2765,6 +2798,46 @@ async function eliminarEstado(estadoId) {
       panel.style.display = open ? 'none' : '';
       if (icon) icon.setAttribute('data-lucide', open ? 'chevron-right' : 'chevron-down');
       lucide.createIcons();
+    }
+
+    function resetearGuia(btn) {
+      if (!confirm('¿Marcar esta guía como no presentada aún al cliente?\n\nSe deberá reimprimir para que vuelva a estar disponible en el portal.')) return;
+      var envioId = btn.dataset.envio;
+      btn.disabled = true;
+      fetch('/envios/' + envioId + '/resetear-guia', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.ok) {
+            location.reload();
+          } else {
+            alert(data.message || 'No se pudo completar la acción.');
+            btn.disabled = false;
+          }
+        })
+        .catch(function() {
+          alert('Error de conexión.');
+          btn.disabled = false;
+        });
+    }
+
+    function resetearEtiqueta(btn) {
+      if (!confirm('¿Marcar esta etiqueta como no presentada aún al cliente?\n\nSe deberá reimprimir para que vuelva a estar disponible en el portal.')) return;
+      var envioId = btn.dataset.envio;
+      btn.disabled = true;
+      fetch('/envios/' + envioId + '/resetear-etiqueta', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.ok) {
+            location.reload();
+          } else {
+            alert(data.message || 'No se pudo completar la acción.');
+            btn.disabled = false;
+          }
+        })
+        .catch(function() {
+          alert('Error de conexión.');
+          btn.disabled = false;
+        });
     }
   </script>
   <script src="/js/notifications.js"></script>

@@ -248,6 +248,11 @@ db.query(`ALTER TABLE envios ADD COLUMN documentar_referencia VARCHAR(200) NULL`
 db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_documentar   TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 // Migración: habilitación de campo Documentar por usuario
 db.query(`ALTER TABLE usuarios ADD COLUMN documentar_activo  TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+// Migración: limitar guías visibles solo de su propiedad
+db.query(`ALTER TABLE usuarios ADD COLUMN solo_guias_propias TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+// Migración: presentado_portal en guías/etiquetas impresas (permite des-presentar al cliente con un clic)
+db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN presentado_portal TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN presentado_portal TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 
 // Migración: peso total de guía y peso por ítem en etiqueta
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_peso_total TINYINT(1) DEFAULT 1`).catch(() => {});

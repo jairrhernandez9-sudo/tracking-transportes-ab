@@ -488,6 +488,117 @@
       margin: 0 auto;
     }
     
+    /* FILTROS EN CASCADA */
+    .filtro-cascade {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0 4px;
+      flex-wrap: wrap;
+    }
+    .mexico-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: #f1f5f9;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+    .mexico-pill.active, .mexico-pill:hover {
+      background: #1e40af;
+      border-color: #1e40af;
+      color: #fff;
+    }
+    /* Multi-select dropdown */
+    .fc-multiselect {
+      position: relative;
+    }
+    .fc-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      min-width: 170px;
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      user-select: none;
+      transition: border-color .15s;
+    }
+    .fc-trigger:hover, .fc-multiselect.open .fc-trigger {
+      border-color: #3b82f6;
+    }
+    .fc-trigger span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .fc-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 220px;
+      max-width: 320px;
+      max-height: 280px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      z-index: 200;
+      padding: 6px 0;
+    }
+    .fc-multiselect.open .fc-dropdown { display: block; }
+    .fc-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      font-size: 0.82rem;
+      color: #374151;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .fc-option:hover { background: #f1f5f9; }
+    .fc-option input[type=checkbox] { accent-color: #3b82f6; width: 15px; height: 15px; flex-shrink: 0; }
+    .fc-option-all { font-weight: 600; color: #1e40af; }
+    .fc-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+    /* Direcciones select */
+    .fc-select-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .fc-select {
+      appearance: none;
+      padding: 7px 32px 7px 12px;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      min-width: 190px;
+      max-width: 280px;
+      transition: border-color .15s;
+    }
+    .fc-select:hover, .fc-select:focus { border-color: #3b82f6; outline: none; }
+    .fc-select:disabled { background: #f8fafc; color: #9ca3af; cursor: default; }
+
     /* TOOLBAR */
     .toolbar {
       display: flex;
@@ -1192,31 +1303,93 @@
       </header>
       
       <div class="envios-container">
-        
+
+        <!-- FILTROS EN CASCADA -->
+        <div class="filtro-cascade">
+          <!-- Todo México -->
+          <a href="/envios<%= filtros.estado && filtros.estado !== 'todos' ? '?estado=' + filtros.estado : '' %>"
+             class="mexico-pill <%= (!filtros.clienteIds || filtros.clienteIds.length === 0) ? 'active' : '' %>"
+             id="mexicoPill" title="Ver todos los envíos">
+            <i data-lucide="map-pin" style="width:14px;height:14px;"></i>
+            Todo México
+          </a>
+
+          <!-- Empresas multi-select -->
+          <div class="fc-multiselect" id="empresasMS">
+            <div class="fc-trigger" id="empresasTrigger">
+              <span id="empresasLabel"><%
+                var sel = filtros.clienteIds || [];
+                if (sel.length === 0) { %>Todas las Empresas<% }
+                else if (sel.length === 1) {
+                  var found = clientesList.find(function(c){ return String(c.id) === String(sel[0]); });
+                  %><%= found ? found.nombre_empresa : 'Empresa' %><%
+                } else { %><%= sel.length %> empresas seleccionadas<% } %>
+              </span>
+              <i data-lucide="chevron-down" style="width:14px;height:14px;flex-shrink:0;"></i>
+            </div>
+            <div class="fc-dropdown" id="empresasDropdown">
+              <label class="fc-option fc-option-all">
+                <input type="checkbox" id="selAllEmpresas"> <span>Todas las Empresas</span>
+              </label>
+              <div class="fc-divider"></div>
+              <% clientesList.forEach(function(c) { %>
+              <label class="fc-option">
+                <input type="checkbox" class="empresa-cb" value="<%= c.id %>"
+                  <%= (filtros.clienteIds || []).map(String).includes(String(c.id)) ? 'checked' : '' %>>
+                <span><%= c.nombre_empresa %></span>
+              </label>
+              <% }); %>
+            </div>
+          </div>
+
+          <!-- Direcciones select -->
+          <div class="fc-select-wrap" id="dirWrap">
+            <select id="dirSelect" class="fc-select" <%= (!filtros.clienteIds || filtros.clienteIds.length === 0) ? 'disabled' : '' %>>
+              <option value="">Todas las direcciones</option>
+              <% direccionesList.forEach(function(d) { %>
+              <option value="<%= d.id %>" <%= String(filtros.dir_id) === String(d.id) ? 'selected' : '' %>>
+                <%= d.alias %> — <%= d.ciudad %>
+              </option>
+              <% }); %>
+            </select>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#6b7280;"></i>
+          </div>
+        </div>
+
         <!-- TOOLBAR -->
+        <%
+          function estadoUrl(est) {
+            var q = [];
+            if (est && est !== 'todos') q.push('estado=' + est);
+            (filtros.clienteIds || []).forEach(function(id){ q.push('clientes[]=' + id); });
+            if (filtros.dir_id) q.push('dir_id=' + filtros.dir_id);
+            if (filtros.buscar) q.push('buscar=' + encodeURIComponent(filtros.buscar));
+            return '/envios' + (q.length ? '?' + q.join('&') : '');
+          }
+        %>
         <div class="toolbar">
           <div class="toolbar-left">
-            <a href="/envios?estado=todos" class="filter-btn <%= (!filtros.estado || filtros.estado === 'todos') ? 'active' : '' %>">
+            <a href="<%= estadoUrl('todos') %>" class="filter-btn <%= (!filtros.estado || filtros.estado === 'todos') ? 'active' : '' %>">
               <i data-lucide="package" style="width: 18px; height: 18px;"></i>
               Todos
             </a>
-            <a href="/envios?estado=creado" class="filter-btn <%= filtros.estado === 'creado' ? 'active' : '' %>">
+            <a href="<%= estadoUrl('creado') %>" class="filter-btn <%= filtros.estado === 'creado' ? 'active' : '' %>">
               <i data-lucide="file-plus" style="width: 18px; height: 18px;"></i>
               Creados
             </a>
-            <a href="/envios?estado=pendiente" class="filter-btn <%= filtros.estado === 'pendiente' ? 'active' : '' %>">
+            <a href="<%= estadoUrl('pendiente') %>" class="filter-btn <%= filtros.estado === 'pendiente' ? 'active' : '' %>">
               <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
               Pendientes
             </a>
-            <a href="/envios?estado=en-transito" class="filter-btn <%= filtros.estado === 'en-transito' ? 'active' : '' %>">
+            <a href="<%= estadoUrl('en-transito') %>" class="filter-btn <%= filtros.estado === 'en-transito' ? 'active' : '' %>">
               <i data-lucide="truck" style="width: 18px; height: 18px;"></i>
               En tránsito
             </a>
-            <a href="/envios?estado=entregado" class="filter-btn <%= filtros.estado === 'entregado' ? 'active' : '' %>">
+            <a href="<%= estadoUrl('entregado') %>" class="filter-btn <%= filtros.estado === 'entregado' ? 'active' : '' %>">
               <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
               Entregados
             </a>
-            <a href="/envios?estado=cancelado" class="filter-btn <%= filtros.estado === 'cancelado' ? 'active' : '' %>">
+            <a href="<%= estadoUrl('cancelado') %>" class="filter-btn <%= filtros.estado === 'cancelado' ? 'active' : '' %>">
               <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i>
               Cancelados
             </a>
@@ -1349,6 +1522,8 @@
               if (filtros.buscar)  q.push('buscar='  + encodeURIComponent(filtros.buscar));
               if (filtros.estado && filtros.estado !== 'todos') q.push('estado=' + encodeURIComponent(filtros.estado));
               if (filtros.orderBy) q.push('orderBy=' + encodeURIComponent(filtros.orderBy));
+              (filtros.clienteIds || []).forEach(function(id){ q.push('clientes[]=' + id); });
+              if (filtros.dir_id) q.push('dir_id=' + filtros.dir_id);
               q.push('page=' + p);
               return '/envios?' + q.join('&');
             }; %>
@@ -1529,10 +1704,18 @@
         clearBtn.style.display = hasText ? '' : 'none';
       }
 
+      function getActiveFiltros() {
+        const p = new URLSearchParams();
+        if (estadoActual && estadoActual !== 'todos') p.set('estado', estadoActual);
+        document.querySelectorAll('.empresa-cb:checked').forEach(cb => p.append('clientes[]', cb.value));
+        const dirSel = document.getElementById('dirSelect');
+        if (dirSel && dirSel.value) p.set('dir_id', dirSel.value);
+        return p;
+      }
+
       function goSearch(term) {
-        const params = new URLSearchParams();
+        const params = getActiveFiltros();
         if (term) params.set('buscar', term);
-        if (estadoActual && estadoActual !== 'todos') params.set('estado', estadoActual);
         window.location.href = '/envios?' + params.toString();
       }
 
@@ -1565,6 +1748,125 @@
 
       // Estado inicial: si hay término activo al cargar la página
       setIconState(!!input.value);
+    })();
+
+    // ── Filtros en cascada ──────────────────────────────────
+    (function() {
+      const estadoCascada = '<%= filtros.estado || "todos" %>';
+      const ms        = document.getElementById('empresasMS');
+      const trigger   = document.getElementById('empresasTrigger');
+      const dropdown  = document.getElementById('empresasDropdown');
+      const label     = document.getElementById('empresasLabel');
+      const selAll    = document.getElementById('selAllEmpresas');
+      const dirSelect = document.getElementById('dirSelect');
+      const clientesList = <%- JSON.stringify(clientesList) %>;
+      const cbs       = () => Array.from(document.querySelectorAll('.empresa-cb'));
+
+      // Abrir dropdown
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        ms.classList.toggle('open');
+      });
+
+      // Cerrar dropdown al hacer clic fuera → aplicar filtro de empresas
+      document.addEventListener('click', function(e) {
+        if (ms.classList.contains('open') && !ms.contains(e.target)) {
+          ms.classList.remove('open');
+          applyEmpresasFilter();
+        }
+      });
+
+      // Actualizar label del trigger
+      function updateLabel() {
+        const checked = cbs().filter(c => c.checked);
+        if (checked.length === 0) {
+          label.textContent = 'Todas las Empresas';
+          selAll.checked = false;
+          selAll.indeterminate = false;
+        } else if (checked.length === cbs().length) {
+          label.textContent = 'Todas las Empresas';
+          selAll.checked = true;
+          selAll.indeterminate = false;
+        } else if (checked.length === 1) {
+          const found = clientesList.find(c => String(c.id) === checked[0].value);
+          label.textContent = found ? found.nombre_empresa : 'Empresa';
+          selAll.checked = false;
+          selAll.indeterminate = true;
+        } else {
+          label.textContent = checked.length + ' empresas seleccionadas';
+          selAll.checked = false;
+          selAll.indeterminate = true;
+        }
+      }
+
+      // Seleccionar/deseleccionar todas
+      selAll.addEventListener('change', function() {
+        cbs().forEach(cb => cb.checked = this.checked);
+        updateLabel();
+        loadDirecciones(cbs().filter(c => c.checked).map(c => c.value));
+      });
+
+      // Cambio en checkbox individual → actualizar label + cargar direcciones por AJAX
+      cbs().forEach(cb => cb.addEventListener('change', function() {
+        updateLabel();
+        loadDirecciones(cbs().filter(c => c.checked).map(c => c.value));
+      }));
+
+      // Cargar direcciones vía AJAX sin navegar
+      async function loadDirecciones(clienteIds) {
+        dirSelect.innerHTML = '<option value="">Todas las direcciones</option>';
+        if (!clienteIds.length) {
+          dirSelect.disabled = true;
+          return;
+        }
+        dirSelect.disabled = false;
+        try {
+          const qs = clienteIds.map(id => 'clientes[]=' + encodeURIComponent(id)).join('&');
+          const res = await fetch('/envios/api/direcciones-filtro?' + qs);
+          const dirs = await res.json();
+          dirs.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = d.alias + ' — ' + d.ciudad;
+            dirSelect.appendChild(opt);
+          });
+          const prevDir = '<%= filtros.dir_id %>';
+          if (prevDir) {
+            const match = Array.from(dirSelect.options).find(o => o.value === prevDir);
+            if (match) match.selected = true;
+          }
+        } catch(e) { /* silencioso */ }
+      }
+
+      // Aplicar filtro de empresas → navegar
+      function applyEmpresasFilter() {
+        const checked = cbs().filter(c => c.checked);
+        const selectedIds = checked.map(c => c.value);
+        // Comparar con los que ya estaban activos para evitar recarga innecesaria
+        const prevIds = <%- JSON.stringify((filtros.clienteIds || []).map(String)) %>;
+        const same = selectedIds.length === prevIds.length && selectedIds.every(id => prevIds.includes(id));
+        if (same) return;
+        const p = new URLSearchParams();
+        if (estadoCascada && estadoCascada !== 'todos') p.set('estado', estadoCascada);
+        const buscarVal = document.getElementById('searchInput')?.value?.trim();
+        if (buscarVal) p.set('buscar', buscarVal);
+        selectedIds.forEach(id => p.append('clientes[]', id));
+        window.location.href = '/envios?' + p.toString();
+      }
+
+      // Cambio en selección de dirección → navegar
+      dirSelect.addEventListener('change', function() {
+        const checked = cbs().filter(c => c.checked);
+        const p = new URLSearchParams();
+        if (estadoCascada && estadoCascada !== 'todos') p.set('estado', estadoCascada);
+        const buscarVal = document.getElementById('searchInput')?.value?.trim();
+        if (buscarVal) p.set('buscar', buscarVal);
+        checked.forEach(c => p.append('clientes[]', c.value));
+        if (this.value) p.set('dir_id', this.value);
+        window.location.href = '/envios?' + p.toString();
+      });
+
+      updateLabel();
     })();
 
     // Variables globales para cancelación
