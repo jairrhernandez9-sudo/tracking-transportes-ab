@@ -1306,13 +1306,17 @@
 
         <!-- FILTROS EN CASCADA -->
         <div class="filtro-cascade">
-          <!-- Todo México -->
-          <a href="/envios<%= filtros.estado && filtros.estado !== 'todos' ? '?estado=' + filtros.estado : '' %>"
-             class="mexico-pill <%= (!filtros.clienteIds || filtros.clienteIds.length === 0) ? 'active' : '' %>"
-             id="mexicoPill" title="Ver todos los envíos">
-            <i data-lucide="map-pin" style="width:14px;height:14px;"></i>
-            Todo México
-          </a>
+          <!-- Estado de México (república) -->
+          <div class="fc-select-wrap">
+            <i data-lucide="map-pin" style="width:14px;height:14px;position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#3b82f6;"></i>
+            <select id="estadoMxSelect" class="fc-select" style="padding-left:30px;min-width:160px;">
+              <option value="">Todo México</option>
+              <% estadosMx.forEach(function(emx) { %>
+              <option value="<%= emx %>" <%= filtros.estado_mx === emx ? 'selected' : '' %>><%= emx %></option>
+              <% }); %>
+            </select>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#6b7280;"></i>
+          </div>
 
           <!-- Empresas multi-select -->
           <div class="fc-multiselect" id="empresasMS">
@@ -1363,6 +1367,7 @@
             if (est && est !== 'todos') q.push('estado=' + est);
             (filtros.clienteIds || []).forEach(function(id){ q.push('clientes[]=' + id); });
             if (filtros.dir_id) q.push('dir_id=' + filtros.dir_id);
+            if (filtros.estado_mx) q.push('estado_mx=' + encodeURIComponent(filtros.estado_mx));
             if (filtros.buscar) q.push('buscar=' + encodeURIComponent(filtros.buscar));
             return '/envios' + (q.length ? '?' + q.join('&') : '');
           }
@@ -1524,6 +1529,7 @@
               if (filtros.orderBy) q.push('orderBy=' + encodeURIComponent(filtros.orderBy));
               (filtros.clienteIds || []).forEach(function(id){ q.push('clientes[]=' + id); });
               if (filtros.dir_id) q.push('dir_id=' + filtros.dir_id);
+              if (filtros.estado_mx) q.push('estado_mx=' + encodeURIComponent(filtros.estado_mx));
               q.push('page=' + p);
               return '/envios?' + q.join('&');
             }; %>
@@ -1710,6 +1716,8 @@
         document.querySelectorAll('.empresa-cb:checked').forEach(cb => p.append('clientes[]', cb.value));
         const dirSel = document.getElementById('dirSelect');
         if (dirSel && dirSel.value) p.set('dir_id', dirSel.value);
+        const emxSel = document.getElementById('estadoMxSelect');
+        if (emxSel && emxSel.value) p.set('estado_mx', emxSel.value);
         return p;
       }
 
@@ -1838,10 +1846,12 @@
         } catch(e) { /* silencioso */ }
       }
 
-      // Aplicar filtro de empresas → navegar
+      // Aplicar filtro de empresas → navegar + guardar en localStorage
       function applyEmpresasFilter() {
         const checked = cbs().filter(c => c.checked);
         const selectedIds = checked.map(c => c.value);
+        // Guardar selección en localStorage
+        try { localStorage.setItem('envios_empresas', JSON.stringify(selectedIds)); } catch(e) {}
         // Comparar con los que ya estaban activos para evitar recarga innecesaria
         const prevIds = <%- JSON.stringify((filtros.clienteIds || []).map(String)) %>;
         const same = selectedIds.length === prevIds.length && selectedIds.every(id => prevIds.includes(id));
@@ -1851,6 +1861,8 @@
         const buscarVal = document.getElementById('searchInput')?.value?.trim();
         if (buscarVal) p.set('buscar', buscarVal);
         selectedIds.forEach(id => p.append('clientes[]', id));
+        const emxSel = document.getElementById('estadoMxSelect');
+        if (emxSel && emxSel.value) p.set('estado_mx', emxSel.value);
         window.location.href = '/envios?' + p.toString();
       }
 
@@ -1863,10 +1875,46 @@
         if (buscarVal) p.set('buscar', buscarVal);
         checked.forEach(c => p.append('clientes[]', c.value));
         if (this.value) p.set('dir_id', this.value);
+        const emxSel = document.getElementById('estadoMxSelect');
+        if (emxSel && emxSel.value) p.set('estado_mx', emxSel.value);
         window.location.href = '/envios?' + p.toString();
       });
 
+      // Restaurar selección de empresas desde localStorage si no hay clientes en URL
+      const urlClienteIds = <%- JSON.stringify((filtros.clienteIds || []).map(String)) %>;
+      if (urlClienteIds.length === 0) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('envios_empresas') || '[]');
+          if (saved.length > 0) {
+            cbs().forEach(cb => { cb.checked = saved.includes(cb.value); });
+            updateLabel();
+            loadDirecciones(saved);
+            // Navegar con la selección guardada
+            const p = new URLSearchParams();
+            if (estadoCascada && estadoCascada !== 'todos') p.set('estado', estadoCascada);
+            saved.forEach(id => p.append('clientes[]', id));
+            const emxSel = document.getElementById('estadoMxSelect');
+            if (emxSel && emxSel.value) p.set('estado_mx', emxSel.value);
+            window.location.replace('/envios?' + p.toString());
+          }
+        } catch(e) {}
+      }
+
       updateLabel();
+
+      // Cambio en estado de México → navegar
+      document.getElementById('estadoMxSelect').addEventListener('change', function() {
+        const checked = cbs().filter(c => c.checked);
+        const p = new URLSearchParams();
+        if (estadoCascada && estadoCascada !== 'todos') p.set('estado', estadoCascada);
+        const buscarVal = document.getElementById('searchInput')?.value?.trim();
+        if (buscarVal) p.set('buscar', buscarVal);
+        checked.forEach(c => p.append('clientes[]', c.value));
+        const dirSel = document.getElementById('dirSelect');
+        if (dirSel && dirSel.value) p.set('dir_id', dirSel.value);
+        if (this.value) p.set('estado_mx', this.value);
+        window.location.href = '/envios?' + p.toString();
+      });
     })();
 
     // Variables globales para cancelación

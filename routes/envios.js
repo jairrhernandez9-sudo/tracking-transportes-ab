@@ -92,7 +92,7 @@ router.get('/api/direcciones-filtro', isAuthenticated, async (req, res) => {
 // Lista de envíos con filtros y paginación
 router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const { buscar, estado, orderBy, dir_id } = req.query;
+    const { buscar, estado, orderBy, dir_id, estado_mx } = req.query;
     const clienteIds = [].concat(req.query['clientes[]'] || req.query.clientes || []).map(Number).filter(Boolean);
     const page  = Math.max(1, parseInt(req.query.page) || 1);
     const limit = 25;
@@ -146,6 +146,11 @@ router.get('/', isAuthenticated, async (req, res) => {
       params.push(estado);
     }
 
+    if (estado_mx) {
+      whereClause += ` AND e.destino_estado COLLATE utf8mb4_unicode_ci = ?`;
+      params.push(estado_mx);
+    }
+
     // Cargar lista de clientes para el filtro de empresas
     const esOpFiltro = esOperador;
     const clientesQuery = esOpFiltro
@@ -155,6 +160,14 @@ router.get('/', isAuthenticated, async (req, res) => {
          ORDER BY c.nombre_empresa`
       : `SELECT id, nombre_empresa FROM clientes WHERE eliminado_en IS NULL ORDER BY nombre_empresa`;
     const [clientesList] = await db.query(clientesQuery, esOpFiltro ? [req.session.userId] : []).catch(() => [[]]);
+
+    // Cargar estados de México disponibles en envíos (para el filtro de estado)
+    const [estadosMxRows] = await db.query(
+      `SELECT DISTINCT e.destino_estado FROM envios e
+       WHERE e.destino_estado IS NOT NULL AND e.destino_estado != ''
+       ORDER BY e.destino_estado ASC`
+    ).catch(() => [[]]);
+    const estadosMx = estadosMxRows.map(r => r.destino_estado);
 
     // Cargar direcciones de los clientes seleccionados para pre-poblar el dropdown
     let direccionesList = [];
@@ -222,8 +235,9 @@ router.get('/', isAuthenticated, async (req, res) => {
         rol: req.session.userRole
       },
       envios,
-      filtros: { buscar, estado: estado || 'todos', orderBy, clienteIds, dir_id: dir_id || '' },
+      filtros: { buscar, estado: estado || 'todos', orderBy, clienteIds, dir_id: dir_id || '', estado_mx: estado_mx || '' },
       clientesList,
+      estadosMx,
       direccionesList,
       pagination: { page: currentPage, totalPages, totalEnvios, limit },
       colPermisos
