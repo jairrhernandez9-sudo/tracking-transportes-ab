@@ -255,6 +255,9 @@ db.query(`ALTER TABLE usuarios ADD COLUMN auto_transito TINYINT(1) NOT NULL DEFA
 // Migración: presentado_portal en guías/etiquetas impresas (permite des-presentar al cliente con un clic)
 db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN presentado_portal TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN presentado_portal TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+// Migración: ocultar fecha/hora del historial en el portal de cliente
+db.query(`ALTER TABLE clientes ADD COLUMN ocultar_fecha TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+db.query(`ALTER TABLE clientes ADD COLUMN ocultar_hora  TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 
 // Migración: peso total de guía y peso por ítem en etiqueta
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_peso_total TINYINT(1) DEFAULT 1`).catch(() => {});

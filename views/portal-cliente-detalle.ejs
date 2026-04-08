@@ -729,10 +729,13 @@
                 <span class="timeline-badge tb-<%= estadoClass %>">
                   <%= (h.estado || '').replace(/-/g,' ').toUpperCase() %>
                 </span>
+                <% if (!ocultarFecha || !ocultarHora) { %>
                 <span class="timeline-date">
-                  <%= new Date(h.fecha_hora).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City'}) %>
-                  · <%= new Date(h.fecha_hora).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City'}) %>
+                  <% if (!ocultarFecha) { %><%= new Date(h.fecha_hora).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City'}) %><% } %>
+                  <% if (!ocultarFecha && !ocultarHora) { %>·<% } %>
+                  <% if (!ocultarHora) { %><%= new Date(h.fecha_hora).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City'}) %><% } %>
                 </span>
+                <% } %>
               </div>
               <% if (h.ubicacion) { %>
               <div class="timeline-location">

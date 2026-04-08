@@ -70,6 +70,54 @@ router.get('/actividad', isAuthenticated, async (req, res) => {
 });
 
 // ============================================
+// EDITAR ESTADO DEL HISTORIAL
+// ============================================
+router.put('/:id/editar', isAuthenticated, async (req, res) => {
+  try {
+    const estadoId = req.params.id;
+
+    if (!['admin', 'superusuario', 'operador'].includes(req.session.userRole)) {
+      return res.status(403).json({ success: false, message: 'No tienes permisos para editar estados' });
+    }
+
+    const [estados] = await db.query('SELECT * FROM historial_estados WHERE id = ?', [estadoId]);
+    if (estados.length === 0) {
+      return res.status(404).json({ success: false, message: 'Estado no encontrado' });
+    }
+
+    const { estado, ubicacion, comentarios, fecha_hora } = req.body;
+
+    // Sólo actualizar fecha_hora si se envió explícitamente (no vacío)
+    // El valor viene en hora México (America/Mexico_City), lo pasamos directamente a MySQL DATETIME
+    const usarFecha = fecha_hora && fecha_hora.trim() !== '';
+
+    await db.query(
+      `UPDATE historial_estados
+       SET estado = ?, ubicacion = ?, comentarios = ?
+       ${usarFecha ? ', fecha_hora = CONVERT_TZ(?, \'America/Mexico_City\', \'UTC\')' : ''}
+       WHERE id = ?`,
+      usarFecha
+        ? [estado, ubicacion || null, comentarios || null, fecha_hora, estadoId]
+        : [estado, ubicacion || null, comentarios || null, estadoId]
+    );
+
+    // Actualizar estado_actual del envío al más reciente
+    const [ultimoEstado] = await db.query(
+      `SELECT estado FROM historial_estados WHERE envio_id = ? ORDER BY fecha_hora DESC LIMIT 1`,
+      [estados[0].envio_id]
+    );
+    if (ultimoEstado.length > 0) {
+      await db.query('UPDATE envios SET estado_actual = ? WHERE id = ?', [ultimoEstado[0].estado, estados[0].envio_id]);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al editar estado:', error);
+    res.status(500).json({ success: false, message: 'Error al editar el estado' });
+  }
+});
+
+// ============================================
 // ELIMINAR ESTADO DEL HISTORIAL
 // ============================================
 router.delete('/:id/eliminar', isAuthenticated, async (req, res) => {

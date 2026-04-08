@@ -705,6 +705,12 @@
         padding: 25px;
       }
     }
+  .switch { position:relative;display:inline-block;width:44px;height:24px; }
+  .switch input { opacity:0;width:0;height:0; }
+  .slider { position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:24px;transition:.25s; }
+  .slider::before { content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s; }
+  .switch input:checked + .slider { background:#3b82f6; }
+  .switch input:checked + .slider::before { transform:translateX(20px); }
   </style>
   <link rel="stylesheet" href="/css/responsive.css">
 </head>
@@ -1105,6 +1111,37 @@
                 <p style="font-size:0.75rem;color:#f59e0b;margin-top:4px;">El crédito está desactivado globalmente en Configuración → Tarifas</p>
                 <% } %>
               </div>
+            </div>
+          </div>
+
+          <!-- Visibilidad del historial en portal -->
+          <div style="margin: 28px 0 8px; padding-top: 24px; border-top: 2px solid #f1f5f9;">
+            <h3 style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 6px;">
+              <i data-lucide="eye-off" style="width:18px;height:18px;vertical-align:-3px;color:#3b82f6;"></i>
+              Historial de estados — Portal cliente
+            </h3>
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 14px;">Controla qué información de fecha/hora se muestra al cliente en su portal y en el tracking público.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;">
+                <div>
+                  <div style="font-size:0.88rem;font-weight:700;color:#1e293b;">Ocultar fecha</div>
+                  <div style="font-size:0.78rem;color:#64748b;">No muestra la fecha del estado en el portal ni en el tracking</div>
+                </div>
+                <label class="switch" style="flex-shrink:0;">
+                  <input type="checkbox" name="ocultar_fecha" value="1" <%= cliente.ocultar_fecha ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;">
+                <div>
+                  <div style="font-size:0.88rem;font-weight:700;color:#1e293b;">Ocultar hora</div>
+                  <div style="font-size:0.78rem;color:#64748b;">No muestra la hora del estado en el portal ni en el tracking</div>
+                </div>
+                <label class="switch" style="flex-shrink:0;">
+                  <input type="checkbox" name="ocultar_hora" value="1" <%= cliente.ocultar_hora ? 'checked' : '' %>>
+                  <span class="slider"></span>
+                </label>
+              </label>
             </div>
           </div>
 

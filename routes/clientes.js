@@ -617,13 +617,16 @@ router.post('/:id/editar', isAuthenticated, requireAdminOrSuper, uploadClienteLo
     const tplIdEdit = parseInt(template_etiqueta_id) || null;
     const guiaTplIdEdit = parseInt(template_guia_id) || null;
     const metodoPagoEdit = ['PUE', 'PPD'].includes(metodo_pago_defecto) ? metodo_pago_defecto : 'PPD';
+    const ocultarFecha = req.body.ocultar_fecha ? 1 : 0;
+    const ocultarHora  = req.body.ocultar_hora  ? 1 : 0;
     await db.query(
       `UPDATE clientes
        SET nombre_empresa = ?, contacto = ?, telefono = ?, email = ?, direccion = ?, prefijo_tracking = ?,
-           template_etiqueta_id = ?, template_guia_id = ?, metodo_pago_defecto = ?
+           template_etiqueta_id = ?, template_guia_id = ?, metodo_pago_defecto = ?,
+           ocultar_fecha = ?, ocultar_hora = ?
            ${logoUpdateSql}
        WHERE id = ?`,
-      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplIdEdit, guiaTplIdEdit, metodoPagoEdit, ...logoUpdateParams, id]
+      [nombre_empresa, contacto, telefono, email, direccion, prefijoFinal, tplIdEdit, guiaTplIdEdit, metodoPagoEdit, ocultarFecha, ocultarHora, ...logoUpdateParams, id]
     );
 
     await registrarActividad(req, {

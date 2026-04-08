@@ -332,7 +332,7 @@ router.get('/envio/:id', soloCliente, async (req, res) => {
     const [[guiaDisponible]]    = await db.query('SELECT id FROM guias_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]);
     const [[etiquetaDisponible]] = await db.query('SELECT id FROM etiquetas_config_impresa WHERE envio_id = ? AND activa = 1 AND (presentado_portal IS NULL OR presentado_portal = 1)', [id]);
 
-    const [[clienteDetRow]] = await db.query('SELECT logo_url FROM clientes WHERE id = ?', [clienteId]);
+    const [[clienteDetRow]] = await db.query('SELECT logo_url, ocultar_fecha, ocultar_hora FROM clientes WHERE id = ?', [clienteId]);
     res.render('portal-cliente-detalle', {
       title: `Envío ${envio.numero_tracking}`,
       user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
@@ -343,7 +343,9 @@ router.get('/envio/:id', soloCliente, async (req, res) => {
       logoUrl,
       clienteLogoUrl: clienteDetRow?.logo_url || null,
       guiaDisponible: !!guiaDisponible,
-      etiquetaDisponible: !!etiquetaDisponible
+      etiquetaDisponible: !!etiquetaDisponible,
+      ocultarFecha: !!(clienteDetRow?.ocultar_fecha),
+      ocultarHora:  !!(clienteDetRow?.ocultar_hora)
     });
 
   } catch (err) {

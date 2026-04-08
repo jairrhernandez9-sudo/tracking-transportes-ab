@@ -50,15 +50,16 @@ router.get('/:numeroTracking', async (req, res) => {
     
     // Buscar el envío
     const [envios] = await db.query(
-      `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email 
-       FROM envios e 
-       LEFT JOIN clientes c ON e.cliente_id = c.id 
-       WHERE e.numero_tracking = ? 
+      `SELECT e.*, c.nombre_empresa, c.contacto, c.telefono, c.email,
+              c.ocultar_fecha, c.ocultar_hora
+       FROM envios e
+       LEFT JOIN clientes c ON e.cliente_id = c.id
+       WHERE e.numero_tracking = ?
           OR e.referencia_cliente = ?
           OR FIND_IN_SET(?, REPLACE(e.referencia_cliente, ', ', ',')) > 0`,
       [numeroTracking, numeroTracking, numeroTracking]
     );
-    
+
     if (envios.length === 0) {
       // Si no se encuentra, renderizar página con mensaje
       return res.render('tracking-public', {
@@ -68,8 +69,10 @@ router.get('/:numeroTracking', async (req, res) => {
         numeroTracking: numeroTracking
       });
     }
-    
+
     const envio = envios[0];
+    const ocultarFecha = !!(envio.ocultar_fecha);
+    const ocultarHora  = !!(envio.ocultar_hora);
     
 
     // Info de guía origen si es parcial
@@ -104,7 +107,9 @@ router.get('/:numeroTracking', async (req, res) => {
       config: config,
       envio: envio,
       historial: historial,
-      numeroTracking: numeroTracking
+      numeroTracking: numeroTracking,
+      ocultarFecha,
+      ocultarHora
     });
     
   } catch (error) {

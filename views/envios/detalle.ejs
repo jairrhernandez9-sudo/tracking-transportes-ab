@@ -788,8 +788,8 @@
   flex: 1;
 }
 
-/* Botón de eliminar estado */
-.btn-eliminar-estado {
+/* Botones de acción en estado */
+.btn-eliminar-estado, .btn-editar-estado {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -805,8 +805,9 @@
   opacity: 0;
 }
 
-/* Mostrar botón al hacer hover sobre el item */
-.timeline-item:hover .btn-eliminar-estado {
+/* Mostrar botones al hacer hover sobre el item */
+.timeline-item:hover .btn-eliminar-estado,
+.timeline-item:hover .btn-editar-estado {
   opacity: 1;
 }
 
@@ -816,11 +817,17 @@
   transform: scale(1.1);
 }
 
-.btn-eliminar-estado:active {
+.btn-editar-estado:hover {
+  background: #eff6ff;
+  color: #3b82f6;
+  transform: scale(1.1);
+}
+
+.btn-eliminar-estado:active, .btn-editar-estado:active {
   transform: scale(0.95);
 }
 
-.btn-eliminar-estado i {
+.btn-eliminar-estado i, .btn-editar-estado i {
   width: 16px;
   height: 16px;
 }
@@ -1908,6 +1915,20 @@
       }) %>
     </span>
   </div>
+<% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+<button
+  type="button"
+  class="btn-editar-estado"
+  data-estado-id="<%= item.id %>"
+  data-estado="<%= item.estado %>"
+  data-ubicacion="<%= item.ubicacion || '' %>"
+  data-comentarios="<%= item.comentarios || '' %>"
+  data-fecha-hora="<%= item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('sv-SE', {timeZone:'America/Mexico_City'}).slice(0,16).replace(' ','T') : '' %>"
+  title="Editar este estado"
+>
+  <i data-lucide="pencil"></i>
+</button>
+<% } %>
 <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
 <button
   type="button"
@@ -2548,9 +2569,22 @@
 // INICIALIZAR: Asignar eventos a botones
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
+  // Botones de editar estado
+  document.querySelectorAll('.btn-editar-estado').forEach(function(boton) {
+    boton.addEventListener('click', function() {
+      abrirModalEditarEstado(
+        this.getAttribute('data-estado-id'),
+        this.getAttribute('data-estado'),
+        this.getAttribute('data-ubicacion'),
+        this.getAttribute('data-comentarios'),
+        this.getAttribute('data-fecha-hora')
+      );
+    });
+  });
+
   // Seleccionar todos los botones de eliminar estado
   const botonesEliminar = document.querySelectorAll('.btn-eliminar-estado');
-  
+
   // Asignar evento click a cada botón
   botonesEliminar.forEach(function(boton) {
     boton.addEventListener('click', function() {
@@ -2644,6 +2678,61 @@ async function eliminarEstado(estadoId) {
     alert('❌ Error al eliminar el estado. Intenta de nuevo.');
   }
 }
+
+// ============================================
+// MODAL: Editar Estado
+// ============================================
+function abrirModalEditarEstado(id, estado, ubicacion, comentarios, fechaHora) {
+  document.getElementById('editarEstadoId').value = id;
+  const sel = document.getElementById('editarEstadoSelect');
+  if (sel) sel.value = estado || 'creado';
+  document.getElementById('editarEstadoUbicacion').value = ubicacion || '';
+  document.getElementById('editarEstadoComentarios').value = comentarios || '';
+  // Pre-llenar fecha con la original (ya viene en hora México desde el servidor)
+  const fechaInput = document.getElementById('editarEstadoFecha');
+  fechaInput.value = fechaHora || '';
+  document.getElementById('modalEditarEstado').classList.add('show');
+  lucide.createIcons();
+}
+
+function cerrarModalEditarEstado() {
+  document.getElementById('modalEditarEstado').classList.remove('show');
+}
+
+async function guardarEditarEstado() {
+  const id = document.getElementById('editarEstadoId').value;
+  const estado = document.getElementById('editarEstadoSelect').value;
+  const ubicacion = document.getElementById('editarEstadoUbicacion').value.trim();
+  const comentarios = document.getElementById('editarEstadoComentarios').value.trim();
+  const fechaHora = document.getElementById('editarEstadoFecha').value;
+
+  const btn = document.getElementById('btnGuardarEditarEstado');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader" style="width:16px;height:16px;"></i> Guardando...';
+  lucide.createIcons();
+
+  try {
+    const resp = await fetch(`/historial/${id}/editar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado, ubicacion, comentarios, fecha_hora: fechaHora || '' })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert('❌ Error: ' + (data.message || 'No se pudo guardar'));
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="save" style="width:16px;height:16px;"></i> Guardar';
+      lucide.createIcons();
+    }
+  } catch (err) {
+    alert('❌ Error de conexión. Intenta de nuevo.');
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="save" style="width:16px;height:16px;"></i> Guardar';
+    lucide.createIcons();
+  }
+}
 </script>
 
 <!-- Animación del spinner -->
@@ -2714,6 +2803,61 @@ async function eliminarEstado(estadoId) {
   justify-content: flex-end;
 }
 </style>
+
+  <!-- Modal Editar Estado del Historial -->
+  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+  <div id="modalEditarEstado" class="modal">
+    <div class="modal-content" style="max-width:500px;">
+      <div class="modal-header">
+        <h2>
+          <i data-lucide="pencil" style="width:22px;height:22px;color:#3b82f6;"></i>
+          Editar estado
+        </h2>
+        <button class="modal-close" onclick="cerrarModalEditarEstado()">
+          <i data-lucide="x" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+        <input type="hidden" id="editarEstadoId">
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;color:#374151;display:block;margin-bottom:6px;">Estado</label>
+          <select id="editarEstadoSelect" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-family:inherit;color:#1e293b;">
+            <option value="creado">Creado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="en-transito">En tránsito</option>
+            <option value="entregado">Entregado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;color:#374151;display:block;margin-bottom:6px;">Ubicación</label>
+          <input type="text" id="editarEstadoUbicacion" placeholder="Ej. Monterrey, NL"
+            style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-family:inherit;color:#1e293b;">
+        </div>
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;color:#374151;display:block;margin-bottom:6px;">Comentarios</label>
+          <textarea id="editarEstadoComentarios" rows="3" placeholder="Comentario opcional..."
+            style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-family:inherit;color:#1e293b;resize:vertical;"></textarea>
+        </div>
+        <div>
+          <label style="font-size:0.82rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">
+            Fecha y hora
+            <span style="font-weight:400;color:#94a3b8;font-size:0.78rem;"> — dejar en blanco para conservar la original</span>
+          </label>
+          <input type="datetime-local" id="editarEstadoFecha"
+            style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-family:inherit;color:#1e293b;">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary" onclick="cerrarModalEditarEstado()">Cancelar</button>
+        <button id="btnGuardarEditarEstado" class="btn btn-primary" onclick="guardarEditarEstado()">
+          <i data-lucide="save" style="width:16px;height:16px;"></i>
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+  <% } %>
 
   <!-- Modal Eliminar Envío -->
   <% if (user && user.rol === 'admin') { %>
