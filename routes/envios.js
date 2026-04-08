@@ -673,6 +673,17 @@ router.post('/api/guardar-config-guia', isAuthenticated, async (req, res) => {
       [envio_id, usuarioId, usuarioNombre, tuvoCAmbios ? 1 : 0]
     ).catch(() => {});
 
+    // Auto cambiar estado a En tránsito si el usuario tiene el flag activo
+    const [[autoRow]] = await db.query(
+      'SELECT auto_transito FROM usuarios WHERE id = ?', [usuarioId]
+    ).catch(() => [[{}]]);
+    if (autoRow?.auto_transito) {
+      await db.query(
+        `UPDATE envios SET estado_actual = 'en-transito' WHERE id = ? AND estado_actual NOT IN ('entregado','cancelado')`,
+        [envio_id]
+      ).catch(() => {});
+    }
+
     res.json({ ok: true });
   } catch (e) {
     console.error('Error guardar config guia:', e);

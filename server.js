@@ -250,6 +250,8 @@ db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_documentar   TINYINT(1) NOT NUL
 db.query(`ALTER TABLE usuarios ADD COLUMN documentar_activo  TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 // Migración: limitar guías visibles solo de su propiedad
 db.query(`ALTER TABLE usuarios ADD COLUMN solo_guias_propias TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+// Migración: auto cambiar estado a En tránsito al imprimir guía
+db.query(`ALTER TABLE usuarios ADD COLUMN auto_transito TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 // Migración: presentado_portal en guías/etiquetas impresas (permite des-presentar al cliente con un clic)
 db.query(`ALTER TABLE guias_config_impresa     ADD COLUMN presentado_portal TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE etiquetas_config_impresa ADD COLUMN presentado_portal TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
