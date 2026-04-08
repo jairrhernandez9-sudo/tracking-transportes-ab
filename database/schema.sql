@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-03-28
+-- Última actualización: 2026-04-07
 -- Motor: MySQL 8+ / MariaDB 10.5+
 -- ============================================================
 
@@ -60,6 +60,9 @@ CREATE TABLE `usuarios` (
   -- Campo Documentar a
   `ultimo_documentar`          TINYINT(1) NOT NULL DEFAULT 0,
   `documentar_activo`          TINYINT(1) NOT NULL DEFAULT 0,
+  -- Permisos adicionales
+  `solo_guias_propias`         TINYINT(1) NOT NULL DEFAULT 0,
+  `auto_transito`              TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -309,6 +312,8 @@ CREATE TABLE `clientes` (
   `template_guia_id`        INT           NULL COMMENT 'FK a guia_templates',
   `metodo_pago_defecto`     VARCHAR(3)    NOT NULL DEFAULT 'PPD' COMMENT 'PUE o PPD (SAT)',
   `logo_url`                VARCHAR(500)  NULL COMMENT 'Logo del cliente mostrado en el portal',
+  `ocultar_fecha`           TINYINT(1)    NOT NULL DEFAULT 0 COMMENT 'Oculta la fecha del historial en portal y tracking público',
+  `ocultar_hora`            TINYINT(1)    NOT NULL DEFAULT 0 COMMENT 'Oculta la hora del historial en portal y tracking público',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_prefijo_tracking` (`prefijo_tracking`),
   KEY `fk_cliente_etpl` (`template_etiqueta_id`),
@@ -431,7 +436,6 @@ CREATE TABLE `envios` (
   `numero_parte`            INT           DEFAULT NULL,
   -- Etiqueta / Pago
   `etiqueta_modificada`     TINYINT(1)    NOT NULL DEFAULT '0',
-  `editado_por_nombre`      VARCHAR(150)  DEFAULT NULL,
   -- Pago (SAT: PUE = contado, PPD = crédito)
   `metodo_pago`             VARCHAR(3)    NOT NULL DEFAULT 'PPD' COMMENT 'PUE o PPD (SAT). Copiado del cliente al crear el envío.',
   -- Auditoría
@@ -537,11 +541,9 @@ CREATE TABLE `pictogramas` (
 -- ============================================================
 DROP TABLE IF EXISTS `envio_pictogramas`;
 CREATE TABLE `envio_pictogramas` (
-  `id`             INT  NOT NULL AUTO_INCREMENT,
   `envio_id`       INT  NOT NULL,
   `pictograma_id`  INT  NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_envio_picto` (`envio_id`, `pictograma_id`),
+  PRIMARY KEY (`envio_id`, `pictograma_id`),
   KEY `fk_ep_picto` (`pictograma_id`),
   CONSTRAINT `fk_ep_envio`  FOREIGN KEY (`envio_id`)      REFERENCES `envios`      (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_ep_picto`  FOREIGN KEY (`pictograma_id`) REFERENCES `pictogramas` (`id`) ON DELETE CASCADE
@@ -745,4 +747,4 @@ CREATE TABLE IF NOT EXISTS `actividad_log` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-03-27
+-- Schema actualizado: 2026-04-07
