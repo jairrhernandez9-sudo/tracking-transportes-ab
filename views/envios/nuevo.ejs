@@ -1114,9 +1114,10 @@
                     type="text"
                     id="refTagInput"
                     class="ref-tag-input"
-                    placeholder="Ej: PO-2024-001 y presiona Enter"
+                    placeholder="Ej: PO-2024-001 — Enter, coma, o clic en otro campo"
                     maxlength="100"
                     onkeydown="refTagKeydown(event)"
+                    onblur="refTagAgregar()"
                   >
                 </div>
                 <input type="hidden" name="referencia_cliente" id="refTagHidden" value="">

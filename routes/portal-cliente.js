@@ -459,6 +459,13 @@ router.get('/envio/:id/guia', soloCliente, async (req, res) => {
         [envio.origen_calle, envio.origen_ciudad]
       );
       origenAlias = origenRows[0]?.alias || null;
+      if (!origenAlias) {
+        const [origenClienteRows] = await db.query(
+          'SELECT alias FROM direcciones_cliente WHERE calle = ? AND ciudad = ? LIMIT 1',
+          [envio.origen_calle, envio.origen_ciudad]
+        );
+        origenAlias = origenClienteRows[0]?.alias || null;
+      }
     }
     let destinoAlias = null;
     if (envio.destino_calle && envio.destino_ciudad) {

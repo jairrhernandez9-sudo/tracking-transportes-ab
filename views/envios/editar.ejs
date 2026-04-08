@@ -717,8 +717,9 @@
                 <div class="ref-tags-wrapper" id="refTagsWrapper" onclick="document.getElementById('refTagInput').focus()">
                   <div id="refTagsContainer"></div>
                   <input type="text" id="refTagInput" class="ref-tag-input"
-                    placeholder="Ej: PO-2024-001 y presiona Enter" maxlength="100"
-                    onkeydown="refTagKeydown(event)">
+                    placeholder="Ej: PO-2024-001 — Enter, coma, o clic en otro campo" maxlength="100"
+                    onkeydown="refTagKeydown(event)"
+                    onblur="refTagAgregar()">
                 </div>
                 <input type="hidden" name="referencia_cliente" id="refTagHidden" value="<%= envio.referencia_cliente || '' %>">
                 <p class="ref-add-hint">
