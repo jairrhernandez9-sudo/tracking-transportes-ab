@@ -1274,8 +1274,11 @@
       const lista  = tab === 'bodegas' ? _bodegas : _dirCliente;
       const filtered = lista.filter(d =>
         (d.alias||'').toLowerCase().includes(term) ||
+        (d.referencia||'').toLowerCase().includes(term) ||
         (d.calle||'').toLowerCase().includes(term) ||
-        (d.ciudad||'').toLowerCase().includes(term)
+        (d.colonia||'').toLowerCase().includes(term) ||
+        (d.ciudad||'').toLowerCase().includes(term) ||
+        (d.estado||'').toLowerCase().includes(term)
       );
       if (!filtered.length) {
         bodyEl.innerHTML = `<div class="dir-empty">${tab === 'bodegas' ? 'No hay bodegas registradas' : 'Este cliente no tiene direcciones guardadas'}</div>`;

@@ -2089,6 +2089,7 @@
           // Bodegas
           const bodegas = (direccionesBodegas || []).filter(d =>
             !query || d.alias?.toLowerCase().includes(query) ||
+            d.referencia?.toLowerCase().includes(query) ||
             d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query) ||
             d.estado?.toLowerCase().includes(query) || d.colonia?.toLowerCase().includes(query)
           );
@@ -2109,6 +2110,7 @@
           // Direcciones cliente
           const clDirs = (direccionesCliente || []).filter(d =>
             !query || d.alias?.toLowerCase().includes(query) ||
+            d.referencia?.toLowerCase().includes(query) ||
             d.ciudad?.toLowerCase().includes(query) || d.calle?.toLowerCase().includes(query) ||
             d.estado?.toLowerCase().includes(query) || d.colonia?.toLowerCase().includes(query)
           );

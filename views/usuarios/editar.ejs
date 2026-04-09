@@ -1418,6 +1418,19 @@ input[type="text"]::-moz-reveal {
                   El usuario puede usar el campo "Documentar a" al crear guías
                 </label>
               </div>
+              <div class="checkbox-container" style="margin-top:10px;">
+                <input
+                  type="checkbox"
+                  name="auto_transito"
+                  id="autoTransitoCheckbox"
+                  class="checkbox-input"
+                  value="1"
+                  <%= usuario.auto_transito ? 'checked' : '' %>
+                >
+                <label for="autoTransitoCheckbox" class="checkbox-label">
+                  Al imprimir la guía expedida, el envío cambia automáticamente a "En tránsito"
+                </label>
+              </div>
               <% } %>
             </div>
             
@@ -1687,18 +1700,6 @@ input[type="text"]::-moz-reveal {
                 </label>
               </div>
 
-              <% if (usuario.rol !== 'cliente') { %>
-              <div class="permiso-row" style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;">
-                <div class="permiso-row-info">
-                  <span class="permiso-label">Cuando termina de crear una guía en automático cambia su estado a "En tránsito"</span>
-                  <span class="permiso-desc">Al imprimir la guía expedida el envío pasa automáticamente a En tránsito</span>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" name="auto_transito" value="1" <%= usuario.auto_transito ? 'checked' : '' %>>
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <% } %>
 
             </div>
           </div><!-- /tab-columnas -->

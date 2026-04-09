@@ -1544,7 +1544,7 @@
                 <i data-lucide="file-text" style="width: 13px; height: 13px;"></i> PDF
               </button>
             </div>
-            <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+            <% if (user && user.rol === 'admin') { %>
             <!-- Grupo CSV admin (rose) -->
             <div style="display: flex; align-items: center; background: #fff1f2; border: 1px solid #fda4af; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
               <button onclick="abrirModalImportarCSV()" title="Importar CSV" style="padding: 7px 11px; background: transparent; border: none; border-right: 1px solid #fda4af; color: #be185d; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='transparent'">
@@ -1564,14 +1564,22 @@
         
         <% if (direcciones && direcciones.length > 0) { %>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 16px; margin-top: 16px;">
-            <% direcciones.forEach(function(dir) { %>
-              <div style="background: white; padding: 16px; border-radius: 10px; border: 2px solid #e5e7eb; transition: all 0.3s;"
-                   onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.1)'"
-                   onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
-                
+            <% direcciones.forEach(function(dir) {
+                const camposFaltantes = [];
+                if (!dir.colonia) camposFaltantes.push('Colonia');
+                if (!dir.ciudad)  camposFaltantes.push('Ciudad');
+                if (!dir.estado)  camposFaltantes.push('Estado');
+                if (!dir.cp)      camposFaltantes.push('CP');
+                const incompleta = camposFaltantes.length > 0;
+            %>
+              <div class="dir-card-item<%= incompleta ? ' dir-card-incompleta' : '' %>"
+                   style="background: <%= incompleta ? '#fffbeb' : 'white' %>; padding: 16px; border-radius: 10px; border: 2px solid <%= incompleta ? '#f59e0b' : '#e5e7eb' %>; transition: all 0.3s;"
+                   onmouseover="this.style.borderColor='<%= incompleta ? '#d97706' : '#3b82f6' %>'"
+                   onmouseout="this.style.borderColor='<%= incompleta ? '#f59e0b' : '#e5e7eb' %>'">
+
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                   <div style="flex: 1;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
                       <h3 style="font-size: 1rem; font-weight: 700; color: #1f2937; margin: 0;">
                         <%= dir.alias %>
                       </h3>
@@ -1580,14 +1588,20 @@
                           ⭐ PREDETERMINADA
                         </span>
                       <% } %>
+                      <% if (incompleta) { %>
+                        <span title="Faltan: <%= camposFaltantes.join(', ') %>"
+                              style="padding: 2px 8px; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; border-radius: 4px; font-size: 0.65rem; font-weight: 700; display:inline-flex; align-items:center; gap:3px;">
+                          ⚠ Incompleta — faltan: <%= camposFaltantes.join(', ') %>
+                        </span>
+                      <% } %>
                     </div>
-                    
+
                     <div style="color: #4b5563; font-size: 0.875rem; line-height: 1.5;">
                       <p style="margin: 0 0 2px 0;">
-                        📍 <%= dir.calle %>, <%= dir.colonia %>
+                        📍 <%= dir.calle %><% if (dir.colonia) { %>, <%= dir.colonia %><% } else { %> <span style="color:#d97706;font-style:italic;">— sin colonia</span><% } %>
                       </p>
                       <p style="margin: 0 0 2px 0;">
-                        🏙️ <%= dir.ciudad %>, <%= dir.estado %>, <%= dir.cp %>
+                        🏙️ <% if (dir.ciudad) { %><%= dir.ciudad %><% } else { %><span style="color:#d97706;font-style:italic;">sin ciudad</span><% } %><% if (dir.estado) { %>, <%= dir.estado %><% } else { %> <span style="color:#d97706;font-style:italic;">— sin estado</span><% } %><% if (dir.cp) { %>, <%= dir.cp %><% } else { %> <span style="color:#d97706;font-style:italic;">— sin CP</span><% } %>
                       </p>
                       <% if (dir.referencia) { %>
                         <p style="margin: 4px 0 0 0; padding: 6px 10px; background: #f9fafb; border-radius: 6px; font-size: 0.8rem;">
