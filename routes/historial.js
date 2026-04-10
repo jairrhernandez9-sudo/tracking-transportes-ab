@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { isAuthenticated } = require('../middleware/auth');
+const path = require('path');
+const fs = require('fs');
 
 // ============================================
 // HISTORIAL DE ACTIVIDAD DEL SISTEMA
@@ -187,6 +189,42 @@ router.delete('/:id/eliminar', isAuthenticated, async (req, res) => {
       success: false,
       message: 'Error al eliminar el estado'
     });
+  }
+});
+
+// ============================================
+// ELIMINAR FOTO INDIVIDUAL DE HISTORIAL
+// ============================================
+router.delete('/foto/:id', isAuthenticated, async (req, res) => {
+  try {
+    const fotoId = req.params.id;
+
+    if (!['admin', 'superusuario'].includes(req.session.userRole)) {
+      return res.status(403).json({ success: false, message: 'No tienes permisos para eliminar fotos' });
+    }
+
+    const [fotos] = await db.query('SELECT * FROM fotos_evidencia WHERE id = ?', [fotoId]);
+    if (fotos.length === 0) {
+      return res.status(404).json({ success: false, message: 'Foto no encontrada' });
+    }
+
+    const foto = fotos[0];
+
+    // Eliminar de la BD
+    await db.query('DELETE FROM fotos_evidencia WHERE id = ?', [fotoId]);
+
+    // Eliminar archivo del disco si está en /uploads/
+    if (foto.url_foto && foto.url_foto.startsWith('/uploads/')) {
+      const filePath = path.join(__dirname, '..', 'public', foto.url_foto);
+      fs.unlink(filePath, err => {
+        if (err) console.warn('No se pudo eliminar archivo:', filePath, err.message);
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error al eliminar foto:', error);
+    res.status(500).json({ success: false, message: 'Error al eliminar la foto' });
   }
 });
 
