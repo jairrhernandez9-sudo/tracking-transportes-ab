@@ -140,6 +140,12 @@
       .main-content { margin-left: 0; }
       .filtros-grid { grid-template-columns: 1fr 1fr; }
     }
+    .switch { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; cursor:pointer; inset:0; background:#cbd5e1; border-radius:24px; transition:.3s; }
+    .slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+    input:checked + .slider { background:#2563eb; }
+    input:checked + .slider:before { transform:translateX(20px); }
   </style>
 </head>
 <body>
@@ -221,7 +227,7 @@
             <span>Configuración</span>
           </a>
         </li>
-        <% if (user.email === 'jose.cordoba@transportesab.com') { %>
+        <% if (puedeVerHistorial) { %>
         <li class="nav-item">
           <a href="/historial/actividad" class="nav-link active">
             <i data-lucide="activity"></i>
@@ -277,6 +283,114 @@
         </div>
       </div>
     </header>
+
+    <!-- MÓDULO DESHABILITADO -->
+    <% if (moduloDeshabilitado) { %>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;text-align:center;">
+      <div style="width:72px;height:72px;background:#f1f5f9;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+        <i data-lucide="eye-off" style="width:36px;height:36px;color:#94a3b8;"></i>
+      </div>
+      <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Módulo deshabilitado</h2>
+      <p style="font-size:0.95rem;color:#64748b;max-width:380px;line-height:1.6;">
+        El historial de actividad ha sido desactivado por el administrador.<br>
+        Contacta con el responsable del sistema para reactivarlo.
+      </p>
+    </div>
+    <% } else { %>
+
+    <!-- TABS -->
+    <div style="display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid #e2e8f0;">
+      <a href="/historial/actividad?tab=actividad"
+        style="display:flex;align-items:center;gap:7px;padding:10px 20px;font-size:0.9rem;font-weight:700;text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;
+               color:<%= tabActual !== 'configuracion' ? '#3b82f6' : '#64748b' %>;
+               border-bottom-color:<%= tabActual !== 'configuracion' ? '#3b82f6' : 'transparent' %>;">
+        <i data-lucide="activity" style="width:16px;height:16px;"></i>
+        Actividad
+      </a>
+      <% if (esJose) { %>
+      <a href="/historial/actividad?tab=configuracion"
+        style="display:flex;align-items:center;gap:7px;padding:10px 20px;font-size:0.9rem;font-weight:700;text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;
+               color:<%= tabActual === 'configuracion' ? '#3b82f6' : '#64748b' %>;
+               border-bottom-color:<%= tabActual === 'configuracion' ? '#3b82f6' : 'transparent' %>;">
+        <i data-lucide="settings" style="width:16px;height:16px;"></i>
+        Configuración
+      </a>
+      <% } %>
+    </div>
+
+    <!-- TAB: CONFIGURACIÓN -->
+    <% if (tabActual === 'configuracion') { %>
+    <% if (guardado) { %>
+    <div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 18px;margin-bottom:16px;color:#15803d;font-weight:600;font-size:0.875rem;">
+      <i data-lucide="check-circle" style="width:18px;height:18px;flex-shrink:0;"></i>
+      Configuración guardada correctamente
+    </div>
+    <% } %>
+    <% if (guardadoError) { %>
+    <div style="display:flex;align-items:center;gap:10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:12px 18px;margin-bottom:16px;color:#dc2626;font-weight:600;font-size:0.875rem;">
+      <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;"></i>
+      Error al guardar la configuración. Intenta de nuevo.
+    </div>
+    <% } %>
+    <div style="max-width:600px;">
+      <form action="/historial/configuracion" method="POST">
+
+        <!-- Módulo on/off -->
+        <div style="background:white;border-radius:16px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,0.07);border:1px solid #e2e8f0;margin-bottom:20px;">
+          <h2 style="font-size:1rem;font-weight:800;color:#0f172a;margin-bottom:4px;display:flex;align-items:center;gap:10px;">
+            <i data-lucide="toggle-right" style="width:20px;height:20px;color:#3b82f6;"></i>
+            Módulo de Historial de Actividad
+          </h2>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:20px;">Activa o desactiva el acceso a este módulo para todos.</p>
+          <div style="display:flex;align-items:center;gap:16px;padding:16px 18px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+            <label class="switch" style="flex-shrink:0;">
+              <input type="checkbox" name="historial_actividad_activo" value="1" <%= historialActivo ? 'checked' : '' %>>
+              <span class="slider round"></span>
+            </label>
+            <div>
+              <div style="font-size:0.9rem;font-weight:700;color:#0f172a;">Módulo activo</div>
+              <div style="font-size:0.78rem;color:#64748b;">Actualmente: <strong style="color:<%= historialActivo ? '#16a34a' : '#dc2626' %>"><%= historialActivo ? 'Habilitado' : 'Deshabilitado' %></strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acceso por usuario (solo jose lo ve) -->
+        <% if (esJose && admins && admins.length > 0) { %>
+        <div style="background:white;border-radius:16px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,0.07);border:1px solid #e2e8f0;margin-bottom:20px;">
+          <h2 style="font-size:1rem;font-weight:800;color:#0f172a;margin-bottom:4px;display:flex;align-items:center;gap:10px;">
+            <i data-lucide="users" style="width:20px;height:20px;color:#3b82f6;"></i>
+            Acceso por administrador
+          </h2>
+          <p style="font-size:0.82rem;color:#64748b;margin-bottom:20px;">Elige qué administradores pueden ver el historial de actividad.</p>
+          <% admins.forEach(admin => { %>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f1f5f9;">
+            <label class="switch" style="flex-shrink:0;">
+              <input type="checkbox" name="acceso_usuario_id" value="<%= admin.id %>"
+                <%= admin.historial_acceso ? 'checked' : '' %>>
+              <span class="slider round"></span>
+            </label>
+            <div style="display:flex;flex-direction:column;gap:1px;">
+              <span style="font-size:0.9rem;font-weight:700;color:#0f172a;"><%= admin.nombre %></span>
+              <span style="font-size:0.78rem;color:#94a3b8;"><%= admin.email %></span>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+
+        <div style="text-align:right;">
+          <button type="submit"
+            style="display:inline-flex;align-items:center;gap:8px;background:#2563eb;color:white;border:none;border-radius:10px;padding:10px 24px;font-size:0.875rem;font-weight:700;cursor:pointer;">
+            <i data-lucide="save" style="width:15px;height:15px;"></i>
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+    <% } %>
+
+    <!-- TAB: ACTIVIDAD -->
+    <% if (tabActual !== 'configuracion') { %>
 
     <!-- FILTROS -->
     <div class="filtros-card">
@@ -413,6 +527,10 @@
       <% } %>
       <% } %>
     </div>
+
+    <% } %><%/* /if tabActual !== configuracion */%>
+
+    <% } %><%/* /if moduloDeshabilitado else */%>
 
   </main>
 </div>

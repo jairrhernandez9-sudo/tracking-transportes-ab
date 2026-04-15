@@ -262,6 +262,8 @@ db.query(`ALTER TABLE clientes ADD COLUMN ocultar_hora  TINYINT(1) NOT NULL DEFA
 db.query(`ALTER TABLE usuarios ADD COLUMN puede_editar_historial TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 // Migración: al crear la guía, pasar automáticamente a En tránsito
 db.query(`ALTER TABLE usuarios ADD COLUMN auto_transito_crear TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
+// Migración: acceso al historial de actividad por usuario
+db.query(`ALTER TABLE usuarios ADD COLUMN historial_acceso TINYINT(1) NOT NULL DEFAULT 0`).catch(() => {});
 
 // Migración: peso total de guía y peso por ítem en etiqueta
 db.query(`ALTER TABLE etiqueta_templates ADD COLUMN mostrar_peso_total TINYINT(1) DEFAULT 1`).catch(() => {});
@@ -475,6 +477,14 @@ const historialRoutes      = require('./routes/historial');
 const portalClienteRoutes  = require('./routes/portal-cliente');
 const pictogramasRoutes    = require('./routes/pictogramas');
 
+
+// Middleware global: exponer puedeVerHistorial a todas las vistas
+app.use((req, res, next) => {
+  res.locals.puedeVerHistorial =
+    req.session.userEmail === 'jose.cordoba@transportesab.com' ||
+    !!(req.session.historialAcceso);
+  next();
+});
 
 app.use('/tracking', trackingRoutes);
 app.use('/auth', authRoutes);

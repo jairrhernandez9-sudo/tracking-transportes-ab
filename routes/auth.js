@@ -66,6 +66,7 @@ router.post('/login', async (req, res) => {
     req.session.userRole = user.rol;
     req.session.clienteId = user.cliente_id || null;
     req.session.sucursalDirId = user.sucursal_dir_id || null;
+    req.session.historialAcceso = !!(user.historial_acceso);
 
     await registrarActividad(req, {
       accion: 'LOGIN', entidad: 'usuario', entidadId: user.id,

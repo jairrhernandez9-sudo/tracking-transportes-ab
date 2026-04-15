@@ -927,7 +927,7 @@
                 <span>Configuración</span>
               </a>
             </li>
-            <% if (user && user.email === 'jose.cordoba@transportesab.com') { %>
+            <% if (user && puedeVerHistorial) { %>
             <li class="nav-item">
               <a href="/historial/actividad" class="nav-link">
                 <i data-lucide="activity"></i>

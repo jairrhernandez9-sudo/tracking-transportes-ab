@@ -8,11 +8,116 @@ const fs = require('fs');
 // ============================================
 // HISTORIAL DE ACTIVIDAD DEL SISTEMA
 // ============================================
-router.get('/actividad', isAuthenticated, async (req, res) => {
-  if (req.session.userEmail !== 'jose.cordoba@transportesab.com') {
-    return res.status(403).send('No tienes acceso a esta página.');
+const JOSE_EMAIL = 'jose.cordoba@transportesab.com';
+
+function tieneAccesoHistorial(session) {
+  return session.userEmail === JOSE_EMAIL || !!(session.historialAcceso);
+}
+
+router.post('/configuracion', isAuthenticated, async (req, res) => {
+  if (req.session.userEmail !== JOSE_EMAIL) {
+    return res.status(403).json({ success: false });
   }
   try {
+    // Guardar flag del módulo
+    const valor = req.body.historial_actividad_activo ? 'true' : 'false';
+    await db.query(
+      'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
+      [valor, req.session.userId, 'historial_actividad_activo']
+    );
+
+    // Guardar accesos por usuario: primero quitar a todos los admins (excepto jose)
+    await db.query(
+      "UPDATE usuarios SET historial_acceso = 0 WHERE rol = 'admin' AND email != ?",
+      [JOSE_EMAIL]
+    );
+    // Activar los que vienen marcados (solo admins, nunca operadores ni clientes)
+    const idsActivos = [].concat(req.body.acceso_usuario_id || []).map(Number).filter(Boolean);
+    if (idsActivos.length > 0) {
+      await db.query(
+        `UPDATE usuarios SET historial_acceso = 1 WHERE id IN (${idsActivos.map(() => '?').join(',')}) AND rol = 'admin'`,
+        idsActivos
+      );
+    }
+
+    console.log('✅ Config historial guardada — módulo:', valor, '| accesos:', idsActivos);
+    res.redirect('/historial/actividad?tab=configuracion&guardado=1');
+  } catch (err) {
+    console.error('❌ Error al guardar config historial:', err);
+    res.redirect('/historial/actividad?tab=configuracion&error=1');
+  }
+});
+
+router.get('/actividad', isAuthenticated, async (req, res) => {
+  // Verificar acceso: jose.cordoba o usuarios con historial_acceso = 1
+  const [[usuarioSesion]] = await db.query(
+    'SELECT historial_acceso FROM usuarios WHERE id = ?', [req.session.userId]
+  ).catch(() => [[{}]]);
+  req.session.historialAcceso = usuarioSesion?.historial_acceso;
+
+  if (!tieneAccesoHistorial(req.session)) {
+    return res.status(403).send('No tienes acceso a esta página.');
+  }
+
+  const esJose = req.session.userEmail === JOSE_EMAIL;
+
+  try {
+    // Leer flag de activación
+    const [[flagRow]] = await db.query(
+      "SELECT valor FROM configuracion_sistema WHERE clave = 'historial_actividad_activo'"
+    ).catch(() => [[{ valor: 'true' }]]);
+    const historialActivo = flagRow?.valor !== 'false';
+    // Solo jose puede ver el tab de configuración
+    const tabActual = (req.query.tab === 'configuracion' && !esJose) ? 'actividad' : (req.query.tab || 'actividad');
+
+    // Lista de admins para el tab de configuración (solo jose la ve)
+    const [admins] = esJose
+      ? await db.query(
+          "SELECT id, nombre, email, historial_acceso FROM usuarios WHERE rol = 'admin' AND activo = 1 ORDER BY nombre"
+        )
+      : [[]];
+
+    // Si está desactivado:
+    // - Jose: redirigir a config si no está ya en él; si ya está en config, seguir normalmente
+    // - Otros con acceso: mostrar pantalla de módulo deshabilitado
+    if (!historialActivo) {
+      if (esJose) {
+        if (tabActual !== 'configuracion') {
+          // Llevar a Jose al tab de config para que pueda reactivar
+          return res.render('historial/actividad', {
+            title: 'Historial de Actividad',
+            registros: [], usuariosLog: [], filtros: {},
+            pagination: { pagina: 1, totalPaginas: 0, total: 0 },
+            historialActivo, tabActual: 'configuracion', esJose, admins,
+            guardado: req.query.guardado === '1',
+            guardadoError: req.query.error === '1',
+            moduloDeshabilitado: false,
+            user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole }
+          });
+        }
+        // Jose ya está en config tab: renderizar con datos mínimos (no hacen falta queries de actividad)
+        return res.render('historial/actividad', {
+          title: 'Historial de Actividad',
+          registros: [], usuariosLog: [], filtros: {},
+          pagination: { pagina: 1, totalPaginas: 0, total: 0 },
+          historialActivo, tabActual: 'configuracion', esJose, admins,
+          guardado: req.query.guardado === '1',
+          guardadoError: req.query.error === '1',
+          moduloDeshabilitado: false,
+          user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole }
+        });
+      }
+      // No es Jose: pantalla de módulo deshabilitado
+      return res.render('historial/actividad', {
+        title: 'Historial de Actividad',
+        registros: [], usuariosLog: [], filtros: {},
+        pagination: { pagina: 1, totalPaginas: 0, total: 0 },
+        historialActivo, tabActual: 'actividad', esJose, admins: [],
+        guardado: false, guardadoError: false,
+        moduloDeshabilitado: true,
+        user: { id: req.session.userId, nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole }
+      });
+    }
     const POR_PAGINA = 50;
     const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
     const offset  = (pagina - 1) * POR_PAGINA;
@@ -58,6 +163,13 @@ router.get('/actividad', isAuthenticated, async (req, res) => {
       usuariosLog,
       filtros: { accion, entidad, usuario_id, fecha_desde, fecha_hasta, q },
       pagination: { pagina, totalPaginas, total },
+      historialActivo,
+      tabActual,
+      esJose,
+      admins,
+      guardado: req.query.guardado === '1',
+      guardadoError: req.query.error === '1',
+      moduloDeshabilitado: false,
       user: {
         id: req.session.userId,
         nombre: req.session.userName,
