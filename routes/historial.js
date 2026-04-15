@@ -78,8 +78,16 @@ router.put('/:id/editar', isAuthenticated, async (req, res) => {
   try {
     const estadoId = req.params.id;
 
-    if (!['admin', 'superusuario', 'operador'].includes(req.session.userRole)) {
+    const rol = req.session.userRole;
+    if (!['admin', 'superusuario', 'operador'].includes(rol)) {
       return res.status(403).json({ success: false, message: 'No tienes permisos para editar estados' });
+    }
+    // Operador: verificar que tenga el permiso puede_editar_historial
+    if (rol === 'operador') {
+      const [[u]] = await db.query('SELECT puede_editar_historial FROM usuarios WHERE id = ?', [req.session.userId]);
+      if (!u?.puede_editar_historial) {
+        return res.status(403).json({ success: false, message: 'No tienes permisos para editar estados' });
+      }
     }
 
     const [estados] = await db.query('SELECT * FROM historial_estados WHERE id = ?', [estadoId]);

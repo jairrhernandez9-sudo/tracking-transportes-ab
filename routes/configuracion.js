@@ -91,7 +91,8 @@ async function obtenerConfiguracion() {
     alertas: {},
     tracking: {},
     etiqueta: {},
-    guia: {}
+    guia: {},
+    envios: {}
   };
   
   configs.forEach(config => {
@@ -1250,6 +1251,48 @@ router.post('/catalogos/tipos-empaques/:id/mover', isAuthenticated, async (req, 
     res.redirect('/configuracion?tab=catalogos');
   } catch (error) {
     console.error('Error al mover tipo empaque:', error);
+    res.redirect('/configuracion?tab=catalogos&error=error_servidor');
+  }
+});
+
+// Actualizar botones de fecha rápida
+router.post('/envios', async (req, res) => {
+  try {
+    const claves = [
+      'fecha_rapida_manana',
+      'fecha_rapida_2dias',
+      'fecha_rapida_3dias',
+      'fecha_rapida_hoy',
+      'fecha_rapida_1semana',
+      'fecha_rapida_2semanas',
+    ];
+
+    for (const clave of claves) {
+      const valor = req.body[clave] ? 'true' : 'false';
+      await db.query(
+        'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
+        [valor, req.session.userId, clave]
+      );
+    }
+
+    // Guardar botones personalizados como JSON
+    const labels  = [].concat(req.body['custom_label']  || []);
+    const days    = [].concat(req.body['custom_days']   || []);
+    const actives = [].concat(req.body['custom_active'] || []);
+    const custom = [];
+    for (let i = 0; i < labels.length; i++) {
+      const label = (labels[i] || '').trim();
+      const d = parseInt(days[i]);
+      if (label && !isNaN(d) && d > 0) custom.push({ label, days: d, active: actives[i] === '1' });
+    }
+    await db.query(
+      'UPDATE configuracion_sistema SET valor = ?, modificado_por = ? WHERE clave = ?',
+      [JSON.stringify(custom), req.session.userId, 'fecha_rapida_custom']
+    );
+
+    res.redirect('/configuracion?tab=catalogos&success=fecha_rapida');
+  } catch (error) {
+    console.error('Error al guardar configuración de envíos:', error);
     res.redirect('/configuracion?tab=catalogos&error=error_servidor');
   }
 });

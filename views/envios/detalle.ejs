@@ -1952,7 +1952,7 @@
       }) %>
     </span>
   </div>
-<% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+<% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || (user.rol === 'operador' && vistaPermisos.puedeEditarHistorial))) { %>
 <button
   type="button"
   class="btn-editar-estado"
@@ -1979,10 +1979,12 @@
 <% } %>
 </div>
                         
+                        <% if (item.ubicacion) { %>
                         <div class="timeline-ubicacion">
                           <i data-lucide="map-pin"></i>
-                          <%= item.ubicacion || 'Sin ubicación especificada' %>
+                          <%= item.ubicacion %>
                         </div>
+                        <% } %>
                         
                         <% if (item.comentarios) { %>
                           <div class="timeline-comentario">
@@ -2199,7 +2201,7 @@
                   </div>
                   
                   <div class="form-group">
-                    <label class="form-label">Ubicación</label>
+                    <label class="form-label">Ubicación <span style="font-weight:400;color:#94a3b8;font-size:0.8rem;">(opcional)</span></label>
                     <input type="text" name="ubicacion" id="ubicacionInput" class="form-input" placeholder="Ciudad, Estado">
                   </div>
                   
@@ -2878,7 +2880,7 @@ async function eliminarFoto(fotoId, btn) {
 </style>
 
   <!-- Modal Editar Estado del Historial -->
-  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'operador')) { %>
+  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario' || (user.rol === 'operador' && vistaPermisos.puedeEditarHistorial))) { %>
   <div id="modalEditarEstado" class="modal">
     <div class="modal-content" style="max-width:500px;">
       <div class="modal-header">

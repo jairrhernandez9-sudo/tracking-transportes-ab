@@ -3948,9 +3948,106 @@
             </div>
 
           </div><!-- /config-card -->
+
+          <!-- Tarjeta: Accesos rápidos de fecha -->
+          <form action="/configuracion/envios" method="POST" style="margin-top:24px;">
+            <div class="config-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <i data-lucide="calendar" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                    Accesos rápidos de fecha de entrega
+                  </h2>
+                  <p class="card-description">Botones que aparecen al crear o editar un envío en el campo "Fecha de entrega estimada".</p>
+                </div>
+              </div>
+
+              <%/* Predefinidos */%>
+              <div style="font-size:0.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:4px;">Predefinidos</div>
+              <% const botonesConfig = [
+                { clave: 'fecha_rapida_manana',   label: 'Mañana (1 día)' },
+                { clave: 'fecha_rapida_2dias',    label: '2 días' },
+                { clave: 'fecha_rapida_3dias',    label: '3 días' },
+                { clave: 'fecha_rapida_1semana',  label: '1 semana (7 días)' },
+                { clave: 'fecha_rapida_2semanas', label: '2 semanas (14 días)' },
+                { clave: 'fecha_rapida_hoy',      label: '⚠ HOY (advertencia)' },
+              ]; %>
+              <% botonesConfig.forEach(btn => { %>
+              <div style="display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <label class="switch" style="flex-shrink:0;">
+                  <input type="checkbox" name="<%= btn.clave %>" value="1"
+                    <%= (config.envios && (config.envios[btn.clave] === true || config.envios[btn.clave] === 'true')) ? 'checked' : '' %>>
+                  <span class="slider round"></span>
+                </label>
+                <span style="font-size:0.9rem; color:#374151; font-weight:500;"><%= btn.label %></span>
+              </div>
+              <% }); %>
+
+              <%/* Personalizados */%>
+              <div style="font-size:0.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:20px;">Personalizados</div>
+              <div id="custom-buttons-list">
+                <% const customBtns = (config.envios && Array.isArray(config.envios.fecha_rapida_custom)) ? config.envios.fecha_rapida_custom : []; %>
+                <% customBtns.forEach((btn, idx) => { %>
+                <div class="custom-btn-row" style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                  <label class="switch" style="flex-shrink:0;">
+                    <input type="checkbox" name="custom_active" value="1" <%= btn.active !== false ? 'checked' : '' %>>
+                    <span class="slider round"></span>
+                  </label>
+                  <input type="text" name="custom_label" value="<%= btn.label %>" placeholder="Etiqueta (ej: 5 días)"
+                    style="flex:1; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.875rem;">
+                  <input type="number" name="custom_days" value="<%= btn.days %>" min="1" max="365" placeholder="Días"
+                    style="width:80px; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.875rem;">
+                  <span style="font-size:0.78rem;color:#94a3b8;white-space:nowrap;">días</span>
+                  <button type="button" onclick="this.closest('.custom-btn-row').remove()"
+                    style="background:none; border:none; color:#ef4444; cursor:pointer; padding:4px; flex-shrink:0;" title="Eliminar">
+                    <i data-lucide="trash-2" style="width:16px;height:16px;pointer-events:none;"></i>
+                  </button>
+                </div>
+                <% }); %>
+              </div>
+              <button type="button" onclick="agregarBtnPersonalizado()"
+                style="display:flex;align-items:center;gap:6px;margin-top:10px;background:none;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 16px;color:#64748b;font-size:0.875rem;cursor:pointer;font-weight:600;">
+                <i data-lucide="plus" style="width:15px;height:15px;pointer-events:none;"></i>
+                Agregar acceso rápido
+              </button>
+
+              <div style="margin-top:24px; text-align:right;">
+                <button type="submit" class="btn-primary">
+                  <i data-lucide="save" style="width:16px;height:16px;"></i>
+                  Guardar cambios
+                </button>
+              </div>
+            </div>
+          </form>
+
         </div><!-- /tab catalogos -->
         <% } %><!-- /if !esOperador -->
 
+<script>
+function agregarBtnPersonalizado() {
+  const row = document.createElement('div');
+  row.className = 'custom-btn-row';
+  row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;';
+  row.innerHTML = `
+    <label class="switch" style="flex-shrink:0;">
+      <input type="checkbox" name="custom_active" value="1" checked>
+      <span class="slider round"></span>
+    </label>
+    <input type="text" name="custom_label" placeholder="Etiqueta (ej: 5 días)"
+      style="flex:1;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.875rem;">
+    <input type="number" name="custom_days" min="1" max="365" placeholder="Días"
+      style="width:80px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.875rem;">
+    <span style="font-size:0.78rem;color:#94a3b8;white-space:nowrap;">días</span>
+    <button type="button" onclick="this.closest('.custom-btn-row').remove()"
+      style="background:none;border:none;color:#ef4444;cursor:pointer;padding:4px;flex-shrink:0;" title="Eliminar">
+      <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+    </button>`;
+  document.getElementById('custom-buttons-list').appendChild(row);
+  lucide.createIcons();
+}
+</script>
+
+        <!-- ============================================ -->
         <!-- ============================================ -->
         <!-- TAB: PÁGINA DE INICIO                        -->
         <!-- ============================================ -->

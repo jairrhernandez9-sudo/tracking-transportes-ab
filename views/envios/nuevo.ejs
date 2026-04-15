@@ -1234,11 +1234,28 @@
                     </div>
                     <div class="fecha-divider"></div>
                     <div class="quick-dates">
+                      <% if (fechaRapida && fechaRapida.fecha_rapida_manana) { %>
                       <button type="button" class="quick-date-btn" data-days="1" onclick="setQuickDate(1)">Mañana</button>
+                      <% } %>
+                      <% if (fechaRapida && fechaRapida.fecha_rapida_2dias) { %>
+                      <button type="button" class="quick-date-btn" data-days="2" onclick="setQuickDate(2)">2 días</button>
+                      <% } %>
+                      <% if (fechaRapida && fechaRapida.fecha_rapida_3dias) { %>
                       <button type="button" class="quick-date-btn" data-days="3" onclick="setQuickDate(3)">3 días</button>
+                      <% } %>
+                      <% if (fechaRapida && fechaRapida.fecha_rapida_1semana) { %>
                       <button type="button" class="quick-date-btn" data-days="7" onclick="setQuickDate(7)">1 semana</button>
+                      <% } %>
+                      <% if (fechaRapida && fechaRapida.fecha_rapida_2semanas) { %>
                       <button type="button" class="quick-date-btn" data-days="14" onclick="setQuickDate(14)">2 semanas</button>
+                      <% } %>
+                      <% if (fechaRapida && Array.isArray(fechaRapida.fecha_rapida_custom)) {
+                           fechaRapida.fecha_rapida_custom.filter(b => b.active !== false).forEach(btn => { %>
+                      <button type="button" class="quick-date-btn" data-days="<%= btn.days %>" onclick="setQuickDate(<%= btn.days %>)"><%= btn.label %></button>
+                      <% }); } %>
+                      <% if (fechaRapida && fechaRapida.fecha_rapida_hoy) { %>
                       <button type="button" class="quick-date-btn hoy-btn" data-days="0" onclick="setQuickDate(0)">⚠ HOY</button>
+                      <% } %>
                     </div>
                   </div>
                 </div>

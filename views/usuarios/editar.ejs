@@ -1431,6 +1431,32 @@ input[type="text"]::-moz-reveal {
                   Al imprimir la guía expedida, el envío cambia automáticamente a "En tránsito"
                 </label>
               </div>
+              <div class="checkbox-container" style="margin-top:10px;">
+                <input
+                  type="checkbox"
+                  name="puede_editar_historial"
+                  id="puedeEditarHistorialCheckbox"
+                  class="checkbox-input"
+                  value="1"
+                  <%= usuario.puede_editar_historial ? 'checked' : '' %>
+                >
+                <label for="puedeEditarHistorialCheckbox" class="checkbox-label">
+                  El usuario puede editar hora en los historiales de pedido
+                </label>
+              </div>
+              <div class="checkbox-container" style="margin-top:10px;">
+                <input
+                  type="checkbox"
+                  name="auto_transito_crear"
+                  id="autoTransitoCrearCheckbox"
+                  class="checkbox-input"
+                  value="1"
+                  <%= usuario.auto_transito_crear ? 'checked' : '' %>
+                >
+                <label for="autoTransitoCrearCheckbox" class="checkbox-label">
+                  Al crear la guía, cambiar automáticamente el estado a "En tránsito"
+                </label>
+              </div>
               <% } %>
             </div>
             

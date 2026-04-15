@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-04-07
+-- Última actualización: 2026-04-15
 -- Motor: MySQL 8+ / MariaDB 10.5+
 -- ============================================================
 
@@ -63,6 +63,8 @@ CREATE TABLE `usuarios` (
   -- Permisos adicionales
   `solo_guias_propias`         TINYINT(1) NOT NULL DEFAULT 0,
   `auto_transito`              TINYINT(1) NOT NULL DEFAULT 0,
+  `puede_editar_historial`     TINYINT(1) NOT NULL DEFAULT 0,
+  `auto_transito_crear`        TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -341,6 +343,16 @@ CREATE TABLE `configuracion_sistema` (
   KEY `modificado_por` (`modificado_por`),
   CONSTRAINT `configuracion_sistema_ibfk_1` FOREIGN KEY (`modificado_por`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Datos iniciales: botones de fecha rápida
+INSERT INTO `configuracion_sistema` (`clave`, `valor`, `tipo`, `categoria`, `descripcion`) VALUES
+  ('fecha_rapida_manana',   'true',  'boolean', 'envios', 'Botón fecha rápida: Mañana'),
+  ('fecha_rapida_2dias',    'true',  'boolean', 'envios', 'Botón fecha rápida: 2 días'),
+  ('fecha_rapida_3dias',    'true',  'boolean', 'envios', 'Botón fecha rápida: 3 días'),
+  ('fecha_rapida_hoy',      'true',  'boolean', 'envios', 'Botón fecha rápida: HOY (advertencia)'),
+  ('fecha_rapida_1semana',  'false', 'boolean', 'envios', 'Botón fecha rápida: 1 semana'),
+  ('fecha_rapida_2semanas', 'false', 'boolean', 'envios', 'Botón fecha rápida: 2 semanas'),
+  ('fecha_rapida_custom',   '[]',    'json',    'envios', 'Botones de fecha rápida personalizados');
 
 
 -- ============================================================

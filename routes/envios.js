@@ -9,6 +9,41 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 // ============================================
+// FUNCIÓN HELPER: Botones de fecha rápida
+// ============================================
+async function getFechaRapidaConfig() {
+  try {
+    const [rows] = await db.query(
+      "SELECT clave, valor, tipo FROM configuracion_sistema WHERE categoria = 'envios'"
+    );
+    const cfg = {
+      fecha_rapida_manana:   true,
+      fecha_rapida_2dias:    true,
+      fecha_rapida_3dias:    true,
+      fecha_rapida_hoy:      true,
+      fecha_rapida_1semana:  false,
+      fecha_rapida_2semanas: false,
+      fecha_rapida_custom:   [],
+    };
+    rows.forEach(r => {
+      if (r.tipo === 'json') {
+        try { cfg[r.clave] = JSON.parse(r.valor); } catch (e) { cfg[r.clave] = []; }
+      } else {
+        cfg[r.clave] = r.valor === 'true';
+      }
+    });
+    return cfg;
+  } catch (e) {
+    return {
+      fecha_rapida_manana: true, fecha_rapida_2dias: true,
+      fecha_rapida_3dias: true,  fecha_rapida_hoy: true,
+      fecha_rapida_1semana: false, fecha_rapida_2semanas: false,
+      fecha_rapida_custom: [],
+    };
+  }
+}
+
+// ============================================
 // FUNCIÓN HELPER: Construir dirección completa
 // ============================================
 function construirDireccionCompleta(calle, colonia, ciudad, estado, cp, referencia = '') {
@@ -324,7 +359,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       `SELECT ver_botones_detalle, ver_telefono_detalle, ver_contacto_detalle,
               ver_editado_por_detalle, ver_panel_estado, ver_comentario_estado,
               ver_panel_evidencia, ver_comentario_evidencia, ver_acciones_rapidas,
-              ver_actualizado_por_detalle, ver_reimp_por_detalle
+              ver_actualizado_por_detalle, ver_reimp_por_detalle, puede_editar_historial
        FROM usuarios WHERE id = ?`, [req.session.userId]
     ).catch(() => [[{}]]);
     const vistaPermisos = {
@@ -339,6 +374,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       panelEvidencia:     (permsRow?.ver_panel_evidencia           ?? 1) !== 0,
       comentarioEvidencia:(permsRow?.ver_comentario_evidencia      ?? 1) !== 0,
       accionesRapidas:    (permsRow?.ver_acciones_rapidas          ?? 1) !== 0,
+      puedeEditarHistorial: !!(permsRow?.puede_editar_historial),
     };
 
     // Actualizado por: último registro de historial_estados
@@ -834,6 +870,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
       'SELECT id, nombre FROM tipos_empaques WHERE activo = 1 ORDER BY orden ASC, nombre ASC'
     ).catch(() => [[]]);
     const documentarActivo = !!(usuarioRow?.documentar_activo);
+    const fechaRapida = await getFechaRapidaConfig();
 
     res.render('envios/nuevo', {
       title: 'Crear Nuevo Envío',
@@ -849,6 +886,7 @@ router.get('/nuevo/formulario', isAuthenticated, async (req, res) => {
       tiposEmpaques: tiposEmpaques || [],
       documentarActivo,
       ultimoDocumentar: !!(usuarioRow?.ultimo_documentar),
+      fechaRapida,
       error: null
     });
   } catch (error) {
@@ -934,6 +972,7 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
         ultimoClienteId: parseInt(cliente_id) || null,
         pictogramas: [],
         tiposEmpaques: tiposEmpaquesVal || [],
+        fechaRapida: await getFechaRapidaConfig(),
         error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
@@ -1106,6 +1145,21 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       ).catch(() => {});
     }
 
+    // Auto-tránsito al crear: si el usuario tiene el flag, insertar historial en_transito
+    const [[usuarioTransitoCrear]] = await db.query(
+      'SELECT auto_transito_crear FROM usuarios WHERE id = ?', [req.session.userId]
+    ).catch(() => [[{}]]);
+    if (usuarioTransitoCrear?.auto_transito_crear) {
+      await db.query(
+        `INSERT INTO historial_estados (envio_id, estado, ubicacion, comentarios, usuario_id)
+         VALUES (?, 'en-transito', NULL, 'En tránsito', ?)`,
+        [envioId, req.session.userId]
+      ).catch(() => {});
+      await db.query(
+        "UPDATE envios SET estado_actual = 'en-transito' WHERE id = ?", [envioId]
+      ).catch(() => {});
+    }
+
     console.log('✅ Envío creado:', numeroTracking);
     await registrarActividad(req, {
       accion: 'ENVIO_CREADO', entidad: 'envio', entidadId: envioId,
@@ -1142,6 +1196,7 @@ if (!cliente_id || !origen_calle || !origen_ciudad || !destino_calle || !destino
       ultimoClienteId: parseInt(req.body?.cliente_id) || null,
       pictogramas: [],
       tiposEmpaques: tiposEmpaquesErr || [],
+      fechaRapida: await getFechaRapidaConfig(),
       error: 'Error al crear el envío: ' + error.message
     });
   }
@@ -1194,6 +1249,7 @@ router.get('/:id/editar', isAuthenticated, async (req, res) => {
       pictoIdsEnvio,
       tiposEmpaques: tiposEmpaquesEditar || [],
       documentarActivo: !!(usuarioEditar?.documentar_activo),
+      fechaRapida: await getFechaRapidaConfig(),
       error: null
     });
   } catch (error) {
@@ -1257,6 +1313,7 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
         envio: envioRow[0], clientes, items: itemsVal,
         pictogramas: [], pictoIdsEnvio: [],
         tiposEmpaques: tiposEmpaquesEditVal || [],
+        fechaRapida: await getFechaRapidaConfig(),
         error: 'Cliente y direcciones completas (calle, ciudad) son obligatorios'
       });
     }
@@ -1352,6 +1409,7 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
       envio: envioRow[0], clientes, items: itemsCatch,
       pictogramas: [], pictoIdsEnvio: [],
       tiposEmpaques: tiposEmpaquesEditErr || [],
+      fechaRapida: await getFechaRapidaConfig(),
       error: 'Error al actualizar el envío: ' + error.message
     });
   }
@@ -1363,8 +1421,8 @@ router.post('/:id/actualizar-estado', isAuthenticated, async (req, res) => {
     const { id } = req.params;
     const { nuevo_estado, ubicacion, comentarios } = req.body;
     
-    if (!nuevo_estado || !ubicacion) {
-      return res.status(400).json({ success: false, message: 'Estado y ubicación son obligatorios' });
+    if (!nuevo_estado) {
+      return res.status(400).json({ success: false, message: 'El estado es obligatorio' });
     }
     
     // VERIFICAR ESTADO ACTUAL
