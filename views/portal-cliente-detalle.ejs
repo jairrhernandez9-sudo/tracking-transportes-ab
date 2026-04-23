@@ -825,7 +825,7 @@
             </div>
             <div>
               <div class="quick-row-label">Entrega estimada</div>
-              <div class="quick-row-value"><%= new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric', timeZone:'America/Mexico_City'}) %></div>
+              <div class="quick-row-value"><%= new Date(envio.fecha_estimada_entrega + 'T12:00:00Z').toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric', timeZone:'America/Mexico_City'}) %></div>
             </div>
           </div>
           <% } %>

@@ -350,6 +350,10 @@ router.get('/rendimiento', isAuthenticated, async (req, res) => {
 // ══════════════════════════════════════════════════════════════
 function fmtFecha(d) {
   if (!d) return '—';
+  if (typeof d === 'string') {
+    const [y, m, day] = d.split('T')[0].split('-');
+    return `${day}/${m}/${y}`;
+  }
   return new Date(d).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 function fmtEstado(e) {

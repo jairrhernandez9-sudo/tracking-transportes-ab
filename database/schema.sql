@@ -1,7 +1,7 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
 -- Última actualización: 2026-04-15
--- Motor: MySQL 8+ / MariaDB 10.5+
+-- Motor: MySQL 8+
 -- ============================================================
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -63,8 +63,9 @@ CREATE TABLE `usuarios` (
   -- Permisos adicionales
   `solo_guias_propias`         TINYINT(1) NOT NULL DEFAULT 0,
   `auto_transito`              TINYINT(1) NOT NULL DEFAULT 0,
-  `puede_editar_historial`     TINYINT(1) NOT NULL DEFAULT 0,
-  `auto_transito_crear`        TINYINT(1) NOT NULL DEFAULT 0,
+  `puede_editar_historial`     TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Operador puede editar fecha/hora en historial de pedido',
+  `auto_transito_crear`        TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Al crear guía, agrega automáticamente estado en-transito',
+  `historial_acceso`           TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Admin puede ver el módulo Historial de Actividad',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -353,6 +354,16 @@ INSERT INTO `configuracion_sistema` (`clave`, `valor`, `tipo`, `categoria`, `des
   ('fecha_rapida_1semana',  'false', 'boolean', 'envios', 'Botón fecha rápida: 1 semana'),
   ('fecha_rapida_2semanas', 'false', 'boolean', 'envios', 'Botón fecha rápida: 2 semanas'),
   ('fecha_rapida_custom',   '[]',    'json',    'envios', 'Botones de fecha rápida personalizados');
+
+-- Datos iniciales: historial de actividad
+INSERT INTO `configuracion_sistema` (`clave`, `valor`, `tipo`, `categoria`, `descripcion`) VALUES
+  ('historial_actividad_activo', 'true', 'boolean', 'sistema', 'Activa o desactiva el módulo Historial de Actividad para todos');
+
+-- Datos iniciales: configuración adicional
+INSERT INTO `configuracion_sistema` (`clave`, `valor`, `tipo`, `categoria`, `descripcion`) VALUES
+  ('credito_habilitado',        'true',  'boolean', 'tarifas',  'Habilitar pago por crédito'),
+  ('documentar_activo',         'true',  'boolean', 'empresa',  'Habilitar campo Documentar en creación de guías'),
+  ('etiqueta_mostrar_contacto', 'false', 'boolean', 'etiqueta', 'Toggle etiqueta_mostrar_contacto');
 
 
 -- ============================================================
@@ -759,4 +770,4 @@ CREATE TABLE IF NOT EXISTS `actividad_log` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-04-07
+-- Schema actualizado: 2026-04-15

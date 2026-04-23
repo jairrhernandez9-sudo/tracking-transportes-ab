@@ -1741,7 +1741,7 @@
                 <div class="info-item">
                   <span class="info-label">Fecha Estimada</span>
                   <span class="info-value">
-                    <%= envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) : '-' %>
+                    <%= envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega + 'T12:00:00Z').toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) : '-' %>
                   </span>
                 </div>
                 

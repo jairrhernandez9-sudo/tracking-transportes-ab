@@ -767,7 +767,7 @@
                     type="date" 
                     name="fecha_estimada_entrega" 
                     class="form-input" 
-                    value="<%= envio.fecha_estimada_entrega ? envio.fecha_estimada_entrega.toISOString().split('T')[0] : '' %>"
+                    value="<%= envio.fecha_estimada_entrega ? String(envio.fecha_estimada_entrega).split('T')[0] : '' %>"
                   >
                 </div>
               </div>

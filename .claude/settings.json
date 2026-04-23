@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -h localhost -u root -proot tracking_local -e \"SELECT id, numero_tracking, fecha_estimada_entrega FROM envios WHERE numero_tracking = 'DRAFTMD-00042TZ2301';\")",
+      "Bash(where mysql *)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

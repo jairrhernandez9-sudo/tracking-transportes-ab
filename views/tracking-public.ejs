@@ -567,8 +567,8 @@ ${(config.mostrar_comentarios_tracking !== false && item.comentarios) ? `<div cl
   });
 
   const fechaCreacion = new Date(envio.fecha_creacion).toLocaleDateString('es-MX');
-  const fechaEstimada = envio.fecha_estimada_entrega ? 
-    new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : 'Por definir';
+  const fechaEstimada = envio.fecha_estimada_entrega ?
+    new Date(envio.fecha_estimada_entrega + 'T12:00:00Z').toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) : 'Por definir';
 
   // Generar código QR
   let qrCodeHTML = '';
@@ -819,7 +819,7 @@ ${(config.mostrar_comentarios_tracking !== false && item.comentarios) ? `<div cl
       ['Destino:', envio.destino],
       ['Peso:', `${envio.peso} kg`],
       ['Fecha de Envío:', new Date(envio.fecha_creacion).toLocaleDateString('es-MX')],
-      ['Entrega Estimada:', envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega).toLocaleDateString('es-MX') : 'Por definir'],
+      ['Entrega Estimada:', envio.fecha_estimada_entrega ? new Date(envio.fecha_estimada_entrega + 'T12:00:00Z').toLocaleDateString('es-MX', {timeZone:'America/Mexico_City'}) : 'Por definir'],
       ['Cliente:', envio.nombre_empresa || 'N/A'],
       ['Referencia del Cliente:', envio.referencia_cliente || 'Sin referencia'],
       ['Descripción:', envio.descripcion || 'N/A']
