@@ -1415,6 +1415,71 @@ router.post('/:id/editar', isAuthenticated, async (req, res) => {
   }
 });
 
+// Actualizar estado masivo (POST)
+const ESTADOS_VALIDOS = ['creado', 'pendiente', 'en-transito', 'entregado', 'cancelado'];
+router.post('/bulk-update', isAuthenticated, async (req, res) => {
+  try {
+    const { ids, nuevo_estado, nueva_fecha } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0)
+      return res.status(400).json({ success: false, message: 'Selecciona al menos un envío' });
+    if (!nuevo_estado && !nueva_fecha)
+      return res.status(400).json({ success: false, message: 'Selecciona al menos un campo a modificar' });
+    if (nuevo_estado && !ESTADOS_VALIDOS.includes(nuevo_estado))
+      return res.status(400).json({ success: false, message: 'Estado inválido' });
+
+    const safeIds = ids.map(Number).filter(n => Number.isInteger(n) && n > 0);
+    if (safeIds.length === 0)
+      return res.status(400).json({ success: false, message: 'IDs inválidos' });
+
+    const setCols = [];
+    const setVals = [];
+    if (nuevo_estado) { setCols.push('estado_actual = ?');          setVals.push(nuevo_estado); }
+    if (nueva_fecha)  { setCols.push('fecha_estimada_entrega = ?'); setVals.push(nueva_fecha);  }
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      await conn.query(
+        `UPDATE envios SET ${setCols.join(', ')} WHERE id IN (${safeIds.map(() => '?').join(',')})`,
+        [...setVals, ...safeIds]
+      );
+
+      if (nuevo_estado) {
+        for (const envioId of safeIds) {
+          await conn.query(
+            `INSERT INTO historial_estados (envio_id, estado, comentarios, usuario_id) VALUES (?, ?, ?, ?)`,
+            [envioId, nuevo_estado, 'Cambio masivo de estado', req.session.userId]
+          );
+        }
+      }
+
+      await conn.commit();
+    } catch (e) {
+      await conn.rollback();
+      throw e;
+    } finally {
+      conn.release();
+    }
+
+    const cambios = [];
+    if (nuevo_estado) cambios.push(`estado → "${nuevo_estado}"`);
+    if (nueva_fecha)  cambios.push(`fecha estimada → "${nueva_fecha}"`);
+
+    await registrarActividad(req, {
+      accion: 'ENVIO_BULK_UPDATE', entidad: 'envio', entidadId: null,
+      descripcion: `Cambio masivo: ${safeIds.length} envío(s) — ${cambios.join(', ')}`,
+      detalle: { ids: safeIds, nuevo_estado, nueva_fecha }
+    });
+
+    res.json({ success: true, updated: safeIds.length });
+  } catch (e) {
+    console.error('bulk-update error:', e);
+    res.status(500).json({ success: false, message: 'Error al actualizar' });
+  }
+});
+
 // Actualizar estado de envío (POST)
 router.post('/:id/actualizar-estado', isAuthenticated, async (req, res) => {
   try {

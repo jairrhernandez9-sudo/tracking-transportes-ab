@@ -780,6 +780,110 @@
       color: #991b1b;
     }
     
+    /* ── Bulk action bar ───────────────────────────────── */
+    .bulk-bar {
+      position: fixed;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #f8fafc;
+      border-radius: 14px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      z-index: 1000;
+      transition: bottom 0.28s cubic-bezier(.4,0,.2,1);
+      white-space: nowrap;
+    }
+    .bulk-bar.visible { bottom: 28px; }
+    .bulk-bar-count {
+      font-size: 0.88rem;
+      font-weight: 600;
+      background: #334155;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+    .bulk-bar-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .bulk-bar-btn:hover { background: #2563eb; }
+    .bulk-bar-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .bulk-bar-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      border-radius: 6px;
+    }
+    .bulk-bar-close:hover { color: #f8fafc; background: #334155; }
+
+    /* Checkbox col + row highlight */
+    .col-check { width: 40px; text-align: center; }
+    .envio-cb { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
+    tr.bulk-selected td { background: #eff6ff !important; }
+    tr.bulk-selected { outline: 2px solid #bfdbfe; outline-offset: -1px; }
+
+    /* Modal bulk */
+    .bulk-field-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .bulk-field-row:last-child { border-bottom: none; }
+    .bulk-field-row label.bulk-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #1e293b;
+      min-width: 160px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .bulk-field-row .bulk-input {
+      flex: 1;
+    }
+    .bulk-field-row select,
+    .bulk-field-row input[type="date"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #f8fafc;
+      color: #1e293b;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .bulk-field-row select:disabled,
+    .bulk-field-row input[type="date"]:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .bulk-field-row select:not(:disabled),
+    .bulk-field-row input[type="date"]:not(:disabled) {
+      background: #fff;
+      border-color: #3b82f6;
+    }
+
     .table-actions {
       display: flex;
       gap: 8px;
@@ -1412,6 +1516,9 @@
             <table class="table">
               <thead>
                 <tr>
+                  <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+                  <th class="col-check"><input type="checkbox" class="envio-cb" id="checkAll" title="Seleccionar todos"></th>
+                  <% } %>
                   <% if (!colPermisos || colPermisos.folio)      { %><th>Folio</th><% } %>
                   <% if (!colPermisos || colPermisos.tracking)   { %><th>Tracking</th><% } %>
                   <% if (!colPermisos || colPermisos.referencia) { %><th>Referencia</th><% } %>
@@ -1427,6 +1534,9 @@
               <tbody>
                 <% envios.forEach(envio => { %>
                   <tr class="<%= (user && (user.rol === 'admin' || user.rol === 'superusuario') && envio.etiqueta_modificada) ? 'etq-modificada' : '' %>">
+                    <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+                    <td class="col-check"><input type="checkbox" class="envio-cb row-cb" value="<%= envio.id %>"></td>
+                    <% } %>
                     <% if (!colPermisos || colPermisos.folio) { %>
                     <td style="font-size:0.8rem;color:#64748b;font-weight:600;">#<%= envio.id %></td>
                     <% } %>
@@ -2068,6 +2178,224 @@
       }
     });
   </script>
+  <!-- Barra de edición masiva -->
+  <div class="bulk-bar" id="bulkBar">
+    <span class="bulk-bar-count" id="bulkCount">0 seleccionados</span>
+    <button class="bulk-bar-btn" onclick="abrirModalBulk()">
+      <i data-lucide="pencil" style="width:15px;height:15px;"></i>
+      Editar selección
+    </button>
+    <button class="bulk-bar-close" onclick="limpiarSeleccion()" title="Cancelar selección">
+      <i data-lucide="x" style="width:16px;height:16px;"></i>
+    </button>
+  </div>
+
+  <!-- Modal edición masiva -->
+  <div id="modalBulk" class="modal">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <h2>
+          <i data-lucide="pencil" style="width:22px;height:22px;color:#3b82f6;"></i>
+          Editar selección
+        </h2>
+        <button class="modal-close" onclick="cerrarModalBulk()">
+          <i data-lucide="x" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#64748b;font-size:0.88rem;margin-bottom:16px;">
+          Activa los campos que quieres modificar. Solo se actualizarán los campos marcados.
+        </p>
+
+        <div class="bulk-field-row">
+          <label class="bulk-label">
+            <input type="checkbox" id="chkEstado" onchange="toggleBulkField('bulkEstadoSel','chkEstado')">
+            Estado
+          </label>
+          <div class="bulk-input">
+            <select id="bulkEstadoSel" disabled>
+              <option value="">Selecciona...</option>
+              <option value="creado">Creado</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en-transito">En tránsito</option>
+              <option value="entregado">Entregado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bulk-field-row">
+          <label class="bulk-label">
+            <input type="checkbox" id="chkFecha" onchange="toggleBulkField('bulkFechaInput','chkFecha')">
+            Fecha estimada
+          </label>
+          <div class="bulk-input">
+            <input type="date" id="bulkFechaInput" disabled>
+          </div>
+        </div>
+
+        <p id="bulkResumen" style="margin-top:16px;font-size:0.85rem;color:#3b82f6;font-weight:600;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="cerrarModalBulk()">
+          <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
+          Cancelar
+        </button>
+        <button id="btnConfirmarBulk" class="btn btn-primary" onclick="confirmarBulk()">
+          <i data-lucide="check" style="width:18px;height:18px;"></i>
+          Confirmar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Selección masiva ────────────────────────────────────────
+    (function() {
+      const checkAll = document.getElementById('checkAll');
+      const bar      = document.getElementById('bulkBar');
+      const counter  = document.getElementById('bulkCount');
+
+      function getChecked() {
+        return Array.from(document.querySelectorAll('.row-cb:checked'));
+      }
+
+      function updateBar() {
+        const checked = getChecked();
+        const n = checked.length;
+        counter.textContent = n === 1 ? '1 seleccionado' : `${n} seleccionados`;
+        bar.classList.toggle('visible', n > 0);
+        if (checkAll) {
+          checkAll.indeterminate = n > 0 && n < document.querySelectorAll('.row-cb').length;
+          checkAll.checked = n > 0 && n === document.querySelectorAll('.row-cb').length;
+        }
+        // Resaltar filas
+        document.querySelectorAll('.row-cb').forEach(cb => {
+          cb.closest('tr').classList.toggle('bulk-selected', cb.checked);
+        });
+        lucide.createIcons();
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', function() {
+          document.querySelectorAll('.row-cb').forEach(cb => cb.checked = this.checked);
+          updateBar();
+        });
+      }
+
+      document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-cb')) updateBar();
+      });
+
+      window.limpiarSeleccion = function() {
+        document.querySelectorAll('.row-cb').forEach(cb => {
+          cb.checked = false;
+          cb.closest('tr').classList.remove('bulk-selected');
+        });
+        if (checkAll) { checkAll.checked = false; checkAll.indeterminate = false; }
+        bar.classList.remove('visible');
+      };
+
+      window.toggleBulkField = function(inputId, chkId) {
+        const input = document.getElementById(inputId);
+        const chk   = document.getElementById(chkId);
+        input.disabled = !chk.checked;
+        if (chk.checked) input.focus();
+        actualizarResumen();
+      };
+
+      window.actualizarResumen = function() {
+        const n    = getChecked().length;
+        const partes = [];
+        if (document.getElementById('chkEstado')?.checked) {
+          const v = document.getElementById('bulkEstadoSel').value;
+          if (v) partes.push(`estado → <strong>${v}</strong>`);
+        }
+        if (document.getElementById('chkFecha')?.checked) {
+          const v = document.getElementById('bulkFechaInput').value;
+          if (v) partes.push(`fecha estimada → <strong>${v}</strong>`);
+        }
+        const el = document.getElementById('bulkResumen');
+        el.innerHTML = partes.length
+          ? `Se modificará${partes.length > 1 ? 'n' : ''} ${partes.join(' y ')} en <strong>${n}</strong> envío${n !== 1 ? 's' : ''}.`
+          : '';
+      };
+
+      document.getElementById('bulkEstadoSel')?.addEventListener('change', actualizarResumen);
+      document.getElementById('bulkFechaInput')?.addEventListener('change', actualizarResumen);
+
+      window.abrirModalBulk = function() {
+        // Reset campos
+        ['chkEstado','chkFecha'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.checked = false;
+        });
+        document.getElementById('bulkEstadoSel').disabled = true;
+        document.getElementById('bulkFechaInput').disabled = true;
+        document.getElementById('bulkEstadoSel').value = '';
+        document.getElementById('bulkFechaInput').value = '';
+        document.getElementById('bulkResumen').innerHTML = '';
+        document.getElementById('modalBulk').classList.add('show');
+        lucide.createIcons();
+      };
+
+      window.cerrarModalBulk = function() {
+        document.getElementById('modalBulk').classList.remove('show');
+      };
+
+      document.getElementById('modalBulk')?.addEventListener('click', function(e) {
+        if (e.target === this) cerrarModalBulk();
+      });
+
+      window.confirmarBulk = async function() {
+        const ids = getChecked().map(cb => parseInt(cb.value));
+        const payload = { ids };
+
+        if (document.getElementById('chkEstado')?.checked) {
+          const v = document.getElementById('bulkEstadoSel').value;
+          if (!v) { alert('Selecciona un estado'); return; }
+          payload.nuevo_estado = v;
+        }
+        if (document.getElementById('chkFecha')?.checked) {
+          const v = document.getElementById('bulkFechaInput').value;
+          if (!v) { alert('Ingresa una fecha estimada'); return; }
+          payload.nueva_fecha = v;
+        }
+        if (!payload.nuevo_estado && !payload.nueva_fecha) {
+          alert('Activa al menos un campo para modificar');
+          return;
+        }
+
+        const btn = document.getElementById('btnConfirmarBulk');
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" style="width:18px;height:18px;"></i> Aplicando...';
+        lucide.createIcons();
+
+        try {
+          const res  = await fetch('/envios/bulk-update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert(data.message || 'Error al actualizar');
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="check" style="width:18px;height:18px;"></i> Confirmar cambios';
+            lucide.createIcons();
+          }
+        } catch {
+          alert('Error de conexión');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="check" style="width:18px;height:18px;"></i> Confirmar cambios';
+          lucide.createIcons();
+        }
+      };
+    })();
+  </script>
+
   <script src="/js/notifications.js"></script>
   <script src="/js/sidebar.js"></script>
 </body>
