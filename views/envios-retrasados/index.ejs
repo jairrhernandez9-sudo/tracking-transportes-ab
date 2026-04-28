@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -327,15 +327,15 @@
       <div class="nav-section-title">PRINCIPAL</div>
       <ul class="nav-menu">
         <% if (!user || user.rol !== 'operador') { %><li class="nav-item"><a href="/dashboard" class="nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a></li><% } %>
-        <li class="nav-item"><a href="/envios" class="nav-link"><i data-lucide="package"></i><span>Envíos</span></a></li>
-        <li class="nav-item"><a href="/envios-retrasados" class="nav-link active"><i data-lucide="alert-triangle"></i><span>Envíos Retrasados</span></a></li>
+        <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item"><a href="/envios" class="nav-link"><i data-lucide="package"></i><span>Envíos</span></a></li><% } %>
+        <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item"><a href="/envios-retrasados" class="nav-link active"><i data-lucide="alert-triangle"></i><span>Envíos Retrasados</span></a></li><% } %>
       </ul>
     </div>
 
     <div class="nav-section">
       <div class="nav-section-title">GESTIÓN</div>
       <ul class="nav-menu">
-        <li class="nav-item"><a href="/clientes" class="nav-link"><i data-lucide="users"></i><span>Clientes</span></a></li>
+        <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item"><a href="/clientes" class="nav-link"><i data-lucide="users"></i><span>Clientes</span></a></li><% } %>
         <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
         <li class="nav-item"><a href="/reportes" class="nav-link"><i data-lucide="bar-chart"></i><span>Reportes</span></a></li>
         <% } %>
@@ -346,10 +346,10 @@
     <div class="nav-section">
       <div class="nav-section-title">SISTEMA</div>
       <ul class="nav-menu">
-        <% if (user.rol === 'admin') { %>
+        <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
         <li class="nav-item"><a href="/usuarios" class="nav-link"><i data-lucide="user-cog"></i><span>Usuarios</span></a></li>
         <% } %>
-        <li class="nav-item"><a href="/configuracion" class="nav-link"><i data-lucide="settings"></i><span>Configuración</span></a></li>
+        <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item"><a href="/configuracion" class="nav-link"><i data-lucide="settings"></i><span>Configuración</span></a></li><% } %>
         <% if (user && puedeVerHistorial) { %>
         <li class="nav-item">
           <a href="/historial/actividad" class="nav-link">
@@ -425,6 +425,7 @@
     </div>
 
     <!-- STATS ROW -->
+    <% if (!userMenu || userMenu.sec_retrasados_stats) { %>
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-icon red"><i data-lucide="alert-triangle"></i></div>
@@ -455,6 +456,7 @@
         </div>
       </div>
     </div>
+    <% } %>
 
     <!-- SEVERITY BAR -->
     <% if (counts.total > 0) { %>
@@ -474,6 +476,7 @@
     <% } %>
 
     <!-- FILTER TABS -->
+    <% if (!userMenu || userMenu.sec_retrasados_filtros) { %>
     <div class="filter-bar">
       <span class="filter-label">Filtrar</span>
       <a href="/envios-retrasados" class="filter-tab <%= criticidad === 'todos' ? 'active' : '' %>">
@@ -493,6 +496,7 @@
         Medios <span class="ftab-count"><%= counts.medios %></span>
       </a>
     </div>
+    <% } %>
 
     <!-- TABLE -->
     <div class="table-card">
@@ -621,6 +625,7 @@
   }
 </script>
 <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

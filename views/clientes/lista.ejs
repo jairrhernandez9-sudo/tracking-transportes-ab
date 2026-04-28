@@ -908,30 +908,30 @@
             </a>
           </li>
           <% } %>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
             <a href="/envios" class="nav-link">
               <i data-lucide="package"></i>
               <span>Envíos</span>
             </a>
-          </li>
-          <li class="nav-item">
+          </li><% } %>
+          <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
             <a href="/envios-retrasados" class="nav-link">
               <i data-lucide="alert-triangle"></i>
               <span>Envíos Retrasados</span>
             </a>
-          </li>
+          </li><% } %>
         </ul>
       </div>
       
       <div class="nav-section">
         <div class="nav-section-title">GESTIÓN</div>
         <ul class="nav-menu">
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
             <a href="/clientes" class="nav-link active">
               <i data-lucide="users"></i>
               <span>Clientes</span>
             </a>
-          </li>
+          </li><% } %>
           <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
@@ -947,7 +947,7 @@
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
-            <% if (user.rol === 'admin') { %>
+            <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
@@ -955,12 +955,12 @@
               </a>
             </li>
             <% } %>
-            <li class="nav-item">
+            <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
                 <span>Configuración</span>
               </a>
-            </li>
+            </li><% } %>
             <% if (user && puedeVerHistorial) { %>
             <li class="nav-item">
               <a href="/historial/actividad" class="nav-link">
@@ -1011,7 +1011,7 @@
               Eliminados
             </a>
           <% } %>
-          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
+          <% if (user && (user.rol === 'admin' || user.rol === 'superusuario') && (!userMenu || userMenu.sec_clientes_nuevo)) { %>
           <a href="/clientes/nuevo" class="btn-primary">
             <i data-lucide="plus"></i>
             Nuevo Cliente
@@ -1084,6 +1084,7 @@
       <% } %>
       
       <!-- STATS CARDS -->
+      <% if (!userMenu || userMenu.sec_clientes_stats) { %>
       <div class="stats-grid">
         <div class="stat-card primary">
           <div class="stat-info">
@@ -1145,8 +1146,10 @@
           </div>
         </div>
       </div>
-      
+      <% } %>
+
       <!-- FILTERS -->
+      <% if (!userMenu || userMenu.sec_clientes_filtros) { %>
       <div class="filters-section">
         <form method="GET" action="/clientes">
           <div class="filters-grid">
@@ -1169,7 +1172,8 @@
           </div>
         </form>
       </div>
-      
+      <% } %>
+
       <!-- CLIENTES GRID (CARDS) -->
       <% if (clientes && clientes.length > 0) { %>
         <div class="clientes-grid" id="clientesGrid">
@@ -1361,6 +1365,7 @@
     
   </script>
   <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

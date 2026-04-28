@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -1328,13 +1328,13 @@
           <span>Dashboard</span>
         </a>
       </li>
-      <li class="nav-item">
+      <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
         <a href="/envios" class="nav-link">
           <i data-lucide="package"></i>
           <span>Envíos</span>
         </a>
-      </li>
-      <li class="nav-item">
+      </li><% } %>
+      <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
         <a href="/envios-retrasados" class="nav-link">
           <i data-lucide="alert-triangle"></i>
           <span>Envíos Retrasados</span>
@@ -1342,7 +1342,7 @@
             <span class="nav-badge"><%= stats.envios_retrasados %></span>
           <% } %>
         </a>
-      </li>
+      </li><% } %>
     </ul>
   </div>
   
@@ -1350,12 +1350,12 @@
   <div class="nav-section">
     <div class="nav-section-title">GESTIÓN</div>
     <ul class="nav-menu">
-      <li class="nav-item">
+      <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
         <a href="/clientes" class="nav-link">
           <i data-lucide="users"></i>
           <span>Clientes</span>
         </a>
-      </li>
+      </li><% } %>
       <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
       <li class="nav-item">
         <a href="/reportes" class="nav-link">
@@ -1372,7 +1372,7 @@
     <div class="nav-section">
       <div class="nav-section-title">SISTEMA</div>
       <ul class="nav-menu">
-        <% if (user.rol === 'admin') { %>
+        <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
         <li class="nav-item">
           <a href="/usuarios" class="nav-link">
             <i data-lucide="user-cog"></i>
@@ -1380,12 +1380,12 @@
           </a>
         </li>
         <% } %>
-        <li class="nav-item">
+        <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
           <a href="/configuracion" class="nav-link">
             <i data-lucide="settings"></i>
             <span>Configuración</span>
           </a>
-        </li>
+        </li><% } %>
         <% if (user && puedeVerHistorial) { %>
         <li class="nav-item">
           <a href="/historial/actividad" class="nav-link">
@@ -1476,6 +1476,7 @@
       </header>
       
       <!-- STATS CARDS -->
+      <% if (!userMenu || userMenu.dash_tarjetas) { %>
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-header">
@@ -1535,7 +1536,10 @@
         </div>
       </div>
       
+      <% } %>
+
       <!-- CHARTS SECTION -->
+      <% if (!userMenu || userMenu.dash_graficas) { %>
       <div class="charts-section">
         <div class="chart-card">
           <div class="chart-header">
@@ -1616,7 +1620,10 @@
         </div>
       </div>
       
+      <% } %>
+
       <!-- TRANSACTIONS TABLE -->
+      <% if (!userMenu || userMenu.dash_actividad) { %>
       <div class="transactions-section">
         <div class="section-header">
           <h3 class="section-title">Actividad reciente</h3>
@@ -1719,7 +1726,8 @@
           <% } %>
         </div>
       </div>
-      
+      <% } %>
+
     </main>
     
   </div>
@@ -2153,6 +2161,7 @@
   </script>
 
   <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

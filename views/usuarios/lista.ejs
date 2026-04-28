@@ -913,30 +913,30 @@
             </a>
           </li>
           <% } %>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
             <a href="/envios" class="nav-link">
               <i data-lucide="package"></i>
               <span>Envíos</span>
             </a>
-          </li>
-          <li class="nav-item">
+          </li><% } %>
+          <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
             <a href="/envios-retrasados" class="nav-link">
               <i data-lucide="alert-triangle"></i>
               <span>Envíos Retrasados</span>
             </a>
-          </li>
+          </li><% } %>
         </ul>
       </div>
       
       <div class="nav-section">
         <div class="nav-section-title">GESTIÓN</div>
         <ul class="nav-menu">
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
             <a href="/clientes" class="nav-link">
               <i data-lucide="users"></i>
               <span>Clientes</span>
             </a>
-          </li>
+          </li><% } %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
@@ -955,12 +955,12 @@
               <span>Usuarios</span>
             </a>
           </li>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
             <a href="/configuracion" class="nav-link">
               <i data-lucide="settings"></i>
               <span>Configuración</span>
             </a>
-          </li>
+          </li><% } %>
           <% if (user && puedeVerHistorial) { %>
           <li class="nav-item">
             <a href="/historial/actividad" class="nav-link">
@@ -997,10 +997,12 @@
             <i data-lucide="search" class="search-icon"></i>
           </div>
           
+          <% if (!userMenu || userMenu.sec_usuarios_nuevo) { %>
           <a href="/usuarios/nuevo" class="btn-primary">
             <i data-lucide="user-plus"></i>
             Nuevo Usuario
           </a>
+          <% } %>
           
           <a href="/envios-retrasados" class="notification-btn">
             <i data-lucide="bell"></i>
@@ -1070,6 +1072,7 @@
       <% } %>
       
       <!-- STATS -->
+      <% if (!userMenu || userMenu.sec_usuarios_stats) { %>
       <div class="stats-grid" style="grid-template-columns: repeat(5,1fr);">
         <div class="stat-card primary">
           <div class="stat-info">
@@ -1112,7 +1115,8 @@
           <div class="stat-icon" style="background:#fef3c7;"><i data-lucide="building-2" style="color:#92400e;"></i></div>
         </div>
       </div>
-      
+      <% } %>
+
       <!-- USERS TABLE -->
       <div class="users-container">
         <div class="users-header">
@@ -1121,6 +1125,7 @@
             Listado de Usuarios
           </h2>
           
+          <% if (!userMenu || userMenu.sec_usuarios_filtros) { %>
           <div class="filter-tabs">
             <button class="filter-tab active" data-filter="todos">Todos</button>
             <button class="filter-tab" data-filter="admin">Admins</button>
@@ -1128,6 +1133,7 @@
             <button class="filter-tab" data-filter="operador">Operadores</button>
             <button class="filter-tab" data-filter="cliente">Clientes</button>
           </div>
+          <% } %>
         </div>
         
         <% if (usuarios && usuarios.length > 0) { %>
@@ -1190,6 +1196,12 @@
                         <i data-lucide="edit"></i>
                         Editar
                       </a>
+                      <% if (usuario.rol !== 'cliente') { %>
+                      <a href="/usuarios/<%= usuario.id %>/permisos" class="btn-action" style="color:#7c3aed;border-color:#ddd8fe;" title="Gestionar permisos de menú">
+                        <i data-lucide="shield"></i>
+                        Permisos
+                      </a>
+                      <% } %>
                       <% if (usuario.id !== user.id) { %>
                         <button 
                           class="btn-action delete" 
@@ -1308,6 +1320,7 @@
     }
   </script>
   <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

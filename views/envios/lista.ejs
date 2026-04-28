@@ -1267,30 +1267,30 @@
             </a>
           </li>
           <% } %>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
             <a href="/envios" class="nav-link active">
               <i data-lucide="package"></i>
               <span>Envíos</span>
             </a>
-          </li>
-          <li class="nav-item">
+          </li><% } %>
+          <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
             <a href="/envios-retrasados" class="nav-link">
               <i data-lucide="alert-triangle"></i>
               <span>Envíos Retrasados</span>
             </a>
-          </li>
+          </li><% } %>
         </ul>
       </div>
       
       <div class="nav-section">
         <div class="nav-section-title">GESTIÓN</div>
         <ul class="nav-menu">
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
             <a href="/clientes" class="nav-link">
               <i data-lucide="users"></i>
               <span>Clientes</span>
             </a>
-          </li>
+          </li><% } %>
           <% if (user && (user.rol === 'admin' || user.rol === 'superusuario')) { %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
@@ -1306,7 +1306,7 @@
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
-            <% if (user.rol === 'admin') { %>
+            <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
@@ -1314,12 +1314,12 @@
               </a>
             </li>
             <% } %>
-            <li class="nav-item">
+            <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
                 <span>Configuración</span>
               </a>
-            </li>
+            </li><% } %>
             <% if (user && puedeVerHistorial) { %>
             <li class="nav-item">
               <a href="/historial/actividad" class="nav-link">
@@ -1409,6 +1409,7 @@
       <div class="envios-container">
 
         <!-- FILTROS EN CASCADA -->
+        <% if (!userMenu || userMenu.sec_envios_filtros) { %>
         <div class="filtro-cascade">
           <!-- Estado de México (república) -->
           <div class="fc-select-wrap">
@@ -1463,6 +1464,7 @@
             <i data-lucide="chevron-down" style="width:14px;height:14px;position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#6b7280;"></i>
           </div>
         </div>
+        <% } %>
 
         <!-- TOOLBAR -->
         <%
@@ -1477,6 +1479,7 @@
           }
         %>
         <div class="toolbar">
+          <% if (!userMenu || userMenu.sec_envios_tabs) { %>
           <div class="toolbar-left">
             <a href="<%= estadoUrl('todos') %>" class="filter-btn <%= (!filtros.estado || filtros.estado === 'todos') ? 'active' : '' %>">
               <i data-lucide="package" style="width: 18px; height: 18px;"></i>
@@ -1503,11 +1506,14 @@
               Cancelados
             </a>
           </div>
-          
+          <% } %>
+
+          <% if (!userMenu || userMenu.sec_envios_nuevo) { %>
           <a href="/envios/nuevo/formulario" class="btn-primary">
             <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
             Nuevo Envío
           </a>
+          <% } %>
         </div>
         
         <!-- TABLE -->
@@ -1593,9 +1599,11 @@
                         </a>
                         
                         <!-- Editar -->
+                        <% if (!userMenu || userMenu.sec_envios_editar) { %>
                         <a href="/envios/<%= envio.id %>/editar" class="btn-icon" title="Editar información">
                           <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                         </a>
+                        <% } %>
                         
                         <!-- Cancelar (Admin y Superusuario) -->
                         <% if (user && (user.rol === 'admin' || user.rol === 'superusuario') && envio.estado_actual !== 'cancelado' && envio.estado_actual !== 'entregado') { %>
@@ -2397,6 +2405,7 @@
   </script>
 
   <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

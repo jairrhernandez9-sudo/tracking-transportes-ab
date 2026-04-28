@@ -50,6 +50,36 @@ db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_facturar_rfc TINYINT
 db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_nombre TINYINT(1) DEFAULT 0`).catch(() => {});
 db.query(`ALTER TABLE guia_templates ADD COLUMN obligatorio_destinatario_direccion TINYINT(1) DEFAULT 0`).catch(() => {});
 
+// Migración: permisos de visibilidad de menú y dashboard por usuario
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_envios       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_retrasados   TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_clientes     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_reportes     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_configuracion TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_historial    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN dash_tarjetas     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN dash_graficas     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN dash_actividad    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+// Migración: permisos de secciones dentro de cada página
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_envios_filtros    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_envios_tabs       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_envios_nuevo      TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_clientes_stats    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_clientes_filtros  TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_clientes_nuevo    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_reportes_stats    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_reportes_filtros  TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_retrasados_stats  TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_retrasados_filtros TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_usuarios_stats    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_usuarios_filtros  TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_usuarios_nuevo    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_envios_editar       TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_reportes_general    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_reportes_clientes   TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_reportes_periodo    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN sec_reportes_rendimiento TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+
 // Migración: último lugar de expedición por usuario
 db.query(`ALTER TABLE usuarios ADD COLUMN ultimo_lugar_expedicion VARCHAR(200) NULL`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN sucursal_dir_id INT NULL`).catch(() => {});
@@ -483,6 +513,59 @@ app.use((req, res, next) => {
   res.locals.puedeVerHistorial =
     req.session.userEmail === 'jose.cordoba@transportesab.com' ||
     !!(req.session.historialAcceso);
+  next();
+});
+
+// Middleware global: permisos de visibilidad de menú y dashboard
+app.use(async (req, res, next) => {
+  res.locals.userMenuJson = 'null';
+  res.locals.userMenu     = null;
+  if (!req.session.userId) return next();
+  try {
+    const [[u]] = await db.query(
+      `SELECT menu_envios, menu_retrasados, menu_clientes, menu_reportes,
+              menu_configuracion, menu_historial, dash_tarjetas, dash_graficas, dash_actividad,
+              sec_envios_filtros, sec_envios_tabs, sec_envios_nuevo,
+              sec_clientes_stats, sec_clientes_filtros, sec_clientes_nuevo,
+              sec_reportes_stats, sec_reportes_filtros,
+              sec_retrasados_stats, sec_retrasados_filtros,
+              sec_usuarios_stats, sec_usuarios_filtros, sec_usuarios_nuevo,
+              sec_envios_editar,
+              sec_reportes_general, sec_reportes_clientes, sec_reportes_periodo, sec_reportes_rendimiento
+       FROM usuarios WHERE id = ?`,
+      [req.session.userId]
+    );
+    if (u) {
+      res.locals.userMenuJson = JSON.stringify(u);
+      res.locals.userMenu     = u;
+    }
+  } catch (_) {}
+  next();
+});
+
+// Middleware global: bloqueo de secciones según permisos de menú
+app.use((req, res, next) => {
+  if (!req.session.userId) return next();
+  const menu = res.locals.userMenu;
+  if (!menu) return next();
+
+  const reglas = [
+    { prefijo: '/envios-retrasados', campo: 'menu_retrasados' },
+    { prefijo: '/envios',            campo: 'menu_envios' },
+    { prefijo: '/clientes',          campo: 'menu_clientes' },
+    { prefijo: '/reportes',          campo: 'menu_reportes' },
+    { prefijo: '/configuracion',     campo: 'menu_configuracion' },
+    { prefijo: '/historial',         campo: 'menu_historial' },
+  ];
+
+  for (const r of reglas) {
+    if (req.path === r.prefijo || req.path.startsWith(r.prefijo + '/')) {
+      if (menu[r.campo] === 0) {
+        return res.redirect('/dashboard');
+      }
+      break;
+    }
+  }
   next();
 });
 

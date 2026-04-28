@@ -3,13 +3,13 @@ const router = express.Router();
 const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 const { isAuthenticated } = require('../middleware/auth');
-const { requireAdmin } = require('../middleware/roles');
+const { requireAdmin, requireAdminOrJose } = require('../middleware/roles');
 const { registrarActividad } = require('../utils/actividad');
 
 // ============================================
 // LISTA DE USUARIOS (Solo Admin)
 // ============================================
-router.get('/', isAuthenticated, requireAdmin, async (req, res) => {
+router.get('/', isAuthenticated, requireAdminOrJose, async (req, res) => {
   try {
     const { buscar, rol } = req.query;
     
@@ -531,6 +531,49 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar usuario:', error);
     res.redirect('/usuarios?error=update');
+  }
+});
+
+// ============================================
+// PERMISOS DE VISIBILIDAD DE MENÚ Y DASHBOARD
+// ============================================
+const CAMPOS_PERMISOS = [
+  'menu_envios','menu_retrasados','menu_clientes','menu_reportes',
+  'menu_configuracion','menu_historial','dash_tarjetas','dash_graficas','dash_actividad',
+  'sec_envios_filtros','sec_envios_tabs','sec_envios_nuevo',
+  'sec_clientes_stats','sec_clientes_filtros','sec_clientes_nuevo',
+  'sec_reportes_stats','sec_reportes_filtros',
+  'sec_retrasados_stats','sec_retrasados_filtros',
+  'sec_usuarios_stats','sec_usuarios_filtros','sec_usuarios_nuevo',
+  'sec_envios_editar',
+  'sec_reportes_general','sec_reportes_clientes','sec_reportes_periodo','sec_reportes_rendimiento'
+];
+
+router.get('/:id/permisos', isAuthenticated, requireAdminOrJose, async (req, res) => {
+  try {
+    const [[usuario]] = await db.query('SELECT * FROM usuarios WHERE id = ?', [req.params.id]);
+    if (!usuario) return res.redirect('/usuarios');
+    res.render('usuarios/permisos', {
+      title: 'Permisos de usuario',
+      user: { nombre: req.session.userName, email: req.session.userEmail, rol: req.session.userRole },
+      usuario,
+      success: req.query.success === '1'
+    });
+  } catch (e) {
+    console.error(e);
+    res.redirect('/usuarios');
+  }
+});
+
+router.post('/:id/permisos', isAuthenticated, requireAdminOrJose, async (req, res) => {
+  try {
+    const vals = CAMPOS_PERMISOS.map(c => req.body[c] === '1' ? 1 : 0);
+    const sets = CAMPOS_PERMISOS.map(c => `${c} = ?`).join(', ');
+    await db.query(`UPDATE usuarios SET ${sets} WHERE id = ?`, [...vals, req.params.id]);
+    res.redirect(`/usuarios/${req.params.id}/permisos?success=1`);
+  } catch (e) {
+    console.error(e);
+    res.redirect(`/usuarios/${req.params.id}/permisos`);
   }
 });
 

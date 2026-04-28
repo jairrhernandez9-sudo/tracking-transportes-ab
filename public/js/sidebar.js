@@ -100,9 +100,45 @@
     });
   }
 
+  /* ── Permisos de visibilidad de menú ──────────────────────── */
+  function applyMenuPermissions() {
+    var menu = window._userMenu;
+    if (!menu) return;
+
+    var rules = {
+      '/envios':              'menu_envios',
+      '/envios-retrasados':  'menu_retrasados',
+      '/clientes':           'menu_clientes',
+      '/reportes':           'menu_reportes',
+      '/configuracion':      'menu_configuracion',
+      '/historial/actividad':'menu_historial'
+    };
+
+    // Ocultar via JS cualquier link que haya pasado el guard EJS pero cuyo permiso sea falsy
+    Object.keys(rules).forEach(function(href) {
+      if (!menu[rules[href]]) {
+        var link = document.querySelector('a.nav-link[href="' + href + '"]');
+        if (link && link.closest('.nav-item')) {
+          link.closest('.nav-item').style.display = 'none';
+        }
+      }
+    });
+
+    // Ocultar secciones vacías (items ausentes del DOM por guard server-side
+    // O items ocultados por JS arriba)
+    document.querySelectorAll('.nav-section').forEach(function(section) {
+      var items = section.querySelectorAll('.nav-item');
+      var hayVisible = Array.from(items).some(function(li) {
+        return li.style.display !== 'none';
+      });
+      if (!hayVisible) section.style.display = 'none';
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function() { init(); applyMenuPermissions(); });
   } else {
     init();
+    applyMenuPermissions();
   }
 })();

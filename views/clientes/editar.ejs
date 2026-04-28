@@ -741,30 +741,30 @@
             </a>
           </li>
           <% } %>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
             <a href="/envios" class="nav-link">
               <i data-lucide="package"></i>
               <span>Envíos</span>
             </a>
-          </li>
-          <li class="nav-item">
+          </li><% } %>
+          <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
             <a href="/envios-retrasados" class="nav-link">
               <i data-lucide="alert-triangle"></i>
               <span>Envíos Retrasados</span>
             </a>
-          </li>
+          </li><% } %>
         </ul>
       </div>
       
       <div class="nav-section">
         <div class="nav-section-title">GESTIÓN</div>
         <ul class="nav-menu">
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
             <a href="/clientes" class="nav-link active">
               <i data-lucide="users"></i>
               <span>Clientes</span>
             </a>
-          </li>
+          </li><% } %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link">
               <i data-lucide="bar-chart"></i>
@@ -778,7 +778,7 @@
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
-            <% if (user.rol === 'admin') { %>
+            <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
@@ -786,12 +786,12 @@
               </a>
             </li>
             <% } %>
-            <li class="nav-item">
+            <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
                 <span>Configuración</span>
               </a>
-            </li>
+            </li><% } %>
             <% if (user && puedeVerHistorial) { %>
             <li class="nav-item">
               <a href="/historial/actividad" class="nav-link">
@@ -1010,7 +1010,7 @@
             
           </div>
           <!-- ⬅️ NUEVO: Prefijo de Tracking -->
-          <% if (user.rol === 'admin') { %>
+          <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
             <div class="form-group full-width" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 16px; border: 2px solid #f59e0b;">
               <label class="form-label" style="color: #92400e; font-weight: 700; font-size: 1.05rem;">
                 <i data-lucide="hash" style="width: 20px; height: 20px;"></i>
@@ -1038,7 +1038,7 @@
                 </div>
               <% } %>
               
-              <% if (user.rol === 'admin') { %>
+              <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
               <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
                 Puedes modificar el prefijo si es necesario. Los envíos futuros usarán el nuevo prefijo.
               </p>
@@ -1440,6 +1440,7 @@
     }
   </script>
   <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

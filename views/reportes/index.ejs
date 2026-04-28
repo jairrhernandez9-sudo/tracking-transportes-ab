@@ -876,30 +876,30 @@
             </a>
           </li>
           <% } %>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
             <a href="/envios" class="nav-link">
               <i data-lucide="package"></i>
               <span>Envíos</span>
             </a>
-          </li>
-          <li class="nav-item">
+          </li><% } %>
+          <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
             <a href="/envios-retrasados" class="nav-link">
               <i data-lucide="alert-triangle"></i>
               <span>Envíos Retrasados</span>
             </a>
-          </li>
+          </li><% } %>
         </ul>
       </div>
       
       <div class="nav-section">
         <div class="nav-section-title">GESTIÓN</div>
         <ul class="nav-menu">
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
             <a href="/clientes" class="nav-link">
               <i data-lucide="users"></i>
               <span>Clientes</span>
             </a>
-          </li>
+          </li><% } %>
           <li class="nav-item">
             <a href="/reportes" class="nav-link active">
               <i data-lucide="bar-chart"></i>
@@ -913,7 +913,7 @@
         <div class="nav-section">
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
-            <% if (user.rol === 'admin') { %>
+            <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
             <li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
@@ -921,12 +921,12 @@
               </a>
             </li>
             <% } %>
-            <li class="nav-item">
+            <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
               <a href="/configuracion" class="nav-link">
                 <i data-lucide="settings"></i>
                 <span>Configuración</span>
               </a>
-            </li>
+            </li><% } %>
             <% if (user && puedeVerHistorial) { %>
             <li class="nav-item">
               <a href="/historial/actividad" class="nav-link">
@@ -1015,6 +1015,7 @@
       </div>
       
       <!-- STATS CARDS -->
+      <% if (!userMenu || userMenu.sec_reportes_stats) { %>
       <div class="stats-grid">
         <div class="stat-card primary">
           <div class="stat-info">
@@ -1072,8 +1073,10 @@
           </div>
         </div>
       </div>
-      
+      <% } %>
+
       <!-- FILTERS -->
+      <% if (!userMenu || userMenu.sec_reportes_filtros) { %>
       <div class="filters-section">
         <div class="filters-header">
           <h3 class="filters-title">
@@ -1125,11 +1128,13 @@
           </div>
         </form>
       </div>
-      
+      <% } %>
+
       <!-- REPORTES DISPONIBLES -->
       <div class="reports-grid">
-        
+
         <!-- Reporte General -->
+        <% if (!userMenu || userMenu.sec_reportes_general) { %>
         <div class="report-card primary">
           <div class="report-header">
             <div class="report-icon">
@@ -1147,8 +1152,10 @@
             </a>
           </div>
         </div>
-        
+        <% } %>
+
         <!-- Reporte por Cliente -->
+        <% if (!userMenu || userMenu.sec_reportes_clientes) { %>
         <div class="report-card success">
           <div class="report-header">
             <div class="report-icon">
@@ -1166,8 +1173,10 @@
             </a>
           </div>
         </div>
-        
+        <% } %>
+
         <!-- Reporte por Fecha -->
+        <% if (!userMenu || userMenu.sec_reportes_periodo) { %>
         <div class="report-card warning">
           <div class="report-header">
             <div class="report-icon">
@@ -1185,8 +1194,10 @@
             </a>
           </div>
         </div>
-        
+        <% } %>
+
         <!-- Reporte de Rendimiento -->
+        <% if (!userMenu || userMenu.sec_reportes_rendimiento) { %>
         <div class="report-card info">
           <div class="report-header">
             <div class="report-icon">
@@ -1204,7 +1215,8 @@
             </a>
           </div>
         </div>
-        
+        <% } %>
+
       </div>
       
     </main>
@@ -1276,6 +1288,7 @@
     }
   </script>
   <script src="/js/notifications.js"></script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

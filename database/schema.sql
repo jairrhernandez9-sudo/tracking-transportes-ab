@@ -1,6 +1,6 @@
 -- ============================================================
 -- Tracking Logística — Schema completo
--- Última actualización: 2026-04-15
+-- Última actualización: 2026-04-27
 -- Motor: MySQL 8+
 -- ============================================================
 
@@ -66,6 +66,40 @@ CREATE TABLE `usuarios` (
   `puede_editar_historial`     TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Operador puede editar fecha/hora en historial de pedido',
   `auto_transito_crear`        TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Al crear guía, agrega automáticamente estado en-transito',
   `historial_acceso`           TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Admin puede ver el módulo Historial de Actividad',
+  -- Permisos de visibilidad de menú lateral
+  `menu_envios`                TINYINT(1) NOT NULL DEFAULT 1,
+  `menu_retrasados`            TINYINT(1) NOT NULL DEFAULT 1,
+  `menu_clientes`              TINYINT(1) NOT NULL DEFAULT 1,
+  `menu_reportes`              TINYINT(1) NOT NULL DEFAULT 1,
+  `menu_configuracion`         TINYINT(1) NOT NULL DEFAULT 1,
+  `menu_historial`             TINYINT(1) NOT NULL DEFAULT 1,
+  -- Permisos de secciones del Dashboard
+  `dash_tarjetas`              TINYINT(1) NOT NULL DEFAULT 1,
+  `dash_graficas`              TINYINT(1) NOT NULL DEFAULT 1,
+  `dash_actividad`             TINYINT(1) NOT NULL DEFAULT 1,
+  -- Permisos de secciones dentro de página Envíos
+  `sec_envios_filtros`         TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_envios_tabs`            TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_envios_nuevo`           TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_envios_editar`          TINYINT(1) NOT NULL DEFAULT 1,
+  -- Permisos de secciones dentro de página Clientes
+  `sec_clientes_stats`         TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_clientes_filtros`       TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_clientes_nuevo`         TINYINT(1) NOT NULL DEFAULT 1,
+  -- Permisos de secciones dentro de página Reportes
+  `sec_reportes_stats`         TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_reportes_filtros`       TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_reportes_general`       TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_reportes_clientes`      TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_reportes_periodo`       TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_reportes_rendimiento`   TINYINT(1) NOT NULL DEFAULT 1,
+  -- Permisos de secciones dentro de página Envíos Retrasados
+  `sec_retrasados_stats`       TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_retrasados_filtros`     TINYINT(1) NOT NULL DEFAULT 1,
+  -- Permisos de secciones dentro de página Usuarios
+  `sec_usuarios_stats`         TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_usuarios_filtros`       TINYINT(1) NOT NULL DEFAULT 1,
+  `sec_usuarios_nuevo`         TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`)
@@ -770,4 +804,4 @@ CREATE TABLE IF NOT EXISTS `actividad_log` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Schema actualizado: 2026-04-15
+-- Schema actualizado: 2026-04-27

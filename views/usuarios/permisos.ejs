@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Transportes AB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8f9fa; min-height: 100vh; }
+    .page-wrapper { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    }
+    .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 12px; }
+    .logo-icon-image { width: 42px; height: 42px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0; }
+    .logo-icon-image img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-info { display: flex; flex-direction: column; gap: 2px; }
+    .logo-text { color: white; font-size: 1.1rem; font-weight: 900; line-height: 1; }
+    .logo-tagline { color: rgba(255,255,255,0.7); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-section { margin-bottom: 24px; }
+    .nav-section-title { font-size: 0.65rem; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; padding: 0 14px; margin-bottom: 8px; }
+    .nav-menu { list-style: none; }
+    .nav-item { margin-bottom: 4px; }
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; position: relative; }
+    .nav-link i { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(4px); }
+    .nav-link.active { background: rgba(255,255,255,0.15); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .nav-link.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 24px; background: white; border-radius: 0 4px 4px 0; }
+    .nav-link-logout { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: rgba(255,255,255,0.6); text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s ease; margin-top: auto; }
+    .nav-link-logout:hover { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .nav-link-logout i { width: 20px; height: 20px; flex-shrink: 0; }
+    .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+    /* MAIN */
+    .main-content { margin-left: 260px; flex: 1; padding: 30px 40px; min-height: 100vh; }
+
+    /* HEADER */
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .page-title-section { display: flex; align-items: center; gap: 12px; }
+    .page-title { font-size: 1.75rem; font-weight: 900; color: #1f2937; margin-bottom: 4px; }
+    .page-subtitle { font-size: 0.9rem; color: #6b7280; font-weight: 500; }
+    .header-actions { display: flex; align-items: center; gap: 15px; }
+    .user-profile { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; }
+    .user-profile:hover { border-color: #3b82f6; box-shadow: 0 2px 8px rgba(59,130,246,0.1); }
+    .user-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+    .user-info h4 { font-size: 0.85rem; font-weight: 700; color: #1f2937; }
+    .user-info p { font-size: 0.7rem; color: #6b7280; }
+    .user-chevron { width: 14px; height: 14px; color: #9ca3af; }
+    .user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 260px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; z-index: 2000; overflow: hidden; }
+    .user-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .user-dropdown-header { padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; gap: 12px; align-items: center; }
+    .user-dropdown-avatar { width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.1rem; flex-shrink: 0; }
+    .user-dropdown-info { flex: 1; min-width: 0; }
+    .user-dropdown-name { color: white; font-weight: 800; font-size: 0.95rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-dropdown-email { color: rgba(255,255,255,0.9); font-size: 0.75rem; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-dropdown-badge { display: inline-block; padding: 3px 8px; background: rgba(255,255,255,0.2); border-radius: 10px; color: white; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-dropdown-divider { height: 1px; background: #e5e7eb; margin: 6px 0; }
+    .user-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #4b5563; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.2s ease; }
+    .user-dropdown-item i { width: 18px; height: 18px; color: #9ca3af; }
+    .user-dropdown-item:hover { background: #f9fafb; color: #3b82f6; }
+    .user-dropdown-item:hover i { color: #3b82f6; }
+    .user-dropdown-item.logout { color: #ef4444; }
+    .user-dropdown-item.logout i { color: #ef4444; }
+    .user-dropdown-item.logout:hover { background: #fef2f2; }
+
+    /* BREADCRUMB */
+    .breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-size: 0.85rem; }
+    .breadcrumb a { color: #6b7280; text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: #3b82f6; }
+    .breadcrumb-separator { color: #d1d5db; }
+    .breadcrumb-current { color: #1f2937; font-weight: 600; }
+
+    /* SUCCESS */
+    .success-message { background: #d1fae5; border: 2px solid #10b981; color: #065f46; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; font-weight: 600; animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* USER CARD */
+    .perms-content { max-width: 860px; }
+    .user-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .user-card-avatar {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .user-card-info h2 { font-size: 1.15rem; font-weight: 800; color: #1f2937; margin-bottom: 4px; }
+    .user-card-info p { font-size: 0.85rem; color: #6b7280; }
+    .rol-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-left: 10px; }
+    .rol-admin { background: #dbeafe; color: #1e40af; }
+    .rol-superusuario { background: #ede9fe; color: #6d28d9; }
+    .rol-operador { background: #f3f4f6; color: #4b5563; }
+    .rol-cliente { background: #fef3c7; color: #92400e; }
+
+    /* PERMISSIONS CARD */
+    .perms-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .perms-card-header {
+      padding: 20px 28px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .perms-card-header h3 { font-size: 1rem; font-weight: 800; color: #1f2937; }
+    .perms-card-header p { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+    .header-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-icon.blue { background: #dbeafe; color: #2563eb; }
+    .header-icon.purple { background: #ede9fe; color: #7c3aed; }
+    .header-icon i { width: 20px; height: 20px; }
+
+    .perms-list { padding: 8px 0; }
+    .perm-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.15s;
+    }
+    .perm-row:last-child { border-bottom: none; }
+    .perm-row:hover { background: #f9fafb; }
+    .perm-label { display: flex; align-items: center; gap: 12px; }
+    .perm-label i { width: 18px; height: 18px; color: #9ca3af; }
+    .perm-label-text { font-size: 0.9rem; font-weight: 600; color: #374151; }
+    .perm-label-desc { font-size: 0.78rem; color: #9ca3af; margin-top: 1px; }
+
+    /* TOGGLE SWITCH */
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+    .toggle-label-on { font-size: 0.78rem; font-weight: 700; color: #10b981; }
+    .toggle-label-off { font-size: 0.78rem; font-weight: 700; color: #9ca3af; }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #e5e7eb;
+      border-radius: 24px;
+      transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .toggle-slider { background: #3b82f6; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* BANNERS */
+    .banner-rol {
+      padding: 16px 20px; border-radius: 12px; margin-bottom: 24px;
+      display: flex; align-items: flex-start; gap: 14px;
+      font-size: 0.88rem; font-weight: 600;
+    }
+    .banner-rol.bypass { background: #eff6ff; border: 2px solid #3b82f6; color: #1e40af; }
+    .banner-rol i { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+    .banner-rol p { margin: 4px 0 0; font-weight: 400; font-size: 0.82rem; opacity: 0.85; }
+
+    /* PERM ROW BLOQUEADO */
+    .perm-row.bloqueado { background: #fafafa; }
+    .perm-row.bloqueado .perm-label-text { color: #b0b7c3; }
+    .perm-row.bloqueado .perm-label-desc { color: #d1d5db; }
+    .perm-row.bloqueado .perm-label i  { color: #d1d5db; }
+    .blocked-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px;
+      background: #f3f4f6; color: #9ca3af;
+      border: 1px solid #e5e7eb; border-radius: 8px;
+      font-size: 0.7rem; font-weight: 700;
+      white-space: nowrap;
+    }
+    .blocked-badge i { width: 12px; height: 12px; }
+    .toggle input:disabled + .toggle-slider { cursor: not-allowed; opacity: 0.35; }
+
+    /* ACTIONS */
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: white; color: #4b5563;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-weight: 600; font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: #9ca3af; color: #1f2937; }
+    .btn-back i { width: 16px; height: 16px; }
+    .btn-save {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 28px;
+      background: #3b82f6; color: white;
+      border: none; border-radius: 10px;
+      font-weight: 700; font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-save:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+    .btn-save i { width: 18px; height: 18px; }
+
+    @media (max-width: 968px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .page-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+    }
+  </style>
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon-image">
+          <img src="/images/logo-transportes-ab.png" alt="Logo">
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">Transportes AB</span>
+          <span class="logo-tagline">Sistema Tracking</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">PRINCIPAL</div>
+        <ul class="nav-menu">
+          <% if (!user || user.rol !== 'operador') { %>
+          <li class="nav-item">
+            <a href="/dashboard" class="nav-link">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <% } %>
+          <% if (!userMenu || userMenu.menu_envios) { %><li class="nav-item">
+            <a href="/envios" class="nav-link">
+              <i data-lucide="package"></i>
+              <span>Envíos</span>
+            </a>
+          </li><% } %>
+          <% if (!userMenu || userMenu.menu_retrasados) { %><li class="nav-item">
+            <a href="/envios-retrasados" class="nav-link">
+              <i data-lucide="alert-triangle"></i>
+              <span>Envíos Retrasados</span>
+            </a>
+          </li><% } %>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">GESTIÓN</div>
+        <ul class="nav-menu">
+          <% if (!userMenu || userMenu.menu_clientes) { %><li class="nav-item">
+            <a href="/clientes" class="nav-link">
+              <i data-lucide="users"></i>
+              <span>Clientes</span>
+            </a>
+          </li><% } %>
+          <li class="nav-item">
+            <a href="/reportes" class="nav-link">
+              <i data-lucide="bar-chart"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">SISTEMA</div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="/usuarios" class="nav-link active">
+              <i data-lucide="user-cog"></i>
+              <span>Usuarios</span>
+            </a>
+          </li>
+          <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
+            <a href="/configuracion" class="nav-link">
+              <i data-lucide="settings"></i>
+              <span>Configuración</span>
+            </a>
+          </li><% } %>
+          <% if (user && puedeVerHistorial) { %>
+          <li class="nav-item">
+            <a href="/historial/actividad" class="nav-link">
+              <i data-lucide="activity"></i>
+              <span>Historial</span>
+            </a>
+          </li>
+          <% } %>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div class="page-title-section">
+          <div>
+            <h1 class="page-title">Permisos de Usuario</h1>
+            <p class="page-subtitle">Controla qué secciones puede ver este usuario</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a href="/envios-retrasados" class="notification-btn" style="width:40px;height:40px;background:white;border:1px solid #e5e7eb;border-radius:10px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:inherit;transition:all 0.3s;">
+            <i data-lucide="bell" style="width:18px;height:18px;"></i>
+          </a>
+
+          <div class="user-profile" id="userProfileBtn">
+            <div class="user-avatar">
+              <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+            </div>
+            <div class="user-info">
+              <h4><%= user && user.nombre ? user.nombre : 'Administrador' %></h4>
+              <p><%= user && user.email ? user.email : 'admin@sistema.com' %></p>
+            </div>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar">
+                  <%= user && user.nombre ? user.nombre.charAt(0).toUpperCase() : 'A' %>
+                </div>
+                <div class="user-dropdown-info">
+                  <div class="user-dropdown-name"><%= user && user.nombre ? user.nombre : 'Administrador' %></div>
+                  <div class="user-dropdown-email"><%= user && user.email ? user.email : '' %></div>
+                  <span class="user-dropdown-badge">
+                    <%= user && (user.rol === 'admin' ? 'Administrador' : user.rol === 'superusuario' ? 'Gerente' : 'Operador') %>
+                  </span>
+                </div>
+              </div>
+              <div class="user-dropdown-divider"></div>
+              <a href="/mi-perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi perfil</span>
+              </a>
+              <div class="user-dropdown-divider"></div>
+              <a href="/auth/logout" class="user-dropdown-item logout">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="perms-content">
+      <!-- BREADCRUMB -->
+      <nav class="breadcrumb">
+        <a href="/dashboard"><i data-lucide="home" style="width:14px;height:14px;"></i></a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/usuarios">Usuarios</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="/usuarios/<%= usuario.id %>"><%= usuario.nombre %></a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Permisos</span>
+      </nav>
+
+      <!-- SUCCESS -->
+      <% if (success) { %>
+        <div class="success-message">
+          <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
+          Permisos guardados correctamente.
+        </div>
+      <% } %>
+
+      <!-- USER INFO CARD -->
+      <div class="user-card">
+        <div class="user-card-avatar"><%= usuario.nombre.charAt(0).toUpperCase() %></div>
+        <div class="user-card-info">
+          <h2>
+            <%= usuario.nombre %>
+            <span class="rol-badge rol-<%= usuario.rol %>">
+              <%= usuario.rol === 'admin' ? 'Administrador' : usuario.rol === 'superusuario' ? 'Superusuario' : usuario.rol === 'operador' ? 'Operador' : 'Cliente' %>
+            </span>
+          </h2>
+          <p><%= usuario.email %></p>
+        </div>
+      </div>
+
+      <%
+        /* ── Lógica de bloqueo por rol ──────────────────────────── */
+        const rolUsuario = usuario.rol;
+        const esAdminOSuper = ['admin','superusuario'].includes(rolUsuario);
+
+        /* Permisos que NO tienen efecto porque la ruta ya exige un rol mayor
+           independientemente de lo que se configure aquí */
+        const bloqueadosPorRol = {};
+        if (!esAdminOSuper) {
+          // /usuarios requiere requireAdmin → operador nunca entra sin importar el permiso
+          bloqueadosPorRol['sec_usuarios_stats']   = 'La página Usuarios es solo para Administradores';
+          bloqueadosPorRol['sec_usuarios_filtros'] = 'La página Usuarios es solo para Administradores';
+          bloqueadosPorRol['sec_usuarios_nuevo']   = 'La página Usuarios es solo para Administradores';
+          // /clientes/nuevo requiere requireAdminOrSuper
+          bloqueadosPorRol['sec_clientes_nuevo']   = 'Solo visible para roles Admin y Superusuario';
+        }
+
+        function blq(campo) { return bloqueadosPorRol[campo] || null; }
+      %>
+
+      <!-- FORM -->
+      <form method="POST" action="/usuarios/<%= usuario.id %>/permisos">
+
+        <!-- MENÚ LATERAL -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon blue"><i data-lucide="layout-dashboard"></i></div>
+            <div>
+              <h3>Menú Lateral</h3>
+              <p>Secciones visibles en el sidebar de navegación</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="package"></i>
+                <div>
+                  <div class="perm-label-text">Envíos</div>
+                  <div class="perm-label-desc">Gestión y seguimiento de guías</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_envios-off" style="<%= usuario.menu_envios ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_envios-on"  style="<%= usuario.menu_envios ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_envios" value="1" onchange="syncLabel(this,'menu_envios')" <%= usuario.menu_envios ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="alert-triangle"></i>
+                <div>
+                  <div class="perm-label-text">Envíos Retrasados</div>
+                  <div class="perm-label-desc">Alertas de guías fuera de tiempo</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_retrasados-off" style="<%= usuario.menu_retrasados ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_retrasados-on"  style="<%= usuario.menu_retrasados ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_retrasados" value="1" onchange="syncLabel(this,'menu_retrasados')" <%= usuario.menu_retrasados ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="users"></i>
+                <div>
+                  <div class="perm-label-text">Clientes</div>
+                  <div class="perm-label-desc">Directorio y gestión de clientes</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_clientes-off" style="<%= usuario.menu_clientes ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_clientes-on"  style="<%= usuario.menu_clientes ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_clientes" value="1" onchange="syncLabel(this,'menu_clientes')" <%= usuario.menu_clientes ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="bar-chart"></i>
+                <div>
+                  <div class="perm-label-text">Reportes</div>
+                  <div class="perm-label-desc">Estadísticas y exportación de datos</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_reportes-off" style="<%= usuario.menu_reportes ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_reportes-on"  style="<%= usuario.menu_reportes ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_reportes" value="1" onchange="syncLabel(this,'menu_reportes')" <%= usuario.menu_reportes ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="settings"></i>
+                <div>
+                  <div class="perm-label-text">Configuración</div>
+                  <div class="perm-label-desc">Parámetros del sistema y etiquetas</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_configuracion-off" style="<%= usuario.menu_configuracion ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_configuracion-on"  style="<%= usuario.menu_configuracion ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_configuracion" value="1" onchange="syncLabel(this,'menu_configuracion')" <%= usuario.menu_configuracion ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="activity"></i>
+                <div>
+                  <div class="perm-label-text">Historial de Actividad</div>
+                  <div class="perm-label-desc">Registro de acciones del sistema</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_historial-off" style="<%= usuario.menu_historial ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_historial-on"  style="<%= usuario.menu_historial ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_historial" value="1" onchange="syncLabel(this,'menu_historial')" <%= usuario.menu_historial ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon purple"><i data-lucide="pie-chart"></i></div>
+            <div>
+              <h3>Dashboard</h3>
+              <p>Secciones visibles en la página de inicio</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="credit-card"></i>
+                <div>
+                  <div class="perm-label-text">Tarjetas de estadísticas</div>
+                  <div class="perm-label-desc">Totales de envíos, clientes y estados</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-dash_tarjetas-off" style="<%= usuario.dash_tarjetas ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-dash_tarjetas-on"  style="<%= usuario.dash_tarjetas ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="dash_tarjetas" value="1" onchange="syncLabel(this,'dash_tarjetas')" <%= usuario.dash_tarjetas ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="bar-chart-2"></i>
+                <div>
+                  <div class="perm-label-text">Gráficas</div>
+                  <div class="perm-label-desc">Gráfica de envíos por estado y tendencias</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-dash_graficas-off" style="<%= usuario.dash_graficas ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-dash_graficas-on"  style="<%= usuario.dash_graficas ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="dash_graficas" value="1" onchange="syncLabel(this,'dash_graficas')" <%= usuario.dash_graficas ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="clock"></i>
+                <div>
+                  <div class="perm-label-text">Actividad reciente</div>
+                  <div class="perm-label-desc">Últimas guías y movimientos registrados</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-dash_actividad-off" style="<%= usuario.dash_actividad ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-dash_actividad-on"  style="<%= usuario.dash_actividad ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="dash_actividad" value="1" onchange="syncLabel(this,'dash_actividad')" <%= usuario.dash_actividad ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECCIONES: ENVÍOS -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon blue"><i data-lucide="package"></i></div>
+            <div>
+              <h3>Página: Envíos</h3>
+              <p>Secciones visibles dentro de la lista de envíos</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="filter"></i>
+                <div>
+                  <div class="perm-label-text">Filtros de búsqueda</div>
+                  <div class="perm-label-desc">Barra de región, empresa y dirección</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_envios_filtros-off" style="<%= usuario.sec_envios_filtros ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_envios_filtros-on"  style="<%= usuario.sec_envios_filtros ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_envios_filtros" value="1" onchange="syncLabel(this,'sec_envios_filtros')" <%= usuario.sec_envios_filtros ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="list-filter"></i>
+                <div>
+                  <div class="perm-label-text">Pestañas de estado</div>
+                  <div class="perm-label-desc">Todos, Creados, Pendientes, En tránsito…</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_envios_tabs-off" style="<%= usuario.sec_envios_tabs ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_envios_tabs-on"  style="<%= usuario.sec_envios_tabs ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_envios_tabs" value="1" onchange="syncLabel(this,'sec_envios_tabs')" <%= usuario.sec_envios_tabs ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="plus-circle"></i>
+                <div>
+                  <div class="perm-label-text">Botón "Nuevo Envío"</div>
+                  <div class="perm-label-desc">Acceso para crear nuevas guías</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_envios_nuevo-off" style="<%= usuario.sec_envios_nuevo ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_envios_nuevo-on"  style="<%= usuario.sec_envios_nuevo ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_envios_nuevo" value="1" onchange="syncLabel(this,'sec_envios_nuevo')" <%= usuario.sec_envios_nuevo ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="edit"></i>
+                <div>
+                  <div class="perm-label-text">Botón "Editar" por guía</div>
+                  <div class="perm-label-desc">Icono de edición en cada fila de la tabla</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_envios_editar-off" style="<%= usuario.sec_envios_editar ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_envios_editar-on"  style="<%= usuario.sec_envios_editar ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_envios_editar" value="1" onchange="syncLabel(this,'sec_envios_editar')" <%= usuario.sec_envios_editar ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECCIONES: CLIENTES -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon blue"><i data-lucide="users"></i></div>
+            <div>
+              <h3>Página: Clientes</h3>
+              <p>Secciones visibles dentro de la lista de clientes</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="credit-card"></i>
+                <div>
+                  <div class="perm-label-text">Tarjetas de estadísticas</div>
+                  <div class="perm-label-desc">Total, activos, nuevos y envíos totales</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_clientes_stats-off" style="<%= usuario.sec_clientes_stats ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_clientes_stats-on"  style="<%= usuario.sec_clientes_stats ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_clientes_stats" value="1" onchange="syncLabel(this,'sec_clientes_stats')" <%= usuario.sec_clientes_stats ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="filter"></i>
+                <div>
+                  <div class="perm-label-text">Filtros de ordenamiento</div>
+                  <div class="perm-label-desc">Ordenar por reciente, nombre, envíos…</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_clientes_filtros-off" style="<%= usuario.sec_clientes_filtros ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_clientes_filtros-on"  style="<%= usuario.sec_clientes_filtros ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_clientes_filtros" value="1" onchange="syncLabel(this,'sec_clientes_filtros')" <%= usuario.sec_clientes_filtros ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <% const _bCN = blq('sec_clientes_nuevo'); %>
+            <div class="perm-row <%= _bCN ? 'bloqueado' : '' %>">
+              <div class="perm-label">
+                <i data-lucide="plus-circle"></i>
+                <div>
+                  <div class="perm-label-text">Botón "Nuevo Cliente"</div>
+                  <div class="perm-label-desc"><%= _bCN ? _bCN : 'Acceso para registrar nuevos clientes' %></div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <% if (_bCN) { %>
+                  <span class="blocked-badge"><i data-lucide="lock"></i> Bloqueado por rol</span>
+                <% } else { %>
+                  <span class="toggle-label-off" id="lbl-sec_clientes_nuevo-off" style="<%= usuario.sec_clientes_nuevo ? 'display:none' : '' %>">Oculto</span>
+                  <span class="toggle-label-on"  id="lbl-sec_clientes_nuevo-on"  style="<%= usuario.sec_clientes_nuevo ? '' : 'display:none' %>">Visible</span>
+                <% } %>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_clientes_nuevo" value="1"
+                    <%= _bCN ? 'disabled' : "onchange=\"syncLabel(this,'sec_clientes_nuevo')\"" %>
+                    <%= !_bCN && usuario.sec_clientes_nuevo ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECCIONES: REPORTES -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon purple"><i data-lucide="bar-chart"></i></div>
+            <div>
+              <h3>Página: Reportes</h3>
+              <p>Secciones visibles dentro de la página de reportes</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="credit-card"></i>
+                <div>
+                  <div class="perm-label-text">Tarjetas de estadísticas</div>
+                  <div class="perm-label-desc">Total envíos, entregados, en tránsito, clientes</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_reportes_stats-off" style="<%= usuario.sec_reportes_stats ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_reportes_stats-on"  style="<%= usuario.sec_reportes_stats ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_reportes_stats" value="1" onchange="syncLabel(this,'sec_reportes_stats')" <%= usuario.sec_reportes_stats ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="sliders-horizontal"></i>
+                <div>
+                  <div class="perm-label-text">Filtros de reporte</div>
+                  <div class="perm-label-desc">Fecha inicio, fecha fin, estado</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_reportes_filtros-off" style="<%= usuario.sec_reportes_filtros ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_reportes_filtros-on"  style="<%= usuario.sec_reportes_filtros ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_reportes_filtros" value="1" onchange="syncLabel(this,'sec_reportes_filtros')" <%= usuario.sec_reportes_filtros ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="file-text"></i>
+                <div>
+                  <div class="perm-label-text">Reporte General</div>
+                  <div class="perm-label-desc">Tarjeta con acceso al reporte general de envíos</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_reportes_general-off" style="<%= usuario.sec_reportes_general ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_reportes_general-on"  style="<%= usuario.sec_reportes_general ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_reportes_general" value="1" onchange="syncLabel(this,'sec_reportes_general')" <%= usuario.sec_reportes_general ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="users"></i>
+                <div>
+                  <div class="perm-label-text">Reporte Por Cliente</div>
+                  <div class="perm-label-desc">Tarjeta con acceso al análisis por cliente</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_reportes_clientes-off" style="<%= usuario.sec_reportes_clientes ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_reportes_clientes-on"  style="<%= usuario.sec_reportes_clientes ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_reportes_clientes" value="1" onchange="syncLabel(this,'sec_reportes_clientes')" <%= usuario.sec_reportes_clientes ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="calendar"></i>
+                <div>
+                  <div class="perm-label-text">Reporte Por Período</div>
+                  <div class="perm-label-desc">Tarjeta con acceso al reporte por rango de fechas</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_reportes_periodo-off" style="<%= usuario.sec_reportes_periodo ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_reportes_periodo-on"  style="<%= usuario.sec_reportes_periodo ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_reportes_periodo" value="1" onchange="syncLabel(this,'sec_reportes_periodo')" <%= usuario.sec_reportes_periodo ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="trending-up"></i>
+                <div>
+                  <div class="perm-label-text">Reporte de Rendimiento</div>
+                  <div class="perm-label-desc">Tarjeta con acceso al análisis de eficiencia operativa</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_reportes_rendimiento-off" style="<%= usuario.sec_reportes_rendimiento ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_reportes_rendimiento-on"  style="<%= usuario.sec_reportes_rendimiento ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_reportes_rendimiento" value="1" onchange="syncLabel(this,'sec_reportes_rendimiento')" <%= usuario.sec_reportes_rendimiento ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECCIONES: USUARIOS -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon blue"><i data-lucide="user-cog"></i></div>
+            <div>
+              <h3>Página: Usuarios</h3>
+              <p>Secciones visibles dentro de la gestión de usuarios</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <% const _bUS = blq('sec_usuarios_stats'); %>
+            <div class="perm-row <%= _bUS ? 'bloqueado' : '' %>">
+              <div class="perm-label">
+                <i data-lucide="credit-card"></i>
+                <div>
+                  <div class="perm-label-text">Tarjetas de estadísticas</div>
+                  <div class="perm-label-desc"><%= _bUS ? _bUS : 'Total, admins, superusuarios, operadores, clientes' %></div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <% if (_bUS) { %>
+                  <span class="blocked-badge"><i data-lucide="lock"></i> Bloqueado por rol</span>
+                <% } else { %>
+                  <span class="toggle-label-off" id="lbl-sec_usuarios_stats-off" style="<%= usuario.sec_usuarios_stats ? 'display:none' : '' %>">Oculto</span>
+                  <span class="toggle-label-on"  id="lbl-sec_usuarios_stats-on"  style="<%= usuario.sec_usuarios_stats ? '' : 'display:none' %>">Visible</span>
+                <% } %>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_usuarios_stats" value="1"
+                    <%= _bUS ? 'disabled' : "onchange=\"syncLabel(this,'sec_usuarios_stats')\"" %>
+                    <%= !_bUS && usuario.sec_usuarios_stats ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <% const _bUF = blq('sec_usuarios_filtros'); %>
+            <div class="perm-row <%= _bUF ? 'bloqueado' : '' %>">
+              <div class="perm-label">
+                <i data-lucide="list-filter"></i>
+                <div>
+                  <div class="perm-label-text">Pestañas de filtro por rol</div>
+                  <div class="perm-label-desc"><%= _bUF ? _bUF : 'Todos, Admins, Superusuarios, Operadores, Clientes' %></div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <% if (_bUF) { %>
+                  <span class="blocked-badge"><i data-lucide="lock"></i> Bloqueado por rol</span>
+                <% } else { %>
+                  <span class="toggle-label-off" id="lbl-sec_usuarios_filtros-off" style="<%= usuario.sec_usuarios_filtros ? 'display:none' : '' %>">Oculto</span>
+                  <span class="toggle-label-on"  id="lbl-sec_usuarios_filtros-on"  style="<%= usuario.sec_usuarios_filtros ? '' : 'display:none' %>">Visible</span>
+                <% } %>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_usuarios_filtros" value="1"
+                    <%= _bUF ? 'disabled' : "onchange=\"syncLabel(this,'sec_usuarios_filtros')\"" %>
+                    <%= !_bUF && usuario.sec_usuarios_filtros ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <% const _bUN = blq('sec_usuarios_nuevo'); %>
+            <div class="perm-row <%= _bUN ? 'bloqueado' : '' %>">
+              <div class="perm-label">
+                <i data-lucide="plus-circle"></i>
+                <div>
+                  <div class="perm-label-text">Botón "Nuevo Usuario"</div>
+                  <div class="perm-label-desc"><%= _bUN ? _bUN : 'Acceso para registrar nuevos usuarios' %></div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <% if (_bUN) { %>
+                  <span class="blocked-badge"><i data-lucide="lock"></i> Bloqueado por rol</span>
+                <% } else { %>
+                  <span class="toggle-label-off" id="lbl-sec_usuarios_nuevo-off" style="<%= usuario.sec_usuarios_nuevo ? 'display:none' : '' %>">Oculto</span>
+                  <span class="toggle-label-on"  id="lbl-sec_usuarios_nuevo-on"  style="<%= usuario.sec_usuarios_nuevo ? '' : 'display:none' %>">Visible</span>
+                <% } %>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_usuarios_nuevo" value="1"
+                    <%= _bUN ? 'disabled' : "onchange=\"syncLabel(this,'sec_usuarios_nuevo')\"" %>
+                    <%= !_bUN && usuario.sec_usuarios_nuevo ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECCIONES: ENVÍOS RETRASADOS -->
+        <div class="perms-card">
+          <div class="perms-card-header">
+            <div class="header-icon" style="background:#fee2e2;color:#dc2626;"><i data-lucide="alert-triangle"></i></div>
+            <div>
+              <h3>Página: Envíos Retrasados</h3>
+              <p>Secciones visibles dentro de la página de retrasados</p>
+            </div>
+          </div>
+          <div class="perms-list">
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="credit-card"></i>
+                <div>
+                  <div class="perm-label-text">Tarjetas de criticidad</div>
+                  <div class="perm-label-desc">Total, críticos, altos y medios + barra de distribución</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_retrasados_stats-off" style="<%= usuario.sec_retrasados_stats ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_retrasados_stats-on"  style="<%= usuario.sec_retrasados_stats ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_retrasados_stats" value="1" onchange="syncLabel(this,'sec_retrasados_stats')" <%= usuario.sec_retrasados_stats ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="list-filter"></i>
+                <div>
+                  <div class="perm-label-text">Pestañas de criticidad</div>
+                  <div class="perm-label-desc">Todos, Críticos, Altos, Medios</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-sec_retrasados_filtros-off" style="<%= usuario.sec_retrasados_filtros ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-sec_retrasados_filtros-on"  style="<%= usuario.sec_retrasados_filtros ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="sec_retrasados_filtros" value="1" onchange="syncLabel(this,'sec_retrasados_filtros')" <%= usuario.sec_retrasados_filtros ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="form-actions">
+          <a href="/usuarios/<%= usuario.id %>" class="btn-back">
+            <i data-lucide="arrow-left"></i>
+            Volver al usuario
+          </a>
+          <button type="submit" class="btn-save">
+            <i data-lucide="save"></i>
+            Guardar permisos
+          </button>
+        </div>
+
+      </form>
+      </div><!-- /perms-content -->
+
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function syncLabel(input, campo) {
+      document.getElementById('lbl-' + campo + '-on').style.display  = input.checked ? '' : 'none';
+      document.getElementById('lbl-' + campo + '-off').style.display = input.checked ? 'none' : '';
+    }
+
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdown   = document.getElementById('userDropdown');
+    if (userProfileBtn && userDropdown) {
+      userProfileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+        lucide.createIcons();
+      });
+      document.addEventListener('click', function(e) {
+        if (!userProfileBtn.contains(e.target)) userDropdown.classList.remove('show');
+      });
+    }
+  </script>
+  <script>window._userMenu=<%- locals.userMenuJson||"null" %>;</script>
+  <script src="/js/sidebar.js"></script>
+</body>
+</html>
