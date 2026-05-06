@@ -1887,6 +1887,20 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       ORDER BY p.orden ASC, p.nombre ASC
     `, [id]).catch(() => [[]]);
 
+    // Perfil de impresora del operador activo
+    let perfilImpresora = null;
+    try {
+      const [[usuarioRow]] = await db.query(
+        'SELECT perfil_impresora_id FROM usuarios WHERE id = ?', [req.session.userId]
+      );
+      if (usuarioRow && usuarioRow.perfil_impresora_id) {
+        const [[perfil]] = await db.query(
+          'SELECT * FROM perfiles_impresora WHERE id = ? AND activo = 1', [usuarioRow.perfil_impresora_id]
+        );
+        if (perfil) perfilImpresora = perfil;
+      }
+    } catch (e) { /* sin perfil */ }
+
     await registrarActividad(req, {
       accion: 'ETIQUETA_IMPRESA', entidad: 'envio', entidadId: parseInt(id),
       descripcion: `Etiqueta impresa del envío ${envioData.numero_tracking}`,
@@ -1903,6 +1917,7 @@ router.get('/:id/etiqueta', isAuthenticated, async (req, res) => {
       pictogramas: pictosEnvio || [],
       origenAlias: origenAliasEtq,
       destinoAlias: destinoAliasEtq,
+      perfilImpresora: perfilImpresora,
       user: {
         nombre: req.session.userName || 'Usuario',
         email: req.session.userEmail || 'usuario@sistema.com',

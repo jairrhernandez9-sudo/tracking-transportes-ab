@@ -449,6 +449,27 @@ db.query(`
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 `).catch(() => {});
 
+// Migración: perfiles de impresora
+db.query(`
+  CREATE TABLE IF NOT EXISTS perfiles_impresora (
+    id            INT NOT NULL AUTO_INCREMENT,
+    nombre        VARCHAR(100) NOT NULL,
+    ancho_mm      DECIMAL(6,2) NOT NULL DEFAULT 101.60,
+    alto_mm       DECIMAL(6,2) NOT NULL DEFAULT 152.40,
+    margen_top    DECIMAL(4,2) NOT NULL DEFAULT 0,
+    margen_bottom DECIMAL(4,2) NOT NULL DEFAULT 0,
+    margen_left   DECIMAL(4,2) NOT NULL DEFAULT 0,
+    margen_right  DECIMAL(4,2) NOT NULL DEFAULT 0,
+    compactacion  DECIMAL(4,2) NOT NULL DEFAULT 0,
+    activo        TINYINT(1) NOT NULL DEFAULT 1,
+    creado_por    INT NULL,
+    creado_en     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY fk_perfil_impresora_creador (creado_por)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN perfil_impresora_id INT NULL`).catch(() => {});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

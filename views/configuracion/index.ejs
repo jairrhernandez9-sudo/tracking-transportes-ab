@@ -1029,6 +1029,25 @@
             Dirección predeterminada actualizada
           </div>
         <% } %>
+
+        <% if (success === 'perfil_creado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Perfil de impresora creado correctamente
+          </div>
+        <% } %>
+        <% if (success === 'perfil_actualizado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Perfil de impresora actualizado correctamente
+          </div>
+        <% } %>
+        <% if (success === 'perfil_eliminado') { %>
+          <div class="alert alert-success">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+            Perfil de impresora eliminado
+          </div>
+        <% } %>
         
         <% if (error === 'error_servidor') { %>
           <div class="alert alert-error">
@@ -1110,6 +1129,14 @@
           <button class="tab-btn <%= tabInicial === 'catalogos' ? 'active' : '' %>" onclick="openTab(event, 'catalogos')">
             <i data-lucide="package" style="width: 18px; height: 18px;"></i>
             Catálogos
+          </button>
+          <% } %>
+
+          <%/* Impresoras: admin + superusuario */%>
+          <% if (!esOperador) { %>
+          <button class="tab-btn <%= tabInicial === 'impresoras' ? 'active' : '' %>" onclick="openTab(event, 'impresoras')">
+            <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
+            Impresoras
           </button>
           <% } %>
 
@@ -4051,6 +4078,157 @@ function agregarBtnPersonalizado() {
         <!-- ============================================ -->
         <!-- TAB: PÁGINA DE INICIO                        -->
         <!-- ============================================ -->
+        <!-- TAB: IMPRESORAS -->
+        <% if (!esOperador) { %>
+        <div id="impresoras" class="tab-content">
+          <div class="config-card">
+            <div class="config-card-header">
+              <i data-lucide="printer" style="width:20px;height:20px;color:#3b82f6;"></i>
+              <div>
+                <h3>Perfiles de Impresora</h3>
+                <p>Configura tamaño de papel, márgenes y compactación para cada tipo de impresora</p>
+              </div>
+            </div>
+
+            <!-- Lista de perfiles -->
+            <% if (perfilesImpresora && perfilesImpresora.length > 0) { %>
+            <div style="overflow-x:auto;margin-bottom:28px;">
+              <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+                <thead>
+                  <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                    <th style="padding:10px 14px;text-align:left;font-weight:700;color:#374151;">Nombre</th>
+                    <th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;">Ancho</th>
+                    <th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;">Alto</th>
+                    <th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;">Márgenes (mm)</th>
+                    <th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;">Compact.</th>
+                    <th style="padding:10px 14px;text-align:center;font-weight:700;color:#374151;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% perfilesImpresora.forEach(function(p) { %>
+                  <tr style="border-bottom:1px solid #f1f5f9;" id="row-perfil-<%= p.id %>">
+                    <td style="padding:10px 14px;font-weight:600;color:#1f2937;"><%= p.nombre %></td>
+                    <td style="padding:10px 14px;text-align:center;color:#4b5563;"><%= parseFloat(p.ancho_mm).toFixed(1) %> mm</td>
+                    <td style="padding:10px 14px;text-align:center;color:#4b5563;"><%= parseFloat(p.alto_mm).toFixed(1) %> mm</td>
+                    <td style="padding:10px 14px;text-align:center;color:#4b5563;">
+                      ↑<%= parseFloat(p.margen_top).toFixed(1) %>
+                      →<%= parseFloat(p.margen_right).toFixed(1) %>
+                      ↓<%= parseFloat(p.margen_bottom).toFixed(1) %>
+                      ←<%= parseFloat(p.margen_left).toFixed(1) %>
+                    </td>
+                    <td style="padding:10px 14px;text-align:center;">
+                      <span style="background:<%= p.compactacion > 0 ? '#fef3c7' : '#f0fdf4' %>;color:<%= p.compactacion > 0 ? '#92400e' : '#166534' %>;padding:2px 8px;border-radius:4px;font-weight:700;font-size:0.8rem;">
+                        <%= parseFloat(p.compactacion).toFixed(1) %>%
+                      </span>
+                    </td>
+                    <td style="padding:10px 14px;text-align:center;display:flex;gap:6px;justify-content:center;">
+                      <button onclick="abrirEditarPerfil(<%= JSON.stringify(p) %>)"
+                        style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:4px;">
+                        <i data-lucide="pencil" style="width:12px;height:12px;"></i> Editar
+                      </button>
+                      <form method="POST" action="/configuracion/perfiles-impresora/<%= p.id %>/eliminar" onsubmit="return confirm('¿Eliminar este perfil?')">
+                        <button type="submit" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:4px;">
+                          <i data-lucide="trash-2" style="width:12px;height:12px;"></i> Eliminar
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <% } else { %>
+            <div style="background:#f8fafc;border-radius:10px;padding:24px;text-align:center;color:#6b7280;margin-bottom:28px;">
+              <i data-lucide="printer" style="width:32px;height:32px;margin-bottom:8px;opacity:0.4;display:block;margin-left:auto;margin-right:auto;"></i>
+              No hay perfiles configurados. Crea el primero abajo.
+            </div>
+            <% } %>
+
+            <!-- Formulario nuevo / editar -->
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;">
+              <h4 id="perfil-form-titulo" style="font-size:0.95rem;font-weight:700;color:#1f2937;margin-bottom:18px;">
+                <i data-lucide="plus-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;color:#3b82f6;"></i>
+                Nuevo perfil
+              </h4>
+              <form id="perfil-form" method="POST" action="/configuracion/perfiles-impresora">
+                <input type="hidden" name="_method_override" value="POST">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                  <div style="grid-column:1/-1;">
+                    <label style="display:block;font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px;">Nombre del perfil *</label>
+                    <input type="text" name="nombre" id="pf-nombre" required placeholder="Ej: Zebra ZD220 — Rollo 4×6"
+                      style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                  </div>
+                  <div>
+                    <label style="display:block;font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px;">Ancho del papel (mm)</label>
+                    <input type="number" name="ancho_mm" id="pf-ancho" value="101.6" min="10" max="300" step="0.1"
+                      style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                    <span style="font-size:0.75rem;color:#9ca3af;">Estándar 4×6: 101.6 mm</span>
+                  </div>
+                  <div>
+                    <label style="display:block;font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:4px;">Alto del papel (mm)</label>
+                    <input type="number" name="alto_mm" id="pf-alto" value="152.4" min="10" max="600" step="0.1"
+                      style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                    <span style="font-size:0.75rem;color:#9ca3af;">Estándar 4×6: 152.4 mm</span>
+                  </div>
+                </div>
+
+                <p style="font-size:0.82rem;font-weight:700;color:#374151;margin-bottom:8px;">Márgenes adicionales (mm) — usar 0 si la impresora no los necesita</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+                  <div>
+                    <label style="display:block;font-size:0.78rem;color:#6b7280;margin-bottom:4px;">↑ Superior</label>
+                    <input type="number" name="margen_top" id="pf-mt" value="0" min="0" max="20" step="0.1"
+                      style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                  </div>
+                  <div>
+                    <label style="display:block;font-size:0.78rem;color:#6b7280;margin-bottom:4px;">↓ Inferior</label>
+                    <input type="number" name="margen_bottom" id="pf-mb" value="0" min="0" max="20" step="0.1"
+                      style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                  </div>
+                  <div>
+                    <label style="display:block;font-size:0.78rem;color:#6b7280;margin-bottom:4px;">← Izquierdo</label>
+                    <input type="number" name="margen_left" id="pf-ml" value="0" min="0" max="20" step="0.1"
+                      style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                  </div>
+                  <div>
+                    <label style="display:block;font-size:0.78rem;color:#6b7280;margin-bottom:4px;">→ Derecho</label>
+                    <input type="number" name="margen_right" id="pf-mr" value="0" min="0" max="20" step="0.1"
+                      style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:0.9rem;">
+                  </div>
+                </div>
+
+                <div style="margin-bottom:18px;">
+                  <label style="display:block;font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:6px;">
+                    Compactación de contenido: <span id="pf-compact-val">0.0</span>%
+                  </label>
+                  <input type="range" name="compactacion" id="pf-compact" value="0" min="0" max="5" step="0.5"
+                    oninput="document.getElementById('pf-compact-val').textContent=parseFloat(this.value).toFixed(1)"
+                    style="width:100%;accent-color:#3b82f6;">
+                  <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#9ca3af;">
+                    <span>0% — sin reducción</span>
+                    <span>5% — máxima compactación</span>
+                  </div>
+                  <p style="font-size:0.78rem;color:#6b7280;margin-top:6px;">
+                    <i data-lucide="info" style="width:12px;height:12px;vertical-align:middle;"></i>
+                    Reduce el contenido impreso para evitar que salga una etiqueta en blanco extra. Recomendado: 2–3% para rollos ligeramente más pequeños.
+                  </p>
+                </div>
+
+                <div style="display:flex;gap:10px;">
+                  <button type="submit" style="background:#3b82f6;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                    <i data-lucide="save" style="width:15px;height:15px;"></i>
+                    <span id="perfil-btn-txt">Crear perfil</span>
+                  </button>
+                  <button type="button" onclick="resetPerfilForm()" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div><!-- /tab impresoras -->
+        <% } %>
+
         <div id="pagina-inicio" class="tab-content">
           <form action="/configuracion/pagina-inicio" method="POST">
             <div class="config-card">
@@ -4157,6 +4335,38 @@ function agregarBtnPersonalizado() {
       });
     }
     
+    // Perfiles de impresora
+    function abrirEditarPerfil(p) {
+      var form = document.getElementById('perfil-form');
+      if (!form) return;
+      form.action = '/configuracion/perfiles-impresora/' + p.id + '/editar';
+      form.querySelector('[name="nombre"]').value        = p.nombre        || '';
+      form.querySelector('[name="ancho_mm"]').value     = p.ancho_mm      || 101.6;
+      form.querySelector('[name="alto_mm"]').value      = p.alto_mm       || 152.4;
+      form.querySelector('[name="margen_top"]').value   = p.margen_top    || 0;
+      form.querySelector('[name="margen_bottom"]').value= p.margen_bottom || 0;
+      form.querySelector('[name="margen_left"]').value  = p.margen_left   || 0;
+      form.querySelector('[name="margen_right"]').value = p.margen_right  || 0;
+      var sliderComp = form.querySelector('[name="compactacion"]');
+      if (sliderComp) {
+        sliderComp.value = p.compactacion || 0;
+        var lbl = document.getElementById('pf-compact-val');
+        if (lbl) lbl.textContent = parseFloat(p.compactacion || 0).toFixed(1);
+      }
+      document.getElementById('perfil-btn-txt').textContent = 'Guardar cambios';
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetPerfilForm() {
+      var form = document.getElementById('perfil-form');
+      if (!form) return;
+      form.action = '/configuracion/perfiles-impresora';
+      form.reset();
+      var lbl = document.getElementById('pf-compact-val');
+      if (lbl) lbl.textContent = '0.0';
+      document.getElementById('perfil-btn-txt').textContent = 'Crear perfil';
+    }
+
     // Catálogos: edición inline de tipos de empaque
     function editarTE(id) {
       document.getElementById('te-nombre-' + id).style.display = 'none';

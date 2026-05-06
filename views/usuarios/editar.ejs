@@ -1457,6 +1457,24 @@ input[type="text"]::-moz-reveal {
                   Al crear la guía, cambiar automáticamente el estado a "En tránsito"
                 </label>
               </div>
+
+              <% if (typeof perfilesImpresora !== 'undefined' && perfilesImpresora && perfilesImpresora.length > 0) { %>
+              <div style="margin-top:18px;padding-top:14px;border-top:1px solid #e5e7eb;">
+                <label class="form-label" for="perfil_impresora_id" style="display:flex;align-items:center;gap:6px;font-size:0.875rem;font-weight:600;color:#374151;margin-bottom:6px;">
+                  <i data-lucide="printer" style="width:15px;height:15px;color:#6b7280;"></i>
+                  Perfil de impresora
+                </label>
+                <select name="perfil_impresora_id" id="perfil_impresora_id" style="width:100%;max-width:340px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.875rem;color:#374151;background:white;">
+                  <option value="">— Sin perfil (tamaño estándar 4×6″) —</option>
+                  <% perfilesImpresora.forEach(function(p) { %>
+                    <option value="<%= p.id %>" <%= usuario.perfil_impresora_id == p.id ? 'selected' : '' %>><%= p.nombre %></option>
+                  <% }); %>
+                </select>
+                <p style="margin-top:6px;font-size:0.78rem;color:#9ca3af;">
+                  Determina el tamaño de papel y compactación al imprimir etiquetas.
+                </p>
+              </div>
+              <% } %>
               <% } %>
             </div>
             

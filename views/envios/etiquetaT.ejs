@@ -6,12 +6,23 @@
   <title>Etiqueta - <%= envio.numero_tracking %></title>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
+  <%
+    const _prf = (typeof perfilImpresora !== 'undefined' && perfilImpresora) ? perfilImpresora : null;
+    const _pgW   = _prf ? parseFloat(_prf.ancho_mm)      : 101.6;
+    const _pgH   = _prf ? parseFloat(_prf.alto_mm)       : 152.4;
+    const _mgTop = _prf ? parseFloat(_prf.margen_top)    : 0;
+    const _mgBot = _prf ? parseFloat(_prf.margen_bottom) : 0;
+    const _mgL   = _prf ? parseFloat(_prf.margen_left)   : 0;
+    const _mgR   = _prf ? parseFloat(_prf.margen_right)  : 0;
+    const _comp  = _prf ? parseFloat(_prf.compactacion)  : 0;
+    const _zoom  = _comp > 0 ? (1 - _comp / 100).toFixed(4) : '1';
+  %>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     @page {
-      size: 4in 6in;
-      margin: 0;
+      size: <%= _pgW %>mm <%= _pgH %>mm;
+      margin: <%= _mgTop %>mm <%= _mgR %>mm <%= _mgBot %>mm <%= _mgL %>mm;
     }
 
     body {
@@ -627,7 +638,7 @@
     @media print {
       body { background: white; padding: 0; }
       .no-print { display: none !important; }
-      #etiqueta-canvas { zoom: 1 !important; }
+      #etiqueta-canvas { zoom: <%= _zoom %> !important; }
       .etiqueta { box-shadow: none; margin: 0; border-radius: 0; }
     }
   </style>

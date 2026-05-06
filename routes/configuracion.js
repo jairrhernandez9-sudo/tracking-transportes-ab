@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { isAuthenticated, isAdmin } = require('../middleware/auth');
+const { requireAdminOrSuper } = require('../middleware/roles');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -168,6 +169,10 @@ router.get('/', async (req, res) => {
       'SELECT * FROM pictogramas ORDER BY orden ASC, nombre ASC'
     ).catch(() => [[]]);
 
+    const [perfilesImpresora] = await db.query(
+      'SELECT * FROM perfiles_impresora WHERE activo = 1 ORDER BY nombre ASC'
+    ).catch(() => [[]]);
+
     // Leer pagina_inicio del usuario actual
     const [[usuarioRow]] = await db.query(
       'SELECT pagina_inicio FROM usuarios WHERE id = ?', [req.session.userId]
@@ -190,6 +195,7 @@ router.get('/', async (req, res) => {
       guiaTemplates,
       tiposEmpaques,
       pictogramas: pictogramas || [],
+      perfilesImpresora: perfilesImpresora || [],
       paginaInicio,
       success: req.query.success,
       error: req.query.error,
@@ -1295,6 +1301,53 @@ router.post('/envios', async (req, res) => {
     console.error('Error al guardar configuración de envíos:', error);
     res.redirect('/configuracion?tab=catalogos&error=error_servidor');
   }
+});
+
+// ============================================================
+// PERFILES DE IMPRESORA
+// ============================================================
+
+router.get('/perfiles-impresora', isAuthenticated, async (req, res) => {
+  try {
+    const [perfiles] = await db.query('SELECT * FROM perfiles_impresora WHERE activo = 1 ORDER BY nombre ASC');
+    res.json(perfiles);
+  } catch (e) { res.json([]); }
+});
+
+router.post('/perfiles-impresora', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  try {
+    const { nombre, ancho_mm, alto_mm, margen_top, margen_bottom, margen_left, margen_right, compactacion } = req.body;
+    if (!nombre) return res.redirect('/configuracion?tab=impresoras&error=nombre_requerido');
+    await db.query(
+      `INSERT INTO perfiles_impresora (nombre, ancho_mm, alto_mm, margen_top, margen_bottom, margen_left, margen_right, compactacion, creado_por)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nombre.trim(), parseFloat(ancho_mm)||101.60, parseFloat(alto_mm)||152.40,
+       parseFloat(margen_top)||0, parseFloat(margen_bottom)||0, parseFloat(margen_left)||0, parseFloat(margen_right)||0,
+       parseFloat(compactacion)||0, req.session.userId]
+    );
+    res.redirect('/configuracion?tab=impresoras&success=perfil_creado');
+  } catch (e) { console.error(e); res.redirect('/configuracion?tab=impresoras&error=error_servidor'); }
+});
+
+router.post('/perfiles-impresora/:id/editar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  try {
+    const { nombre, ancho_mm, alto_mm, margen_top, margen_bottom, margen_left, margen_right, compactacion } = req.body;
+    await db.query(
+      `UPDATE perfiles_impresora SET nombre=?, ancho_mm=?, alto_mm=?, margen_top=?, margen_bottom=?, margen_left=?, margen_right=?, compactacion=? WHERE id=?`,
+      [nombre.trim(), parseFloat(ancho_mm)||101.60, parseFloat(alto_mm)||152.40,
+       parseFloat(margen_top)||0, parseFloat(margen_bottom)||0, parseFloat(margen_left)||0, parseFloat(margen_right)||0,
+       parseFloat(compactacion)||0, req.params.id]
+    );
+    res.redirect('/configuracion?tab=impresoras&success=perfil_actualizado');
+  } catch (e) { console.error(e); res.redirect('/configuracion?tab=impresoras&error=error_servidor'); }
+});
+
+router.post('/perfiles-impresora/:id/eliminar', isAuthenticated, requireAdminOrSuper, async (req, res) => {
+  try {
+    await db.query('UPDATE perfiles_impresora SET activo = 0 WHERE id = ?', [req.params.id]);
+    await db.query('UPDATE usuarios SET perfil_impresora_id = NULL WHERE perfil_impresora_id = ?', [req.params.id]);
+    res.redirect('/configuracion?tab=impresoras&success=perfil_eliminado');
+  } catch (e) { console.error(e); res.redirect('/configuracion?tab=impresoras&error=error_servidor'); }
 });
 
 module.exports = router;

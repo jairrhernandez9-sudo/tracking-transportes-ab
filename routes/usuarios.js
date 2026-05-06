@@ -308,6 +308,10 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
     );
     const sucursalesAsignadasIds = sucAsignadas.map(s => s.sucursal_dir_id);
 
+    const [perfilesImpresora] = await db.query(
+      'SELECT id, nombre FROM perfiles_impresora WHERE activo = 1 ORDER BY nombre'
+    ).catch(() => [[]]);
+
     res.render('usuarios/editar', {
       title: 'Editar Usuario',
       user: {
@@ -319,6 +323,7 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
       clientes,
       sucursales,
       sucursalesAsignadasIds,
+      perfilesImpresora,
       error: null,
       success: null
     });
@@ -408,8 +413,10 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
       ? (Array.isArray(req.body.sucursal_ids) ? req.body.sucursal_ids : [req.body.sucursal_ids]).map(Number).filter(Boolean)
       : [];
 
-    let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ? WHERE id = ?';
-    let updateParams = [nombre, email, rol, activo, cliente_id_edit, userId];
+    const perfil_impresora_id = req.body.perfil_impresora_id ? parseInt(req.body.perfil_impresora_id) : null;
+
+    let updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ?, perfil_impresora_id = ? WHERE id = ?';
+    let updateParams = [nombre, email, rol, activo, cliente_id_edit, perfil_impresora_id, userId];
 
     if (password_nueva) {
       // Validar contraseñas
@@ -420,6 +427,7 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
           usuario: { ...usuario, nombre, email, rol },
           clientes: await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa').then(([r]) => r),
           sucursales: [],
+          perfilesImpresora: await db.query('SELECT id, nombre FROM perfiles_impresora WHERE activo = 1 ORDER BY nombre').then(([r]) => r).catch(() => []),
           error: 'Las contraseñas no coinciden',
           success: null
         });
@@ -432,6 +440,7 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
           usuario: { ...usuario, nombre, email, rol },
           clientes: await db.query('SELECT id, nombre_empresa FROM clientes WHERE activo = 1 ORDER BY nombre_empresa').then(([r]) => r),
           sucursales: [],
+          perfilesImpresora: await db.query('SELECT id, nombre FROM perfiles_impresora WHERE activo = 1 ORDER BY nombre').then(([r]) => r).catch(() => []),
           error: 'La contraseña debe tener al menos 6 caracteres',
           success: null
         });
@@ -439,8 +448,8 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
 
       // Hash de la nueva contraseña
       const hashedPassword = await bcrypt.hash(password_nueva, 10);
-      updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ?, password = ? WHERE id = ?';
-      updateParams = [nombre, email, rol, activo, cliente_id_edit, hashedPassword, userId];
+      updateQuery = 'UPDATE usuarios SET nombre = ?, email = ?, rol = ?, activo = ?, cliente_id = ?, perfil_impresora_id = ?, password = ? WHERE id = ?';
+      updateParams = [nombre, email, rol, activo, cliente_id_edit, perfil_impresora_id, hashedPassword, userId];
     }
 
     // Actualizar usuario
