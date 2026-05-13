@@ -57,6 +57,7 @@ db.query(`ALTER TABLE usuarios ADD COLUMN menu_clientes     TINYINT(1) NOT NULL 
 db.query(`ALTER TABLE usuarios ADD COLUMN menu_reportes     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN menu_configuracion TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN menu_historial    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
+db.query(`ALTER TABLE usuarios ADD COLUMN menu_usuarios     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN dash_tarjetas     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN dash_graficas     TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});
 db.query(`ALTER TABLE usuarios ADD COLUMN dash_actividad    TINYINT(1) NOT NULL DEFAULT 1`).catch(() => {});

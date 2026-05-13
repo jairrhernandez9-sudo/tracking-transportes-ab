@@ -548,7 +548,7 @@ router.post('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
 // ============================================
 const CAMPOS_PERMISOS = [
   'menu_envios','menu_retrasados','menu_clientes','menu_reportes',
-  'menu_configuracion','menu_historial','dash_tarjetas','dash_graficas','dash_actividad',
+  'menu_configuracion','menu_historial','menu_usuarios','dash_tarjetas','dash_graficas','dash_actividad',
   'sec_envios_filtros','sec_envios_tabs','sec_envios_nuevo',
   'sec_clientes_stats','sec_clientes_filtros','sec_clientes_nuevo',
   'sec_reportes_stats','sec_reportes_filtros',

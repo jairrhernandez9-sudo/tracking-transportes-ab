@@ -321,12 +321,12 @@
       <div class="nav-section">
         <div class="nav-section-title">SISTEMA</div>
         <ul class="nav-menu">
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_usuarios) { %><li class="nav-item">
             <a href="/usuarios" class="nav-link active">
               <i data-lucide="user-cog"></i>
               <span>Usuarios</span>
             </a>
-          </li>
+          </li><% } %>
           <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
             <a href="/configuracion" class="nav-link">
               <i data-lucide="settings"></i>
@@ -553,6 +553,24 @@
                 <span class="toggle-label-on"  id="lbl-menu_configuracion-on"  style="<%= usuario.menu_configuracion ? '' : 'display:none' %>">Visible</span>
                 <label class="toggle">
                   <input type="checkbox" name="menu_configuracion" value="1" onchange="syncLabel(this,'menu_configuracion')" <%= usuario.menu_configuracion ? 'checked' : '' %>>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="perm-row">
+              <div class="perm-label">
+                <i data-lucide="user-cog"></i>
+                <div>
+                  <div class="perm-label-text">Usuarios</div>
+                  <div class="perm-label-desc">Gestión de usuarios del sistema</div>
+                </div>
+              </div>
+              <div class="toggle-wrap">
+                <span class="toggle-label-off" id="lbl-menu_usuarios-off" style="<%= usuario.menu_usuarios ? 'display:none' : '' %>">Oculto</span>
+                <span class="toggle-label-on"  id="lbl-menu_usuarios-on"  style="<%= usuario.menu_usuarios ? '' : 'display:none' %>">Visible</span>
+                <label class="toggle">
+                  <input type="checkbox" name="menu_usuarios" value="1" onchange="syncLabel(this,'menu_usuarios')" <%= usuario.menu_usuarios ? 'checked' : '' %>>
                   <span class="toggle-slider"></span>
                 </label>
               </div>

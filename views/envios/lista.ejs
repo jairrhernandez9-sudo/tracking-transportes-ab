@@ -35,6 +35,7 @@
       height: 100vh;
       overflow-y: auto;
       box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+      z-index: 400;
     }
     
     .logo {
@@ -1307,12 +1308,12 @@
           <div class="nav-section-title">SISTEMA</div>
           <ul class="nav-menu">
             <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
-            <li class="nav-item">
+            <% if (!userMenu || userMenu.menu_usuarios) { %><li class="nav-item">
               <a href="/usuarios" class="nav-link">
                 <i data-lucide="user-cog"></i>
                 <span>Usuarios</span>
               </a>
-            </li>
+            </li><% } %>
             <% } %>
             <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
               <a href="/configuracion" class="nav-link">

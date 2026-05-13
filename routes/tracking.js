@@ -5,21 +5,18 @@ const QRCode = require('qrcode');
 
 // ✅ FUNCIÓN PARA OBTENER CONFIGURACIÓN
 async function obtenerConfiguracion() {
-  const [configs] = await db.query('SELECT * FROM configuracion_sistema WHERE categoria = "tracking"');
-  
+  const [configs] = await db.query(
+    'SELECT * FROM configuracion_sistema WHERE categoria = "tracking" OR clave = "empresa_sitio_web"'
+  );
+
   const configuracion = {};
-  
+
   configs.forEach(config => {
     let valor = config.valor;
-    
-    // Convertir según tipo
-    if (config.tipo === 'boolean') {
-      valor = valor === 'true';
-    }
-    
+    if (config.tipo === 'boolean') valor = valor === 'true';
     configuracion[config.clave] = valor;
   });
-  
+
   return configuracion;
 }
 

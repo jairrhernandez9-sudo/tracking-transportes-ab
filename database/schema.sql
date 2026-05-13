@@ -591,6 +591,7 @@ CREATE TABLE `usuarios` (
   `sec_reportes_periodo` tinyint(1) NOT NULL DEFAULT '1',
   `sec_reportes_rendimiento` tinyint(1) NOT NULL DEFAULT '1',
   `perfil_impresora_id` int DEFAULT NULL,
+  `menu_usuarios` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_cliente` (`cliente_id`),

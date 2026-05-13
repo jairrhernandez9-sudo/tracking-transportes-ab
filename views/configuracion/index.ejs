@@ -826,12 +826,12 @@
         <div class="nav-section-title">SISTEMA</div>
         <ul class="nav-menu">
           <% if (user && (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com')) { %>
-          <li class="nav-item">
+          <% if (!userMenu || userMenu.menu_usuarios) { %><li class="nav-item">
             <a href="/usuarios" class="nav-link">
               <i data-lucide="user-cog"></i>
               <span>Usuarios</span>
             </a>
-          </li>
+          </li><% } %>
           <% } %>
           <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
             <a href="/configuracion" class="nav-link active">
@@ -1094,17 +1094,9 @@
 
           <%/* Notificaciones: solo admin */%>
           <% if (esAdmin) { %>
-          <button class="tab-btn <%= tabInicial === 'notificaciones' ? 'active' : '' %>" onclick="openTab(event, 'notificaciones')">
+          <button class="tab-btn <%= ['notificaciones','alertas'].includes(tabInicial) ? 'active' : '' %>" onclick="openTab(event, 'notificaciones')">
             <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
             Notificaciones
-          </button>
-          <% } %>
-
-          <%/* Alertas: admin + superusuario */%>
-          <% if (!esOperador) { %>
-          <button class="tab-btn <%= tabInicial === 'alertas' ? 'active' : '' %>" onclick="openTab(event, 'alertas')">
-            <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i>
-            Alertas
           </button>
           <% } %>
 
@@ -1765,6 +1757,21 @@
         <!-- TAB: NOTIFICACIONES (solo admin) -->
         <% if (esAdmin) { %>
         <div id="notificaciones" class="tab-content">
+
+          <!-- Sub-tabs de Notificaciones -->
+          <div style="display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid #e2e8f0;padding-bottom:0;">
+            <button id="notif-btn-notificaciones" onclick="switchNotifSubtab('notificaciones')"
+              style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:0.92rem;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;color:#64748b;border-radius:4px 4px 0 0;transition:all .15s;">
+              <i data-lucide="bell" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;"></i>Notificaciones
+            </button>
+            <button id="notif-btn-alertas" onclick="switchNotifSubtab('alertas')"
+              style="padding:8px 18px;border:none;background:none;cursor:pointer;font-size:0.92rem;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;color:#64748b;border-radius:4px 4px 0 0;transition:all .15s;">
+              <i data-lucide="alert-triangle" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;"></i>Alertas
+            </button>
+          </div>
+
+          <!-- Panel: Notificaciones -->
+          <div id="notif-panel-notificaciones">
           <form action="/configuracion/notificaciones" method="POST">
             <div class="config-card" style="max-width: 800px;">
               <div class="card-header">
@@ -1840,11 +1847,10 @@
               Guardar configuración
             </button>
           </form>
-        </div>
-        <% } /* fin if esAdmin - tab notificaciones */ %>
+          </div><!-- /notif-panel-notificaciones -->
 
-        <!-- TAB: ALERTAS -->
-        <div id="alertas" class="tab-content">
+          <!-- Panel: Alertas -->
+          <div id="notif-panel-alertas" style="display:none;">
           <form action="/configuracion/alertas" method="POST">
             <div class="config-card" style="max-width: 800px;">
               <div class="card-header">
@@ -1896,8 +1902,11 @@
               Guardar alertas
             </button>
           </form>
-        </div>
-        
+          </div><!-- /notif-panel-alertas -->
+
+        </div><!-- /tab notificaciones -->
+        <% } /* fin if esAdmin - tab notificaciones */ %>
+
         <!-- TAB: TRACKING -->
         <div id="tracking" class="tab-content">
         <form action="/configuracion/tracking" method="POST">
@@ -4388,6 +4397,15 @@ function agregarBtnPersonalizado() {
       document.getElementById(tabName).classList.add('active');
       event.currentTarget.classList.add('active');
 
+      // Si se abre Notificaciones, activar sub-tab por defecto
+      if (tabName === 'notificaciones') {
+        var hayNotifActivo = ['notificaciones','alertas'].some(function(t) {
+          var el = document.getElementById('notif-panel-' + t);
+          return el && el.style.display !== 'none';
+        });
+        if (!hayNotifActivo) switchNotifSubtab('notificaciones');
+      }
+
       // Si se abre Imprimibles, asegurar que el sub-tab activo sea visible
       if (tabName === 'imprimibles') {
         var activeImp = document.querySelector('#imp-panel-etiqueta, #imp-panel-guia, #imp-panel-pictogramas');
@@ -4406,6 +4424,7 @@ function agregarBtnPersonalizado() {
     document.addEventListener('DOMContentLoaded', function() {
       var tabInicial = '<%= tabInicial %>';
       var imprimiblesMap = { etiqueta: true, guia: true, pictogramas: true };
+      var notifMap = { alertas: true };
 
       if (imprimiblesMap[tabInicial]) {
         // Activar el tab Imprimibles y el sub-tab correcto
@@ -4414,6 +4433,13 @@ function agregarBtnPersonalizado() {
         if (impTab) impTab.classList.add('active');
         if (impBtn) impBtn.classList.add('active');
         switchImpSubtab(tabInicial);
+      } else if (notifMap[tabInicial]) {
+        // Activar tab Notificaciones y sub-tab Alertas
+        var notifTab = document.getElementById('notificaciones');
+        var notifBtn = document.querySelector('[onclick="openTab(event, \'notificaciones\')"]');
+        if (notifTab) notifTab.classList.add('active');
+        if (notifBtn) notifBtn.classList.add('active');
+        switchNotifSubtab('alertas');
       } else {
         var tabEl = document.getElementById(tabInicial);
         if (tabEl) {
@@ -4426,8 +4452,9 @@ function agregarBtnPersonalizado() {
           var primerBtn = document.querySelector('.tab-btn');
           if (primerTab) primerTab.classList.add('active');
           if (primerBtn) primerBtn.classList.add('active');
-          // Inicializar sub-tabs de imprimibles con etiqueta por defecto
+          // Inicializar sub-tabs por defecto
           switchImpSubtab('etiqueta');
+          switchNotifSubtab('notificaciones');
         }
       }
       lucide.createIcons();
@@ -4977,6 +5004,19 @@ function agregarBtnPersonalizado() {
         btn.style.boxShadow  = active ? '0 1px 4px rgba(37,99,235,.25)' : 'none';
       });
     }
+    function switchNotifSubtab(tab) {
+      ['notificaciones', 'alertas'].forEach(function(t) {
+        const el  = document.getElementById('notif-panel-' + t);
+        const btn = document.getElementById('notif-btn-' + t);
+        if (!el || !btn) return;
+        const active = t === tab;
+        el.style.display            = active ? '' : 'none';
+        btn.style.borderBottomColor = active ? '#2563eb' : 'transparent';
+        btn.style.color             = active ? '#2563eb' : '#64748b';
+        btn.style.background        = active ? '#eff6ff' : 'none';
+      });
+    }
+
     function switchImpSubtab(tab) {
       const panels = ['etiqueta', 'guia', 'pictogramas'];
       panels.forEach(function(t) {

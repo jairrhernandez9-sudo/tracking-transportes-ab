@@ -143,8 +143,15 @@
   <div class="container">
     <div class="header-content">
       <div class="logo-container">
-        <img src="/images/logo-transportes-ab.png" alt="Transportes AB" class="logo">
-        <h1 class="company-name">Transportes AB</h1>
+        <% if (config && config.empresa_sitio_web) { %>
+          <a href="<%= config.empresa_sitio_web %>" target="_blank" rel="noopener" style="display:contents;">
+            <img src="/images/logo-transportes-ab.png" alt="Transportes AB" class="logo">
+            <h1 class="company-name">Transportes AB</h1>
+          </a>
+        <% } else { %>
+          <img src="/images/logo-transportes-ab.png" alt="Transportes AB" class="logo">
+          <h1 class="company-name">Transportes AB</h1>
+        <% } %>
       </div>
     </div>
   </div>

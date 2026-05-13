@@ -111,7 +111,8 @@
       '/clientes':           'menu_clientes',
       '/reportes':           'menu_reportes',
       '/configuracion':      'menu_configuracion',
-      '/historial/actividad':'menu_historial'
+      '/historial/actividad':'menu_historial',
+      '/usuarios':           'menu_usuarios'
     };
 
     // Ocultar via JS cualquier link que haya pasado el guard EJS pero cuyo permiso sea falsy

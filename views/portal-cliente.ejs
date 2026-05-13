@@ -688,15 +688,24 @@
 
     <!-- Paginación -->
     <% if (paginacion.total > 1) { %>
-    <div class="pagination">
-      <a href="?page=<%= paginacion.actual - 1 %>&buscar=<%= filtros.buscar %>&estado=<%= filtros.estado %>"
-         class="page-btn <%= paginacion.actual <= 1 ? 'disabled' : '' %>">← Anterior</a>
-      <% for (let p = 1; p <= paginacion.total; p++) { %>
-        <a href="?page=<%= p %>&buscar=<%= filtros.buscar %>&estado=<%= filtros.estado %>"
-           class="page-btn <%= p === paginacion.actual ? 'active' : '' %>"><%= p %></a>
-      <% } %>
-      <a href="?page=<%= paginacion.actual + 1 %>&buscar=<%= filtros.buscar %>&estado=<%= filtros.estado %>"
-         class="page-btn <%= paginacion.actual >= paginacion.total ? 'disabled' : '' %>">Siguiente →</a>
+    <%
+      const _qs = (p) => '?page=' + p + '&buscar=' + encodeURIComponent(filtros.buscar || '') + '&estado=' + encodeURIComponent(filtros.estado || '') + (filtros.direccion_id ? '&direccion_id=' + filtros.direccion_id : '');
+      const _cur = paginacion.actual;
+      const _tot = paginacion.total;
+      // Páginas a mostrar: primera, última, y ventana de ±2 alrededor de la actual
+      const _show = new Set();
+      _show.add(1); _show.add(_tot);
+      for (let i = Math.max(1, _cur - 2); i <= Math.min(_tot, _cur + 2); i++) _show.add(i);
+      const _pages = Array.from(_show).sort((a, b) => a - b);
+    %>
+    <div class="pagination" style="flex-wrap: wrap;">
+      <a href="<%= _qs(_cur - 1) %>" class="page-btn <%= _cur <= 1 ? 'disabled' : '' %>">← Anterior</a>
+      <% let _prev = 0; _pages.forEach(function(p) { %>
+        <% if (_prev && p - _prev > 1) { %><span class="page-btn" style="pointer-events:none;border-color:transparent;color:#9ca3af;">…</span><% } %>
+        <a href="<%= _qs(p) %>" class="page-btn <%= p === _cur ? 'active' : '' %>"><%= p %></a>
+        <% _prev = p; %>
+      <% }); %>
+      <a href="<%= _qs(_cur + 1) %>" class="page-btn <%= _cur >= _tot ? 'disabled' : '' %>">Siguiente →</a>
     </div>
     <% } %>
     <% } %>

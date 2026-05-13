@@ -214,12 +214,12 @@
       <div class="nav-section-title">SISTEMA</div>
       <ul class="nav-menu">
         <% if (user.rol === 'admin' || user.email === 'jose.cordoba@transportesab.com') { %>
-        <li class="nav-item">
+        <% if (!userMenu || userMenu.menu_usuarios) { %><li class="nav-item">
           <a href="/usuarios" class="nav-link">
             <i data-lucide="user-cog"></i>
             <span>Usuarios</span>
           </a>
-        </li>
+        </li><% } %>
         <% } %>
         <% if (!userMenu || userMenu.menu_configuracion) { %><li class="nav-item">
           <a href="/configuracion" class="nav-link">
