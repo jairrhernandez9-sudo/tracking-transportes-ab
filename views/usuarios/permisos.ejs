@@ -444,11 +444,16 @@
         const bloqueadosPorRol = {};
         if (!esAdminOSuper) {
           // /usuarios requiere requireAdmin → operador nunca entra sin importar el permiso
+          bloqueadosPorRol['menu_usuarios']        = 'Solo visible para el rol Admin';
           bloqueadosPorRol['sec_usuarios_stats']   = 'La página Usuarios es solo para Administradores';
           bloqueadosPorRol['sec_usuarios_filtros'] = 'La página Usuarios es solo para Administradores';
           bloqueadosPorRol['sec_usuarios_nuevo']   = 'La página Usuarios es solo para Administradores';
           // /clientes/nuevo requiere requireAdminOrSuper
           bloqueadosPorRol['sec_clientes_nuevo']   = 'Solo visible para roles Admin y Superusuario';
+        }
+        if (rolUsuario === 'superusuario') {
+          // El sidebar de Usuarios solo es visible para admin → superusuario no puede activarlo
+          bloqueadosPorRol['menu_usuarios'] = 'Solo visible para el rol Admin';
         }
 
         function blq(campo) { return bloqueadosPorRol[campo] || null; }
@@ -558,19 +563,26 @@
               </div>
             </div>
 
-            <div class="perm-row">
+            <% const _bMU = blq('menu_usuarios'); %>
+            <div class="perm-row <%= _bMU ? 'bloqueado' : '' %>">
               <div class="perm-label">
                 <i data-lucide="user-cog"></i>
                 <div>
                   <div class="perm-label-text">Usuarios</div>
-                  <div class="perm-label-desc">Gestión de usuarios del sistema</div>
+                  <div class="perm-label-desc"><%= _bMU ? _bMU : 'Gestión de usuarios del sistema' %></div>
                 </div>
               </div>
               <div class="toggle-wrap">
-                <span class="toggle-label-off" id="lbl-menu_usuarios-off" style="<%= usuario.menu_usuarios ? 'display:none' : '' %>">Oculto</span>
-                <span class="toggle-label-on"  id="lbl-menu_usuarios-on"  style="<%= usuario.menu_usuarios ? '' : 'display:none' %>">Visible</span>
+                <% if (_bMU) { %>
+                  <span class="blocked-badge"><i data-lucide="lock"></i> Bloqueado por rol</span>
+                <% } else { %>
+                  <span class="toggle-label-off" id="lbl-menu_usuarios-off" style="<%= usuario.menu_usuarios ? 'display:none' : '' %>">Oculto</span>
+                  <span class="toggle-label-on"  id="lbl-menu_usuarios-on"  style="<%= usuario.menu_usuarios ? '' : 'display:none' %>">Visible</span>
+                <% } %>
                 <label class="toggle">
-                  <input type="checkbox" name="menu_usuarios" value="1" onchange="syncLabel(this,'menu_usuarios')" <%= usuario.menu_usuarios ? 'checked' : '' %>>
+                  <input type="checkbox" name="menu_usuarios" value="1"
+                    <%= _bMU ? 'disabled' : "onchange=\"syncLabel(this,'menu_usuarios')\"" %>
+                    <%= !_bMU && usuario.menu_usuarios ? 'checked' : '' %>>
                   <span class="toggle-slider"></span>
                 </label>
               </div>
