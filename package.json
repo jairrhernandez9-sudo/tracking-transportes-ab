@@ -1,6 +1,6 @@
 {
   "name": "tracking-transportes-ab",
-  "version": "1.0.0",
+  "version": "4.3.1",
   "description": "Sistema de tracking para Transportes AB",
   "main": "server.js",
   "scripts": {

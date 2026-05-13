@@ -3,6 +3,7 @@ const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
 const db = require('./config/database');
+const { version: APP_VERSION } = require('./package.json');
 
 // Tabla de asignación operador → cliente
 db.query(`
@@ -494,9 +495,10 @@ app.use(session({
   }
 }));
 
-// Hacer disponible la sesión en todas las vistas
+// Hacer disponible la sesión y versión en todas las vistas
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+  res.locals.user       = req.session.user || null;
+  res.locals.appVersion = 'V' + APP_VERSION;
   next();
 });
 
