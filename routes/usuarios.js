@@ -277,6 +277,7 @@ router.get('/:id/editar', isAuthenticated, requireAdmin, async (req, res) => {
   try {
     const [usuarios] = await db.query(
       `SELECT id, nombre, email, rol, activo, fecha_creacion, cliente_id, sucursal_dir_id,
+        perfil_impresora_id,
         ver_botones_detalle, ver_telefono_detalle, ver_contacto_detalle, ver_editado_por_detalle,
         ver_actualizado_por_detalle, ver_reimp_por_detalle,
         ver_panel_estado, ver_comentario_estado, ver_panel_evidencia, ver_comentario_evidencia,
